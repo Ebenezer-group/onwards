@@ -1,0 +1,77 @@
+
+License
+Feel free to use the software in your projects.  However,
+two of the files, quicklz.h and quicklz.c, are from another
+developer and should only be used in conjunction with the rest
+of the software here.  See http://quicklz.com for more info.
+
+Building
+There should be two makefiles here: one for BSD/Linux and one
+for Windows.  The BSD version is called "makefile" and the
+Windows version is called "makefile.mcr".  If you're using
+Windows, you may want to remove the BSD version and rename
+makefile.mcr to just makefile.  If you're using a big-endian
+machine, add -DCMW_ENDIAN_BIG to the CXXFLAGS in the makefile.
+
+A library and two programs are built.
+The programs are the C++ Middleware Writer Ambassador
+(CMWA) and a command line interface which is called direct.
+On Windows the CMWA program is not built.
+
+
+Accounts
+An account is needed to use the C++ Middleware Writer.
+Before running the programs, you have to get an account
+and modify your cmwAmbassador.cfg file to include your
+account number(s) and password(s).
+
+
+Running the CMW Ambassador (after installing):
+
+cmwAmbassador cmwAmbassador.cfg
+
+After starting the CMW Ambassador, run the direct
+program like this:
+
+direct 14 /home/brian/direct/ambassador.req
+
+or on Windows:
+
+.\direct.exe 14 /Users/brian/direct/ambassador.req
+
+14 is an account number.  Substitute your account number there.
+
+The path for a .req file is next -- req is short for request.
+Zero or more header files and one "Middle file" are listed in
+a .req file to specify a request.  There's more info on
+Middle files here -- http://webEbenezer.net/middle.html.
+A .req file also has the settings for various options.
+
+Once you have built the software, I suggest copying
+ambassador.req and local.mdl to one of your directories
+and modifying the copies according to your needs.
+
+
+Troubleshooting
+The middle tier has to be running for the front tier to work.
+If direct fails with "No reply received.  Is the CMWA running?"
+make sure the middle tier is running.
+
+Another possible problem could be due to "breaking changes"
+between the back and middle tier.  (We may have changed
+the protocol between these tiers and now older versions
+of the middle tier no longer work right.)  The thing to do
+in this case is to check if the checksum here --
+http://webEbenezer.net/build_integration.html  --
+is different from the result of running sha256sum on your
+copy of the archive.  If the checksums are different,
+download the new version of the archive and reinstall.
+
+If you rename one of the files listed in one of your .req
+files, you should also touch that file so the change will
+be "noticed" by the CMW.
+
+
+
+Thank you for using the software.
+
