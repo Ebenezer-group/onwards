@@ -15,10 +15,6 @@ class string_join
   int len2;
 
  public:
-  string_join (char const* str1,char const* str2) : s1(str1),s2(str2)
-                             ,len1(::strlen(s1)),len2(::strlen(s2))
-  {}
-
   string_join (char const* str1,::std::experimental::string_view str2) : s1(str1),s2(str2.data())
                              ,len1(::strlen(s1)),len2(str2.size())
   {}
