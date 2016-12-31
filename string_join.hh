@@ -2,7 +2,6 @@
 
 #include "marshalling_integer.hh"
 #include <experimental/string_view>
-#include <string.h>
 
 namespace cmw {
 
