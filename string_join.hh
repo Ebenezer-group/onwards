@@ -9,21 +9,19 @@ namespace cmw {
 class string_join
 {
   // hand_written_marshalling_code
-  char const* s1;
-  char const* s2;
-  int len1;
-  int len2;
+  ::std::experimental::string_view s1;
+  ::std::experimental::string_view s2;
 
  public:
-  string_join (char const* str1,::std::experimental::string_view str2) : s1(str1),s2(str2.data())
-                             ,len1(::strlen(s1)),len2(str2.size())
+  string_join (::std::experimental::string_view str1
+	       ,::std::experimental::string_view str2) : s1(str1),s2(str2)
   {}
 
   void Marshal (::cmw::SendBuffer& buf,bool=false) const
   {
-    ::cmw::marshalling_integer(len1+len2).Marshal(buf);
-    buf.Receive(s1,len1);
-    buf.Receive(s2,len2);
+    ::cmw::marshalling_integer(s1.length()+s2.length()).Marshal(buf);
+    buf.Receive(s1.data(),s1.length());
+    buf.Receive(s2.data(),s2.length());
   }
 };
 
