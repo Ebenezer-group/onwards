@@ -2,8 +2,7 @@ middle_messages_front
   //@in (cmw_request)
 
   @out @max_length=cmw::udp_packet_max (bool)
-  @out @max_length=cmw::udp_packet_max (bool, const char*)
-  @out @max_length=cmw::udp_packet_max (bool, cmw::string_join)
+  @out @max_length=cmw::udp_packet_max (bool, ::std::experimental::string_view)
 }
 
 front_messages_middle

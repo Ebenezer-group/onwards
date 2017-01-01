@@ -7,6 +7,7 @@
 #include "marshalling_integer.hh"
 #include <stdint.h>
 #include <stdio.h> // snprintf
+#include <experimental/string_view>
 #include <string>
 #include <string.h>
 #include <type_traits>
@@ -86,6 +87,7 @@ public:
   }
 
   void Receive (::std::string const&);
+  void Receive (::std::experimental::string_view const&);
 
   void InsertNull () {uint8_t z=0;Receive(z);}
 

@@ -17,7 +17,6 @@
 #include "request_generator.hh"
 #include "setDirectory.hh"
 #include "sleep_wrapper.hh"
-#include "string_join.hh"
 #include "syslog_wrapper.hh"
 #include "SendBufferCompressed.hh"
 #include "SendBufferStack.hh"
@@ -221,7 +220,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):
                 request.save_lastruntime();
                 middle_messages_front::Marshal(localsendbuf,true);
               }else middle_messages_front::Marshal(localsendbuf,false,
-                                    string_join{"CMW: ",cmwBuf.GiveString_view()});
+                                                   cmwBuf.GiveString_view());
               localsendbuf.Flush((::sockaddr*)&request.front_tier
                                  ,sizeof(request.front_tier));
             }else --unrepliedKeepalives;
