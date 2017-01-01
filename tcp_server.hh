@@ -4,7 +4,7 @@
 #include "ErrorWords.hh"
 #include "getaddrinfo_wrapper.hh"
 #include "platforms.hh"
-#include <fcntl.hh>
+#include <fcntl.h>
 
 namespace cmw {
 
