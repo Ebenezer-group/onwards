@@ -36,6 +36,11 @@
 #include <netinet/in.h> //sockaddr_in6,socklen_t
 #include <unistd.h> //pread
 
+#define CHECK_FIELD_NAME(fieldname)             \
+  ::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl);     \
+  if(::strcmp(fieldname,::strtok(lineBuf," "))) \
+    throw cmw::failure("Expected ")<<fieldname;
+
 class request_generator{
   // hand_written_marshalling_code
   char const* fname;
@@ -68,6 +73,14 @@ public:
       throw ::cmw::failure("A middle file is required.");
     if(::cmw::File{::strtok(nullptr,"\n ")}.Marshal(buf))++updatedFiles;
     buf.Receive(index,updatedFiles);
+
+    CHECK_FIELD_NAME("Message-Lengths");
+    token=::strtok(lineBuf," ");
+    int8_t msgLength;
+    if(!::strcmp("variable",token))msgLength=1;
+    else if(!::strcmp("fixed",token))msgLength=0;
+    else throw ::cmw::failure("Invalid value for Message-Lengths.");
+    buf.Receive(msgLength);
   }
 };
 
@@ -194,11 +207,6 @@ bool cmwAmbassador::sendData (){
   }
   return true;
 }
-
-#define CHECK_FIELD_NAME(fieldname)             \
-  ::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl);     \
-  if(::strcmp(fieldname,::strtok(lineBuf," "))) \
-    throw cmw::failure("Expected ")<<fieldname;
 
 cmwAmbassador::cmwAmbassador (char const* configfile):
   cmwBuf(1100000),cmwSendbuf(1000000)

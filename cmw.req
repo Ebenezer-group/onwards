@@ -1,4 +1,4 @@
 Header                            message_ids.hh
 Header                            account_info.hh
 Middle-File                       remote.mdl
-Type-Used-for-Constants           int16_t
+Message-Lengths                   variable
