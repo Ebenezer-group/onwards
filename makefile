@@ -17,7 +17,7 @@ libhome.a: $(objects)
 #zz.middle_messages_back.hh: account_info.hh remote.mdl cmw.req
 #	direct 1 /usr/share/nginx/html/misc/cmw.req
 
-cmwAmbassador: cmwAmbassador.cc zz.middle_messages_back.hh request_generator.hh libhome.a
+cmwAmbassador: cmwAmbassador.cc zz.middle_messages_back.hh libhome.a
 	$(CXX) -o $@ $(CXXFLAGS) -s $< libhome.a
 	size $@
 
