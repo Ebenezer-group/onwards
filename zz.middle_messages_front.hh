@@ -3,6 +3,7 @@
 #include<experimental/string_view>
 #include"udp_stuff.hh"
 #include"SendBuffer.hh"
+#include"string_join.hh"
 
 namespace middle_messages_front{
 inline void Marshal (::cmw::SendBuffer& buf
@@ -27,4 +28,15 @@ inline void Marshal (::cmw::SendBuffer& buf
   }catch(...){buf.Rollback();throw;}
 }
 
+inline void Marshal (::cmw::SendBuffer& buf
+         ,bool az1
+         ,cmw::string_join const& az2
+         ,int32_t max_length=cmw::udp_packet_max){
+  try{
+    buf.ReserveBytes(4);
+    buf.Receive(az1);
+    az2.Marshal(buf);
+    buf.FillInSize(max_length);
+  }catch(...){buf.Rollback();throw;}
+}
 }
