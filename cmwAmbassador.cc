@@ -75,7 +75,7 @@ public:
     buf.Receive(index,updatedFiles);
 
     CHECK_FIELD_NAME("Message-Lengths");
-    token=::strtok(lineBuf," ");
+    token=::strtok(nullptr,"\n ");
     int8_t msgLength;
     if(!::strcmp("variable",token))msgLength=1;
     else if(!::strcmp("fixed",token))msgLength=0;
