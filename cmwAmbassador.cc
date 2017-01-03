@@ -110,13 +110,13 @@ struct cmw_request{
     char lastrunFile[60];
     ::snprintf(lastrunFile,sizeof(lastrunFile),"%s.lastrun",filename);
     fd=::open(lastrunFile,O_RDWR);
+    previous_updatedtime=0;
     if(fd>=0){
-     if(::pread(fd,&previous_updatedtime,sizeof(previous_updatedtime),0)<=0)
-       throw failure("pread ")<<errno;
+      if(::pread(fd,&previous_updatedtime,sizeof(previous_updatedtime),0)<0)
+        throw failure("pread ")<<errno;
     }else{
       fd=::open(lastrunFile,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
       if(fd<0)throw failure("open ")<<errno;
-      previous_updatedtime=0;
     }
     current_updatedtime=previous_updatedtime;
   }
