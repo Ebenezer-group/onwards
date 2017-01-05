@@ -90,14 +90,6 @@ public:
 
   bool GiveBool () {return GiveOne()!=0;}
 
-  void AppendTo(::std::string& s)
-  {
-    marshalling_integer slen(*this);
-    if(slen()>msgLength-index)throw failure("ReceiveBuffer::AppendTo");
-    s.append(buf+subTotal+index,slen());
-    index+=slen();
-  }
-
   ::std::string GiveString ()
   {
     marshalling_integer slen(*this);
@@ -105,16 +97,6 @@ public:
       throw failure("ReceiveBuffer::GiveString");
     ::std::string str(buf+subTotal+index,slen());
     index+=slen();
-    return str;
-  }
-
-  char const* GiveCharStar ()
-  {
-    marshalling_integer slen(*this);
-    if(slen()+1>msgLength-index)
-      throw failure("ReceiveBuffer::GiveCharStar");
-    char const* str=buf+subTotal+index;
-    index+=(slen()+1);
     return str;
   }
 
@@ -128,12 +110,31 @@ public:
     return view;
   }
 
-  void CopyString (char* dest,int len)
+  template <ssize_t N>
+  void CopyString (char (&dest)[N])
   {
     marshalling_integer slen(*this);
-    if(slen()+1>len)throw failure("ReceiveBuffer::CopyString");
+    if(slen()+1>N)throw failure("ReceiveBuffer::CopyString");
     Give(dest,slen());
     dest[slen()]='\0';
+  }
+
+  void AppendTo(::std::string& s)
+  {
+    marshalling_integer slen(*this);
+    if(slen()>msgLength-index)throw failure("ReceiveBuffer::AppendTo");
+    s.append(buf+subTotal+index,slen());
+    index+=slen();
+  }
+
+  char const* GiveCharStar ()
+  {
+    marshalling_integer slen(*this);
+    if(slen()+1>msgLength-index)
+      throw failure("ReceiveBuffer::GiveCharStar");
+    char const* str=buf+subTotal+index;
+    index+=(slen()+1);
+    return str;
   }
 
   template <class T>

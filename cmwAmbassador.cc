@@ -101,7 +101,7 @@ struct cmw_request{
   template <class R>
   explicit cmw_request (ReceiveBuffer<R>& buf):accountNbr(buf)
   {
-    buf.CopyString(path,sizeof(path));
+    buf.CopyString(path);
     auto const pos=::strrchr(path,'/');
     if(NULL==pos)throw failure("cmw_request didn't find a /");
     *pos='\0';
