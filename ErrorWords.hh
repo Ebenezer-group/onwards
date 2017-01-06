@@ -11,7 +11,7 @@ class failure : public ::std::exception {
 
 public:
   explicit failure (char const* w):whatStr(w) {}
-  explicit failure (::std::string& w):whatStr(::std::move(w)) {}
+  explicit failure (::std::string w):whatStr(::std::move(w)) {}
 
   explicit failure (char const* w, int tot) {
     if(tot>0)whatStr.reserve(tot);

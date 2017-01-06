@@ -21,8 +21,8 @@ class File
   file_type mutable fd=0;
 
 public:
-  explicit File () {}
   explicit File (char const* n):name(n) {}
+  File (File&& mv):name(::std::move(mv.name)) {} // No need to copy fd.
 
   template <class R>
   explicit File (ReceiveBuffer<R>& buf):name(buf.GiveString())
@@ -34,16 +34,13 @@ public:
     fd=::open(name.c_str(),O_WRONLY|O_CREAT|O_TRUNC
               ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 #endif
-    if(fd<0)
-      throw failure("File::File open ")<<name<<" "<<GetError();
+    if(fd<0)throw failure("File::File open ")<<name<<" "<<GetError();
     buf.GiveFile(fd);
   }
 
-  File& operator= (File&& rhs)
-  {
-    name=::std::move(rhs.name);
-    return *this;
-  }
+  template <class R>
+  File (bool contents,ReceiveBuffer<R>& buf):
+        File{contents?File{buf}:File{buf.GiveString_view().data()}}{}
 
   ~File ();
   bool Marshal (SendBuffer& buf,bool=false) const;

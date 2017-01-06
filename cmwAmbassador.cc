@@ -212,20 +212,20 @@ cmwAmbassador::cmwAmbassador (char const* configfile):
   cmwBuf(1100000),cmwSendbuf(1000000)
 {
   char lineBuf[140];
-  char const* token=nullptr;
   FILEWrapper Fl(configfile,"r");
   while(::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl)){
-    token=::strtok(lineBuf," ");
-    if(::strcmp("Account-Number",token))break;
-    auto num=::strtol(::strtok(nullptr,"\n "),0,10);
-    CHECK_FIELD_NAME("Password");
-    accounts.emplace_back(num,::strtok(nullptr,"\n "));
+    char const* token=::strtok(lineBuf," ");
+    if(!::strcmp("Account-Number",token)){
+      auto num=::strtol(::strtok(nullptr,"\n "),0,10);
+      CHECK_FIELD_NAME("Password");
+      accounts.emplace_back(num,::strtok(nullptr,"\n "));
+    }else{
+      if(accounts.empty())
+        throw failure("At least one account number is required.");
+      if(!::strcmp("UDP-Port-Number",token))break;
+      else throw failure("UDP-Port-Number is required.");
+    }
   }
-  if(accounts.empty())
-    throw failure("At least one account number is required.");
-
-  if(::strcmp("UDP-Port-Number",token))
-    throw failure("UDP-Port-Number is required.");
   fds[1].fd=localsendbuf.sock_=udp_server(::strtok(nullptr,"\n "));
 
   CHECK_FIELD_NAME("Seconds-to-Sleep-Between-Login-Attempts");
