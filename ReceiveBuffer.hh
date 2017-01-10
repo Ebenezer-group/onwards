@@ -127,16 +127,6 @@ public:
     index+=slen();
   }
 
-  char const* GiveCharStar ()
-  {
-    marshalling_integer slen(*this);
-    if(slen()+1>msgLength-index)
-      throw failure("ReceiveBuffer::GiveCharStar");
-    char const* str=buf+subTotal+index;
-    index+=(slen()+1);
-    return str;
-  }
-
   template <class T>
   void Giveilist (T& intrlst)
   {
