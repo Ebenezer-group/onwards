@@ -20,7 +20,7 @@ int main (int argc,char** argv)
       throw failure("Usage: direct account-number .req-file-path [node] [port]");
 
     windows_start();
-    getaddrinfo_wrapper res(3==argc?"::1"/*"127.0.0.1"*/:argv[3]
+    getaddrinfo_wrapper res(argc<4?"::1"/*"127.0.0.1"*/:argv[3]
                             ,argc<5?"55555":argv[4],SOCK_DGRAM);
     auto rp=res.get();
     SendBufferStack<> sendbuf;

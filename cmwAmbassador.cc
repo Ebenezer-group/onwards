@@ -138,7 +138,7 @@ class cmwAmbassador{
 
   SendBufferCompressed cmwSendbuf;
   SendBufferStack<> localsendbuf;
-  ::std::queue<::std::unique_ptr<cmw_request> > pendingTransactions;
+  ::std::queue<::std::unique_ptr<cmw_request>> pendingTransactions;
   ::std::vector<cmw_account> accounts;
   int loginPause;
   int unrepliedKeepalives=0;
