@@ -1,7 +1,7 @@
 CFLAGS= -O2 -Wshadow -Wundef -W -Wall -Wextra
 CXXFLAGS= -std=c++1z -O2 -Wshadow -Wundef -Wreorder -W -Wall -Wextra
 
-#CXX=g++
+#CXX=g++7
 CXX=clang++ -stdlib=libc++
 
 AR=ar

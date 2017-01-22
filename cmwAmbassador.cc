@@ -298,6 +298,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):
         ReceiveBufferStack<SameFormat> localbuf(fds[1].fd,(::sockaddr*)&front,&frontlen);
         gotAddress=true;
         auto request=::std::make_unique<cmw_request>(localbuf);
+        //::std::unique_ptr request{new cmw_request(localbuf)};
         middle_messages_back::Marshal(cmwSendbuf,Generate,request->accountNbr
                                       ,request_generator(request->filename),500000);
         request->latest_update=current_updatedtime;
