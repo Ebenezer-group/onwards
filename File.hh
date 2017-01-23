@@ -22,7 +22,7 @@ class File
 
 public:
   explicit File (char const *n):name(n) {}
-  File (File&& mv):name(::std::move(mv.name)) {} // No need to copy fd.
+  File (File&& mv) noexcept :name(::std::move(mv.name)) {} // No need to copy fd.
 
   template <class R>
   explicit File (ReceiveBuffer<R>& buf):name(buf.GiveString_view())

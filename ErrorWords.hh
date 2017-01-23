@@ -18,7 +18,7 @@ public:
     whatStr=w;
   }
 
-  char const* what () const throw() { return whatStr.c_str(); }
+  char const* what () const noexcept { return whatStr.c_str(); }
 
   failure& operator<< (::std::string const& s)
   {
