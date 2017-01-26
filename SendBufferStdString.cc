@@ -8,7 +8,7 @@ void cmw::SendBuffer::Receive (::std::string const& s)
   Receive(s.data(),slen());
 }
 
-void cmw::SendBuffer::Receive (::std::experimental::string_view const& s)
+void cmw::SendBuffer::Receive (::std::string_view const& s)
 {
   marshalling_integer slen(s.size());
   slen.Marshal(*this);

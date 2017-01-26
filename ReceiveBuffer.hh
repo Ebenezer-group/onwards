@@ -6,7 +6,7 @@
 #include "marshalling_integer.hh"
 #include <stdint.h>
 #include <string>
-#include <experimental/string_view>
+#include <string_view>
 #include <string.h>
 
 #include <limits>
@@ -100,12 +100,12 @@ public:
     return str;
   }
 
-  ::std::experimental::string_view GiveString_view()
+  ::std::string_view GiveString_view()
   {
     marshalling_integer slen(*this);
     if(slen()>msgLength-index)
       throw failure("ReceiveBuffer::GiveString_view");
-    ::std::experimental::string_view view(buf+subTotal+index,slen());
+    ::std::string_view view(buf+subTotal+index,slen());
     index+=slen();
     return view;
   }

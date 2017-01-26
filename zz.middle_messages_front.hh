@@ -3,7 +3,7 @@
 #include"SendBuffer.hh"
 #include"string_join.hh"
 #include"udp_stuff.hh"
-#include<experimental/string_view>
+#include<string_view>
 
 namespace middle_messages_front{
 inline void Marshal (::cmw::SendBuffer& buf
@@ -18,7 +18,7 @@ inline void Marshal (::cmw::SendBuffer& buf
 
 inline void Marshal (::cmw::SendBuffer& buf
          ,bool az1
-         ,::std::experimental::string_view const& az2
+         ,::std::string_view const& az2
          ,int32_t max_length=cmw::udp_packet_max){
   try{
     buf.ReserveBytes(4);

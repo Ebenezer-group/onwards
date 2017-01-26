@@ -2,8 +2,7 @@
 
 #include <exception>
 #include <string>
-#include <experimental/string_view>
-#include <utility> // move
+#include <string_view>
 
 namespace cmw {
 class failure : public ::std::exception {
@@ -11,7 +10,7 @@ class failure : public ::std::exception {
 
 public:
   explicit failure (char const* w):whatStr(w) {}
-  explicit failure (::std::string w):whatStr(::std::move(w)) {}
+  explicit failure (::std::string_view w):whatStr(w) {}
 
   explicit failure (char const* w, int tot) {
     if(tot>0)whatStr.reserve(tot);
@@ -19,6 +18,8 @@ public:
   }
 
   char const* what () const noexcept { return whatStr.c_str(); }
+  //::std::string_view what_view () const noexcept 
+  //{ return ::std::string_view(whatStr); }
 
   failure& operator<< (::std::string const& s)
   {
@@ -26,9 +27,9 @@ public:
     return *this;
   }
 
-  failure& operator<< (::std::experimental::string_view const& s)
+  failure& operator<< (::std::string_view const& s)
   {
-    whatStr.append(s.data(),s.size());
+    whatStr.append(s);
     return *this;
   }
 
