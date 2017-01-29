@@ -4,6 +4,7 @@
 
 #include "ErrorWords.hh"
 #include <string>
+#include <string_view>
 #include <utility> // move
 #if !defined(CMW_WINDOWS)
 #include <fcntl.h>
@@ -21,8 +22,9 @@ class File
   file_type mutable fd=0;
 
 public:
-  explicit File (char const *n):name(n) {}
-  File (File&& mv) noexcept :name(::std::move(mv.name)) {} // No need to copy fd.
+  explicit File (char const *n):name(n){}
+  explicit File (::std::string_view n):name(n){}
+  File (File&& mv) noexcept :name(::std::move(mv.name)){} // No need to copy fd.
 
   template <class R>
   explicit File (ReceiveBuffer<R>& buf):name(buf.GiveString_view())
@@ -40,7 +42,7 @@ public:
 
   template <class R>
   File (bool contents,ReceiveBuffer<R>& buf):
-        File{contents?File{buf}:File{buf.GiveString_view().data()}}{}
+        File{contents?File{buf}:File{buf.GiveString_view()}}{}
 
   ~File ();
   bool Marshal (SendBuffer& buf,bool=false) const;

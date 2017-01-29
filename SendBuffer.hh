@@ -89,8 +89,6 @@ public:
   void Receive (::std::string const&);
   void Receive (::std::string_view const&);
 
-  void InsertNull () {uint8_t z=0;Receive(z);}
-
   int GetIndex () {return index;}
   int ReserveBytes (int);
   void FillInSize (int32_t);

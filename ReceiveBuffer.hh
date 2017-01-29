@@ -90,7 +90,7 @@ public:
 
   bool GiveBool () {return GiveOne()!=0;}
 
-  ::std::string GiveString ()
+  auto GiveString ()
   {
     marshalling_integer slen(*this);
     if(slen()>msgLength-index)
@@ -100,7 +100,7 @@ public:
     return str;
   }
 
-  ::std::string_view GiveString_view()
+  auto GiveString_view()
   {
     marshalling_integer slen(*this);
     if(slen()>msgLength-index)
