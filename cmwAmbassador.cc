@@ -30,7 +30,6 @@
 #include <stdio.h>
 #include <stdlib.h> //strtol
 #include <string.h>
-#include <utility> //move
 #include <vector>
 #include <fcntl.h>
 #include <netinet/in.h> //sockaddr_in6,socklen_t
@@ -303,7 +302,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):
                                       ,request_generator(request->filename),500000);
         request->latest_update=current_updatedtime;
         request->front_tier=front;
-        pendingTransactions.push(::std::move(request));
+        pendingTransactions.push(static_cast<::std::unique_ptr<cmw_request>&&>(request));
       }catch(::std::exception const& ex){
         syslog_wrapper(LOG_ERR,"Mediate request: %s",ex.what());
         if(gotAddress){
