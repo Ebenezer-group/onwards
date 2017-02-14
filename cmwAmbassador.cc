@@ -51,9 +51,9 @@ public:
   void Marshal (::cmw::SendBuffer& buf,bool=false) const{
     auto index=buf.ReserveBytes(1);
     if(::cmw::File{fname}.Marshal(buf))
-      buf.Receive(index,static_cast<int8_t>(1));
+      buf.Receive(index,true);
     else{
-      buf.Receive(index,static_cast<int8_t>(0));
+      buf.Receive(index,false);
       buf.Receive(fname);
     }
 

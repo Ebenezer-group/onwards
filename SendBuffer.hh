@@ -76,8 +76,7 @@ public:
     index+=fl_sz;
   }
 
-  void Receive (bool b)
-  {Receive(static_cast<unsigned char>(b));}
+  void Receive (bool b) {Receive(static_cast<unsigned char>(b));}
 
   void Receive (char const* cstr)
   {
