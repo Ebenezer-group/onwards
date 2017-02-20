@@ -29,7 +29,7 @@ bool cmw::File::Marshal (SendBuffer& buf,bool) const
     if(mod_time>current_updatedtime)current_updatedtime=mod_time;
 #else
   struct stat sb;
-  if(::stat(name.c_str(),&sb)<0)throw failure("File::Marshal: stat.");
+  if(::stat(name.c_str(),&sb)<0)throw failure("File::Marshal: stat.") << name;
   if(sb.st_mtime>previous_updatedtime){
     if((fd=::open(name.c_str(),O_RDONLY))<0)
       throw failure("File::Marshal: open ")<<name<<" "<<errno;

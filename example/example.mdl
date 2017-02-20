@@ -1,0 +1,12 @@
+send_sample_messages
+    -out (messageid_t, ::std::vector<int32_t>, ::std::string) 
+    -out (messageid_t, ::std::set<int32_t>) 
+    -out (messageid_t, ::std::array<::std::array<float, 2>, 3>) 
+}
+
+receive_sample_messages
+    -in (::std::vector<int32_t>, ::std::string) 
+    -in (::std::set<int32_t>) 
+    -in (::std::array<::std::array<float, 2>, 3>) 
+}
+
