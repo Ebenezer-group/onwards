@@ -7,7 +7,7 @@
 #include<string>
 #include<vector>
 
-namespace send_sample_messages{
+namespace send_example_messages{
 inline void Marshal (::cmw::SendBuffer& buf
          ,messageid_t const& az1
          ,::std::vector<int32_t> const& az2

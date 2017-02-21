@@ -1,5 +1,5 @@
-//   This program receives messages sent by sendsample.
-//   The Middle code is the same as in the send sample.
+//   This program receives messages sent by sendexample.
+//   The Middle code is the same as in the send example.
 //
 
 #include <array>
@@ -9,7 +9,7 @@
 #include <string>
 #include <udp_stuff.hh>
 #include <vector>
-#include <zz.receive_sample_messages.hh>
+#include <zz.receive_example_messages.hh>
 
 int main()
 {
@@ -24,7 +24,7 @@ int main()
       {
         std::vector<int32_t> vec;
         std::string str;
-        receive_sample_messages::Give(buffer, vec, str);  
+        receive_example_messages::Give(buffer, vec, str);  
         for (auto val : vec) { std::cout << val << " "; }
         std::cout << "\n" << str;
       }
@@ -33,7 +33,7 @@ int main()
       case messageid2:
       {
         std::set<int32_t> iset;
-        receive_sample_messages::Give(buffer, iset);   
+        receive_example_messages::Give(buffer, iset);   
         for (auto val : iset) { std::cout << val << " "; }
       }
       break;
@@ -41,7 +41,7 @@ int main()
       case messageid3:
       {
         std::array<std::array<float, 2>, 3> a;
-        receive_sample_messages::Give(buffer, a);   
+        receive_example_messages::Give(buffer, a);   
         for (auto subarray : a) {
           for (auto val : subarray) { std::cout << val << " "; }
           std::cout << std::endl;

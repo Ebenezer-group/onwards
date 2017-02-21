@@ -8,7 +8,7 @@
 #include<string>
 #include<vector>
 
-namespace receive_sample_messages{
+namespace receive_example_messages{
 template <class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::vector<int32_t>& az1

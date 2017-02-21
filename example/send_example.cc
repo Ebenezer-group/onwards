@@ -1,13 +1,13 @@
 //   The following Middle code was used as input to the C++ 
 //   Middleware Writer.
 //
-//   send_sample_messages
+//   send_example_messages
 //      -out (messageid_t, ::std::vector<int32_t>, ::std::string)
 //      -out (messageid_t, ::std::set<int32_t>)
 //      -out (messageid_t, ::std::array<::std::array<float, 2>, 3>)
 //   }
 //
-//   receive_sample_messages
+//   receive_example_messages
 //      -in (::std::vector<int32_t>, ::std::string)
 //      -in (::std::set<int32_t>)
 //      -in (::std::array<::std::array<float, 2>, 3>)
@@ -20,7 +20,7 @@
 #include <SendBufferStack.hh>
 #include <string>
 #include <vector>
-#include <zz.send_sample_messages.hh>
+#include <zz.send_example_messages.hh>
 
 using namespace cmw;
 
@@ -40,16 +40,16 @@ int main()
 
     if (1 == messageID) {
       ::std::vector<int32_t> vec { 100, 97, 94, 91, 88, 85 };
-      send_sample_messages::Marshal(buffer, messageid1, vec, "Proverbs 24:27");  
+      send_example_messages::Marshal(buffer, messageid1, vec, "Proverbs 24:27");  
     } else if (2 == messageID) {
       ::std::set<int32_t> iset { 100, 97, 94, 91, 88, 85 };
-      send_sample_messages::Marshal(buffer, messageid2, iset);  
+      send_example_messages::Marshal(buffer, messageid2, iset);  
     } else {
       ::std::array<::std::array<float, 2>, 3> ar {{ {{1.1,2.2}}
 						   ,{{3.3,4.4}}
                                                    ,{{5.5,6.6}}
                                                  }};
-      send_sample_messages::Marshal(buffer, messageid3, ar);  
+      send_example_messages::Marshal(buffer, messageid3, ar);  
     }
 
     buffer.Flush(rp->ai_addr, rp->ai_addrlen);
