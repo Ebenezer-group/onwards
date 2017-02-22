@@ -6,7 +6,7 @@
 #include "empty_container.hh"
 #include "ErrorWords.hh"
 #include "File.hh"
-#include "FILEWrapper.hh"
+#include "FILE_wrapper.hh"
 #include "IO.hh"
 #include "marshalling_integer.hh"
 #include "message_ids.hh"
@@ -43,7 +43,7 @@
 class request_generator{
   // hand_written_marshalling_code
   char const* fname;
-  cmw::FILEWrapper Fl;
+  cmw::FILE_wrapper Fl;
 
 public:
   explicit request_generator (char const* file):fname(file),Fl{file,"r"}{}
@@ -211,7 +211,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):
   cmwBuf(1100000),cmwSendbuf(1000000)
 {
   char lineBuf[140];
-  FILEWrapper Fl(configfile,"r");
+  FILE_wrapper Fl(configfile,"r");
   while(::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl)){
     char const* token=::strtok(lineBuf," ");
     if(!::strcmp("Account-Number",token)){

@@ -6,18 +6,18 @@
 
 namespace cmw {
 
-class FILEWrapper
+class FILE_wrapper
 {
 public:
   FILE* Hndl;
 
-  inline FILEWrapper (char const* fn,char const* mode)
+  inline FILE_wrapper (char const* fn,char const* mode)
   {
     if((Hndl=::fopen(fn,mode))==nullptr)
-      throw failure("FILEWrapper ctor ")<<fn<<" "<<mode<<
+      throw failure("FILE_wrapper ctor ")<<fn<<" "<<mode<<
             " "<<GetError();
   }
 
-  inline ~FILEWrapper () {::fclose(Hndl);}
+  inline ~FILE_wrapper () {::fclose(Hndl);}
 };
 }
