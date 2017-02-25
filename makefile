@@ -9,7 +9,7 @@ LIBS=-L./ -L/usr/lib
 
 all: libhome.a cmwAmbassador direct
 
-objects = close_socket.o marshalling_integer.o quicklz.o ErrorWords.o File.o FileMarshal.o IO.o SendBuffer.o SendBufferCompressed.o SendBufferStdString.o SendBufferFile.o SendBufferFlush.o
+objects = close_socket.o marshalling_integer.o quicklz.o ErrorWords.o File.o IO.o SendBuffer.o SendBufferCompressed.o SendBufferStdString.o SendBufferFile.o SendBufferFlush.o
 
 libhome.a: $(objects)
 	$(AR) r $@ $(objects)
