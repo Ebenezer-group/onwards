@@ -3,9 +3,5 @@ Remember to run
 
 make 
 
-and then 
-
-make install 
-
 in the "onwards" directory prior to running make in this directory.
 

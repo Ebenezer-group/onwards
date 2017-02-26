@@ -4,17 +4,18 @@ CXX=g++7
 AR=ar
 LIBS=-L./ -L/usr/lib
 
-all: send_example receive_example 
+TARGETS = send_example receive_example 
+all: $(TARGETS)
 
 
 send_example: send_example.cc
-	$(CXX) -o $@ $(CXXFLAGS) send_example.cc /usr/local/lib/libhome.a
+	$(CXX) -o $@ $(CXXFLAGS) send_example.cc ../libhome.a
 	ls -l $@
 
 receive_example: receive_example.cc
-	$(CXX) -o $@ $(CXXFLAGS) receive_example.cc /usr/local/lib/libhome.a 
+	$(CXX) -o $@ $(CXXFLAGS) receive_example.cc ../libhome.a 
 	ls -l $@
 
 clean:
-	rm -f send_example receive_example *.o
+	rm -f $(TARGETS)
 
