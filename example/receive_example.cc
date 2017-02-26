@@ -2,14 +2,14 @@
 //   The Middle code is the same as in the send example.
 //
 
+#include "ReceiveBufferStack.hh"
+#include "udp_stuff.hh"
+#include "zz.receive_example_messages.hh"
 #include <array>
 #include <iostream>
-#include <ReceiveBufferStack.hh>
 #include <set>
 #include <string>
-#include <udp_stuff.hh>
 #include <vector>
-#include <zz.receive_example_messages.hh>
 
 int main()
 {
@@ -19,6 +19,7 @@ int main()
     for (;;) {
       cmw::ReceiveBufferStack<SameFormat> buffer(sd); 
       auto msgid = buffer.Give<messageid_t>();
+      std::cout << "Message id is " << static_cast<unsigned>(msgid) << '\n';
       switch (msgid) {
       case messageid1:
       {
@@ -26,7 +27,7 @@ int main()
         std::string str;
         receive_example_messages::Give(buffer, vec, str);  
         for (auto val : vec) { std::cout << val << " "; }
-        std::cout << "\n" << str;
+        std::cout << '\n' << str;
       }
       break;
       

@@ -13,14 +13,14 @@
 //      -in (::std::array<::std::array<float, 2>, 3>)
 //   }
 
+#include "getaddrinfo_wrapper.hh"
+#include "SendBufferStack.hh"
+#include "zz.send_example_messages.hh"
 #include <array>
-#include <getaddrinfo_wrapper.hh>
 #include <iostream>
 #include <set>
-#include <SendBufferStack.hh>
 #include <string>
 #include <vector>
-#include <zz.send_example_messages.hh>
 
 using namespace cmw;
 
