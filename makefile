@@ -7,10 +7,10 @@ CXX=g++7
 AR=ar
 LIBS=-L./ -L/usr/lib
 
-all: libhome.a project_code
+all: libhome.a subdirs
 
-.PHONY: project_code
-project_code:
+.PHONY: subdirs
+subdirs:
 	$(MAKE) -C tiers
 	cd example && make
 
@@ -22,10 +22,12 @@ libhome.a: $(objects)
 
 INSTALL_DIR=/usr/local
 install:
+	$(MAKE) -C tiers install
 	cp -f libhome.a  $(INSTALL_DIR)/lib
-	cp -f close_socket.hh connect_wrapper.hh getaddrinfo_wrapper.hh tcp_server.hh  udp_stuff.hh ErrorWords.hh File.hh IO*.hh marshalling_integer.hh poll_wrapper.hh SendBuffer*.hh Formatting.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh empty_container.hh quicklz.h $(INSTALL_DIR)/include
+	cp -f close_socket.hh connect_wrapper.hh getaddrinfo_wrapper.hh tcp_server.hh udp_stuff.hh ErrorWords.hh File.hh IO*.hh marshalling_integer.hh poll_wrapper.hh SendBuffer*.hh Formatting.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh empty_container.hh quicklz.h $(INSTALL_DIR)/include
 
 uninstall:
+	$(MAKE) -C tiers uninstall
 	rm -f $(INSTALL_DIR)/lib/libhome.a
 
 clean:
