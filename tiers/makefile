@@ -1,29 +1,29 @@
-CXXFLAGS= -std=c++17 -I.. -O2 -Wshadow -Wundef -Wreorder -W -Wall -Wextra
-
 CXX=g++7
 #CXX=clang++ -stdlib=libc++
 
-all: cmwAmbassador direct 
+CXXFLAGS= -std=c++17 -I.. -O2 -Wshadow -Wundef -Wreorder -W -Wall -Wextra
+
+TARGETS = cmwAmbassador direct 
+all: $(TARGETS)
 
 #zz.middle_messages_back.hh: account_info.hh remote.mdl cmw.req
 #	direct 1 /usr/share/nginx/html/misc/cmw.req
 
-cmwAmbassador: cmwAmbassador.cc zz.middle_messages_back.hh ../libhome.a
-	$(CXX) -o $@ $(CXXFLAGS) -s $< ../libhome.a
+cmwAmbassador: $@.cc zz.middle_messages_back.hh ../libhome.a
+	$(CXX) -o $@ $(CXXFLAGS) $< ../libhome.a
 	size $@
 
-direct: direct.cc ../libhome.a
-	$(CXX) -o $@ $(CXXFLAGS) -s $< ../libhome.a
+direct: $@.cc ../libhome.a
+	$(CXX) -o $@ $(CXXFLAGS) $< ../libhome.a
 	size $@
 
+clean:
+	rm -f $(TARGETS)
 
 INSTALL_DIR=/usr/local
 install:
-	cp -f direct cmwAmbassador $(INSTALL_DIR)/bin
+	cp -f $(TARGETS) $(INSTALL_DIR)/bin
 
 uninstall:
-	rm -f $(INSTALL_DIR)/bin/direct $(INSTALL_DIR)/bin/cmwAmbassador
-
-clean:
-	rm -f cmwAmbassador direct
+	cd $(INSTALL_DIR)/bin/ && rm -f $(TARGETS)
 
