@@ -9,11 +9,11 @@ all: $(TARGETS)
 #zz.middle_messages_back.hh: account_info.hh remote.mdl cmw.req
 #	direct 1 /usr/share/nginx/html/misc/cmw.req
 
-cmwAmbassador: $@.cc zz.middle_messages_back.hh ../libhome.a
+cmwAmbassador: cmwAmbassador.cc zz.middle_messages_back.hh ../libhome.a
 	$(CXX) -o $@ $(CXXFLAGS) $< ../libhome.a
 	size $@
 
-direct: $@.cc ../libhome.a
+direct: direct.cc ../libhome.a
 	$(CXX) -o $@ $(CXXFLAGS) $< ../libhome.a
 	size $@
 
