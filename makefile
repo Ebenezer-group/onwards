@@ -1,4 +1,4 @@
-CFLAGS= -O2 -Wshadow -Wundef -W -Wall -Wextra
+CFLAGS= -Os -Wshadow -Wundef -W -Wall -Wextra
 CXXFLAGS= -std=c++17 $(CFLAGS) -Wreorder
 
 CXX=g++7
