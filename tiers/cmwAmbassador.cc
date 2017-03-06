@@ -1,5 +1,3 @@
-#include "platforms.hh"
-
 #include "account_info.hh"
 #include "close_socket.hh"
 #include "connect_wrapper.hh"
@@ -31,6 +29,7 @@
 #include <stdlib.h> //strtol
 #include <string.h>
 #include <vector>
+#include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h> //sockaddr_in6,socklen_t
 #include <unistd.h> //pread
@@ -95,7 +94,7 @@ struct cmw_request{
   char const* filename;
   ::sockaddr_in6 front_tier;
   int32_t latest_update;
-  file_type fd;
+  int fd;
 
   template <class R>
   explicit cmw_request (ReceiveBuffer<R>& buf):accountNbr(buf)
