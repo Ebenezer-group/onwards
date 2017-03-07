@@ -110,6 +110,7 @@ public:
     return view;
   }
 
+#ifndef CMW_WINDOWS
   template <ssize_t N>
   void CopyString (char (&dest)[N])
   {
@@ -118,6 +119,7 @@ public:
     Give(dest,slen());
     dest[slen()]='\0';
   }
+#endif
 
   void AppendTo(::std::string& s)
   {

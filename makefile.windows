@@ -1,6 +1,6 @@
 
 CC=cl
-CFLAGS= -c -EHsc -O2 -nologo
+CFLAGS= -std:c++latest -c -EHsc -O2 -nologo
 
 all: libhome.lib
 
@@ -31,19 +31,14 @@ SendBufferFlush.obj: SendBuffer.hh
 #SendBufferFile.obj: SendBufferFile.hh
 #	$(CC) $(CFLAGS) SendBufferFile.cc
 
-File.obj: File.hh
-	$(CC) $(CFLAGS) File.cc
-
 marshalling_integer.obj: marshalling_integer.hh
 	$(CC) $(CFLAGS) marshalling_integer.cc
 
 ErrorWords.obj: ErrorWords.hh
 	$(CC) $(CFLAGS) ErrorWords.cc
 
-FileMarshal.obj: File.hh
-	$(CC) $(CFLAGS) FileMarshal.cc
 
-objects = close_socket.obj quicklz.obj IO.obj SendBuffer.obj SendBufferCompressed.obj File.obj marshalling_integer.obj SendBufferStdString.obj SendBufferFlush.obj ErrorWords.obj FileMarshal.obj
+objects = close_socket.obj quicklz.obj IO.obj SendBuffer.obj SendBufferCompressed.obj marshalling_integer.obj SendBufferStdString.obj SendBufferFlush.obj ErrorWords.obj
 
 libhome.lib: $(objects)
 	lib /out:$@ $(objects)
