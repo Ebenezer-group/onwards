@@ -1,0 +1,14 @@
+
+CC=cl
+CFLAGS= -EHsc -O2 -nologo
+
+all: direct
+
+direct: direct.cc libhome.lib
+	$(CC) $(CFLAGS) direct.cc /link ..\libhome.lib  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+
+clean:
+	del *.obj direct.exe
+
+install:
+	copy *.exe  \Users\Store\bin\

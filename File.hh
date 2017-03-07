@@ -1,7 +1,5 @@
 #pragma once
 
-#include "platforms.hh"
-
 #include "ErrorWords.hh"
 #include <string>
 #include <string_view>
@@ -19,7 +17,7 @@ template <class R> class ReceiveBuffer;
 class File
 {
   ::std::string name;
-  file_type mutable fd=0;
+  int mutable fd=0;
 
 public:
   explicit File (char const *n):name(n){}
