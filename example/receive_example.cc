@@ -18,7 +18,7 @@ int main()
     auto sd = cmw::udp_server("12345");
 
     for (;;) {
-      cmw::ReceiveBufferStack<SameFormat> buffer(sd); 
+      cmw::ReceiveBufferStack<SameFormat> buffer(sd);
       auto msgid = buffer.Give<messageid_t>();
       std::cout << "Message id is " << static_cast<unsigned>(msgid) << '\n';
       switch (msgid) {
@@ -26,16 +26,16 @@ int main()
       {
         std::vector<int32_t> vec;
         std::string str;
-        receive_example_messages::Give(buffer, vec, str);  
+        receive_example_messages::Give(buffer, vec, str);
         for (auto val : vec) { std::cout << val << " "; }
         std::cout << '\n' << str;
       }
       break;
-      
+
       case messageid2:
       {
         std::set<int32_t> iset;
-        receive_example_messages::Give(buffer, iset);   
+        receive_example_messages::Give(buffer, iset);
         for (auto val : iset) { std::cout << val << " "; }
       }
       break;
@@ -43,7 +43,7 @@ int main()
       case messageid3:
       {
         std::array<std::array<float, 2>, 3> a;
-        receive_example_messages::Give(buffer, a);   
+        receive_example_messages::Give(buffer, a);
         for (auto subarray : a) {
           for (auto val : subarray) { std::cout << val << " "; }
           std::cout << std::endl;
@@ -54,7 +54,7 @@ int main()
       case messageid4:
       {
         ::plf::colony<::std::string> clny;
-        receive_example_messages::Give(buffer, clny);   
+        receive_example_messages::Give(buffer, clny);
         for (auto val: clny) {
           std::cout << val << " ";
         }
@@ -64,7 +64,7 @@ int main()
       default:
         std::cout << "Unexpected message id: " << msgid;
       }
-      std::cout << std::endl;            
+      std::cout << std::endl;
     }
     return 1;
   } catch (std::exception const& ex) {

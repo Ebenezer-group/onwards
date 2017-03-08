@@ -3,7 +3,7 @@ CXX=g++7
 
 CXXFLAGS= -std=c++17 -I.. -Os -Wshadow -Wundef -Wreorder -W -Wall -Wextra
 
-TARGETS := cmwAmbassador direct 
+TARGETS := cmwAmbassador direct
 all: $(TARGETS)
 
 #zz.middle_messages_back.hh: account_info.hh remote.mdl cmw.req

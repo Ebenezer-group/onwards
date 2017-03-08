@@ -18,7 +18,7 @@ public:
   }
 
   char const* what () const noexcept { return whatStr.c_str(); }
-  //::std::string_view what_view () const noexcept 
+  //::std::string_view what_view () const noexcept
   //{ return ::std::string_view(whatStr); }
 
   failure& operator<< (::std::string const& s)

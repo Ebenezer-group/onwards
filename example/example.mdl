@@ -1,14 +1,14 @@
 send_example_messages
-    -out (messageid_t, ::std::vector<int32_t>, ::std::string) 
-    -out (messageid_t, ::std::set<int32_t>) 
-    -out (messageid_t, ::std::array<::std::array<float, 2>, 3>) 
-    -out (messageid_t, ::plf::colony<::std::string>) 
+    -out (messageid_t, ::std::vector<int32_t>, ::std::string)
+    -out (messageid_t, ::std::set<int32_t>)
+    -out (messageid_t, ::std::array<::std::array<float, 2>, 3>)
+    -out (messageid_t, ::plf::colony<::std::string>)
 }
 
 receive_example_messages
-    -in (::std::vector<int32_t>, ::std::string) 
-    -in (::std::set<int32_t>) 
-    -in (::std::array<::std::array<float, 2>, 3>) 
-    -in (::plf::colony<::std::string>) 
+    -in (::std::vector<int32_t>, ::std::string)
+    -in (::std::set<int32_t>)
+    -in (::std::array<::std::array<float, 2>, 3>)
+    -in (::plf::colony<::std::string>)
 }
 
