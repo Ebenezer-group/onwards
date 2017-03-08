@@ -10,13 +10,14 @@ There should be two makefiles here: one for BSD/Linux and one
 for Windows.  The BSD version is called "makefile" and the
 Windows version is called "makefile.windows".  If you're using
 Windows, you may want to remove the BSD version and rename
-makefile.mcr to just makefile.  If you're using a big-endian
+makefile.windows to just makefile.  If you're using a big-endian
 machine, add -DCMW_ENDIAN_BIG to the CXXFLAGS in the makefile.
 
-A library and two programs are built.
-The programs are the C++ Middleware Writer Ambassador
-(CMWA) and a command line interface which is called direct.
-On Windows the CMWA program is not built.
+A library and two programs are built.  The programs are the
+middle and front tiers of the CMW.  The middle tier is called
+the C++ Middleware Writer Ambassador (CMWA).  The front tier
+is a command line interface and is called "direct."  On Windows, 
+only the front tier is built.
 
 
 Accounts
@@ -33,11 +34,11 @@ cmwAmbassador cmwAmbassador.cfg
 After starting the CMW Ambassador, run the direct
 program like this:
 
-direct 14 /home/brian/onwards/tiers/ambassador.req
+direct 14 /home/brian/onwards/example/example.req
 
 or on Windows:
 
-.\direct.exe 14 /Users/brian/onwards/tiers/ambassador.req
+.\direct.exe 14 /Users/brian/onwards/example/example.req
 
 14 is an account number.  Substitute your account number there.
 
@@ -61,14 +62,14 @@ Another possible problem could be due to "breaking changes"
 between the back and middle tier.  (We may have changed
 the protocol between these tiers and now older versions
 of the middle tier no longer work right.)  The thing to do
-in this case is to check our website for an announcement
-that you may have missed about this.  Probably you will
-have to clone/download the new version of the repository
-and then reinstall in order to fix the problem.
+in this case is to check our website for an announcement/
+email that you may have missed.  Probably you will have to 
+clone/download the new version of the repository and then 
+reinstall in order to fix the problem.
 
-If you rename include files listed in one of your .req files, 
-you should also touch that file so the change will be 
-"noticed" by the CMW.
+If you move/rename include files listed in your .req files, 
+you should also touch those files so the changes will be 
+"noticed" by the CMWA.
 
 
 Thank you for using the software.
