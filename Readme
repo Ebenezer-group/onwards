@@ -8,7 +8,7 @@ of the software here.  See http://quicklz.com for more info.
 Building
 There should be two makefiles here: one for BSD/Linux and one
 for Windows.  The BSD version is called "makefile" and the
-Windows version is called "makefile.mcr".  If you're using
+Windows version is called "makefile.windows".  If you're using
 Windows, you may want to remove the BSD version and rename
 makefile.mcr to just makefile.  If you're using a big-endian
 machine, add -DCMW_ENDIAN_BIG to the CXXFLAGS in the makefile.
@@ -33,11 +33,11 @@ cmwAmbassador cmwAmbassador.cfg
 After starting the CMW Ambassador, run the direct
 program like this:
 
-direct 14 /home/brian/direct/ambassador.req
+direct 14 /home/brian/onwards/tiers/ambassador.req
 
 or on Windows:
 
-.\direct.exe 14 /Users/brian/direct/ambassador.req
+.\direct.exe 14 /Users/brian/onwards/tiers/ambassador.req
 
 14 is an account number.  Substitute your account number there.
 
@@ -48,7 +48,7 @@ Middle files here -- http://webEbenezer.net/middle.html.
 A .req file also has the settings for various options.
 
 Once you have built the software, I suggest copying
-ambassador.req and local.mdl to one of your directories
+example.req and example.mdl to one of your directories
 and modifying the copies according to your needs.
 
 
@@ -61,16 +61,14 @@ Another possible problem could be due to "breaking changes"
 between the back and middle tier.  (We may have changed
 the protocol between these tiers and now older versions
 of the middle tier no longer work right.)  The thing to do
-in this case is to check if the checksum here --
-http://webEbenezer.net/build_integration.html  --
-is different from the result of running sha256sum on your
-copy of the archive.  If the checksums are different,
-download the new version of the archive and reinstall.
+in this case is to check our website for an announcement
+that you may have missed about this.  Probably you will
+have to clone/download the new version of the repository
+and then reinstall in order to fix the problem.
 
-If you rename one of the files listed in one of your .req
-files, you should also touch that file so the change will
-be "noticed" by the CMW.
-
+If you rename include files listed in one of your .req files, 
+you should also touch that file so the change will be 
+"noticed" by the CMW.
 
 
 Thank you for using the software.
