@@ -10,6 +10,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "plf_colony.h"
 
 int main()
 {
@@ -46,6 +47,16 @@ int main()
         for (auto subarray : a) {
           for (auto val : subarray) { std::cout << val << " "; }
           std::cout << std::endl;
+        }
+      }
+      break;
+
+      case messageid4:
+      {
+        ::plf::colony<::std::string> clny;
+        receive_example_messages::Give(buffer, clny);   
+        for (auto val: clny) {
+          std::cout << val << " ";
         }
       }
       break;

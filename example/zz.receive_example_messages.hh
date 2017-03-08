@@ -7,6 +7,7 @@
 #include<set>
 #include<string>
 #include<vector>
+#include"plf_colony.h"
 
 namespace receive_example_messages{
 template <class R>
@@ -37,5 +38,16 @@ template <class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::array<::std::array<float, 2>, 3>& az1){
   buf.GiveBlock(&az1[0][0], sizeof az1 / sizeof(float));
+}
+
+template <class R>
+void Give (::cmw::ReceiveBuffer<R>& buf
+         ,::plf::colony<::std::string>& az1){
+  int32_t count[1];
+  count[0]=buf.template Give<uint32_t>();
+  az1.reserve(az1.size()+count[0]);
+  for(;count[0]>0;--count[0]){
+    az1.insert(buf.GiveString());
+  }
 }
 }
