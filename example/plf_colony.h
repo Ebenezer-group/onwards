@@ -3,11 +3,11 @@
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
 // arising from the use of this software.
-// 
+//
 // Permission is granted to anyone to use this software for any purpose,
 // including commercial applications, and to alter it and redistribute it
 // freely, subject to the following restrictions:
-// 
+//
 // 1. The origin of this software must not be misrepresented; you must not
 //    claim that you wrote the original software. If you use this software
 //    in a product, an acknowledgement in the product documentation would be
@@ -1279,7 +1279,7 @@ public:
 		element_allocator_type(alloc),
 		first_group(NULL),
 		total_number_of_elements(0),
-		min_elements_per_group((min_allocation_amount != 0) ? min_allocation_amount : 
+		min_elements_per_group((min_allocation_amount != 0) ? min_allocation_amount :
 			(fill_number > max_allocation_amount) ? max_allocation_amount : static_cast<skipfield_type>(fill_number)),
 		group_allocator_pair(max_allocation_amount),
 		erased_locations((min_elements_per_group < 8) ? min_elements_per_group : (min_elements_per_group >> 7) + 8)
@@ -1318,7 +1318,7 @@ public:
 			element_allocator_type(alloc),
 			first_group(NULL),
 			total_number_of_elements(0),
-			min_elements_per_group((min_allocation_amount != 0) ? min_allocation_amount : 
+			min_elements_per_group((min_allocation_amount != 0) ? min_allocation_amount :
 				(element_list.size() < 8) ? 8 :
 				(element_list.size() > max_allocation_amount) ? max_allocation_amount : static_cast<skipfield_type>(element_list.size())),
 			group_allocator_pair(max_allocation_amount),
@@ -1383,7 +1383,7 @@ public:
 
 
 
-	inline reverse_iterator rend() const PLF_COLONY_NOEXCEPT 
+	inline reverse_iterator rend() const PLF_COLONY_NOEXCEPT
 	{
 		return reverse_iterator(begin_iterator.group_pointer, begin_iterator.element_pointer - 1, begin_iterator.skipfield_pointer - 1);
 	}
@@ -1889,18 +1889,18 @@ public:
 	
 						switch (prev_skipfield | (after_skipfield << 1))
 						{
-							case 1: 
+							case 1:
 							{
 								*(new_location.skipfield_pointer - (value - 1)) = value - 1;
 								break;
 							}
-							case 2: 
+							case 2:
 							{
 								std::memmove(&*(new_location.skipfield_pointer + 2), &*(new_location.skipfield_pointer + 1), sizeof(skipfield_type) * (value - 2));
 								*(new_location.skipfield_pointer + 1) = value - 1;
 								break;
 							}
-							case 3: 
+							case 3:
 							{
 								const skipfield_pointer_type start_node = new_location.skipfield_pointer - (value - 1);
 								const skipfield_type update_count = *start_node - value;
@@ -1916,7 +1916,7 @@ public:
 					}
 				}
 			}
-			else 
+			else
 			{
 				initialize(min_elements_per_group);
 
@@ -2743,7 +2743,7 @@ public:
 			// Update skipfield:
 			skipfield_type node_value = *(current.skipfield_pointer - (current.group_pointer->skipfield != current.skipfield_pointer)); // Find value of left-hand node - if current node is at start of skipfield, we check the current node instead, which will always be zero.
 			skipfield_type update_count = static_cast<skipfield_type>(iterator2.element_pointer - current.element_pointer);
-			         
+
 			*(current.skipfield_pointer - node_value) = node_value + update_count; // Either set current node as the start node, or if previous node is part of a skipblock, update that skipblock's start node
 			const bool left_node_is_zero = (node_value == 0);
 			node_value += left_node_is_zero; // ie. set node_value to 1 if it was zero
@@ -3298,7 +3298,7 @@ public:
 					if (group_pointer->previous_group == NULL)
 					{
 						element_pointer = group_pointer->elements + *(group_pointer->skipfield); // This is first group, so bound to begin() (just in case final decrement took us before begin())
-						skipfield_pointer = group_pointer->skipfield + *(group_pointer->skipfield); 
+						skipfield_pointer = group_pointer->skipfield + *(group_pointer->skipfield);
 						return;
 					}
 				}
@@ -3313,7 +3313,7 @@ public:
 				if (group_pointer->previous_group == NULL) // we've gone beyond begin(), so bound to it
 				{
 					element_pointer = group_pointer->elements + *(group_pointer->skipfield);
-					skipfield_pointer = group_pointer->skipfield + *(group_pointer->skipfield); 
+					skipfield_pointer = group_pointer->skipfield + *(group_pointer->skipfield);
 					return;
 				}
 
@@ -3326,7 +3326,7 @@ public:
 			if (static_cast<difference_type>(group_pointer->number_of_elements) == distance)
 			{
 				element_pointer = group_pointer->elements + *(group_pointer->skipfield);
-				skipfield_pointer = group_pointer->skipfield + *(group_pointer->skipfield); 
+				skipfield_pointer = group_pointer->skipfield + *(group_pointer->skipfield);
 				return;
 			}
 			else if (group_pointer->number_of_elements == static_cast<skipfield_type>(group_pointer->last_endpoint - group_pointer->elements)) // ie. no erased elements in this group
@@ -3368,7 +3368,7 @@ public:
 
         // this needs to be implemented slightly differently to forward-iterator's advance, as it needs to be able to reach rend() ie. begin() - 1 and to be bound to rbegin()
 
-		if (distance > 0) 
+		if (distance > 0)
 		{
 			assert (!(element_pointer == group_pointer->elements - 1 && group_pointer->previous_group == NULL)); // Check that we're not already at rend()
 			// Special case for initial element pointer and initial group (we don't know how far into the group the element pointer is)
@@ -3433,7 +3433,7 @@ public:
 
 				distance -= static_cast<difference_type>(group_pointer->number_of_elements);
 				group_pointer = group_pointer->previous_group;
-			} 
+			}
 			
 
 			// Final group (if not already reached)
@@ -3500,7 +3500,7 @@ public:
 						skipfield_pointer += *skipfield_pointer;
 
 						--distance;
-                        
+
 						if (skipfield_pointer == endpoint)
 						{
 							break;
@@ -3515,7 +3515,7 @@ public:
 					if (group_pointer->next_group == NULL) // bound to rbegin()
 					{
 						--skipfield_pointer;
-						element_pointer = (group_pointer->last_endpoint - 1) - *skipfield_pointer; 
+						element_pointer = (group_pointer->last_endpoint - 1) - *skipfield_pointer;
 						skipfield_pointer -= *skipfield_pointer;
 						return;
 					}	
@@ -3538,7 +3538,7 @@ public:
 				if (group_pointer->next_group == NULL) // bound to rbegin()
 				{
 					skipfield_pointer = group_pointer->skipfield + (group_pointer->last_endpoint - group_pointer->elements) - 1;
-					element_pointer = (group_pointer->last_endpoint - 1) - *skipfield_pointer; 
+					element_pointer = (group_pointer->last_endpoint - 1) - *skipfield_pointer;
 					skipfield_pointer -= *skipfield_pointer;
 					return;
 				}
@@ -3592,8 +3592,8 @@ public:
 		advance(return_iterator, distance);
 		return return_iterator;
 	}
-        
-        
+
+
 
 	template <class colony_element_allocator_type, bool is_const>
 	inline colony_reverse_iterator<colony_element_allocator_type, is_const> next(const colony_reverse_iterator<colony_element_allocator_type, is_const> &it, const typename colony_reverse_iterator<colony_element_allocator_type, is_const>::difference_type distance = 1) const
@@ -3614,8 +3614,8 @@ public:
 		return return_iterator;
 	}
 
-             
-             
+
+
 	template <class colony_element_allocator_type, bool is_const>
 	inline colony_reverse_iterator<colony_element_allocator_type, is_const> prev(const colony_reverse_iterator<colony_element_allocator_type, is_const> &it, const typename colony_reverse_iterator<colony_element_allocator_type, is_const>::difference_type distance = 1) const
 	{

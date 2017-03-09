@@ -9,15 +9,15 @@ Building
 There should be two makefiles here: one for BSD/Linux and one
 for Windows.  The BSD version is called "makefile" and the
 Windows version is called "makefile.windows".  If you're using
-Windows, you may want to remove the BSD version and rename
-makefile.windows to just makefile.  If you're using a big-endian
-machine, add -DCMW_ENDIAN_BIG to the CXXFLAGS in the makefile.
+Windows, you may want to rename makefile.windows to makefile.  
+If you're using a big-endian machine, add -DCMW_ENDIAN_BIG to 
+the CXXFLAGS in the makefile.
 
 A library and two programs are built.  The programs are the
-middle and front tiers of the CMW.  The middle tier is called
-the C++ Middleware Writer Ambassador (CMWA).  The front tier
-is a command line interface and is called "direct."  On Windows, 
-only the front tier is built.
+middle and front tiers of the C++ Middleware Writer (CMW).  
+The middle tier is called the CMW Ambassador (CMWA).  The 
+front tier is called "direct" and is a command line interface.  
+On Windows, only the library and front tier are built.
 
 
 Accounts
