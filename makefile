@@ -13,7 +13,7 @@ subdirs:
 	$(MAKE) -C tiers
 	$(MAKE) -C example
 
-objects = close_socket.o marshalling_integer.o quicklz.o ErrorWords.o File.o IO.o SendBuffer.o SendBufferCompressed.o SendBufferStdString.o SendBufferFile.o SendBufferFlush.o
+objects = marshalling_integer.o quicklz.o File.o IO.o SendBuffer.o SendBufferCompressed.o SendBufferStdString.o SendBufferFile.o SendBufferFlush.o
 
 libhome.a: $(objects)
 	ar r $@ $(objects)

@@ -3,6 +3,7 @@
 #include <exception>
 #include <string>
 #include <string_view>
+#include <stdio.h> //sprintf
 
 namespace cmw {
 class failure : public ::std::exception {
@@ -39,8 +40,18 @@ public:
     return *this;
   }
 
-  failure& operator<< (char const* s);
-  failure& operator<< (int i);
+  failure& operator<< (char const* s)
+  {
+    whatStr.append(s);
+    return *this;
+  }
+
+  failure& operator<< (int i)
+  {
+    char buf[40];
+    ::sprintf(buf,"%d",i);
+    return *this<<buf;
+  }
 
   template <class T>
   failure& operator<< (T val)
