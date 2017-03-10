@@ -7,9 +7,6 @@ all: libhome.lib
 .c.obj:
 	$(CC) $(CFLAGS) -c $*.c -o $*.obj
 
-close_socket.obj: close_socket.hh
-	$(CC) $(CFLAGS) close_socket.cc
-
 quicklz.obj: quicklz.h
 	$(CC) $(CFLAGS) quicklz.c
 
@@ -22,24 +19,14 @@ SendBuffer.obj: SendBuffer.hh
 SendBufferCompressed.obj: SendBufferCompressed.hh
 	$(CC) $(CFLAGS) SendBufferCompressed.cc
 
-SendBufferStdString.obj: SendBuffer.hh
-	$(CC) $(CFLAGS) SendBufferStdString.cc
-
-SendBufferFlush.obj: SendBuffer.hh
-	$(CC) $(CFLAGS) SendBufferFlush.cc
-
 #SendBufferFile.obj: SendBufferFile.hh
 #	$(CC) $(CFLAGS) SendBufferFile.cc
 
 marshalling_integer.obj: marshalling_integer.hh
 	$(CC) $(CFLAGS) marshalling_integer.cc
 
-ErrorWords.obj: ErrorWords.hh
-	$(CC) $(CFLAGS) ErrorWords.cc
 
-
-objects = close_socket.obj quicklz.obj IO.obj SendBuffer.obj SendBufferCompressed.obj marshalling_integer.obj SendBufferStdString.obj SendBufferFlush.obj ErrorWords.obj
-
+objects = quicklz.obj IO.obj SendBuffer.obj SendBufferCompressed.obj marshalling_integer.obj
 libhome.lib: $(objects)
 	lib /out:$@ $(objects)
 
