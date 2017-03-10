@@ -3,17 +3,17 @@ CXX=g++7
 
 CXXFLAGS= -std=c++17 -I.. -Os -Wshadow -Wundef -Wreorder -W -Wall -Wextra
 
-TARGETS := cmwAmbassador direct
+TARGETS := cmwAmbassador genz
 all: $(TARGETS)
 
 #zz.middle_messages_back.hh: account_info.hh remote.mdl cmw.req
-#	direct 1 /usr/home/brian/onwards/tiers/cmw.req
+#	genz 1 /usr/home/brian/onwards/tiers/cmw.req
 
 cmwAmbassador: cmwAmbassador.cc zz.middle_messages_back.hh ../libhome.a
 	$(CXX) -o $@ $(CXXFLAGS) $< ../libhome.a
 	size $@
 
-direct: direct.cc ../libhome.a
+genz: genz.cc ../libhome.a
 	$(CXX) -o $@ $(CXXFLAGS) $< ../libhome.a
 	size $@
 

@@ -17,7 +17,7 @@ int main (int argc,char** argv)
 {
   try{
     if(argc<3 || argc>5)
-      throw failure("Usage: direct account-number .req-file-path [node] [port]");
+      throw failure("Usage: genz account-number .req-file-path [node] [port]");
 
     windows_start();
     getaddrinfo_wrapper res(argc<4?"::1"/*"127.0.0.1"*/:argv[3]

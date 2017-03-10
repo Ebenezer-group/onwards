@@ -16,7 +16,7 @@ the CXXFLAGS in the makefile.
 A library and two programs are built.  The programs are the
 middle and front tiers of the C++ Middleware Writer (CMW).  
 The middle tier is called the CMW Ambassador (CMWA).  The 
-front tier is called "direct" and is a command line interface.  
+front tier is called "genz" and is a command line interface.  
 On Windows, only the library and front tier are built.
 
 
@@ -31,14 +31,13 @@ Running the CMW Ambassador (after installing):
 
 cmwAmbassador cmwAmbassador.cfg
 
-After starting the CMW Ambassador, run the direct
-program like this:
+After starting the CMW Ambassador, run genz like this:
 
-direct 14 /home/brian/onwards/example/example.req
+genz 14 /home/brian/onwards/example/example.req
 
 or on Windows:
 
-.\direct.exe 14 /Users/brian/onwards/example/example.req
+.\genz.exe 14 /Users/brian/onwards/example/example.req
 
 14 is an account number.  Substitute your account number there.
 
@@ -55,7 +54,7 @@ and modifying the copies according to your needs.
 
 Troubleshooting
 The middle tier has to be running for the front tier to work.
-If direct fails with "No reply received.  Is the CMWA running?"
+If genz fails with "No reply received.  Is the CMWA running?"
 make sure the middle tier is running.
 
 Another possible problem could be due to "breaking changes"
