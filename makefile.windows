@@ -16,9 +16,6 @@ IO.obj: IO.hh
 SendBuffer.obj: SendBuffer.hh
 	$(CC) $(CFLAGS) SendBuffer.cc
 
-SendBufferCompressed.obj: SendBufferCompressed.hh
-	$(CC) $(CFLAGS) SendBufferCompressed.cc
-
 #SendBufferFile.obj: SendBufferFile.hh
 #	$(CC) $(CFLAGS) SendBufferFile.cc
 
@@ -26,7 +23,7 @@ marshalling_integer.obj: marshalling_integer.hh
 	$(CC) $(CFLAGS) marshalling_integer.cc
 
 
-objects = quicklz.obj IO.obj SendBuffer.obj SendBufferCompressed.obj marshalling_integer.obj
+objects = quicklz.obj IO.obj SendBuffer.obj marshalling_integer.obj
 libhome.lib: $(objects)
 	lib /out:$@ $(objects)
 
