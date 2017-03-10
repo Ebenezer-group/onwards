@@ -3,6 +3,7 @@
 #include "platforms.hh"
 
 #include "ErrorWords.hh"
+#include "IO.hh"
 #include "IOfile.hh"
 #include "marshalling_integer.hh"
 #include <stdint.h>
@@ -136,11 +137,24 @@ public:
     for(auto const& it:grp) it->Marshal(*this,sendType);
   }
 
-  bool Flush (::sockaddr* =nullptr,::socklen_t=0);
+  inline bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0)
+  {
+    int const bytes=sockWrite(sock_,buf,index,toAddr,toLen);
+    if(bytes==index){
+      Reset();
+      return true;
+    }
+
+    index-=bytes;
+    saved_size=index;
+    ::memmove(buf,buf+bytes,index);
+    return false;
+  }
 
 private:
   SendBuffer (SendBuffer const&);
   SendBuffer& operator= (SendBuffer);
 };
 }
+
 
