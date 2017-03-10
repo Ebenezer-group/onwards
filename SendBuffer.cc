@@ -1,8 +1,6 @@
 #include "SendBuffer.hh"
 
-using ::cmw::SendBuffer;
-
-void SendBuffer::Receive (void const* data,int size)
+void ::cmw::SendBuffer::Receive (void const* data,int size)
 {
   if(size>bufsize-index)
     throw failure("Size of marshalled data exceeds space available: ")
@@ -11,15 +9,7 @@ void SendBuffer::Receive (void const* data,int size)
   index+=size;
 }
 
-int SendBuffer::ReserveBytes (int num)
-{
-  if(num>bufsize-index)throw failure("SendBuffer::ReserveBytes");
-  auto copy=index;
-  index+=num;
-  return copy;
-}
-
-void SendBuffer::FillInSize (int32_t max)
+void ::cmw::SendBuffer::FillInSize (int32_t max)
 {
   int32_t marshalled_bytes=index-saved_size;
   if(marshalled_bytes>max){

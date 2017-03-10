@@ -85,15 +85,33 @@ public:
     Receive(cstr,slen());
   }
 
-  void Receive (::std::string const&);
-  void Receive (::std::string_view const&);
+  inline void Receive (::std::string const& s)
+  {
+    marshalling_integer slen(s.size());
+    slen.Marshal(*this);
+    Receive(s.data(),slen());
+  }
 
-  int GetIndex () {return index;}
-  int ReserveBytes (int);
-  void FillInSize (int32_t);
+  inline void Receive (::std::string_view const& s)
+  {
+    marshalling_integer slen(s.size());
+    slen.Marshal(*this);
+    Receive(s.data(),slen());
+  }
 
-  void Reset () {saved_size=index=0;}
-  void Rollback () {index=saved_size;}
+  inline int GetIndex () {return index;}
+  inline int ReserveBytes (int num)
+  {
+    if(num>bufsize-index)throw failure("SendBuffer::ReserveBytes");
+    auto copy=index;
+    index+=num;
+    return copy;
+  }
+
+  void FillInSize (int32_t max);
+
+  inline void Reset () {saved_size=index=0;}
+  inline void Rollback () {index=saved_size;}
 
   template <class T>
   void ReceiveBlock (T const& grp)
