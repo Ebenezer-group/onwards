@@ -9,14 +9,14 @@ Building
 There should be two makefiles here: one for BSD/Linux and one
 for Windows.  The BSD version is called "makefile" and the
 Windows version is called "makefile.windows".  If you're using
-Windows, you may want to rename makefile.windows to makefile.  
-If you're using a big-endian machine, add -DCMW_ENDIAN_BIG to 
+Windows, you may want to rename makefile.windows to makefile.
+If you're using a big-endian machine, add -DCMW_ENDIAN_BIG to
 the CXXFLAGS in the makefile.
 
 A library and two programs are built.  The programs are the
-middle and front tiers of the C++ Middleware Writer (CMW).  
-The middle tier is called the CMW Ambassador (CMWA).  The 
-front tier is called "genz" and is a command line interface.  
+middle and front tiers of the C++ Middleware Writer (CMW).
+The middle tier is called the CMW Ambassador (CMWA).  The
+front tier is called "genz" and is a command line interface.
 On Windows, only the library and front tier are built.
 
 
@@ -62,12 +62,12 @@ between the back and middle tier.  (We may have changed
 the protocol between these tiers and now older versions
 of the middle tier no longer work right.)  The thing to do
 in this case is to check our website for an announcement/
-email that you may have missed.  Probably you will have to 
-clone/download the new version of the repository and then 
+email that you may have missed.  Probably you will have to
+clone/download the new version of the repository and then
 reinstall in order to fix the problem.
 
-If you move/rename include files listed in your .req files, 
-you should also touch those files so the changes will be 
+If you move/rename include files listed in your .req files,
+you should also touch those files so the changes will be
 "noticed" by the CMWA.
 
 

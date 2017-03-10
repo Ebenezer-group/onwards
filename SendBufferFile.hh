@@ -1,7 +1,10 @@
 #pragma once
 
-#include "platforms.hh"
+#include "ErrorWords.hh"
+#include "IOfile.hh"
 #include "SendBufferHeap.hh"
+#include "platforms.hh"
+#include <string.h>
 
 namespace cmw {
 
@@ -12,9 +15,26 @@ class SendBufferFile : public SendBufferHeap
 public:
   file_type hndl;
 
-  SendBufferFile (int);
-  bool Flush ();
-  void ReceiveFile (int32_t fl_sz);
+  SendBufferFile (int size) : SendBufferHeap(size) {}
+
+  bool Flush ()
+  {
+    int const bytes=Write(hndl,buf,index);
+
+    if(bytes==index){
+      index=0;
+      return true;
+    }
+
+    index-=bytes;
+    ::memmove(buf,buf+bytes,index);
+    return false;
+  }
+
+  void ReceiveFile (int32_t)
+  {
+    throw failure("SendBufferFile::ReceiveFile not implemented");
+  }
 
   int getBufsize()
   {
