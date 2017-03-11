@@ -7,7 +7,7 @@
 #include"marshalling_integer.hh"
 
 namespace middle_messages_back{
-inline void Marshal (::cmw::SendBuffer& buf
+void Marshal (::cmw::SendBuffer& buf
          ,messageid_t const& az1
          ,::std::vector<cmw_account> const& az2
          ,int32_t max_length=10000){

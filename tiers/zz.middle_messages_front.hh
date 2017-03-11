@@ -28,7 +28,7 @@ void Marshal (::cmw::SendBuffer& buf
   }catch(...){buf.Rollback();throw;}
 }
 
-inline void Marshal (::cmw::SendBuffer& buf
+void Marshal (::cmw::SendBuffer& buf
          ,bool az1
          ,cmw::string_join const& az2
          ,int32_t max_length=cmw::udp_packet_max){
