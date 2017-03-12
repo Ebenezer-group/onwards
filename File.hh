@@ -1,17 +1,21 @@
 #pragma once
 
 #include "ErrorWords.hh"
+#include "SendBuffer.hh"
 #include <string>
 #include <string_view>
 #include <utility> // move
+#include <stdint.h>
 
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h> // close
 
+extern int32_t previous_updatedtime;
+extern int32_t current_updatedtime;
+
 namespace cmw {
-class SendBuffer;
 template <class R> class ReceiveBuffer;
 
 class File
@@ -39,9 +43,22 @@ public:
 
   ~File () {if(0!=fd)::close(fd);}
 
-  bool Marshal (SendBuffer& buf,bool=false) const;
+  bool Marshal (SendBuffer& buf,bool=false) const
+  {
+    struct stat sb;
+    if(::stat(name.c_str(),&sb)<0)throw failure("File::Marshal stat ")<<name;
+    if(sb.st_mtime>previous_updatedtime){
+      if((fd=::open(name.c_str(),O_RDONLY))<0)
+        throw failure("File::Marshal open ")<<name<<" "<<errno;
+      buf.Receive(name);
+      buf.ReceiveFile(fd,sb.st_size);
+      if(sb.st_mtime>current_updatedtime)current_updatedtime=sb.st_mtime;
+      return true;
+    }
+    return false;
+  }
 
   ::std::string const& Name () const {return name;}
 };
-
 }
+

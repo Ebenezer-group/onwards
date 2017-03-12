@@ -1,17 +1,16 @@
 #pragma once
 
-#include "platforms.hh"
-
 #include "ErrorWords.hh"
 #include "IO.hh"
 #include "IOfile.hh"
 #include "marshalling_integer.hh"
+#include "platforms.hh"
+#include <string>
+#include <string_view>
+#include <type_traits>
 #include <stdint.h>
 #include <stdio.h> // snprintf
-#include <string_view>
-#include <string>
 #include <string.h>
-#include <type_traits>
 
 #include <limits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8

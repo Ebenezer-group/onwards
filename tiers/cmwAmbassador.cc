@@ -21,14 +21,14 @@
 #include "udp_stuff.hh"
 #include "zz.middle_messages_front.hh"
 
-#include <assert.h>
+#include <memory> //unique_ptr
 #include <queue>
-#include <memory>
+#include <vector>
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h> //strtol
 #include <string.h>
-#include <vector>
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h> //sockaddr_in6,socklen_t
@@ -37,12 +37,12 @@
 #define CHECK_FIELD_NAME(fieldname)             \
   ::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl);     \
   if(::strcmp(fieldname,::strtok(lineBuf," "))) \
-    throw cmw::failure("Expected ")<<fieldname;
+    throw ::cmw::failure("Expected ")<<fieldname;
 
 class request_generator{
   // hand_written_marshalling_code
   char const* fname;
-  cmw::FILE_wrapper Fl;
+  ::cmw::FILE_wrapper Fl;
 
 public:
   explicit request_generator (char const* file):fname(file),Fl{file,"r"}{}
