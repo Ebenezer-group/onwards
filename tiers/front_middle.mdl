@@ -7,5 +7,5 @@ middle_messages_front
 }
 
 front_messages_middle
-  -out -max_length=cmw::udp_packet_max (cmw::marshalling_integer, const char*)
+  -out -max_length=cmw::udp_packet_max -no_inline (cmw::marshalling_integer, const char*)
 }
