@@ -38,7 +38,15 @@ public:
 
   SendBuffer (unsigned char* addr,int sz) : bufsize(sz),buf(addr) {}
 
-  void Receive (void const* data,int size);
+  void Receive (void const* data,int size)
+{
+  if(size>bufsize-index)
+    throw failure("Size of marshalled data exceeds space available: ")
+      <<bufsize<<" "<<saved_size;
+  ::memcpy(buf+index,data,size);
+  index+=size;
+}
+
 
   template<typename... T>
   void Receive_variadic (char const* format,T... t)
@@ -108,7 +116,15 @@ public:
     return copy;
   }
 
-  void FillInSize (int32_t max);
+  void FillInSize (int32_t max)
+{
+  int32_t marshalled_bytes=index-saved_size;
+  if(marshalled_bytes>max){
+    throw failure("Size of marshalled data exceeds max of: ")<<max;
+  }
+  ::memcpy(buf+saved_size,&marshalled_bytes,sizeof(marshalled_bytes));
+  saved_size=index;
+}
 
   inline void Reset () {saved_size=index=0;}
   inline void Rollback () {index=saved_size;}

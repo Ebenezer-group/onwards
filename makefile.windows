@@ -13,11 +13,7 @@ quicklz.obj: quicklz.h
 marshalling_integer.obj: marshalling_integer.hh
 	$(CC) $(CFLAGS) marshalling_integer.cc
 
-SendBuffer.obj: SendBuffer.hh
-	$(CC) $(CFLAGS) SendBuffer.cc
-
-
-objects = quicklz.obj marshalling_integer.obj SendBuffer.obj
+objects = quicklz.obj marshalling_integer.obj
 libhome.lib: $(objects)
 	lib /out:$@ $(objects)
 
