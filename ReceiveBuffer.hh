@@ -2,7 +2,7 @@
 
 #include "ErrorWords.hh"
 #include "Formatting.hh"
-#include "IOfile.hh"
+#include "IO.hh"
 #include "marshalling_integer.hh"
 #include <stdint.h>
 #include <string>

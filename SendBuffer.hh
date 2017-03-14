@@ -2,7 +2,6 @@
 
 #include "ErrorWords.hh"
 #include "IO.hh"
-#include "IOfile.hh"
 #include "marshalling_integer.hh"
 #include "platforms.hh"
 #include <string>
