@@ -22,7 +22,6 @@
 #include "zz.middle_messages_front.hh"
 
 #include <memory> //unique_ptr
-#include <queue>
 #include <vector>
 #include <assert.h>
 #include <stdint.h>
@@ -136,7 +135,7 @@ class cmwAmbassador{
 
   SendBufferCompressed cmwSendbuf;
   SendBufferStack<> localsendbuf;
-  ::std::queue<::std::unique_ptr<cmw_request>> pendingTransactions;
+  ::std::vector<::std::unique_ptr<cmw_request>> pendingTransactions;
   ::std::vector<cmw_account> accounts;
   int loginPause;
   int unrepliedKeepalives=0;
@@ -186,7 +185,7 @@ void cmwAmbassador::reset (char const* explanation){
       localsendbuf.Flush((::sockaddr*)&request.front_tier
                          ,sizeof(request.front_tier));
     }
-    pendingTransactions.pop();
+    pendingTransactions.erase(::std::begin(pendingTransactions));
   }
   localsendbuf.Reset();
   close_socket(cmwBuf.sock_);
@@ -241,7 +240,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):
         if(++unrepliedKeepalives>1)throw failure("No reply from CMW");
         middle_messages_back::Marshal(cmwSendbuf,Keepalive);
         fds[0].events|=POLLOUT;
-        pendingTransactions.push(nullptr);
+        pendingTransactions.push_back(nullptr);
       }catch(::std::exception const& ex){
         syslog_wrapper(LOG_ERR,"Keepalive: %s",ex.what());
         reset("Keepalive problem");
@@ -266,7 +265,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):
               localsendbuf.Flush((::sockaddr*)&request.front_tier
                                  ,sizeof(request.front_tier));
             }else --unrepliedKeepalives;
-            pendingTransactions.pop();
+            pendingTransactions.erase(::std::begin(pendingTransactions));
           }while(cmwBuf.NextMessage());
         }
       }catch(connection_lost const& ex){
@@ -282,7 +281,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):
           localsendbuf.Flush((::sockaddr*)&request.front_tier
                              ,sizeof(request.front_tier));
         }else --unrepliedKeepalives;
-        pendingTransactions.pop();
+        pendingTransactions.erase(::std::begin(pendingTransactions));
       }
     }
 
@@ -301,7 +300,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):
                                       ,request_generator(request->filename),500000);
         request->latest_update=current_updatedtime;
         request->front_tier=front;
-        pendingTransactions.push(static_cast<::std::unique_ptr<cmw_request>&&>(request));
+        pendingTransactions.push_back(static_cast<::std::unique_ptr<cmw_request>&&>(request));
       }catch(::std::exception const& ex){
         syslog_wrapper(LOG_ERR,"Mediate request: %s",ex.what());
         if(gotAddress){
