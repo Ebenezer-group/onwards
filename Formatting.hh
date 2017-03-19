@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdint.h>
-#include <string.h>  // memcpy
+#include<stdint.h>
+#include<string.h> //memcpy
 
 class SameFormat
 {

@@ -1,16 +1,16 @@
 #pragma once
 
-#include "ErrorWords.hh"
-#include "SendBuffer.hh"
-#include <string>
-#include <string_view>
-#include <utility> // move
-#include <stdint.h>
+#include"ErrorWords.hh"
+#include"SendBuffer.hh"
+#include<string>
+#include<string_view>
+#include<utility> //move
+#include<stdint.h>
 
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h> // close
+#include<fcntl.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<unistd.h> //close
 
 extern int32_t previous_updatedtime;
 extern int32_t current_updatedtime;

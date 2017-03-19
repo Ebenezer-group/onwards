@@ -1,5 +1,5 @@
-#include "marshalling_integer.hh"
-#include "SendBuffer.hh"
+#include"marshalling_integer.hh"
+#include"SendBuffer.hh"
 
 #if 0
 void cmw::marshalling_integer::CalculateMarshallingSize (Counter& cntr) const

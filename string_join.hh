@@ -1,11 +1,10 @@
 #pragma once
 
-#include "marshalling_integer.hh"
-#include "SendBuffer.hh"
-#include <string_view>
+#include"marshalling_integer.hh"
+#include"SendBuffer.hh"
+#include<string_view>
 
 namespace cmw {
-
 class string_join
 {
   // hand_written_marshalling_code
@@ -24,5 +23,4 @@ class string_join
     buf.Receive(s2.data(),s2.length());
   }
 };
-
 }

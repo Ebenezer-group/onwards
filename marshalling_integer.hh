@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdlib.h> // strtol
+#include<stdint.h>
+#include<stdlib.h> //strtol
 
 namespace cmw {
 class SendBuffer;
