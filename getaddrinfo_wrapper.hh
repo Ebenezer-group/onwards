@@ -1,12 +1,12 @@
 #pragma once
 
-#include "ErrorWords.hh"
-#include "platforms.hh"
+#include"ErrorWords.hh"
+#include"platforms.hh"
 
 #if !defined(CMW_WINDOWS)
-#include <netdb.h>
-#include <sys/socket.h>
-#include <sys/types.h>
+#include<netdb.h>
+#include<sys/socket.h>
+#include<sys/types.h>
 #endif
 
 namespace cmw {

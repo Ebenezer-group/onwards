@@ -1,24 +1,24 @@
 #pragma once
 
-#include "ErrorWords.hh"
-#include "IO.hh"
-#include "marshalling_integer.hh"
-#include "platforms.hh"
-#include <string>
-#include <string_view>
-#include <type_traits>
-#include <stdint.h>
-#include <stdio.h> // snprintf
-#include <string.h>
+#include"ErrorWords.hh"
+#include"IO.hh"
+#include"marshalling_integer.hh"
+#include"platforms.hh"
+#include<string>
+#include<string_view>
+#include<type_traits>
+#include<stdint.h>
+#include<stdio.h> // snprintf
+#include<string.h>
 
-#include <limits>
+#include<limits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8
               ,"Only 8 bit char supported");
 static_assert(::std::numeric_limits<float>::is_iec559
               ,"Only IEEE 754 supported");
 #ifndef CMW_WINDOWS
-#include <sys/types.h>
-#include <sys/socket.h>
+#include<sys/types.h>
+#include<sys/socket.h>
 #endif
 
 namespace cmw {

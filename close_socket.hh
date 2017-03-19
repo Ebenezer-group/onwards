@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ErrorWords.hh"
-#include "platforms.hh"
+#include"ErrorWords.hh"
+#include"platforms.hh"
 #if !defined(CMW_WINDOWS)
-#include <unistd.h> // close
+#include<unistd.h> //close
 #endif
 
 namespace cmw {
@@ -16,7 +16,7 @@ inline void close_socket (sock_type sock)
   if(::close(sock)==-1){
     auto errval=GetError();
     if(EINTR==errval){
-      if(close(sock)==0){ return; }
+      if(close(sock)==0){return;}
     }
     throw failure("close_socket failed ")<<errval;
 #endif

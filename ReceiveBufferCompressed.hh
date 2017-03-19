@@ -1,11 +1,11 @@
 #pragma once
 
-#include "platforms.hh"
-#include "qlz_wrapper.hh"
-#include "ErrorWords.hh"
-#include "IO.hh"
-#include "ReceiveBuffer.hh"
-#include <string.h>
+#include"ErrorWords.hh"
+#include"IO.hh"
+#include"platforms.hh"
+#include"qlz_wrapper.hh"
+#include"ReceiveBuffer.hh"
+#include<string.h>
 
 namespace cmw {
 template <class R>

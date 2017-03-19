@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ErrorWords.hh"
-#include "IO.hh"
-#include "SendBufferHeap.hh"
-#include "platforms.hh"
-#include <string.h>
+#include"ErrorWords.hh"
+#include"IO.hh"
+#include"platforms.hh"
+#include"SendBufferHeap.hh"
+#include<string.h>
 
 namespace cmw {
 

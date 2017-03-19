@@ -1,7 +1,7 @@
-#include "platforms.hh"
+#include"platforms.hh"
 
 #ifndef CMW_WINDOWS
-#include <unistd.h>
+#include<unistd.h>
 #endif
 
 inline void sleep_wrapper(int seconds)

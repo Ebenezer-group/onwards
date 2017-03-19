@@ -1,15 +1,14 @@
-#include "platforms.hh"
-
-#include "ErrorWords.hh"
-#include "getaddrinfo_wrapper.hh"
-#include "poll_wrapper.hh"
-#include "ReceiveBufferStack.hh"
-#include "SendBufferStack.hh"
-#include "syslog_wrapper.hh"
-#include "zz.front_messages_middle.hh"
-#include <string_view>
-#include <stdio.h>
-#include <stdlib.h> // exit
+#include"ErrorWords.hh"
+#include"getaddrinfo_wrapper.hh"
+#include"platforms.hh"
+#include"poll_wrapper.hh"
+#include"ReceiveBufferStack.hh"
+#include"SendBufferStack.hh"
+#include"syslog_wrapper.hh"
+#include"zz.front_messages_middle.hh"
+#include<string_view>
+#include<stdio.h>
+#include<stdlib.h> //exit
 
 using namespace ::cmw;
 

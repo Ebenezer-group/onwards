@@ -1,37 +1,37 @@
-#include "account_info.hh"
-#include "close_socket.hh"
-#include "connect_wrapper.hh"
-#include "empty_container.hh"
-#include "ErrorWords.hh"
-#include "File.hh"
-#include "FILE_wrapper.hh"
-#include "IO.hh"
-#include "marshalling_integer.hh"
-#include "message_ids.hh"
-#include "poll_wrapper.hh"
-#include "ReceiveBuffer.hh"
-#include "ReceiveBufferCompressed.hh"
-#include "ReceiveBufferStack.hh"
-#include "setDirectory.hh"
-#include "sleep_wrapper.hh"
-#include "string_join.hh"
-#include "syslog_wrapper.hh"
-#include "SendBufferCompressed.hh"
-#include "SendBufferStack.hh"
-#include "udp_stuff.hh"
-#include "zz.middle_messages_front.hh"
+#include"account_info.hh"
+#include"close_socket.hh"
+#include"connect_wrapper.hh"
+#include"empty_container.hh"
+#include"ErrorWords.hh"
+#include"File.hh"
+#include"FILE_wrapper.hh"
+#include"IO.hh"
+#include"marshalling_integer.hh"
+#include"message_ids.hh"
+#include"poll_wrapper.hh"
+#include"ReceiveBuffer.hh"
+#include"ReceiveBufferCompressed.hh"
+#include"ReceiveBufferStack.hh"
+#include"setDirectory.hh"
+#include"sleep_wrapper.hh"
+#include"string_join.hh"
+#include"syslog_wrapper.hh"
+#include"SendBufferCompressed.hh"
+#include"SendBufferStack.hh"
+#include"udp_stuff.hh"
+#include"zz.middle_messages_front.hh"
 
-#include <memory> //unique_ptr
-#include <vector>
-#include <assert.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h> //strtol
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <netinet/in.h> //sockaddr_in6,socklen_t
-#include <unistd.h> //pread
+#include<memory> //unique_ptr
+#include<vector>
+#include<assert.h>
+#include<stdint.h>
+#include<stdio.h>
+#include<stdlib.h> //strtol
+#include<string.h>
+#include<errno.h>
+#include<fcntl.h>
+#include<netinet/in.h> //sockaddr_in6,socklen_t
+#include<unistd.h> //pread
 
 #define CHECK_FIELD_NAME(fieldname)             \
   ::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl);     \
@@ -135,8 +135,8 @@ class cmwAmbassador{
 
   SendBufferCompressed cmwSendbuf;
   SendBufferStack<> localsendbuf;
-  ::std::vector<::std::unique_ptr<cmw_request>> pendingTransactions;
   ::std::vector<cmw_account> accounts;
+  ::std::vector<::std::unique_ptr<cmw_request>> pendingTransactions;
   int loginPause;
   int unrepliedKeepalives=0;
   ::pollfd fds[2];
@@ -153,7 +153,7 @@ void cmwAmbassador::login (){
   for(;;){
     try{
       fds[0].fd=cmwSendbuf.sock_=cmwBuf.sock_=
-                          connect_wrapper("www.webEbenezer.net","56789");
+                    connect_wrapper("174.20.19.129","56789");
       break;
     }catch(::std::exception const& ex){
       ::printf("%s\n",ex.what());

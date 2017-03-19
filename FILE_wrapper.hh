@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ErrorWords.hh"
-#include "platforms.hh"
-#include <stdio.h>
+#include"ErrorWords.hh"
+#include"platforms.hh"
+#include<stdio.h>
 
 namespace cmw {
 
