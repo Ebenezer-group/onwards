@@ -1,9 +1,6 @@
 
-Remember to run
-
-make
-
-in the onwards directory prior to running make in this directory.
+Remember to run make in the onwards directory prior to running make
+in this directory.
 
 And start receive_example prior to running send_example.
 

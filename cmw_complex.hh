@@ -1,6 +1,6 @@
 #pragma once
 
-#include <complex>
+#include<complex>
 
 namespace cmw {
 template <class T,class B>
@@ -20,21 +20,21 @@ template <class T,class B>
 }
 
 #ifdef CMW_VALARRAY_MARSHALLING
-#include <valarray>
+#include<valarray>
 template <class B, class T>
 void valarrayMarshal (B& buf,::std::valarray<T> const& valarr)
 {
-  int32_t headCount=valarr.size();
-  buf.Receive(headCount);
-  buf->Receive(&valarr[0],headCount*sizeof(T));
+  int32_t count=valarr.size();
+  buf.Receive(count);
+  buf->Receive(&valarr[0],count*sizeof(T));
 }
 
 template <class B,class T>
 void valarrayReceive (B& buf,::std::valarray<T>& valarr)
 {
-  int32_t headCount=buf.template Give<uint32_t>();
-  valarr.resize(headCount);
-  buf.Give(&valarr,headCount*sizeof(T));
+  int32_t count=buf.template Give<uint32_t>();
+  valarr.resize(count);
+  buf.Give(&valarr,count*sizeof(T));
 }
 #endif
 }

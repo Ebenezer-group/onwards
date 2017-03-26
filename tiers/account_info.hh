@@ -1,7 +1,7 @@
 #pragma once
 
-#include "marshalling_integer.hh"
-#include <string>
+#include"marshalling_integer.hh"
+#include<string>
 
 namespace cmw {
 class SendBuffer;
