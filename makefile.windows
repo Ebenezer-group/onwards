@@ -18,7 +18,7 @@ libhome.lib: $(objects)
 
 tiers\genz.exe: tiers\genz.cc .\libhome.lib
 	del tiers\string_join.hh tiers\udp_stuff.hh
-	$(CC) $(CFLAGS) -I. tiers\genz.cc /link .\libhome.lib  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+	$(CC) -Fe:$@ $(CFLAGS) -I. tiers\genz.cc /link .\libhome.lib  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
 clean:
 	del *.obj libhome.lib tiers\genz.exe
