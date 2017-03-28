@@ -12,8 +12,7 @@
 
 using namespace ::cmw;
 
-int main (int argc,char** argv)
-{
+int main (int argc,char** argv){
   try{
     if(argc<3 || argc>5)
       throw failure("Usage: genz account-number .req-file-path [node] [port]");

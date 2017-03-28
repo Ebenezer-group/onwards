@@ -36,25 +36,19 @@ inline int sockRead (sock_type sock,char* data,int len
 inline DWORD Write (HANDLE hndl,void const* data,int len)
 {
   DWORD bytesWritten=0;
-  if(!WriteFile(hndl,static_cast<char const*>(data),len
-                ,&bytesWritten,nullptr)){
+  if(!WriteFile(hndl,static_cast<char const*>(data),len,&bytesWritten,nullptr))
     throw failure("Write--WriteFile ")<<GetLastError();
-  }
   return bytesWritten;
 }
 
 inline DWORD Read (HANDLE hndl,void* data,int len)
 {
   DWORD bytesRead=0;
-  if (!ReadFile(hndl,static_cast<char*>(data),len
-                ,&bytesRead,nullptr)){
+  if (!ReadFile(hndl,static_cast<char*>(data),len,&bytesRead,nullptr))
     throw failure("Read--ReadFile")<<GetLastError();
-  }
   return bytesRead;
 }
-
 #else
-
 inline int Write (int fd,void const* data,int len)
 {
   int rc=::write(fd,data,len);

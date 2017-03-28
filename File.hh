@@ -29,8 +29,7 @@ public:
   File (File&& mv) noexcept :name(::std::move(mv.name)){} // No need to copy fd.
 
   template <class R>
-  explicit File (ReceiveBuffer<R>& buf):name(buf.GiveString_view())
-  {
+  explicit File (ReceiveBuffer<R>& buf):name(buf.GiveString_view()){
     fd=::open(name.c_str(),O_WRONLY|O_CREAT|O_TRUNC
               ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     if(fd<0)throw failure("File::File open ")<<name<<" "<<errno;
@@ -43,8 +42,7 @@ public:
 
   ~File () {if(0!=fd)::close(fd);}
 
-  bool Marshal (SendBuffer& buf,bool=false) const
-  {
+  bool Marshal (SendBuffer& buf,bool=false) const{
     struct stat sb;
     if(::stat(name.c_str(),&sb)<0)throw failure("File::Marshal stat ")<<name;
     if(sb.st_mtime>previous_updatedtime){
@@ -61,4 +59,3 @@ public:
   ::std::string const& Name () const {return name;}
 };
 }
-

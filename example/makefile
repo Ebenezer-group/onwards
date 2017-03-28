@@ -14,4 +14,3 @@ receive_example: receive_example.cc
 
 clean:
 	rm -f $(TARGETS)
-
