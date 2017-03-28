@@ -1,29 +1,29 @@
-
 CC=cl
-CFLAGS= -std:c++latest -c -EHsc -O2 -nologo
+CFLAGS= -std:c++latest -EHsc -O2 -nologo
 
-all: libhome.lib tiers/genz
+all: libhome.lib tiers\genz.exe
 
 .c.obj:
 	$(CC) $(CFLAGS) -c $*.c -o $*.obj
 
 quicklz.obj: quicklz.h
-	$(CC) $(CFLAGS) quicklz.c
+	$(CC) $(CFLAGS) -c quicklz.c
 
 marshalling_integer.obj: marshalling_integer.hh
-	$(CC) $(CFLAGS) marshalling_integer.cc
+	$(CC) $(CFLAGS) -c marshalling_integer.cc
 
 objects = quicklz.obj marshalling_integer.obj
 libhome.lib: $(objects)
 	lib /out:$@ $(objects)
 
-tiers/genz: tiers/genz.cc libhome.lib
-	del string_join.hh udp_stuff.hh
-	$(CC) $(CFLAGS) tiers/genz.cc /link .\libhome.lib  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+tiers\genz.exe: tiers\genz.cc .\libhome.lib
+	del tiers\string_join.hh tiers\udp_stuff.hh
+	$(CC) $(CFLAGS) -I. tiers\genz.cc /link .\libhome.lib  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
 clean:
-	del *.obj libhome.lib tiers/genz.exe
+	del *.obj libhome.lib tiers\genz.exe
 
 install:
-	copy *.exe  \Users\Store\bin\
+	copy libhome.lib     \Users\Store\lib\
+	copy tiers\genz.exe  \Users\Store\bin\
 
