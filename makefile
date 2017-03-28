@@ -6,7 +6,9 @@ CXX=g++7
 
 LIBS=-L./ -L/usr/lib
 
-TIERS:= tiers/cmwAmbassador tiers/genz
+MIDDLE:= tiers/cmwAmbassador
+FRONT:= tiers/genz
+TIERS:= $(MIDDLE) $(FRONT)
 TARGETS:= libhome.a $(TIERS)
 all: $(TARGETS)
 
@@ -17,11 +19,11 @@ libhome.a: $(objects)
 #zz.middle_messages_back.hh: account_info.hh remote.mdl cmw.req
 #	genz 2 /usr/home/brian/onwards/tiers/cmw.req
 
-tiers/cmwAmbassador: tiers/cmwAmbassador.cc libhome.a
+$(MIDDLE): $(MIDDLE).cc libhome.a
 	$(CXX) -o $@ $(CXXFLAGS) -I. $@.cc libhome.a
 	size $@
 
-tiers/genz: tiers/genz.cc libhome.a
+$(FRONT): $(FRONT).cc libhome.a
 	$(CXX) -o $@ $(CXXFLAGS) -I. $@.cc libhome.a
 	size $@
 

@@ -2,7 +2,7 @@
 CC=cl
 CFLAGS= -std:c++latest -c -EHsc -O2 -nologo
 
-all: libhome.lib
+all: libhome.lib tiers/genz
 
 .c.obj:
 	$(CC) $(CFLAGS) -c $*.c -o $*.obj
@@ -17,8 +17,13 @@ objects = quicklz.obj marshalling_integer.obj
 libhome.lib: $(objects)
 	lib /out:$@ $(objects)
 
+tiers/genz: tiers/genz.cc libhome.lib
+	del string_join.hh udp_stuff.hh
+	$(CC) $(CFLAGS) tiers/genz.cc /link .\libhome.lib  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+
 clean:
-	del *.obj libhome.lib
+	del *.obj libhome.lib tiers/genz.exe
 
 install:
 	copy *.exe  \Users\Store\bin\
+
