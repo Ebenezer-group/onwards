@@ -1,8 +1,17 @@
-
-Remember to run make in the onwards directory prior to running make
-in this directory.
-
-And start receive_example prior to running send_example.
-
 These example programs don't require a C++ Middleware Writer
 account in order to run them.
+
+To build the examples run
+
+make example
+
+from the onwards directory.  Or
+
+make example -C ..
+
+from the example subdirectory.
+
+It helps to have two command prompts available to run the
+examples.  Start the receive_example program prior to running
+send_example.
+

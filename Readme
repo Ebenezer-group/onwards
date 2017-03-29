@@ -1,17 +1,19 @@
+The C++ Middleware Writer (CMW) and the software found in 
+this repository provide support for messaging and serialization.
 
 License
-Feel free to use the software in your projects.  However,
-two of the files, quicklz.h and quicklz.c, are from another
-developer and should only be used in conjunction with the rest
-of the software here.  See http://quicklz.com for more info.
+The software is under the BSD 2-clause license.  Two of the 
+files, quicklz.h and quicklz.c, are from another developer 
+and should only be used in conjunction with the rest of 
+the software here.  See http://quicklz.com for more info.
 
 Building
-There should be two makefiles here: one for BSD/Linux and one
-for Windows.  The BSD version is called "makefile" and the
-Windows version is called "makefile.windows".  If you're using
-Windows, you may want to rename makefile.windows to makefile.
-If you're using a big-endian machine, add -DCMW_ENDIAN_BIG to
-the CXXFLAGS in the makefile.
+There are two makefiles here: one for BSD/Linux and one for 
+Windows.  The BSD version is called "makefile" and the Windows 
+version is called "makefile.windows".  If you're using Windows, 
+you may want to rename makefile.windows to makefile.  If you're 
+using a big-endian machine, add -DCMW_ENDIAN_BIG to the 
+CXXFLAGS in the makefile.
 
 A library and two programs are built.  The programs are the
 middle and front tiers of the C++ Middleware Writer (CMW).
@@ -21,10 +23,10 @@ On Windows, only the library and front tier are built.
 
 
 Accounts
-An account is needed to use the C++ Middleware Writer.
-Before running the programs, you have to get an account
-and modify your cmwAmbassador.cfg file to include your
-account number(s) and password(s).
+An account is needed to use the CMW.  Before running the 
+programs, you have to get an account and modify your 
+cmwAmbassador.cfg file to include your account number(s) 
+and password(s).
 
 
 Running the CMW Ambassador (after installing):
@@ -72,4 +74,3 @@ you should also touch those files so the changes will be
 
 
 Thank you for using the software.
-

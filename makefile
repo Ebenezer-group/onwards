@@ -1,4 +1,4 @@
-CFLAGS=-Os -Wshadow -Wundef -W -Wall -Wextra
+CFLAGS=-Os -Wundef -W -Wall -Wextra
 CXXFLAGS=-std=c++17 $(CFLAGS) -Wreorder
 
 CXX=g++7
@@ -27,8 +27,17 @@ $(FRONT): $(FRONT).cc libhome.a
 	$(CXX) -o $@ $(CXXFLAGS) -I. $@.cc libhome.a
 	size $@
 
+EXAMPLES:= example/send_example example/receive_example
+example: $(EXAMPLES)
+
+example/send_example: example/send_example.cc libhome.a
+	$(CXX) -o $@ $(CXXFLAGS) -I. $@.cc libhome.a
+
+example/receive_example: example/receive_example.cc libhome.a
+	$(CXX) -o $@ $(CXXFLAGS) -I. $@.cc libhome.a
+
 clean:
-	rm -f $(objects) $(TARGETS)
+	rm -f $(objects) $(TARGETS) $(EXAMPLES)
 
 INSTALL_DIR=/usr/local
 includes=close_socket.hh connect_wrapper.hh getaddrinfo_wrapper.hh tcp_server.hh udp_stuff.hh ErrorWords.hh File.hh IO*.hh marshalling_integer.hh poll_wrapper.hh SendBuffer*.hh Formatting.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh empty_container.hh quicklz.h
@@ -41,3 +50,5 @@ install:
 uninstall:
 	cd $(INSTALL_DIR)/include && rm -f $(includes)
 	rm -f $(INSTALL_DIR)/lib/libhome.a
+
+
