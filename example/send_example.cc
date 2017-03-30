@@ -14,6 +14,7 @@
 //   }
 
 #include "getaddrinfo_wrapper.hh"
+#include "platforms.hh"
 #include "SendBufferStack.hh"
 #include "zz.send_example_messages.hh"
 #include <array>
@@ -28,6 +29,7 @@ using namespace cmw;
 int main()
 {
   try{
+    windows_start();
     SendBufferStack<> buffer;
     //getaddrinfo_wrapper res("127.0.0.1", "12345", SOCK_DGRAM);
     getaddrinfo_wrapper res("::1", "12345", SOCK_DGRAM);

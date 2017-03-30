@@ -2,6 +2,7 @@
 //   The Middle code is the same as in the send example.
 //
 
+#include "platforms.hh"
 #include "ReceiveBufferStack.hh"
 #include "udp_stuff.hh"
 #include "zz.receive_example_messages.hh"
@@ -15,6 +16,7 @@
 int main()
 {
   try {
+    windows_start();
     auto sd = cmw::udp_server("12345");
 
     for (;;) {
