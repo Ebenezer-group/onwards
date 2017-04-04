@@ -1,6 +1,7 @@
 CFLAGS=-Os -Wundef -W -Wall -Wextra
 CXXFLAGS=-std=c++17 $(CFLAGS) -Wreorder
 
+CC=gcc7
 CXX=g++7
 #CXX=clang++ -stdlib=libc++
 
