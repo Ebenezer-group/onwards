@@ -52,4 +52,3 @@ uninstall:
 	cd $(INSTALL_DIR)/include && rm -f $(includes)
 	rm -f $(INSTALL_DIR)/lib/libhome.a
 
-

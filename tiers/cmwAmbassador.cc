@@ -13,7 +13,6 @@
 #include"ReceiveBufferCompressed.hh"
 #include"ReceiveBufferStack.hh"
 #include"setDirectory.hh"
-#include"sleep_wrapper.hh"
 #include"string_join.hh"
 #include"syslog_wrapper.hh"
 #include"SendBufferCompressed.hh"
@@ -29,7 +28,6 @@
 #include<stdlib.h> //strtol
 #include<string.h>
 #include<errno.h>
-#include<fcntl.h>
 #include<netinet/in.h> //sockaddr_in6,socklen_t
 #include<unistd.h> //pread
 
@@ -109,7 +107,7 @@ struct cmw_request{
     fd=::open(lastrunFile,O_RDWR);
     previous_updatedtime=0;
     if(fd>=0){
-      if(::pread(fd,&previous_updatedtime,sizeof(previous_updatedtime),0)<0)
+      if(::pread(fd,&previous_updatedtime,sizeof(previous_updatedtime),0)==-1)
         throw failure("pread ")<<errno;
     }else{
       fd=::open(lastrunFile,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
@@ -157,7 +155,7 @@ void cmwAmbassador::login (){
       break;
     }catch(::std::exception const& ex){
       ::printf("%s\n",ex.what());
-      sleep_wrapper(loginPause);
+      poll_wrapper(nullptr,0,loginPause);
     }
   }
 
@@ -173,8 +171,7 @@ void cmwAmbassador::login (){
   while(!cmwBuf.GotPacket());
   if(!cmwBuf.GiveBool())
     throw failure("Login failed: ")<<cmwBuf.GiveString_view();
-  if(::fcntl(cmwBuf.sock_,F_SETFL,O_NONBLOCK)<0)
-    throw failure("fcntl:")<<errno;
+  set_nonblocking(cmwBuf.sock_);
 }
 
 void cmwAmbassador::reset (char const* explanation){
@@ -212,23 +209,26 @@ cmwAmbassador::cmwAmbassador (char const* configfile):
   FILE_wrapper Fl(configfile,"r");
   while(::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl)){
     char const* token=::strtok(lineBuf," ");
-    if(!::strcmp("Account-Number",token)){
+    if(!::strcmp("Account-number",token)){
       auto num=::strtol(::strtok(nullptr,"\n "),0,10);
       CHECK_FIELD_NAME("Password");
       accounts.emplace_back(num,::strtok(nullptr,"\n "));
     }else{
       if(accounts.empty())
-        throw failure("At least one account number is required.");
-      if(!::strcmp("UDP-Port-Number",token))break;
-      else throw failure("UDP-Port-Number is required.");
+        throw failure("An account number is required.");
+      if(!::strcmp("UDP-port-number",token))break;
+      else throw failure("UDP-port-number is required.");
     }
   }
   fds[1].fd=localsendbuf.sock_=udp_server(::strtok(nullptr,"\n "));
+#ifdef __linux__
+  set_nonblocking(fds[1].fd);
+#endif
 
-  CHECK_FIELD_NAME("Seconds-to-Sleep-Between-Login-Attempts");
+  CHECK_FIELD_NAME("Login-attempts-interval-in-milliseconds");
   loginPause=::strtol(::strtok(nullptr,"\n "),0,10);
 
-  CHECK_FIELD_NAME("Keepalive-Interval-in-Milliseconds");
+  CHECK_FIELD_NAME("Keepalive-interval-in-milliseconds");
   int keepaliveInterval=::strtol(::strtok(nullptr,"\n "),0,10);
 
   fds[0].events=fds[1].events=POLLIN;

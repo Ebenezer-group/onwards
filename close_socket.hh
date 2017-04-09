@@ -3,6 +3,7 @@
 #include"ErrorWords.hh"
 #include"platforms.hh"
 #if !defined(CMW_WINDOWS)
+#include<fcntl.h>
 #include<unistd.h> //close
 #endif
 
@@ -21,5 +22,12 @@ inline void close_socket (sock_type sock)
     throw failure("close_socket failed ")<<errval;
 #endif
   }
+}
+
+inline void set_nonblocking (sock_type sock)
+{
+#ifndef CMW_WINDOWS
+  if(::fcntl(sock,F_SETFL,O_NONBLOCK)==-1)throw failure("set_nonb:")<<errno;
+#endif
 }
 }

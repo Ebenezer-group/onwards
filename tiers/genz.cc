@@ -1,3 +1,4 @@
+#include"close_socket.hh"
 #include"ErrorWords.hh"
 #include"getaddrinfo_wrapper.hh"
 #include"platforms.hh"
@@ -25,7 +26,7 @@ int main (int argc,char** argv){
     for(;rp!=nullptr;rp=rp->ai_next){
       if((sendbuf.sock_=::socket(rp->ai_family,rp->ai_socktype,0))!=-1)break;
     }
-    if(-1==sendbuf.sock_)throw failure("socket call(s) failed ")<<GetError();
+    if(-1==sendbuf.sock_)throw failure("socket call(s) ")<<GetError();
 
     ::pollfd pfd{sendbuf.sock_,POLLIN,0};
     int waitMillisecs=16000;
@@ -33,6 +34,9 @@ int main (int argc,char** argv){
       front_messages_middle::Marshal(sendbuf,marshalling_integer(argv[1])
                                      ,argv[2]);
       sendbuf.Flush(rp->ai_addr,rp->ai_addrlen);
+#ifdef __linux__
+      set_nonblocking(pfd.fd);
+#endif
       if(poll_wrapper(&pfd,1,waitMillisecs)>0){
         ReceiveBufferStack<SameFormat> buf(pfd.fd);
         if(!buf.GiveBool())throw failure("CMWA: ")<<buf.GiveString_view();
