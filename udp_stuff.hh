@@ -19,6 +19,6 @@ inline sock_type udp_server (char const* port)
     close_socket(sock);
     throw failure("udp_server ")<<GetError();
   }
-  throw failure("udp_server failed");
+  throw failure("udp_server");
 }
 }

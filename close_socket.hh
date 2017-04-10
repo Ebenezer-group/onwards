@@ -12,14 +12,14 @@ inline void close_socket (sock_type sock)
 {
 #ifdef CMW_WINDOWS
   if(::closesocket(sock)==SOCKET_ERROR){
-    throw failure("close_socket failed ")<<GetError();
+    throw failure("close_socket")<<GetError();
 #else
   if(::close(sock)==-1){
     auto errval=GetError();
     if(EINTR==errval){
       if(close(sock)==0){return;}
     }
-    throw failure("close_socket failed ")<<errval;
+    throw failure("close_socket")<<errval;
 #endif
   }
 }

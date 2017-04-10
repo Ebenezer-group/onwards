@@ -19,6 +19,6 @@ inline sock_type connect_wrapper(char const* node,char const* port)
     close_socket(sock);
     throw f;
   }
-  throw failure("connect_wrapper failed");
+  throw failure("connect_wrapper");
 }
 }

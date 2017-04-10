@@ -64,12 +64,12 @@ public:
       if(::cmw::File{::strtok(nullptr,"\n ")}.Marshal(buf))++updatedFiles;
     }
 
-    if(::strcmp("Middle-File",token))
+    if(::strcmp("Middle-file",token))
       throw ::cmw::failure("A middle file is required.");
     if(::cmw::File{::strtok(nullptr,"\n ")}.Marshal(buf))++updatedFiles;
     buf.Receive(index,updatedFiles);
 
-    CHECK_FIELD_NAME("Message-Lengths");
+    CHECK_FIELD_NAME("Message-lengths");
     token=::strtok(nullptr,"\n ");
     int8_t msgLength;
     if(!::strcmp("variable",token))msgLength=1;
@@ -170,7 +170,7 @@ void cmwAmbassador::login (){
 
   while(!cmwBuf.GotPacket());
   if(!cmwBuf.GiveBool())
-    throw failure("Login failed: ")<<cmwBuf.GiveString_view();
+    throw failure("Login:")<<cmwBuf.GiveString_view();
   set_nonblocking(cmwBuf.sock_);
 }
 

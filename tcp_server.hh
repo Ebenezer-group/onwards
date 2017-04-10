@@ -34,7 +34,7 @@ inline auto tcp_server (char const* port)
 
     return sock;
   }
-  throw failure("tcp_server failed");
+  throw failure("tcp_server");
 }
 
 inline auto accept_wrapper(sock_type sock)
@@ -42,11 +42,7 @@ inline auto accept_wrapper(sock_type sock)
   ::sockaddr amb_addr;
   ::socklen_t amblen=sizeof(amb_addr);
   sock_type nusock=::accept(sock,&amb_addr,&amblen);
-  if(nusock>=0){
-    if(::fcntl(nusock,F_SETFL,O_NONBLOCK)<0)
-      throw failure("fcntl:")<<GetError();
-    return nusock;
-  }
+  if(nusock>=0)return nusock;
 
   if(ECONNABORTED==GetError())return 0;
   throw failure("accept_wrapper ")<<GetError();
