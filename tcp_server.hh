@@ -47,4 +47,17 @@ inline auto accept_wrapper(sock_type sock)
   if(ECONNABORTED==GetError())return 0;
   throw failure("accept_wrapper ")<<GetError();
 }
+
+#ifdef __FreeBSD__
+inline auto accept4_wrapper(sock_type sock,int flags)
+{
+  ::sockaddr amb_addr;
+  ::socklen_t amblen=sizeof(amb_addr);
+  sock_type nusock=::accept4(sock,&amb_addr,&amblen,flags);
+  if(nusock>=0)return nusock;
+
+  if(ECONNABORTED==GetError())return 0;
+  throw failure("accept4_wrapper ")<<GetError();
+}
+#endif
 }
