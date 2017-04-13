@@ -13,16 +13,17 @@
 //      -in (::std::array<::std::array<float, 2>, 3>)
 //   }
 
-#include "getaddrinfo_wrapper.hh"
-#include "platforms.hh"
-#include "SendBufferStack.hh"
+#include <getaddrinfo_wrapper.hh>
+#include <platforms.hh>
+#include "plf_colony.h"
+#include <SendBufferStack.hh>
 #include "zz.send_example_messages.hh"
+
 #include <array>
 #include <iostream>
 #include <set>
 #include <string>
 #include <vector>
-#include "plf_colony.h"
 
 using namespace cmw;
 

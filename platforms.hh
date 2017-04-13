@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
+#if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #define CMW_WINDOWS
 #include"ErrorWords.hh"
 #include<winsock2.h>

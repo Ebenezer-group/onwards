@@ -48,7 +48,7 @@ inline auto accept_wrapper(sock_type sock)
   throw failure("accept_wrapper ")<<GetError();
 }
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__)||defined(__linux__)
 inline auto accept4_wrapper(sock_type sock,int flags)
 {
   ::sockaddr amb_addr;

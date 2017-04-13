@@ -2,16 +2,17 @@
 //   The Middle code is the same as in the send example.
 //
 
-#include "platforms.hh"
-#include "ReceiveBufferStack.hh"
-#include "udp_stuff.hh"
+#include <platforms.hh>
+#include <ReceiveBufferStack.hh>
+#include <udp_stuff.hh>
 #include "zz.receive_example_messages.hh"
+#include "plf_colony.h"
+
 #include <array>
 #include <iostream>
 #include <set>
 #include <string>
 #include <vector>
-#include "plf_colony.h"
 
 int main()
 {
