@@ -149,14 +149,11 @@ public:
 void cmwAmbassador::login (){
   middle_messages_back::Marshal(cmwSendbuf,Login,accounts);
   for(;;){
-    try{
-      fds[0].fd=cmwSendbuf.sock_=cmwBuf.sock_=
-                    connect_wrapper("174.20.19.129","56789");
-      break;
-    }catch(::std::exception const& ex){
-      ::printf("%s\n",ex.what());
-      poll_wrapper(nullptr,0,loginPause);
-    }
+    fds[0].fd=cmwSendbuf.sock_=cmwBuf.sock_=
+                  connect_wrapper("174.20.19.129","56789");
+    if(fds[0].fd!=-1)break;
+    ::printf("connect_wrapper %d\n",errno);
+    poll_wrapper(nullptr,0,loginPause);
   }
 
   if(sockWrite(cmwSendbuf.sock_,
@@ -165,13 +162,13 @@ void cmwAmbassador::login (){
 #else
                &least_significant_first
 #endif
-               ,1)!=1)throw failure("Couldn't write byte order");
-  while(!cmwSendbuf.Flush());
+               ,1)==1){
+    while(!cmwSendbuf.Flush());
 
-  while(!cmwBuf.GotPacket());
-  if(!cmwBuf.GiveBool())
-    throw failure("Login:")<<cmwBuf.GiveString_view();
-  set_nonblocking(cmwBuf.sock_);
+    while(!cmwBuf.GotPacket());
+    if(cmwBuf.GiveBool())set_nonblocking(cmwBuf.sock_);
+    else throw failure("Login:")<<cmwBuf.GiveString_view();
+  }else throw failure("Couldn't write byte order");
 }
 
 void cmwAmbassador::reset (char const* explanation){

@@ -24,11 +24,11 @@ int main (int argc,char** argv){
     auto rp=res.get();
     SendBufferStack<> sendbuf;
     for(;rp!=nullptr;rp=rp->ai_next){
-      if((sendbuf.sock_=::socket(rp->ai_family,rp->ai_socktype,0))!=-1)break;
+      if((sendbuf.sock_=::socket(rp->ai_family,rp->ai_socktype,0))!=-1)goto sk;
     }
     if(-1==sendbuf.sock_)throw failure("socket call(s) ")<<GetError();
 
-    ::pollfd pfd{sendbuf.sock_,POLLIN,0};
+sk: ::pollfd pfd{sendbuf.sock_,POLLIN,0};
     int waitMillisecs=16000;
     for(int j=0;j<2;++j,waitMillisecs*=2){
       front_messages_middle::Marshal(sendbuf,marshalling_integer(argv[1])
@@ -39,8 +39,8 @@ int main (int argc,char** argv){
 #endif
       if(poll_wrapper(&pfd,1,waitMillisecs)>0){
         ReceiveBufferStack<SameFormat> buf(pfd.fd);
-        if(!buf.GiveBool())throw failure("CMWA: ")<<buf.GiveString_view();
-        ::exit(EXIT_SUCCESS);
+        if(buf.GiveBool())::exit(EXIT_SUCCESS);
+        throw failure("CMWA: ")<<buf.GiveString_view();
       }
     }
     throw failure("No reply received.  Is the middle tier (CMWA) running?");
