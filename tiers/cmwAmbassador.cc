@@ -147,7 +147,6 @@ public:
 };
 
 void cmwAmbassador::login (){
-  middle_messages_back::Marshal(cmwSendbuf,Login,accounts);
   for(;;){
     fds[0].fd=cmwSendbuf.sock_=cmwBuf.sock_=
                   connect_wrapper("174.20.19.129","56789");
@@ -156,6 +155,7 @@ void cmwAmbassador::login (){
     poll_wrapper(nullptr,0,loginPause);
   }
 
+  middle_messages_back::Marshal(cmwSendbuf,Login,accounts);
   if(sockWrite(cmwSendbuf.sock_,
 #ifdef CMW_ENDIAN_BIG
                &most_significant_first
@@ -166,7 +166,7 @@ void cmwAmbassador::login (){
     while(!cmwSendbuf.Flush());
 
     while(!cmwBuf.GotPacket());
-    if(cmwBuf.GiveBool())set_nonblocking(cmwBuf.sock_);
+    if(cmwBuf.GiveBool())set_nonblocking(fds[0].fd);
     else throw failure("Login:")<<cmwBuf.GiveString_view();
   }else throw failure("Couldn't write byte order");
 }
