@@ -17,9 +17,9 @@ inline auto tcp_server (char const* port)
 
     int on=1;
     if(::setsockopt(sock,SOL_SOCKET,SO_REUSEADDR
-                     ,(char const*)&on,sizeof(on))<0){
+                    ,(char const*)&on,sizeof(on))<0){
       close_socket(sock);
-      throw failure("tcp_server setsockopt: ")<<GetError();
+      throw failure("tcp_server setsockopt ")<<GetError();
     }
 
     if(::bind(sock,rp->ai_addr,rp->ai_addrlen)<0){
@@ -39,9 +39,7 @@ inline auto tcp_server (char const* port)
 
 inline auto accept_wrapper(sock_type sock)
 {
-  ::sockaddr amb_addr;
-  ::socklen_t amblen=sizeof(amb_addr);
-  sock_type nusock=::accept(sock,&amb_addr,&amblen);
+  auto nusock=::accept(sock,nullptr,nullptr);
   if(nusock>=0)return nusock;
 
   if(ECONNABORTED==GetError())return 0;
@@ -53,7 +51,7 @@ inline auto accept4_wrapper(sock_type sock,int flags)
 {
   ::sockaddr amb_addr;
   ::socklen_t amblen=sizeof(amb_addr);
-  sock_type nusock=::accept4(sock,&amb_addr,&amblen,flags);
+  auto nusock=::accept4(sock,&amb_addr,&amblen,flags);
   if(nusock>=0)return nusock;
 
   if(ECONNABORTED==GetError())return 0;

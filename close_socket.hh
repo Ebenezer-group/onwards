@@ -16,9 +16,7 @@ inline void close_socket (sock_type sock)
 #else
   if(::close(sock)==-1){
     auto errval=GetError();
-    if(EINTR==errval){
-      if(close(sock)==0){return;}
-    }
+    if(EINTR==errval&&::close(sock)==0)return;
     throw failure("close_socket")<<errval;
 #endif
   }

@@ -59,7 +59,7 @@ If genz fails with "No reply received.  Is the CMWA running?"
 make sure the middle tier is running.
 
 Another possible problem could be due to "breaking changes"
-between the back and middle tier.  (We may have changed
+between the back and middle tiers.  (We may have changed
 the protocol between these tiers and now older versions
 of the middle tier no longer work right.)  The thing to do
 in this case is to check our website for an announcement/
