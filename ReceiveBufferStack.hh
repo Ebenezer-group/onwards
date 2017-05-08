@@ -1,11 +1,10 @@
 #pragma once
-
 #include"IO.hh"
 #include"platforms.hh"
 #include"ReceiveBuffer.hh"
 #include"udp_stuff.hh"
 
-namespace cmw {
+namespace cmw{
 
 template <class R,int size=udp_packet_max>
 class ReceiveBufferStack : public ReceiveBuffer<R>

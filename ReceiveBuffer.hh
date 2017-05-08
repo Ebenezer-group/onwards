@@ -1,5 +1,4 @@
 #pragma once
-
 #include"ErrorWords.hh"
 #include"Formatting.hh"
 #include"IO.hh"
@@ -15,7 +14,7 @@ static_assert(::std::numeric_limits<unsigned char>::digits==8
 static_assert(::std::numeric_limits<float>::is_iec559
               ,"Only IEEE 754 supported");
 
-namespace cmw {
+namespace cmw{
 
 template <class R>
 class ReceiveBuffer

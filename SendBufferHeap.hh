@@ -1,13 +1,11 @@
 #pragma once
-
 #include"SendBuffer.hh"
 
-namespace cmw {
+namespace cmw{
 
 class SendBufferHeap : public SendBuffer
 {
 public:
-
   SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz)
   {}
 

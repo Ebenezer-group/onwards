@@ -1,5 +1,4 @@
 #pragma once
-
 #include"ErrorWords.hh"
 #include"IO.hh"
 #include"platforms.hh"
@@ -7,7 +6,7 @@
 #include"ReceiveBuffer.hh"
 #include<string.h>
 
-namespace cmw {
+namespace cmw{
 template <class R>
 class ReceiveBufferCompressed : public ReceiveBuffer<R>
 {

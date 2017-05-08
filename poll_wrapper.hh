@@ -1,5 +1,4 @@
 #pragma once
-
 #include"ErrorWords.hh"
 #include"platforms.hh"
 
@@ -9,7 +8,7 @@
 #include<poll.h>
 #endif
 
-namespace cmw {
+namespace cmw{
 inline int poll_wrapper(::pollfd* fds,int num,int timeout=-1)
 {
   int rc=::poll(fds,num,timeout);

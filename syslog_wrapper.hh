@@ -1,5 +1,4 @@
 #pragma once
-
 #include"platforms.hh"
 #ifdef CMW_WINDOWS
 #define LOG_INFO 0
@@ -9,7 +8,7 @@
 #include<syslog.h>
 #endif
 
-namespace cmw {
+namespace cmw{
 template<typename... T>
 void syslog_wrapper (int priority,char const* format,T... t)
 {
@@ -18,4 +17,3 @@ void syslog_wrapper (int priority,char const* format,T... t)
 #endif
 }
 }
-

@@ -1,5 +1,4 @@
 #pragma once
-
 #include"ErrorWords.hh"
 #include"IO.hh"
 #include"marshalling_integer.hh"
@@ -8,7 +7,7 @@
 #include<string_view>
 #include<type_traits>
 #include<stdint.h>
-#include<stdio.h> // snprintf
+#include<stdio.h> //snprintf
 #include<string.h>
 
 #include<limits>
@@ -21,7 +20,7 @@ static_assert(::std::numeric_limits<float>::is_iec559
 #include<sys/socket.h>
 #endif
 
-namespace cmw {
+namespace cmw{
 
 class SendBuffer
 {

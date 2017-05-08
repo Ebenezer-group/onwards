@@ -1,11 +1,10 @@
 #pragma once
-
 #include<exception>
 #include<string>
 #include<string_view>
 #include<stdio.h> //sprintf
 
-namespace cmw {
+namespace cmw{
 class failure : public ::std::exception {
   ::std::string whatStr;
 
@@ -72,5 +71,4 @@ public:
     return *this;
   }
 };
-
 }

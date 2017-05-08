@@ -1,5 +1,4 @@
 #pragma once
-
 #include"ErrorWords.hh"
 #include"platforms.hh"
 
@@ -16,4 +15,3 @@ inline void setDirectory (char const* dir)
 #endif
     throw cmw::failure("setDirectory ")<<dir<<" "<<GetError();
 }
-

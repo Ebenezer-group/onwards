@@ -1,20 +1,18 @@
 #pragma once
-
 #include<stdint.h>
 #include<stdlib.h> //strtol
 
-namespace cmw {
+namespace cmw{
 class SendBuffer;
 template <class R> class ReceiveBuffer;
 
-class marshalling_integer
-{
+class marshalling_integer{
   int32_t value;
 
 public:
-  marshalling_integer () {}
-  explicit marshalling_integer (int32_t val):value(val) {}
-  explicit marshalling_integer (char const* val):value(::strtol(val,0,10)) {}
+  marshalling_integer (){}
+  explicit marshalling_integer (int32_t val):value(val){}
+  explicit marshalling_integer (char const* val):value(::strtol(val,0,10)){}
 
   // Reads a sequence of bytes in variable-length format and
   // composes a 32 bit integer.
@@ -26,23 +24,16 @@ public:
       uint8_t abyte=buf.GiveOne();
       value += (abyte&127)*shift;
       if((abyte&128)==0)break;
-
       shift<<=7;
       value+=shift;
     }
   }
 
-  auto operator() () const {return value;}
-  void operator= (int32_t rhs) {value=rhs;}
-
-  bool operator== (marshalling_integer const& rhs) const
-  {return value==rhs();}
-
-  bool operator== (int32_t rhs) const {return value==rhs;}
-
-  bool operator> (int32_t rhs) const {return value>rhs;}
-  void operator-= (int32_t rhs) {value-=rhs;}
-
+  auto operator() () const{return value;}
+  void operator= (int32_t rhs){value=rhs;}
+  bool operator== (marshalling_integer const& rhs) const{return value==rhs();}
+  bool operator== (int32_t rhs) const{return value==rhs;}
+  bool operator> (int32_t rhs) const{return value>rhs;}
   void Marshal (SendBuffer& buf,bool=false) const;
 };
 }

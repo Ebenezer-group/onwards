@@ -1,15 +1,13 @@
 #pragma once
-
 #include"close_socket.hh"
 #include"ErrorWords.hh"
 #include"getaddrinfo_wrapper.hh"
 #include"platforms.hh"
 #include<fcntl.h>
 
-namespace cmw {
+namespace cmw{
 
-inline auto tcp_server (char const* port)
-{
+inline auto tcp_server (char const* port){
   getaddrinfo_wrapper res(nullptr,port,SOCK_STREAM,AI_PASSIVE);
   for(auto rp=res.get();rp!=nullptr;rp=rp->ai_next){
     sock_type sock=::socket(rp->ai_family,rp->ai_socktype,0);
@@ -37,8 +35,7 @@ inline auto tcp_server (char const* port)
   throw failure("tcp_server");
 }
 
-inline auto accept_wrapper(sock_type sock)
-{
+inline auto accept_wrapper(sock_type sock){
   auto nusock=::accept(sock,nullptr,nullptr);
   if(nusock>=0)return nusock;
 
@@ -47,8 +44,7 @@ inline auto accept_wrapper(sock_type sock)
 }
 
 #if defined(__FreeBSD__)||defined(__linux__)
-inline auto accept4_wrapper(sock_type sock,int flags)
-{
+inline auto accept4_wrapper(sock_type sock,int flags){
   ::sockaddr amb_addr;
   ::socklen_t amblen=sizeof(amb_addr);
   auto nusock=::accept4(sock,&amb_addr,&amblen,flags);

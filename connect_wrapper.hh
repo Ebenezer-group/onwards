@@ -1,10 +1,9 @@
 #pragma once
-
 #include"close_socket.hh"
 #include"getaddrinfo_wrapper.hh"
 #include"platforms.hh"
 
-namespace cmw {
+namespace cmw{
 
 inline sock_type connect_wrapper(char const* node,char const* port)
 {

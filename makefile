@@ -1,9 +1,9 @@
 CFLAGS=-Os -Wundef -W -Wall -Wextra
-CXXFLAGS=-std=c++17 $(CFLAGS) -Wreorder
+CXXFLAGS=$(CFLAGS) -Wreorder
 
 CC=gcc7
-CXX=g++7
-#CXX=clang++ -stdlib=libc++
+CXX=g++7 -std=c++17
+#CXX=clang++ -std=c++1z -stdlib=libc++
 
 LIBS=-L./ -L/usr/lib
 
@@ -13,7 +13,7 @@ TIERS:= $(MIDDLE) $(FRONT)
 TARGETS:= libhome.a $(TIERS)
 all: $(TARGETS)
 
-objects = quicklz.o marshalling_integer.o
+objects=quicklz.o marshalling_integer.o
 libhome.a: $(objects)
 	ar rc $@ $(objects)
 
@@ -33,7 +33,6 @@ example: $(EXAMPLES)
 
 example/send_example: example/send_example.cc libhome.a
 	$(CXX) -o $@ $(CXXFLAGS) -I. $@.cc libhome.a
-
 example/receive_example: example/receive_example.cc libhome.a
 	$(CXX) -o $@ $(CXXFLAGS) -I. $@.cc libhome.a
 

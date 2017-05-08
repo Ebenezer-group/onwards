@@ -1,35 +1,23 @@
 #pragma once
-
 #include<stdint.h>
 #include<string.h> //memcpy
 
-class SameFormat
-{
+class SameFormat{
 public:
   template <template<class> class B,class U>
   void Read (B<SameFormat>& buf,U& data)
-  {
-    buf.Give(&data,sizeof(U));
-  }
+  {buf.Give(&data,sizeof(U));}
 
   template <template<class> class B,class U>
-  void ReadBlock (B<SameFormat>& buf
-                  ,U* data,int elements)
-  {
-    buf.Give(data,elements*sizeof(U));
-  }
+  void ReadBlock (B<SameFormat>& buf,U* data,int elements)
+  {buf.Give(data,elements*sizeof(U));}
 };
 
-
-class LeastSignificantFirst
-{
+class LeastSignificantFirst{
 public:
   template <template<class> class B>
-  void Read (B<LeastSignificantFirst>& buf
-             ,uint8_t& val)
-  {
-    val=buf.GiveOne();
-  }
+  void Read (B<LeastSignificantFirst>& buf,uint8_t& val)
+  {val=buf.GiveOne();}
 
   template <template<class> class B>
   void Read (B<LeastSignificantFirst>& buf
@@ -107,15 +95,11 @@ public:
 };
 
 
-class MostSignificantFirst
-{
+class MostSignificantFirst{
 public:
   template <template<class> class B>
-  void Read (B<MostSignificantFirst>& buf
-             ,uint8_t& val)
-  {
-    val=buf.GiveOne();
-  }
+  void Read (B<MostSignificantFirst>& buf ,uint8_t& val)
+  {val=buf.GiveOne();}
 
   template <template<class> class B>
   void Read (B<MostSignificantFirst>& buf

@@ -1,13 +1,11 @@
 #pragma once
-
 #include"ErrorWords.hh"
 #include"platforms.hh"
 #include<stdio.h>
 
-namespace cmw {
+namespace cmw{
 
-class FILE_wrapper
-{
+class FILE_wrapper{
 public:
   FILE* Hndl;
 

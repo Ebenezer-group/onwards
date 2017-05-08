@@ -1,5 +1,4 @@
 #pragma once
-
 #include"ReceiveBuffer.hh"
 
 template <class T>
@@ -12,5 +11,4 @@ explicit empty_container (::cmw::ReceiveBuffer<R>& buf)
   int32_t count=buf.template Give<uint32_t>();
   for(;count>0;--count)T{buf};
 }
-
 };

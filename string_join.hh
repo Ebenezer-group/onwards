@@ -1,12 +1,10 @@
 #pragma once
-
 #include"marshalling_integer.hh"
 #include"SendBuffer.hh"
 #include<string_view>
 
-namespace cmw {
-class string_join
-{
+namespace cmw{
+class string_join{
   // hand_written_marshalling_code
   ::std::string_view s1;
   ::std::string_view s2;

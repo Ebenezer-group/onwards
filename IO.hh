@@ -1,5 +1,4 @@
 #pragma once
-
 #include"ErrorWords.hh"
 #include"platforms.hh"
 #ifndef CMW_WINDOWS
@@ -8,7 +7,7 @@
 #include<unistd.h>
 #endif
 
-namespace cmw {
+namespace cmw{
 inline int sockWrite (sock_type sock,void const* data,int len
                       ,sockaddr* toAddr=nullptr,socklen_t toLen=0)
 {

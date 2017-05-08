@@ -1,12 +1,11 @@
 #pragma once
-
 #include"ErrorWords.hh"
 #include"IO.hh"
 #include"qlz_wrapper.hh"
 #include"SendBufferHeap.hh"
 #include<string.h>
 
-namespace cmw {
+namespace cmw{
 
 class SendBufferCompressed : public SendBufferHeap
 {

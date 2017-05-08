@@ -1,9 +1,8 @@
 #pragma once
-
 #include"SendBuffer.hh"
 #include"udp_stuff.hh"
 
-namespace cmw {
+namespace cmw{
 
 template <unsigned long N=udp_packet_max>
 class SendBufferStack : public SendBuffer

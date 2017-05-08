@@ -1,5 +1,4 @@
 #pragma once
-
 #include"ErrorWords.hh"
 #include"SendBuffer.hh"
 #include<string>
@@ -15,11 +14,10 @@
 extern int32_t previous_updatedtime;
 extern int32_t current_updatedtime;
 
-namespace cmw {
+namespace cmw{
 template <class R> class ReceiveBuffer;
 
-class File
-{
+class File{
   ::std::string name;
   int mutable fd=0;
 

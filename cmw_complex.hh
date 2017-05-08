@@ -1,8 +1,7 @@
 #pragma once
-
 #include<complex>
 
-namespace cmw {
+namespace cmw{
 template <class T,class B>
 void complexMarshal (B& buf,::std::complex<T> const& cmplx)
 {

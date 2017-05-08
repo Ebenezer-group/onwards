@@ -1,5 +1,4 @@
 #pragma once
-
 #include"ErrorWords.hh"
 #include"platforms.hh"
 
@@ -9,8 +8,8 @@
 #include<sys/types.h>
 #endif
 
-namespace cmw {
-class getaddrinfo_wrapper {
+namespace cmw{
+class getaddrinfo_wrapper{
   ::addrinfo* addrinfo_;
 
  public:

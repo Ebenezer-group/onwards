@@ -1,5 +1,4 @@
 #pragma once
-
 #include<marshalling_integer.hh>
 #include<string>
 
@@ -21,4 +20,3 @@ struct cmw_account {
   void Marshal (::cmw::SendBuffer& buf,bool=false) const
   {MarshalMemberData(buf);}
 };
-
