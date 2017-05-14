@@ -2,8 +2,7 @@
 #include"SendBuffer.hh"
 
 // Encode integer into variable-length format.
-void ::cmw::marshalling_integer::Marshal (SendBuffer& buf,bool) const
-{
+void ::cmw::marshalling_integer::Marshal (SendBuffer& buf,bool)const{
   uint32_t N=value;
   for(;;){
     uint8_t abyte=N&127;

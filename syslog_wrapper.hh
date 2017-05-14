@@ -10,8 +10,7 @@
 
 namespace cmw{
 template<typename... T>
-void syslog_wrapper (int priority,char const* format,T... t)
-{
+void syslog_wrapper (int priority,char const* format,T... t){
 #ifndef CMW_WINDOWS
   ::syslog(priority,format,t...);
 #endif

@@ -16,7 +16,7 @@ struct cmw_account {
   template <class R>
   explicit cmw_account (::cmw::ReceiveBuffer<R>&);
 
-  void MarshalMemberData (::cmw::SendBuffer&) const;
-  void Marshal (::cmw::SendBuffer& buf,bool=false) const
+  void MarshalMemberData (::cmw::SendBuffer&)const;
+  void Marshal (::cmw::SendBuffer& buf,bool=false)const
   {MarshalMemberData(buf);}
 };

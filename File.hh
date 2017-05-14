@@ -38,9 +38,9 @@ public:
   File (bool contents,ReceiveBuffer<R>& buf):
         File{contents?File{buf}:File{buf.GiveString_view()}}{}
 
-  ~File () {if(0!=fd)::close(fd);}
+  ~File (){if(0!=fd)::close(fd);}
 
-  bool Marshal (SendBuffer& buf,bool=false) const{
+  bool Marshal (SendBuffer& buf,bool=false)const{
     struct stat sb;
     if(::stat(name.c_str(),&sb)<0)throw failure("File::Marshal stat ")<<name;
     if(sb.st_mtime>previous_updatedtime){
@@ -54,6 +54,6 @@ public:
     return false;
   }
 
-  ::std::string const& Name () const {return name;}
+  ::std::string const& Name ()const{return name;}
 };
 }

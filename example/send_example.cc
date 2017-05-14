@@ -56,7 +56,6 @@ int main()
       send_example_messages::Marshal(buffer, messageid3, ar);
     } else {
       ::plf::colony<::std::string> clny { "Beautiful words ", "wonderful words ", "of life"};
-      //clny.insert("
       send_example_messages::Marshal(buffer, messageid4, clny);
     }
 

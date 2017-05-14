@@ -44,7 +44,7 @@ class request_generator{
 public:
   explicit request_generator (char const* file):fname(file),Fl{file,"r"}{}
 
-  void Marshal (::cmw::SendBuffer& buf,bool=false) const{
+  void Marshal (::cmw::SendBuffer& buf,bool=false)const{
     auto index=buf.ReserveBytes(1);
     if(::cmw::File{fname}.Marshal(buf))
       buf.Receive(index,true);
@@ -116,7 +116,7 @@ struct cmw_request{
     current_updatedtime=previous_updatedtime;
   }
 
-  void save_lastruntime () const
+  void save_lastruntime ()const
   {Write(fd,&latest_update,sizeof(latest_update));}
 
   ~cmw_request () {::close(fd);}

@@ -1,13 +1,11 @@
 #pragma once
 #include"ErrorWords.hh"
 #include"platforms.hh"
-
 #ifndef CMW_WINDOWS
 #include<unistd.h>
 #endif
 
-inline void setDirectory (char const* dir)
-{
+inline void setDirectory (char const* dir){
 #ifdef CMW_WINDOWS
   if(!SetCurrentDirectory(dir))
 #else

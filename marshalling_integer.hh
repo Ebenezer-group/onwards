@@ -29,11 +29,11 @@ public:
     }
   }
 
-  auto operator() () const{return value;}
   void operator= (int32_t rhs){value=rhs;}
-  bool operator== (marshalling_integer const& rhs) const{return value==rhs();}
-  bool operator== (int32_t rhs) const{return value==rhs;}
-  bool operator> (int32_t rhs) const{return value>rhs;}
-  void Marshal (SendBuffer& buf,bool=false) const;
+  auto operator() ()const{return value;}
+  bool operator== (marshalling_integer const& rhs)const{return value==rhs();}
+  bool operator== (int32_t rhs)const{return value==rhs;}
+  bool operator> (int32_t rhs)const{return value>rhs;}
+  void Marshal (SendBuffer& buf,bool=false)const;
 };
 }

@@ -45,7 +45,7 @@ inline void Marshal (::cmw::SendBuffer& buf
 }
 
 inline void
-cmw_account::MarshalMemberData (::cmw::SendBuffer& buf) const{
+cmw_account::MarshalMemberData (::cmw::SendBuffer& buf)const{
   number.Marshal(buf);
   buf.Receive(password);
 }
