@@ -149,26 +149,22 @@ public:
 void cmwAmbassador::login (){
   for(;;){
     fds[0].fd=cmwSendbuf.sock_=cmwBuf.sock_=
-                  connect_wrapper("174.20.19.129","56789");
+       connect_wrapper("174.20.19.129",
+#ifdef CMW_ENDIAN_BIG
+                       "56790");
+#else
+                       "56789");
+#endif
     if(fds[0].fd!=-1)break;
     ::printf("connect_wrapper %d\n",errno);
     poll_wrapper(nullptr,0,loginPause);
   }
 
   middle_messages_back::Marshal(cmwSendbuf,Login,accounts);
-  if(sockWrite(cmwSendbuf.sock_,
-#ifdef CMW_ENDIAN_BIG
-               &most_significant_first
-#else
-               &least_significant_first
-#endif
-               ,1)==1){
-    while(!cmwSendbuf.Flush());
-
-    while(!cmwBuf.GotPacket());
-    if(cmwBuf.GiveBool())set_nonblocking(fds[0].fd);
-    else throw failure("Login:")<<cmwBuf.GiveString_view();
-  }else throw failure("Couldn't write byte order");
+  while(!cmwSendbuf.Flush());
+  while(!cmwBuf.GotPacket());
+  if(cmwBuf.GiveBool())set_nonblocking(fds[0].fd);
+  else throw failure("Login:")<<cmwBuf.GiveString_view();
 }
 
 void cmwAmbassador::reset (char const* explanation){
