@@ -34,17 +34,16 @@ protected:
 public:
   sock_type sock_=-1;
 
-  SendBuffer (unsigned char* addr,int sz) : bufsize(sz),buf(addr) {}
+  SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
   void Receive (void const* data,int size)
-{
-  if(size>bufsize-index)
-    throw failure("Size of marshalled data exceeds space available: ")
-      <<bufsize<<" "<<saved_size;
-  ::memcpy(buf+index,data,size);
-  index+=size;
-}
-
+  {
+    if(size>bufsize-index)
+      throw failure("Size of marshalled data exceeds space available: ")
+        <<bufsize<<" "<<saved_size;
+    ::memcpy(buf+index,data,size);
+    index+=size;
+  }
 
   template<typename... T>
   void Receive_variadic (char const* format,T... t)
@@ -82,7 +81,7 @@ public:
     index+=fl_sz;
   }
 
-  void Receive (bool b) {Receive(static_cast<unsigned char>(b));}
+  void Receive (bool b){Receive(static_cast<unsigned char>(b));}
 
   void Receive (char const* cstr)
   {
@@ -105,7 +104,7 @@ public:
     Receive(s.data(),slen());
   }
 
-  inline int GetIndex () {return index;}
+  inline int GetIndex (){return index;}
   inline int ReserveBytes (int num)
   {
     if(num>bufsize-index)throw failure("SendBuffer::ReserveBytes");
@@ -115,17 +114,17 @@ public:
   }
 
   void FillInSize (int32_t max)
-{
-  int32_t marshalled_bytes=index-saved_size;
-  if(marshalled_bytes>max){
-    throw failure("Size of marshalled data exceeds max of: ")<<max;
-  }
-  ::memcpy(buf+saved_size,&marshalled_bytes,sizeof(marshalled_bytes));
-  saved_size=index;
-}
+  {
+    int32_t marshalled_bytes=index-saved_size;
+    if(marshalled_bytes>max)
+      throw failure("Size of marshalled data exceeds max of: ")<<max;
 
-  inline void Reset () {saved_size=index=0;}
-  inline void Rollback () {index=saved_size;}
+    ::memcpy(buf+saved_size,&marshalled_bytes,sizeof(marshalled_bytes));
+    saved_size=index;
+  }
+
+  inline void Reset (){saved_size=index=0;}
+  inline void Rollback (){index=saved_size;}
 
   template <class T>
   void ReceiveBlock (T const& grp)
@@ -140,22 +139,21 @@ public:
   void ReceiveGroup (T const& grp,bool sendType=false)
   {
     Receive(static_cast<int32_t>(grp.size()));
-    for(auto const& it:grp) it.Marshal(*this,sendType);
+    for(auto const& it:grp)it.Marshal(*this,sendType);
   }
 
   template <class T>
   void ReceiveGroupPointer (T const& grp,bool sendType=false)
   {
     Receive(static_cast<int32_t>(grp.size()));
-    for(auto const& it:grp) it->Marshal(*this,sendType);
+    for(auto const& it:grp)it->Marshal(*this,sendType);
   }
 
   inline bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0)
   {
     int const bytes=sockWrite(sock_,buf,index,toAddr,toLen);
     if(bytes==index){
-      Reset();
-      return true;
+      Reset();return true;
     }
 
     index-=bytes;
@@ -164,10 +162,12 @@ public:
     return false;
   }
 
+  //UDP-friendly alternative to Flush
+  inline void Send (::sockaddr* toAddr=nullptr,::socklen_t toLen=0)
+  {sockWrite(sock_,buf,index,toAddr,toLen);}
+
 private:
   SendBuffer (SendBuffer const&);
   SendBuffer& operator= (SendBuffer);
 };
 }
-
-

@@ -7,7 +7,7 @@
 
 namespace cmw{
 
-class SendBufferCompressed : public SendBufferHeap
+class SendBufferCompressed:public SendBufferHeap
 {
   int compSize;
   int compIndex=0;
@@ -25,11 +25,10 @@ class SendBufferCompressed : public SendBufferHeap
   }
 
 public:
-  SendBufferCompressed (int sz) : SendBufferHeap(sz),compSize(sz+(sz>>3)+400)
-                                  ,compressedBuf(new char[compSize]) {}
+  SendBufferCompressed (int sz):SendBufferHeap(sz),compSize(sz+(sz>>3)+400)
+                                ,compressedBuf(new char[compSize]) {}
 
-  ~SendBufferCompressed ()
-  { delete [] compressedBuf; }
+  ~SendBufferCompressed (){delete[] compressedBuf;}
 
   void Compress ()
   {
@@ -57,8 +56,6 @@ public:
     return rc;
   }
 
-  inline void CompressedReset ()
-  {compIndex=0;compress.reset();Reset();}
+  inline void CompressedReset (){compIndex=0;compress.reset();Reset();}
 };
 }
-

@@ -15,7 +15,7 @@ using namespace ::cmw;
 
 int main (int argc,char** argv){
   try{
-    if(argc<3 || argc>5)
+    if(argc<3||argc>5)
       throw failure("Usage: genz account-number .req-file-path [node] [port]");
 
     windows_start();
@@ -29,21 +29,21 @@ int main (int argc,char** argv){
     if(-1==sendbuf.sock_)throw failure("socket call(s) ")<<GetError();
 
 sk: ::pollfd pfd{sendbuf.sock_,POLLIN,0};
-    int waitMillisecs=16000;
+    int waitMillisecs=9000;
+    front_messages_middle::Marshal(sendbuf,marshalling_integer(argv[1])
+                                   ,argv[2]);
     for(int j=0;j<2;++j,waitMillisecs*=2){
-      front_messages_middle::Marshal(sendbuf,marshalling_integer(argv[1])
-                                     ,argv[2]);
-      sendbuf.Flush(rp->ai_addr,rp->ai_addrlen);
+      sendbuf.Send(rp->ai_addr,rp->ai_addrlen);
 #ifdef __linux__
       set_nonblocking(pfd.fd);
 #endif
       if(poll_wrapper(&pfd,1,waitMillisecs)>0){
         ReceiveBufferStack<SameFormat> buf(pfd.fd);
         if(buf.GiveBool())::exit(EXIT_SUCCESS);
-        throw failure("CMWA: ")<<buf.GiveString_view();
+        throw failure("CMWA:")<<buf.GiveString_view();
       }
     }
-    throw failure("No reply received.  Is the middle tier (CMWA) running?");
+    throw failure("No reply received.  Is the cmwAmbassador running?");
   }catch(::std::exception const& ex){
     ::printf("%s: %s\n",argv[0],ex.what());
 #ifndef CMW_WINDOWS

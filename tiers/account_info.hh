@@ -2,12 +2,12 @@
 #include<marshalling_integer.hh>
 #include<string>
 
-namespace cmw {
+namespace cmw{
 class SendBuffer;
 template <class R> class ReceiveBuffer;
 }
 
-struct cmw_account {
+struct cmw_account{
   ::cmw::marshalling_integer number;
   ::std::string password;
 

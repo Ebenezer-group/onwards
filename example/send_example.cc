@@ -59,7 +59,7 @@ int main()
       send_example_messages::Marshal(buffer, messageid4, clny);
     }
 
-    buffer.Flush(rp->ai_addr, rp->ai_addrlen);
+    buffer.Send(rp->ai_addr, rp->ai_addrlen);
     return 1;
   } catch (::std::exception const& ex) {
     ::std::cout << "failure: " << ex.what() << ::std::endl;
