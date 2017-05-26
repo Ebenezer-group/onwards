@@ -22,8 +22,7 @@ static_assert(::std::numeric_limits<float>::is_iec559
 
 namespace cmw{
 
-class SendBuffer
-{
+class SendBuffer{
   int32_t saved_size=0;
 
 protected:
@@ -50,7 +49,7 @@ public:
   {
     auto maxsize=bufsize-index;
     auto size=::snprintf(buf+index,maxsize,format,t...);
-    if(size>maxsize) throw failure("SendBuffer::Receive_variadic");
+    if(size>maxsize)throw failure("SendBuffer::Receive_variadic");
     index+=size;
   }
 

@@ -46,7 +46,7 @@ The path for a .req file is next -- req is short for request.
 Zero or more header files and one "Middle file" are listed in
 a .req file to specify a request.  There's more info on
 Middle files here -- http://webEbenezer.net/middle.html.
-A .req file also has the settings for various options.
+A .req file also has settings for various options.
 
 Once you have built the software, I suggest copying
 example.req and example.mdl to one of your directories

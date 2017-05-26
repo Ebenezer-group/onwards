@@ -192,8 +192,8 @@ bool cmwAmbassador::sendData (){
   return true;
 }
 
-cmwAmbassador::cmwAmbassador (char const* configfile):
-  cmwBuf(1100000),cmwSendbuf(1000000)
+cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
+  ,cmwSendbuf(1000000)
 {
   char lineBuf[140];
   FILE_wrapper Fl(configfile,"r");
@@ -204,8 +204,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):
       CHECK_FIELD_NAME("Password");
       accounts.emplace_back(num,::strtok(nullptr,"\n "));
     }else{
-      if(accounts.empty())
-        throw failure("An account number is required.");
+      if(accounts.empty())throw failure("An account number is required.");
       if(!::strcmp("UDP-port-number",token))break;
       else throw failure("UDP-port-number is required.");
     }
@@ -312,7 +311,7 @@ int main (int argc,char** argv){
     if(argc!=2)throw failure("Usage: ")<<*argv<<" config-file-name";
     cmwAmbassador(*(argv+1));
   }catch(::std::exception const& ex){
-    syslog_wrapper(LOG_ERR,"%s - program ending.",ex.what());
+    syslog_wrapper(LOG_ERR,"Program ending: %s",ex.what());
   }catch(...){
     syslog_wrapper(LOG_ERR,"Unknown exception!");
   }
