@@ -1,46 +1,36 @@
 CC=cl
-CFLAGS= -std:c++latest -EHsc -O2 -nologo -D "NOMINMAX"
+CFLAGS= -std:c++latest -EHsc -O2 -nologo -D"NOMINMAX"
 
-all: libhome.lib tiers\genz.exe
-
-.c.obj:
-	$(CC) $(CFLAGS) -c $*.c -o $*.obj
-
-quicklz.obj: quicklz.h
-	$(CC) $(CFLAGS) -c quicklz.c
+objects=marshalling_integer.obj
+all: $(objects) tiers\genz.exe
 
 marshalling_integer.obj: marshalling_integer.hh
 	$(CC) $(CFLAGS) -c marshalling_integer.cc
 
-objects = quicklz.obj marshalling_integer.obj
-libhome.lib: $(objects)
-	lib /out:$@ $(objects)
 
-tiers\genz.exe: tiers\genz.cc .\libhome.lib
+tiers\genz.exe: tiers\genz.cc $(objects)
 	del tiers\string_join.hh tiers\udp_stuff.hh
-	$(CC) -Fe:$@ $(CFLAGS) -I. tiers\genz.cc /link .\libhome.lib  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+	$(CC) -Fe:$@ $(CFLAGS) -I. tiers\genz.cc /link $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
 EXAMPLES:= example\send_example.exe example\receive_example.exe
 example: $(EXAMPLES)
 
-example\send_example.exe: example\send_example.cc libhome.lib
-	$(CC) -Fe:$@ $(CFLAGS) -I. example\send_example.cc .\libhome.lib  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+example\send_example.exe: example\send_example.cc $(objects)
+	$(CC) -Fe:$@ $(CFLAGS) -I. example\send_example.cc $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
-example\receive_example.exe: example\receive_example.cc libhome.lib
-	$(CC) -Fe:$@ $(CFLAGS) -I. example\receive_example.cc .\libhome.lib  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+example\receive_example.exe: example\receive_example.cc $(objects)
+	$(CC) -Fe:$@ $(CFLAGS) -I. example\receive_example.cc $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
 clean:
-	del *.obj libhome.lib tiers\genz.exe $(EXAMPLES)
+	del $(objects) tiers\genz.exe $(EXAMPLES)
 
 INSTALL_DIR=\Users\Store
 includes=close_socket.hh connect_wrapper.hh getaddrinfo_wrapper.hh tcp_server.hh udp_stuff.hh ErrorWords.hh File.hh IO*.hh marshalling_integer.hh poll_wrapper.hh SendBuffer*.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh quicklz.h
 
 install:
 	copy $(includes)     $(INSTALL_DIR)\include
-	copy libhome.lib     $(INSTALL_DIR)\lib
 	copy tiers\genz.exe  $(INSTALL_DIR)\bin
 
 uninstall:
 	cd $(INSTALL_DIR)/include && del $(includes)
-	del $(INSTALL_DIR)/lib/libhome.lib
 

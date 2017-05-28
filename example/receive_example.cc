@@ -20,7 +20,7 @@ int main()
     auto sd = ::cmw::udp_server("12345");
 
     for (;;){
-      cmw::ReceiveBufferStack<SameFormat> buffer(sd);
+      cmw::ReceiveBufferStack<cmw::SameFormat> buffer(sd);
       auto msgid = buffer.Give<messageid_t>();
       std::cout << "Message id: " << static_cast<unsigned>(msgid) << '\n';
       switch (msgid) {

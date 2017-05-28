@@ -139,5 +139,6 @@ int qlz_get_setting(int setting);
 }
 #endif
 
+#include<quicklz.c>
 #endif
 
