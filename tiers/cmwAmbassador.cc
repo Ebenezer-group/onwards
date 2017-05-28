@@ -2,6 +2,7 @@
 #include<close_socket.hh>
 #include<connect_wrapper.hh>
 #include<ErrorWords.hh>
+#include<empty_container.hh>
 #include<File.hh>
 #include<FILE_wrapper.hh>
 #include<IO.hh>
@@ -80,17 +81,6 @@ public:
 
 #include"zz.middle_messages_back.hh"
 using namespace ::cmw;
-
-template <class T>
-class empty_container{
-
-public:
-template <class R>
-explicit empty_container (::cmw::ReceiveBuffer<R>& buf){
-  int32_t count=buf.template Give<uint32_t>();
-  for(;count>0;--count)T{buf};
-}
-};
 
 int32_t previous_updatedtime;
 int32_t current_updatedtime;

@@ -129,11 +129,11 @@ extern "C" {
 #endif
 
 // Public functions of QuickLZ
-size_t qlz_size_decompressed(const char *source);
-size_t qlz_size_compressed(const char *source);
-size_t qlz_compress(const void *source, char *destination, size_t size, qlz_state_compress *state);
-size_t qlz_decompress(const char *source, void *destination, struct qlz_state_decompress *state);
-int qlz_get_setting(int setting);
+inline size_t qlz_size_decompressed(const char *source);
+inline size_t qlz_size_compressed(const char *source);
+inline size_t qlz_compress(const void *source, char *destination, size_t size, qlz_state_compress *state);
+inline size_t qlz_decompress(const char *source, void *destination, struct qlz_state_decompress *state);
+inline int qlz_get_setting(int setting);
 
 #if defined (__cplusplus)
 }
@@ -333,7 +333,7 @@ size_t qlz_size_compressed(const char *source)
 	return r;
 }
 
-size_t qlz_size_header(const char *source)
+inline size_t qlz_size_header(const char *source)
 {
 	size_t n = 2*((((*source) & 2) == 2) ? 4 : 1) + 1;
 	return n;
