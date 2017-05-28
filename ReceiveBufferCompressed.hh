@@ -9,30 +9,27 @@
 namespace cmw{
 struct qlz_decompress_wrapper{
   ::qlz_state_decompress* qlz_decompress;
-
   qlz_decompress_wrapper ():qlz_decompress(new ::qlz_state_decompress()){}
   ~qlz_decompress_wrapper (){delete qlz_decompress;}
 };
 
 template <class R>
-class ReceiveBufferCompressed:public ReceiveBuffer<R>
+class ReceiveBufferCompressed:private qlz_decompress_wrapper,public ReceiveBuffer<R>
 {
   int const bufsize;
   int bytesRead=0;
   int compressedSize;
   char* compressedStart;
-  qlz_decompress_wrapper decompress;
 
 public:
   sock_type sock_;
 
-  explicit ReceiveBufferCompressed (int size):ReceiveBuffer<R>(new char[size],0),bufsize(size)
-  {}
+  explicit ReceiveBufferCompressed (int size):ReceiveBuffer<R>(new char[size],0)
+					      ,bufsize(size){}
 
   ~ReceiveBufferCompressed (){delete[] this->buf;}
 
-  bool GotPacket ()
-  {
+  bool GotPacket (){
     try{
       if(bytesRead<9){
         bytesRead+=sockRead(sock_,this->buf+bytesRead,9-bytesRead);
@@ -49,10 +46,10 @@ public:
         ::memmove(compressedStart,this->buf,9);
       }
       bytesRead+=sockRead(sock_,compressedStart+bytesRead
-                            ,compressedSize-bytesRead);
+                          ,compressedSize-bytesRead);
       if(bytesRead<compressedSize)return false;
 
-      ::qlz_decompress(compressedStart,this->buf,decompress.qlz_decompress);
+      ::qlz_decompress(compressedStart,this->buf,qlz_decompress_wrapper::qlz_decompress);
       bytesRead=0;
       this->Update();
       return true;
@@ -62,8 +59,8 @@ public:
     }
   }
 
-  void Reset () {bytesRead=0;
-    ::memset(decompress.qlz_decompress,0,sizeof(::qlz_state_decompress));
+  void Reset (){bytesRead=0;
+    ::memset(qlz_decompress_wrapper::qlz_decompress,0,sizeof(::qlz_state_decompress));
   }
 };
 }
