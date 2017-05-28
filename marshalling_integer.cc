@@ -7,10 +7,7 @@ void ::cmw::marshalling_integer::Marshal (SendBuffer& buf,bool)const{
   for(;;){
     uint8_t abyte=N&127;
     N>>=7;
-    if(0==N){
-      buf.Receive(abyte);
-      break;
-    }
+    if(0==N){buf.Receive(abyte);return;}
     abyte|=128;
     buf.Receive(abyte);
     --N;

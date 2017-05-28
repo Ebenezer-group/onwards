@@ -13,7 +13,7 @@ inline void close_socket (sock_type sock){
     throw failure("close_socket ")<<GetError();
 #else
   if(::close(sock)==-1){
-    auto errval=GetError();
+    auto errval=errno;
     if(EINTR==errval&&::close(sock)==0)return;
     throw failure("close_socket")<<errval;
 #endif

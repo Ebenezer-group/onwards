@@ -22,8 +22,8 @@ public:
     uint32_t shift=1;
     for(;;){
       uint8_t abyte=buf.GiveOne();
-      value += (abyte&127)*shift;
-      if((abyte&128)==0)break;
+      value+= (abyte&127)*shift;
+      if((abyte&128)==0)return;
       shift<<=7;
       value+=shift;
     }

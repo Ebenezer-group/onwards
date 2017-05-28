@@ -2,13 +2,20 @@
 #include"ErrorWords.hh"
 #include"IO.hh"
 #include"platforms.hh"
-#include"qlz_wrapper.hh"
+#include"quicklz.h"
 #include"ReceiveBuffer.hh"
 #include<string.h>
 
 namespace cmw{
+struct qlz_decompress_wrapper{
+  ::qlz_state_decompress* qlz_decompress;
+
+  qlz_decompress_wrapper ():qlz_decompress(new ::qlz_state_decompress()){}
+  ~qlz_decompress_wrapper (){delete qlz_decompress;}
+};
+
 template <class R>
-class ReceiveBufferCompressed : public ReceiveBuffer<R>
+class ReceiveBufferCompressed:public ReceiveBuffer<R>
 {
   int const bufsize;
   int bytesRead=0;
@@ -22,12 +29,12 @@ public:
   explicit ReceiveBufferCompressed (int size):ReceiveBuffer<R>(new char[size],0),bufsize(size)
   {}
 
-  ~ReceiveBufferCompressed () {delete [] this->buf;}
+  ~ReceiveBufferCompressed (){delete[] this->buf;}
 
   bool GotPacket ()
   {
     try{
-      if(bytesRead<9) {
+      if(bytesRead<9){
         bytesRead+=sockRead(sock_,this->buf+bytesRead,9-bytesRead);
         if(bytesRead<9)return false;
 
@@ -45,7 +52,7 @@ public:
                             ,compressedSize-bytesRead);
       if(bytesRead<compressedSize)return false;
 
-      ::qlz_decompress(compressedStart,this->buf,decompress.state_decompress);
+      ::qlz_decompress(compressedStart,this->buf,decompress.qlz_decompress);
       bytesRead=0;
       this->Update();
       return true;
@@ -55,6 +62,8 @@ public:
     }
   }
 
-  void Reset () {bytesRead=0;decompress.reset();}
+  void Reset () {bytesRead=0;
+    ::memset(decompress.qlz_decompress,0,sizeof(::qlz_state_decompress));
+  }
 };
 }

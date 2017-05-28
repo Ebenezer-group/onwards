@@ -11,5 +11,5 @@ inline void setDirectory (char const* dir){
 #else
   if(::chdir(dir)==-1)
 #endif
-    throw cmw::failure("setDirectory ")<<dir<<" "<<GetError();
+    throw ::cmw::failure("setDirectory ")<<dir<<" "<<GetError();
 }
