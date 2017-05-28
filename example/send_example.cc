@@ -49,7 +49,7 @@ int main()
       ::std::set<int32_t> iset { 100, 97, 94, 91, 88, 85 };
       send_example_messages::Marshal(buffer, messageid2, iset);
     } else if (3 == messageID) {
-      ::std::array<::std::array<float, 2>, 3> ar {{ {{1.1,2.2}}
+      ::std::array<::std::array<float, 2>, 3> ar {{ {{1.1f,2.2}}
 						   ,{{3.3,4.4}}
                                                    ,{{5.5,6.6}}
                                                  }};

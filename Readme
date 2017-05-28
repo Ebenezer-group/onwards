@@ -2,9 +2,9 @@ The C++ Middleware Writer (CMW) and the software found in
 this repository provide support for messaging and serialization.
 
 License
-The software is under the BSD 2-clause license.  Two of the
-files, quicklz.h and quicklz.c, are from another developer
-and should only be used in conjunction with the CMW.
+The software is under the BSD 2-clause license.  One of the
+files, quicklz.h, is from another developer and should only 
+be used in conjunction with the CMW.
 
 Building
 There are two makefiles here: one for BSD/Linux and one for
@@ -14,11 +14,11 @@ you may want to rename makefile.windows to makefile.  If you're
 using a big-endian machine, add -DCMW_ENDIAN_BIG to the
 CXXFLAGS in the makefile.
 
-A library and two programs are built.  The programs are the
-middle and front tiers of the C++ Middleware Writer (CMW).
-The middle tier is called the CMW Ambassador (CMWA).  The
-front tier is called "genz" and is a command line interface.
-On Windows, only the library and front tier are built.
+Two programs are built.  The programs are the middle and front 
+tiers of the C++ Middleware Writer (CMW).  The middle tier is 
+called the CMW Ambassador (CMWA).  The front tier is called 
+"genz" and is a command line interface.  On Windows, only the 
+front tier is built.
 
 
 Accounts
