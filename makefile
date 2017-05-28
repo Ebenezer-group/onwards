@@ -40,7 +40,7 @@ clean:
 	rm -f $(objects) $(TARGETS) $(EXAMPLES)
 
 INSTALL_DIR=/usr/local
-includes=close_socket.hh connect_wrapper.hh getaddrinfo_wrapper.hh tcp_server.hh udp_stuff.hh ErrorWords.hh File.hh IO*.hh marshalling_integer.hh poll_wrapper.hh SendBuffer*.hh Formatting.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh empty_container.hh quicklz.h
+includes=close_socket.hh connect_wrapper.hh getaddrinfo_wrapper.hh tcp_server.hh udp_stuff.hh ErrorWords.hh File.hh IO*.hh marshalling_integer.hh poll_wrapper.hh SendBuffer*.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh quicklz.h
 
 install:
 	cp -f $(includes) $(INSTALL_DIR)/include

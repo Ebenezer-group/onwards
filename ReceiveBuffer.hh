@@ -1,12 +1,11 @@
 #pragma once
 #include"ErrorWords.hh"
-#include"Formatting.hh"
 #include"IO.hh"
 #include"marshalling_integer.hh"
 #include<stdint.h>
 #include<string>
 #include<string_view>
-#include<string.h>
+#include<string.h> //memcpy
 
 #include<limits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8
@@ -16,9 +15,184 @@ static_assert(::std::numeric_limits<float>::is_iec559
 
 namespace cmw{
 
+class SameFormat{
+public:
+  template <template<class> class B,class U>
+  void Read (B<SameFormat>& buf,U& data)
+  {buf.Give(&data,sizeof(U));}
+
+  template <template<class> class B,class U>
+  void ReadBlock (B<SameFormat>& buf,U* data,int elements)
+  {buf.Give(data,elements*sizeof(U));}
+};
+
+class LeastSignificantFirst{
+public:
+  template <template<class> class B>
+  void Read (B<LeastSignificantFirst>& buf,uint8_t& val)
+  {val=buf.GiveOne();}
+
+  template <template<class> class B>
+  void Read (B<LeastSignificantFirst>& buf
+             ,uint16_t& val)
+  {
+    val=buf.GiveOne();
+    val|=buf.GiveOne()<<8;
+  }
+
+  template <template<class> class B>
+  void Read (B<LeastSignificantFirst>& buf
+             ,uint32_t& val)
+  {
+    val=buf.GiveOne();
+    val|=buf.GiveOne()<<8;
+    val|=buf.GiveOne()<<16;
+    val|=buf.GiveOne()<<24;
+  }
+
+  template <template<class> class B>
+  void Read (B<LeastSignificantFirst>& buf
+             ,uint64_t& val)
+  {
+    val=buf.GiveOne();
+    val|=buf.GiveOne()<<8;
+    val|=buf.GiveOne()<<16;
+    val|=buf.GiveOne()<<24;
+    val|=(uint64_t)buf.GiveOne()<<32;
+    val|=(uint64_t)buf.GiveOne()<<40;
+    val|=(uint64_t)buf.GiveOne()<<48;
+    val|=(uint64_t)buf.GiveOne()<<56;
+  }
+
+  template <template<class> class B>
+  void Read (B<LeastSignificantFirst>& buf
+             ,float& val)
+  {
+    uint32_t tmp;
+    this->Read(buf,tmp);
+    ::memcpy(&val,&tmp,sizeof(val));
+  }
+
+  template <template<class> class B>
+  void Read (B<LeastSignificantFirst>& buf
+             ,double& val)
+  {
+    uint64_t tmp;
+    this->Read(buf,tmp);
+    ::memcpy(&val,&tmp,sizeof(val));
+  }
+
+  template <template<class> class B,class U>
+  void ReadBlock (B<LeastSignificantFirst>& buf
+                  ,U* data,int elements)
+  {
+    for(int i=0;i<elements;++i){
+      *(data+i)=buf.template Give<U>();
+    }
+  }
+
+  // Overloads for uint8_t and int8_t
+  template <template<class> class B>
+  void ReadBlock (B<LeastSignificantFirst>& buf
+                  ,uint8_t* data,int elements)
+  {
+    buf.Give(data,elements);
+  }
+
+  template <template<class> class B>
+  void ReadBlock (B<LeastSignificantFirst>& buf
+                  ,int8_t* data,int elements)
+  {
+    buf.Give(data,elements);
+  }
+};
+
+
+class MostSignificantFirst{
+public:
+  template <template<class> class B>
+  void Read (B<MostSignificantFirst>& buf ,uint8_t& val)
+  {val=buf.GiveOne();}
+
+  template <template<class> class B>
+  void Read (B<MostSignificantFirst>& buf
+             ,uint16_t& val)
+  {
+    val=buf.GiveOne()<<8;
+    val|=buf.GiveOne();
+  }
+
+  template <template<class> class B>
+  void Read (B<MostSignificantFirst>& buf
+             ,uint32_t& val)
+  {
+    val=buf.GiveOne()<<24;
+    val|=buf.GiveOne()<<16;
+    val|=buf.GiveOne()<<8;
+    val|=buf.GiveOne();
+  }
+
+  template <template<class> class B>
+  void Read (B<MostSignificantFirst>& buf
+             ,uint64_t& val)
+  {
+    val=(uint64_t)buf.GiveOne()<<56;
+    val|=(uint64_t)buf.GiveOne()<<48;
+    val|=(uint64_t)buf.GiveOne()<<40;
+    val|=(uint64_t)buf.GiveOne()<<32;
+    val|=buf.GiveOne()<<24;
+    val|=buf.GiveOne()<<16;
+    val|=buf.GiveOne()<<8;
+    val|=buf.GiveOne();
+  }
+
+  template <template<class> class B>
+  void Read (B<MostSignificantFirst>& buf
+             ,float& val)
+  {
+    uint32_t tmp;
+    this->Read(buf,tmp);
+    ::memcpy(&val,&tmp,sizeof(val));
+  }
+
+  template <template<class> class B>
+  void Read (B<MostSignificantFirst>& buf
+             ,double& val)
+  {
+    uint64_t tmp;
+    this->Read(buf,tmp);
+    ::memcpy(&val,&tmp,sizeof(val));
+  }
+
+  template <template<class> class B,class U>
+  void ReadBlock (B<MostSignificantFirst>& buf
+                  ,U* data,int elements)
+  {
+    for(int i=0;i<elements;++i){
+      *(data+i)=buf.template Give<U>();
+    }
+  }
+
+  template <template<class> class B>
+  void ReadBlock (B<MostSignificantFirst>& buf
+                  ,uint8_t* data,int elements)
+  {
+    buf.Give(data,elements);
+  }
+
+  template <template<class> class B>
+  void ReadBlock (B<MostSignificantFirst>& buf
+                  ,int8_t* data,int elements)
+  {
+    buf.Give(data,elements);
+  }
+};
+
+uint8_t const least_significant_first=0;
+uint8_t const most_significant_first=1;
+
 template <class R>
-class ReceiveBuffer
-{
+class ReceiveBuffer{
   R reader;
   int msgLength=0;
   int subTotal=0;
@@ -29,34 +203,29 @@ protected:
   char* const buf;
 
 public:
-  explicit ReceiveBuffer (char* addr,int bytes):packetLength(bytes),buf(addr)
-  {}
+  explicit ReceiveBuffer (char* addr,int bytes):packetLength(bytes),buf(addr){}
 
-  void Give (void* address,int len)
-  {
+  void Give (void* address,int len){
     if(len>msgLength-index)
-      throw failure("ReceiveBuffer::Give -- bytes remaining < len ")<<len;
+      throw failure("ReceiveBuffer::Give: bytes remaining < len ")<<len;
     ::memcpy(address,buf+subTotal+index,len);
     index+=len;
   }
 
-  char GiveOne ()
-  {
+  char GiveOne (){
     if(index>=msgLength)
-      throw failure("ReceiveBuffer::GiveOne -- out of data");
+      throw failure("ReceiveBuffer::GiveOne: out of data");
     return buf[subTotal+index++];
   }
 
   template <class T>
-  T Give ()
-  {
+  T Give (){
     T tmp;
     reader.Read(*this,tmp);
     return tmp;
   }
 
-  bool NextMessage ()
-  {
+  bool NextMessage (){
     subTotal+=msgLength;
     if(subTotal<packetLength){
       index=0;
@@ -67,8 +236,7 @@ public:
     return false;
   }
 
-  void Update ()
-  {
+  void Update (){
     msgLength=subTotal=0;
     NextMessage();
   }
@@ -77,8 +245,7 @@ public:
   void GiveBlock (T* data,unsigned int elements)
   {reader.ReadBlock(*this,data,elements);}
 
-  void GiveFile (file_type fd)
-  {
+  void GiveFile (file_type fd){
     int sz=Give<uint32_t>();
     while(sz>0){
       int rc=Write(fd,buf+subTotal+index,sz);
@@ -87,10 +254,9 @@ public:
     }
   }
 
-  bool GiveBool () {return GiveOne()!=0;}
+  bool GiveBool (){return GiveOne()!=0;}
 
-  auto GiveString ()
-  {
+  auto GiveString (){
     marshalling_integer slen(*this);
     if(slen()>msgLength-index)
       throw failure("ReceiveBuffer::GiveString");
@@ -99,8 +265,7 @@ public:
     return str;
   }
 
-  auto GiveString_view()
-  {
+  auto GiveString_view(){
     marshalling_integer slen(*this);
     if(slen()>msgLength-index)
       throw failure("ReceiveBuffer::GiveString_view");
@@ -111,8 +276,7 @@ public:
 
 #ifndef CMW_WINDOWS
   template <ssize_t N>
-  void CopyString (char (&dest)[N])
-  {
+  void CopyString (char (&dest)[N]){
     marshalling_integer slen(*this);
     if(slen()+1>N)throw failure("ReceiveBuffer::CopyString");
     Give(dest,slen());
@@ -120,8 +284,7 @@ public:
   }
 #endif
 
-  void AppendTo(::std::string& s)
-  {
+  void AppendTo(::std::string& s){
     marshalling_integer slen(*this);
     if(slen()>msgLength-index)throw failure("ReceiveBuffer::AppendTo");
     s.append(buf+subTotal+index,slen());
@@ -129,16 +292,14 @@ public:
   }
 
   template <class T>
-  void Giveilist (T& intrlst)
-  {
+  void Giveilist (T& intrlst){
     int count=Give<uint32_t>();
     for(;count>0;--count)
       intrlst.push_back(*T::value_type::BuildPolyInstance(*this));
   }
 
   template <class T>
-  void Giverbtree (T& rbt)
-  {
+  void Giverbtree (T& rbt){
     int count=Give<uint32_t>();
     auto endIt(rbt.end());
     for(;count>0;--count){
