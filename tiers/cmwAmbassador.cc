@@ -2,7 +2,6 @@
 #include<close_socket.hh>
 #include<connect_wrapper.hh>
 #include<ErrorWords.hh>
-#include<empty_container.hh>
 #include<File.hh>
 #include<FILE_wrapper.hh>
 #include<IO.hh>

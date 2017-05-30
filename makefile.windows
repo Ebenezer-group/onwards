@@ -7,19 +7,18 @@ all: $(objects) tiers\genz.exe
 marshalling_integer.obj: marshalling_integer.hh
 	$(CC) $(CFLAGS) -c marshalling_integer.cc
 
-
 tiers\genz.exe: tiers\genz.cc $(objects)
 	del tiers\string_join.hh tiers\udp_stuff.hh
-	$(CC) -Fe:$@ $(CFLAGS) -I. tiers\genz.cc /link $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+	$(CC) -Fe:$@ $(CFLAGS) -I. tiers\genz.cc /link $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
-EXAMPLES:= example\send_example.exe example\receive_example.exe
+EXAMPLES:=example\send_example.exe example\receive_example.exe
 example: $(EXAMPLES)
 
 example\send_example.exe: example\send_example.cc $(objects)
-	$(CC) -Fe:$@ $(CFLAGS) -I. example\send_example.cc $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+	$(CC) -Fe:$@ $(CFLAGS) -I. example\send_example.cc $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
 example\receive_example.exe: example\receive_example.cc $(objects)
-	$(CC) -Fe:$@ $(CFLAGS) -I. example\receive_example.cc $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"   "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+	$(CC) -Fe:$@ $(CFLAGS) -I. example\receive_example.cc $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
 clean:
 	del $(objects) tiers\genz.exe $(EXAMPLES)

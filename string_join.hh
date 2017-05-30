@@ -15,7 +15,7 @@ class string_join{
 
   void Marshal (::cmw::SendBuffer& buf,bool=false)const{
     ::cmw::marshalling_integer(s1.length()+s2.length()).Marshal(buf);
-    buf.Receive(s1.data(),s1.length()); //Use low-level Receive
+    buf.Receive(s1.data(),s1.length());//Use low-level Receive
     buf.Receive(s2.data(),s2.length());
   }
 };

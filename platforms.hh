@@ -12,14 +12,13 @@ inline int GetError (){return WSAGetLastError();}
 inline void windows_start (){
   WSADATA wsa;
   int rc=WSAStartup(MAKEWORD(2,2),&wsa);
-  if(0!=rc)throw cmw::failure("WSAStartup: ")<<rc;
+  if(0!=rc)throw ::cmw::failure("WSAStartup:")<<rc;
 }
 
 #else
 #include<errno.h>
 using sock_type=int;
 using file_type=int;
-
 inline int GetError (){return errno;}
 inline void windows_start (){}
 #endif
