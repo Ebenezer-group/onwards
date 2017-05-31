@@ -6,14 +6,14 @@
 #include<string.h>
 
 namespace cmw{
-struct qlz_compress_wrapper{
+struct compress_wrapper{
   ::qlz_state_compress* qlz_compress;
-  qlz_compress_wrapper ():qlz_compress(new ::qlz_state_compress()){}
-  ~qlz_compress_wrapper (){delete qlz_compress;}
+  compress_wrapper ():qlz_compress(new ::qlz_state_compress()){}
+  ~compress_wrapper (){delete qlz_compress;}
 };
 
 class SendBufferCompressed:public SendBufferHeap{
-  qlz_compress_wrapper compress;
+  compress_wrapper compress;
   int compSize;
   int compIndex=0;
   char* compressedBuf;
@@ -33,27 +33,17 @@ public:
 
   ~SendBufferCompressed (){delete[] compressedBuf;}
 
-  void Compress (){
-    if(index+(index>>3)+400>compSize-compIndex)
-      throw failure("Not enough room in compressed buf");
-    compIndex+=::qlz_compress(buf,compressedBuf+compIndex
-                              ,index,compress.qlz_compress);
-    Reset();
-  }
-
-  bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0)
-  {
+  bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0){
     bool rc=true;
-    bool haveWritten=false;
-    if(compIndex>0){
-      rc=FlushFlush(toAddr,toLen);
-      haveWritten=true;
-    }
+    if(compIndex>0)rc=FlushFlush(toAddr,toLen);
 
     if(index>0){
-      Compress();
-      if(!haveWritten)rc=FlushFlush(toAddr,toLen);
-      else rc=false;
+      if(index+(index>>3)+400>compSize-compIndex)
+        throw failure("Not enough room in compressed buf");
+      compIndex+=::qlz_compress(buf,compressedBuf+compIndex
+                                ,index,compress.qlz_compress);
+      Reset();
+      if(rc)rc=FlushFlush(toAddr,toLen);
     }
     return rc;
   }

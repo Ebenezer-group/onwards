@@ -7,14 +7,14 @@
 #include<string.h>
 
 namespace cmw{
-struct qlz_decompress_wrapper{
+struct decompress_wrapper{
   ::qlz_state_decompress* qlz_decompress;
-  qlz_decompress_wrapper ():qlz_decompress(new ::qlz_state_decompress()){}
-  ~qlz_decompress_wrapper (){delete qlz_decompress;}
+  decompress_wrapper ():qlz_decompress(new ::qlz_state_decompress()){}
+  ~decompress_wrapper (){delete qlz_decompress;}
 };
 
 template <class R>
-class ReceiveBufferCompressed:private qlz_decompress_wrapper,public ReceiveBuffer<R>
+class ReceiveBufferCompressed:private decompress_wrapper,public ReceiveBuffer<R>
 {
   int const bufsize;
   int bytesRead=0;
@@ -49,7 +49,7 @@ public:
                           ,compressedSize-bytesRead);
       if(bytesRead<compressedSize)return false;
 
-      ::qlz_decompress(compressedStart,this->buf,qlz_decompress_wrapper::qlz_decompress);
+      ::qlz_decompress(compressedStart,this->buf,decompress_wrapper::qlz_decompress);
       bytesRead=0;
       this->Update();
       return true;
@@ -60,7 +60,7 @@ public:
   }
 
   void Reset (){bytesRead=0;
-    ::memset(qlz_decompress_wrapper::qlz_decompress,0,sizeof(::qlz_state_decompress));
+    ::memset(decompress_wrapper::qlz_decompress,0,sizeof(::qlz_state_decompress));
   }
 };
 }
