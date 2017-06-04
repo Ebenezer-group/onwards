@@ -42,7 +42,7 @@ public:
   }
 
   failure& operator<< (int i){
-    char buf[40];
+    char buf[20];
     ::sprintf(buf,"%d",i);
     return *this<<buf;
   }

@@ -21,7 +21,6 @@ static_assert(::std::numeric_limits<float>::is_iec559
 #endif
 
 namespace cmw{
-
 class SendBuffer{
   int32_t saved_size=0;
 
@@ -35,8 +34,7 @@ public:
 
   SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
-  void Receive (void const* data,int size)
-  {
+  void Receive (void const* data,int size){
     if(size>bufsize-index)
       throw failure("Size of marshalled data exceeds space available: ")
         <<bufsize<<" "<<saved_size;
@@ -45,8 +43,7 @@ public:
   }
 
   template<typename... T>
-  void Receive_variadic (char const* format,T... t)
-  {
+  void Receive_variadic (char const* format,T... t){
     auto maxsize=bufsize-index;
     auto size=::snprintf(buf+index,maxsize,format,t...);
     if(size>maxsize)throw failure("SendBuffer::Receive_variadic");
@@ -54,23 +51,20 @@ public:
   }
 
   template <class T>
-  void Receive (T val)
-  {
+  void Receive (T val){
     static_assert(::std::is_arithmetic<T>::value
                   ,"SendBuffer expecting arithmetic type");
     Receive(&val,sizeof(T));
   }
 
   template <class T>
-  void Receive (int where,T val)
-  {
+  void Receive (int where,T val){
     static_assert(::std::is_arithmetic<T>::value
                   ,"SendBuffer expecting arithmetic type");
     ::memcpy(buf+where,&val,sizeof(T));
   }
 
-  void ReceiveFile (file_type fd,int32_t fl_sz)
-  {
+  void ReceiveFile (file_type fd,int32_t fl_sz){
     Receive(fl_sz);
     if(fl_sz> bufsize-index)
       throw failure("SendBuffer::ReceiveFile ")<<bufsize;
@@ -82,38 +76,33 @@ public:
 
   void Receive (bool b){Receive(static_cast<unsigned char>(b));}
 
-  void Receive (char const* cstr)
-  {
+  void Receive (char const* cstr){
     marshalling_integer slen(::strlen(cstr));
     slen.Marshal(*this);
     Receive(cstr,slen());
   }
 
-  inline void Receive (::std::string const& s)
-  {
+  inline void Receive (::std::string const& s){
     marshalling_integer slen(s.size());
     slen.Marshal(*this);
     Receive(s.data(),slen());
   }
 
-  inline void Receive (::std::string_view const& s)
-  {
+  inline void Receive (::std::string_view const& s){
     marshalling_integer slen(s.size());
     slen.Marshal(*this);
     Receive(s.data(),slen());
   }
 
   inline int GetIndex (){return index;}
-  inline int ReserveBytes (int num)
-  {
+  inline int ReserveBytes (int num){
     if(num>bufsize-index)throw failure("SendBuffer::ReserveBytes");
     auto copy=index;
     index+=num;
     return copy;
   }
 
-  void FillInSize (int32_t max)
-  {
+  void FillInSize (int32_t max){
     int32_t marshalled_bytes=index-saved_size;
     if(marshalled_bytes>max)
       throw failure("Size of marshalled data exceeds max of: ")<<max;
@@ -135,21 +124,18 @@ public:
   }
 
   template <class T>
-  void ReceiveGroup (T const& grp,bool sendType=false)
-  {
+  void ReceiveGroup (T const& grp,bool sendType=false){
     Receive(static_cast<int32_t>(grp.size()));
     for(auto const& it:grp)it.Marshal(*this,sendType);
   }
 
   template <class T>
-  void ReceiveGroupPointer (T const& grp,bool sendType=false)
-  {
+  void ReceiveGroupPointer (T const& grp,bool sendType=false){
     Receive(static_cast<int32_t>(grp.size()));
     for(auto const& it:grp)it->Marshal(*this,sendType);
   }
 
-  inline bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0)
-  {
+  inline bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0){
     int const bytes=sockWrite(sock_,buf,index,toAddr,toLen);
     if(bytes==index){
       Reset();return true;

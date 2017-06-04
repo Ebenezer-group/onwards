@@ -39,10 +39,10 @@ includes=close_socket.hh connect_wrapper.hh getaddrinfo_wrapper.hh tcp_server.hh
 
 install:
 	cp -f $(includes) $(INSTALL_DIR)/include
-	cp -f libhome.a $(INSTALL_DIR)/lib
+	cp -f marshalling_integer.o $(INSTALL_DIR)/lib
 	cp -f $(TIERS) $(INSTALL_DIR)/bin
 
 uninstall:
 	cd $(INSTALL_DIR)/include && rm -f $(includes)
-	rm -f $(INSTALL_DIR)/lib/libhome.a
+	rm -f $(INSTALL_DIR)/lib/marshalling_integer.o
 
