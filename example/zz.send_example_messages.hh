@@ -3,7 +3,7 @@
 #include<SendBuffer.hh>
 #include"message_ids.hh"
 #include<array>
-#include"plf_colony.h"
+#include<plf_colony.h>
 #include<set>
 #include<string>
 #include<vector>

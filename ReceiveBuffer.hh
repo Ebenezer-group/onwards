@@ -293,16 +293,14 @@ public:
 
   template <class T>
   void Giveilist (T& intrlst){
-    int count=Give<uint32_t>();
-    for(;count>0;--count)
+    for(int count=Give<uint32_t>();count>0;--count)
       intrlst.push_back(*T::value_type::BuildPolyInstance(*this));
   }
 
   template <class T>
   void Giverbtree (T& rbt){
-    int count=Give<uint32_t>();
     auto endIt(rbt.end());
-    for(;count>0;--count){
+    for(int count=Give<uint32_t>();count>0;--count){
       rbt.insert_unique(endIt,*T::value_type::BuildPolyInstance(*this));
     }
   }

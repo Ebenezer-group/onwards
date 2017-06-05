@@ -4,7 +4,7 @@
 #include<SendBuffer.hh>
 #include"message_ids.hh"
 #include<array>
-#include"plf_colony.h"
+#include<plf_colony.h>
 #include<set>
 #include<string>
 #include<vector>
@@ -15,7 +15,7 @@ void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::vector<int32_t>& az1
          ,::std::string& az2){
   int32_t count[1];
-  count[0]=Give<uint32_t>(buf);
+  count[0]=::cmw::Give<uint32_t>(buf);
   if(count[0]>0){
     az1.resize(az1.size()+count[0]);
     buf.GiveBlock(&(*(az1.end()-count[0])),count[0]);
@@ -27,10 +27,10 @@ template <class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::set<int32_t>& az1){
   int32_t count[1];
-  count[0]=Give<uint32_t>(buf);
+  count[0]=::cmw::Give<uint32_t>(buf);
   auto endIt1=az1.end();
   for(;count[0]>0;--count[0]){
-    az1.emplace_hint(endIt1,buf.template Give<uint32_t>());
+    az1.emplace_hint(endIt1,::cmw::Give<uint32_t>(buf));
   }
 }
 
@@ -44,7 +44,7 @@ template <class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::plf::colony<::std::string>& az1){
   int32_t count[1];
-  count[0]=Give<uint32_t>(buf);
+  count[0]=::cmw::Give<uint32_t>(buf);
   az1.reserve(az1.size()+count[0]);
   for(;count[0]>0;--count[0]){
     az1.insert(buf.GiveString());

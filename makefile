@@ -27,9 +27,9 @@ EXAMPLES:= example/send_example example/receive_example
 example: $(EXAMPLES)
 
 example/send_example: example/send_example.cc $(objects)
-	$(CXX) -o $@ $(CXXFLAGS) -I. $@.cc $(objects)
+	$(CXX) -o $@ $(CXXFLAGS) -I. -I./example $@.cc $(objects)
 example/receive_example: example/receive_example.cc $(objects)
-	$(CXX) -o $@ $(CXXFLAGS) -I. $@.cc $(objects)
+	$(CXX) -o $@ $(CXXFLAGS) -I. -I./example $@.cc $(objects)
 
 clean:
 	rm -f $(TARGETS) $(EXAMPLES)

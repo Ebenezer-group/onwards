@@ -62,8 +62,7 @@ class empty_container{
 public:
 template <class R>
 explicit empty_container (::cmw::ReceiveBuffer<R>& buf){
-  int32_t count=Give<uint32_t>(buf);
-  for(;count>0;--count)T{buf};
+  for(int32_t num=Give<uint32_t>(buf);num>0;--num)T{buf};
 }
 };
 }
