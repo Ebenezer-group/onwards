@@ -1,5 +1,6 @@
 #pragma once
 #include"ErrorWords.hh"
+#include"ReceiveBuffer.hh"
 #include"SendBuffer.hh"
 #include<string>
 #include<string_view>
@@ -15,8 +16,6 @@ extern int32_t previous_updatedtime;
 extern int32_t current_updatedtime;
 
 namespace cmw{
-template <class R> class ReceiveBuffer;
-
 class File{
   ::std::string name;
   int mutable fd=0;
@@ -63,7 +62,7 @@ class empty_container{
 public:
 template <class R>
 explicit empty_container (::cmw::ReceiveBuffer<R>& buf){
-  int32_t count=buf.template Give<uint32_t>();
+  int32_t count=Give<uint32_t>(buf);
   for(;count>0;--count)T{buf};
 }
 };

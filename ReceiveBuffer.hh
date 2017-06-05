@@ -311,4 +311,7 @@ private:
   ReceiveBuffer (ReceiveBuffer const&);
   ReceiveBuffer& operator= (ReceiveBuffer);
 };
+
+template <class T,class R>
+T Give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
 }
