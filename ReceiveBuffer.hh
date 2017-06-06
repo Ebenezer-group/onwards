@@ -191,7 +191,7 @@ public:
 uint8_t const least_significant_first=0;
 uint8_t const most_significant_first=1;
 
-template <class R>
+template<class R>
 class ReceiveBuffer{
   R reader;
   int msgLength=0;
@@ -218,7 +218,7 @@ public:
     return buf[subTotal+index++];
   }
 
-  template <class T>
+  template<class T>
   T Give (){
     T tmp;
     reader.Read(*this,tmp);
@@ -241,7 +241,7 @@ public:
     NextMessage();
   }
 
-  template <class T>
+  template<class T>
   void GiveBlock (T* data,unsigned int elements)
   {reader.ReadBlock(*this,data,elements);}
 
@@ -275,7 +275,7 @@ public:
   }
 
 #ifndef CMW_WINDOWS
-  template <ssize_t N>
+  template<ssize_t N>
   void CopyString (char (&dest)[N]){
     marshalling_integer slen(*this);
     if(slen()+1>N)throw failure("ReceiveBuffer::CopyString");
@@ -291,13 +291,13 @@ public:
     index+=slen();
   }
 
-  template <class T>
+  template<class T>
   void Giveilist (T& intrlst){
     for(int count=Give<uint32_t>();count>0;--count)
       intrlst.push_back(*T::value_type::BuildPolyInstance(*this));
   }
 
-  template <class T>
+  template<class T>
   void Giverbtree (T& rbt){
     auto endIt(rbt.end());
     for(int count=Give<uint32_t>();count>0;--count){
@@ -310,6 +310,6 @@ private:
   ReceiveBuffer& operator= (ReceiveBuffer);
 };
 
-template <class T,class R>
+template<class T,class R>
 T Give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
 }

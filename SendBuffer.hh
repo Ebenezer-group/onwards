@@ -50,14 +50,14 @@ public:
     index+=size;
   }
 
-  template <class T>
+  template<class T>
   void Receive (T val){
     static_assert(::std::is_arithmetic<T>::value
                   ,"SendBuffer expecting arithmetic type");
     Receive(&val,sizeof(T));
   }
 
-  template <class T>
+  template<class T>
   void Receive (int where,T val){
     static_assert(::std::is_arithmetic<T>::value
                   ,"SendBuffer expecting arithmetic type");
@@ -114,7 +114,7 @@ public:
   inline void Reset (){saved_size=index=0;}
   inline void Rollback (){index=saved_size;}
 
-  template <class T>
+  template<class T>
   void ReceiveBlock (T const& grp)
   {
     int32_t count=grp.size();
@@ -123,13 +123,13 @@ public:
       Receive(&*grp.begin(),count*sizeof(typename T::value_type));
   }
 
-  template <class T>
+  template<class T>
   void ReceiveGroup (T const& grp,bool sendType=false){
     Receive(static_cast<int32_t>(grp.size()));
     for(auto const& it:grp)it.Marshal(*this,sendType);
   }
 
-  template <class T>
+  template<class T>
   void ReceiveGroupPointer (T const& grp,bool sendType=false){
     Receive(static_cast<int32_t>(grp.size()));
     for(auto const& it:grp)it->Marshal(*this,sendType);

@@ -47,7 +47,7 @@ public:
     return *this<<buf;
   }
 
-  template <class T>
+  template<class T>
   failure& operator<< (T val){
     using ::std::to_string;
     return *this<<to_string(val);
@@ -58,7 +58,7 @@ class connection_lost:public failure{
 public:
   explicit connection_lost (char const* w):failure(w){}
 
-  template <class T>
+  template<class T>
   connection_lost& operator<< (T val){
     failure::operator<<(val);
     return *this;

@@ -8,10 +8,8 @@
 #include<string.h> //memmove
 
 namespace cmw{
-
-template <class R>
-class ReceiveBufferTCP:public ReceiveBuffer<R>
-{
+template<class R>
+class ReceiveBufferTCP:public ReceiveBuffer<R>{
   int bytesAvailable=0;
 
 public:
@@ -20,16 +18,14 @@ public:
   explicit ReceiveBufferTCP (int sz):ReceiveBuffer<R>(sz){}
 
 
-  void BulkRead ()
-  {
+  void BulkRead (){
     if(0 == bytesAvailable)
       this->index = 0;
     bytesAvailable += sockRead(sock_,this->buf+bytesAvailable
                                ,this->bufsize-bytesAvailable);
   }
 
-  bool GotPacket ()
-  {
+  bool GotPacket (){
     try {
       static bool initial=true;
       if(initial){
@@ -66,8 +62,6 @@ public:
     }
   }
 
-  void Reset (){
-    bytesAvailable = 0;
-  }
+  void Reset (){bytesAvailable = 0;}
 };
 }

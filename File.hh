@@ -25,7 +25,7 @@ public:
   explicit File (::std::string_view n):name(n){}
   File (File&& mv) noexcept :name(::std::move(mv.name)){} // No need to copy fd.
 
-  template <class R>
+  template<class R>
   explicit File (ReceiveBuffer<R>& buf):name(buf.GiveString_view()){
     fd=::open(name.c_str(),O_WRONLY|O_CREAT|O_TRUNC
               ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
@@ -33,7 +33,7 @@ public:
     buf.GiveFile(fd);
   }
 
-  template <class R>
+  template<class R>
   File (bool contents,ReceiveBuffer<R>& buf):
         File{contents?File{buf}:File{buf.GiveString_view()}}{}
 
@@ -56,12 +56,12 @@ public:
   ::std::string const& Name ()const{return name;}
 };
 
-template <class T>
+template<class T>
 class empty_container{
 
 public:
-template <class R>
-explicit empty_container (::cmw::ReceiveBuffer<R>& buf){
+template<class R>
+explicit empty_container (ReceiveBuffer<R>& buf){
   for(int32_t num=Give<uint32_t>(buf);num>0;--num)T{buf};
 }
 };

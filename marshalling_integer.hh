@@ -4,7 +4,7 @@
 
 namespace cmw{
 class SendBuffer;
-template <class R> class ReceiveBuffer;
+template<class R> class ReceiveBuffer;
 
 class marshalling_integer{
   int32_t value;
@@ -16,7 +16,7 @@ public:
 
   // Reads a sequence of bytes in variable-length format and
   // composes a 32 bit integer.
-  template <class R>
+  template<class R>
   explicit marshalling_integer (ReceiveBuffer<R>& buf):value(0)
   {
     uint32_t shift=1;

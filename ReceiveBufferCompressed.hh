@@ -13,7 +13,7 @@ struct decompress_wrapper{
   ~decompress_wrapper (){delete qlz_decompress;}
 };
 
-template <class R>
+template<class R>
 class ReceiveBufferCompressed:private decompress_wrapper,public ReceiveBuffer<R>
 {
   int const bufsize;
