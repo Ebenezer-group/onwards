@@ -17,8 +17,7 @@ public:
   // Reads a sequence of bytes in variable-length format and
   // composes a 32 bit integer.
   template<class R>
-  explicit marshalling_integer (ReceiveBuffer<R>& buf):value(0)
-  {
+  explicit marshalling_integer (ReceiveBuffer<R>& buf):value(0){
     uint32_t shift=1;
     for(;;){
       uint8_t abyte=buf.GiveOne();
@@ -33,7 +32,6 @@ public:
   auto operator() ()const{return value;}
   bool operator== (marshalling_integer const& rhs)const{return value==rhs();}
   bool operator== (int32_t rhs)const{return value==rhs;}
-  bool operator> (int32_t rhs)const{return value>rhs;}
   void Marshal (SendBuffer& buf,bool=false)const;
 };
 }

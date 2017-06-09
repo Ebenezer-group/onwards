@@ -38,7 +38,7 @@ genz 14 /home/brian/onwards/example/example.req
 
 or on Windows:
 
-.\genz.exe 14 /Users/brian/onwards/example/example.req
+genz.exe 14 /Users/brian/onwards/example/example.req
 
 14 is an account number.  Substitute your account number there.
 
