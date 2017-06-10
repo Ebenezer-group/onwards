@@ -33,20 +33,20 @@
 #define CHECK_FIELD_NAME(fieldname)             \
   ::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl);     \
   if(::strcmp(fieldname,::strtok(lineBuf," "))) \
-    throw ::cmw::failure("Expected ")<<fieldname;
+    throw failure("Expected ")<<fieldname;
 
+using namespace ::cmw;
 class request_generator{
   // hand_written_marshalling_code
   char const* fname;
-  ::cmw::FILE_wrapper Fl;
+  FILE_wrapper Fl;
 
 public:
   explicit request_generator (char const* file):fname(file),Fl{file,"r"}{}
 
-  void Marshal (::cmw::SendBuffer& buf,bool=false)const{
+  void Marshal (SendBuffer& buf,bool=false)const{
     auto index=buf.ReserveBytes(1);
-    if(::cmw::File{fname}.Marshal(buf))
-      buf.Receive(index,true);
+    if(File{fname}.Marshal(buf))buf.Receive(index,true);
     else{
       buf.Receive(index,false);
       buf.Receive(fname);
@@ -60,12 +60,12 @@ public:
       if('/'==lineBuf[0]&&'/'==lineBuf[1])continue;
       token=::strtok(lineBuf," ");
       if(::strcmp("Header",token))break;
-      if(::cmw::File{::strtok(nullptr,"\n ")}.Marshal(buf))++updatedFiles;
+      if(File{::strtok(nullptr,"\n ")}.Marshal(buf))++updatedFiles;
     }
 
     if(::strcmp("Middle-file",token))
-      throw ::cmw::failure("A middle file is required.");
-    if(::cmw::File{::strtok(nullptr,"\n ")}.Marshal(buf))++updatedFiles;
+      throw failure("A middle file is required.");
+    if(File{::strtok(nullptr,"\n ")}.Marshal(buf))++updatedFiles;
     buf.Receive(index,updatedFiles);
 
     CHECK_FIELD_NAME("Message-lengths");
@@ -73,13 +73,12 @@ public:
     int8_t msgLength;
     if(!::strcmp("variable",token))msgLength=1;
     else if(!::strcmp("fixed",token))msgLength=0;
-    else throw ::cmw::failure("Invalid value for Message-Lengths.");
+    else throw failure("Invalid value for Message-Lengths.");
     buf.Receive(msgLength);
   }
 };
 
 #include"zz.middle_messages_back.hh"
-using namespace ::cmw;
 
 int32_t previous_updatedtime;
 int32_t current_updatedtime;
