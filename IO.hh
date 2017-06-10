@@ -10,8 +10,7 @@
 namespace cmw{
 inline int sockWrite (sock_type sock,void const* data,int len
                       ,sockaddr* toAddr=nullptr,socklen_t toLen=0){
-  int rc=::sendto(sock,static_cast<char const*>(data),len,0
-                  ,toAddr,toLen);
+  int rc=::sendto(sock,static_cast<char const*>(data),len,0,toAddr,toLen);
   if(rc>0)return rc;
   auto err=GetError();
   if(EAGAIN==err||EWOULDBLOCK==err)return 0;
@@ -28,7 +27,7 @@ inline int sockRead (sock_type sock,char* data,int len
   throw failure("sockRead sock:")<<sock<<" len:"<<len<<" "<<err;
 }
 
-#if defined(CMW_WINDOWS)
+#ifdef CMW_WINDOWS
 inline auto Write (HANDLE hndl,void const* data,int len){
   DWORD bytesWritten=0;
   if(!WriteFile(hndl,static_cast<char const*>(data),len,&bytesWritten,nullptr))

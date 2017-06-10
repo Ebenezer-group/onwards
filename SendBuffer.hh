@@ -115,8 +115,7 @@ public:
   inline void Rollback (){index=saved_size;}
 
   template<class T>
-  void ReceiveBlock (T const& grp)
-  {
+  void ReceiveBlock (T const& grp){
     int32_t count=grp.size();
     Receive(count);
     if(count>0)

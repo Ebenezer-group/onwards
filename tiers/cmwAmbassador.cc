@@ -117,7 +117,7 @@ struct cmw_request{
   void save_lastruntime ()const
   {Write(fd,&latest_update,sizeof(latest_update));}
 
-  ~cmw_request () {::close(fd);}
+  ~cmw_request (){::close(fd);}
 };
 
 class cmwAmbassador{

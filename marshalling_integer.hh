@@ -30,7 +30,7 @@ public:
 
   void operator= (int32_t rhs){value=rhs;}
   auto operator() ()const{return value;}
-  bool operator== (marshalling_integer const& rhs)const{return value==rhs();}
+  bool operator== (marshalling_integer rhs)const{return value==rhs();}
   bool operator== (int32_t rhs)const{return value==rhs;}
   void Marshal (SendBuffer& buf,bool=false)const;
 };
