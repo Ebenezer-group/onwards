@@ -1,11 +1,12 @@
 //   This program receives messages sent by sendexample.
 //
 
+#include "message_ids.hh"
 #include <platforms.hh>
+#include <plf_colony.h>
 #include <ReceiveBufferStack.hh>
 #include <udp_stuff.hh>
 #include "zz.receive_example_messages.hh"
-#include "plf_colony.h"
 
 #include <array>
 #include <iostream>
@@ -21,7 +22,7 @@ int main()
 
     for (;;){
       cmw::ReceiveBufferStack<cmw::SameFormat> buffer(sd);
-      auto msgid = buffer.Give<messageid_t>();
+      auto const msgid = buffer.Give<message_id_8>();
       std::cout << "Message id: " << static_cast<unsigned>(msgid) << '\n';
       switch (msgid) {
       case messageid1:

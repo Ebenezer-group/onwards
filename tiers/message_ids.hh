@@ -1,9 +1,6 @@
 #pragma once
-#include<stdint.h>
+#include<message_id_types.hh>
 
-using messageid_t=uint8_t;
-
-messageid_t const Login=1;
-messageid_t const Generate=2;
-messageid_t const Keepalive=3;
-
+message_id_8 const Login=1;
+message_id_8 const Generate=2;
+message_id_8 const Keepalive=3;

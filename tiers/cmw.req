@@ -1,4 +1,4 @@
-Header                  message_ids.hh
+Header                  ../message_id_types.hh
 Header                  account_info.hh
 Middle-file             middle_back.mdl
 Message-lengths         variable

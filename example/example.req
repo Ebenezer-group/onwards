@@ -1,4 +1,4 @@
-Header                        message_ids.hh
+Header                        ../message_id_types.hh
 Middle-file                   example.mdl
 Message-lengths               variable
 

@@ -1,10 +1,7 @@
 #pragma once
+#include <message_id_types.hh>
 
-#include <stdint.h>
-
-using messageid_t = uint8_t;
-
-messageid_t const messageid1 = 1;
-messageid_t const messageid2 = 2;
-messageid_t const messageid3 = 3;
-messageid_t const messageid4 = 4;
+message_id_8 const messageid1= 1;
+message_id_8 const messageid2= 2;
+message_id_8 const messageid3= 3;
+message_id_8 const messageid4= 4;
