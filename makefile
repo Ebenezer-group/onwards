@@ -28,8 +28,10 @@ example: $(EXAMPLES)
 
 example/send_example: example/send_example.cc $(objects)
 	$(CXX) -o $@ $(CXXFLAGS) -I. -I./example $@.cc $(objects)
+	size $@
 example/receive_example: example/receive_example.cc $(objects)
 	$(CXX) -o $@ $(CXXFLAGS) -I. -I./example $@.cc $(objects)
+	size $@
 
 clean:
 	rm -f $(TARGETS) $(EXAMPLES)

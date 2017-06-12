@@ -8,6 +8,7 @@
 #include<stdint.h>
 
 #include<fcntl.h> //open
+#include<string.h> //strrchr
 #include<sys/types.h>
 #include<sys/stat.h>
 #include<unistd.h> //close
@@ -45,7 +46,9 @@ public:
     if(sb.st_mtime>previous_updatedtime){
       if((fd=::open(name.c_str(),O_RDONLY))<0)
         throw failure("File::Marshal open ")<<name<<" "<<errno;
-      buf.Receive(name);
+      if('.'==name[0]||name[0]=='/')buf.Receive(::strrchr(name.c_str(),'/')+1);
+      else buf.Receive(name);
+
       buf.ReceiveFile(fd,sb.st_size);
       if(sb.st_mtime>current_updatedtime)current_updatedtime=sb.st_mtime;
       return true;
@@ -62,7 +65,7 @@ class empty_container{
 public:
 template<class R>
 explicit empty_container (ReceiveBuffer<R>& buf){
-  for(int32_t num=Give<uint32_t>(buf);num>0;--num)T{buf};
+  for(int32_t num=marshalling_integer{buf}.operator()();num>0;--num)T{buf};
 }
 };
 }

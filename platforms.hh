@@ -7,7 +7,6 @@
 #include<ws2tcpip.h>
 using sock_type=SOCKET;
 using file_type=HANDLE;
-
 inline int GetError (){return WSAGetLastError();}
 inline void windows_start (){
   WSADATA wsa;

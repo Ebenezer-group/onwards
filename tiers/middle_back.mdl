@@ -1,7 +1,7 @@
 // Messages the middle tier either sends to or receives from the back tier.
 
 middle_messages_back
-  -out -no_inline (messageid_t, ::std::vector<cmw_account>)
-  -out            (messageid_t, ::cmw::marshalling_integer, request_generator)
+  -out -no_inline (messageid_t,::std::vector<cmw_account>)
+  -out            (messageid_t,::cmw::marshalling_integer,request_generator)
   -out (messageid_t)
 }

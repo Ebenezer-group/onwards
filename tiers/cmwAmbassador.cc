@@ -54,7 +54,7 @@ public:
 
     char lineBuf[200];
     char const* token=nullptr;
-    int32_t updatedFiles=0;
+    int8_t updatedFiles=0;
     index=buf.ReserveBytes(sizeof(updatedFiles));
     while(::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl)){
       if('/'==lineBuf[0]&&'/'==lineBuf[1])continue;
@@ -146,7 +146,7 @@ public:
 void cmwAmbassador::login (){
   for(;;){
     fds[0].fd=cmwSendbuf.sock_=cmwBuf.sock_=
-       connect_wrapper("174.20.19.129",
+       connect_wrapper("174.20.7.204",
 #ifdef CMW_ENDIAN_BIG
                        "56790");
 #else

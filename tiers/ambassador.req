@@ -1,4 +1,4 @@
-Header                  string_join.hh
-Header                  udp_stuff.hh
+Header                  ../string_join.hh
+Header                  ../udp_stuff.hh
 Middle-file             front_middle.mdl
 Message-lengths         variable

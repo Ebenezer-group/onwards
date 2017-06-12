@@ -76,6 +76,12 @@ public:
 
   void Receive (bool b){Receive(static_cast<unsigned char>(b));}
 
+  void Receive (char* cstr){
+    marshalling_integer slen(::strlen(cstr));
+    slen.Marshal(*this);
+    Receive(cstr,slen());
+  }
+
   void Receive (char const* cstr){
     marshalling_integer slen(::strlen(cstr));
     slen.Marshal(*this);
