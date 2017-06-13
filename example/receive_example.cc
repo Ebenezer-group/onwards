@@ -24,14 +24,14 @@ int main()
     for(;;){
       ReceiveBufferStack<SameFormat> buffer(sd);
       auto const msgid=buffer.Give<message_id_8>();
-      ::std::cout << "Message id: " << static_cast<unsigned>(msgid)<<'\n';
+      ::std::cout<<"Message id: " << static_cast<unsigned>(msgid)<<'\n';
       switch(msgid){
       case messageid1:
       {
         ::std::vector<int32_t> vec;
         ::std::string str;
         receive_example_messages::Give(buffer,vec,str);
-        for (auto val:vec){::std::cout<<val<<" ";}
+        for(auto val:vec){::std::cout<<val<<" ";}
         ::std::cout<<'\n'<<str;
       }
       break;
@@ -49,7 +49,7 @@ int main()
         ::std::array<std::array<float,2>, 3> a;
         receive_example_messages::Give(buffer,a);
         for(auto subarray:a){
-          for(auto val:subarray){std::cout<<val<<" ";}
+          for(auto val:subarray){::std::cout<<val<<" ";}
           ::std::cout<<::std::endl;
         }
       }

@@ -61,11 +61,10 @@ public:
 
 template<class T>
 class empty_container{
-
 public:
-template<class R>
-explicit empty_container (ReceiveBuffer<R>& buf){
-  for(int32_t num=marshalling_integer{buf}.operator()();num>0;--num)T{buf};
-}
+  template<class R>
+  explicit empty_container (ReceiveBuffer<R>& buf){
+    for(auto n=marshalling_integer{buf}.operator()();n>0;--n)T{buf};
+  }
 };
 }
