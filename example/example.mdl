@@ -1,3 +1,5 @@
+Header                 ../message_id_types.hh
+Message-lengths        variable
 send_example_messages
     -out (message_id_8, ::std::vector<int32_t>, ::std::string)
     -out (message_id_8, ::std::set<int32_t>)

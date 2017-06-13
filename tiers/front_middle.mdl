@@ -1,9 +1,5 @@
-middle_messages_front
-  -out -max_length=cmw::udp_packet_max (bool)
-  -out -max_length=cmw::udp_packet_max -no_inline (bool,::std::string_view)
-  -out -max_length=cmw::udp_packet_max -no_inline (bool,cmw::string_join)
-}
-
+Header                  ../udp_stuff.hh
+Message-lengths         variable
 front_messages_middle
   -out -max_length=cmw::udp_packet_max -no_inline (cmw::marshalling_integer,const char*)
 }

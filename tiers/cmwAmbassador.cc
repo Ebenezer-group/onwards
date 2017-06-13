@@ -48,19 +48,13 @@ public:
     }
 
     char lineBuf[200];
-    char const* token=nullptr;
     int8_t updatedFiles=0;
     index=buf.ReserveBytes(sizeof(updatedFiles));
     while(::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl)){
       if('/'==lineBuf[0]&&'/'==lineBuf[1])continue;
-      token=::strtok(lineBuf," ");
-      if(::strcmp("Header",token))break;
+      if(::strcmp("Header",::strtok(lineBuf," ")))break;
       if(File{::strtok(nullptr,"\n ")}.Marshal(buf))++updatedFiles;
     }
-
-    if(::strcmp("Middle-file",token))
-      throw failure("A middle file is required.");
-    if(File{::strtok(nullptr,"\n ")}.Marshal(buf))++updatedFiles;
     buf.Receive(index,updatedFiles);
   }
 };
