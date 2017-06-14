@@ -34,10 +34,6 @@ public:
     buf.GiveFile(fd);
   }
 
-  template<class R>
-  File (bool contents,ReceiveBuffer<R>& buf):
-        File{contents?File{buf}:File{buf.GiveString_view()}}{}
-
   ~File (){if(0!=fd)::close(fd);}
 
   bool Marshal (SendBuffer& buf,bool=false)const{
