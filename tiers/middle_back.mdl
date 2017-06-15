@@ -1,7 +1,7 @@
 // Messages the middle tier either sends to or receives from the back tier.
-Header   ../message_id_types.hh
-Header   account_info.hh
-Message-lengths         variable
+../message_id_types.hh
+account_info.hh
+message-lengths  variable
 middle_messages_back
   -out -no_inline (message_id_8,::std::vector<cmw_account>)
   -out            (message_id_8,::cmw::marshalling_integer,request_generator)

@@ -47,13 +47,14 @@ public:
       buf.Receive(fname);
     }
 
-    char lineBuf[200];
+    char lineBuf[100];
     int8_t updatedFiles=0;
     index=buf.ReserveBytes(sizeof(updatedFiles));
     while(::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl)){
       if('/'==lineBuf[0]&&'/'==lineBuf[1])continue;
-      if(::strcmp("Header",::strtok(lineBuf," ")))break;
-      if(File{::strtok(nullptr,"\n ")}.Marshal(buf))++updatedFiles;
+      char const* token=::strtok(lineBuf,"\n ");
+      if(!::strcmp("message-lengths",token))break;
+      if(File{token}.Marshal(buf))++updatedFiles;
     }
     buf.Receive(index,updatedFiles);
   }

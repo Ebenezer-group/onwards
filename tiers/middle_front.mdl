@@ -1,6 +1,6 @@
-Header               ../string_join.hh
-Header               ../udp_stuff.hh
-Message-lengths      variable
+../string_join.hh
+../udp_stuff.hh
+message-lengths   variable
 middle_messages_front
   -out -max_length=cmw::udp_packet_max (bool)
   -out -max_length=cmw::udp_packet_max -no_inline (bool,::std::string_view)
