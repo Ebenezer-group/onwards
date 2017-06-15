@@ -147,7 +147,7 @@ void cmwAmbassador::login (){
 }
 
 void cmwAmbassador::reset (char const* explanation){
-  middle_messages_front::Marshal(localsendbuf,false,explanation);
+  middle_messages_front::Marshal(localsendbuf,false,{explanation});
   for(auto& t:pendingTransactions){
     if(t.get()){
       localsendbuf.Send((::sockaddr*)&t->front_tier,sizeof(t->front_tier));
@@ -235,7 +235,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
                 request.save_lastruntime();
                 middle_messages_front::Marshal(localsendbuf,true);
               }else middle_messages_front::Marshal(localsendbuf,false,
-                                 string_join{"CMW:",cmwBuf.GiveString_view()});
+                                 {"CMW:",cmwBuf.GiveString_view()});
               localsendbuf.Send((::sockaddr*)&request.front_tier
                                 ,sizeof(request.front_tier));
               localsendbuf.Reset();
@@ -252,7 +252,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
         assert(!pendingTransactions.empty());
         if(pendingTransactions.front().get()){
           auto const& request=*pendingTransactions.front();
-          middle_messages_front::Marshal(localsendbuf,false,ex.what());
+          middle_messages_front::Marshal(localsendbuf,false,{ex.what()});
           localsendbuf.Send((::sockaddr*)&request.front_tier
                             ,sizeof(request.front_tier));
         }else --unrepliedKeepalives;
@@ -279,7 +279,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
       }catch(::std::exception const& ex){
         syslog_wrapper(LOG_ERR,"Mediate request: %s",ex.what());
         if(gotAddress){
-          middle_messages_front::Marshal(localsendbuf,false,ex.what());
+          middle_messages_front::Marshal(localsendbuf,false,{ex.what()});
           localsendbuf.Send((::sockaddr*)&front,frontlen);
         }
         continue;

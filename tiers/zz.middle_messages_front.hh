@@ -18,18 +18,6 @@ inline void Marshal (::cmw::SendBuffer& buf
 
 void Marshal (::cmw::SendBuffer& buf
          ,bool az1
-         ,::std::string_view const& az2
-         ,int32_t max_length=cmw::udp_packet_max){
-  try{
-    buf.ReserveBytes(4);
-    buf.Receive(az1);
-    buf.Receive(az2);
-    buf.FillInSize(max_length);
-  }catch(...){buf.Rollback();throw;}
-}
-
-void Marshal (::cmw::SendBuffer& buf
-         ,bool az1
          ,cmw::string_join const& az2
          ,int32_t max_length=cmw::udp_packet_max){
   try{

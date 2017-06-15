@@ -1,22 +1,22 @@
 #pragma once
 #include"marshalling_integer.hh"
 #include"SendBuffer.hh"
+#include<initializer_list>
 #include<string_view>
 
 namespace cmw{
 class string_join{
   // hand_written_marshalling_code
-  ::std::string_view s1;
-  ::std::string_view s2;
+  ::std::initializer_list<::std::string_view> in;
 
  public:
-  string_join (::std::string_view str1
-               ,::std::string_view str2):s1(str1),s2(str2){}
+  string_join (::std::initializer_list<::std::string_view> lst):in(lst){}
 
   void Marshal (SendBuffer& buf,bool=false)const{
-    marshalling_integer(s1.length()+s2.length()).Marshal(buf);
-    buf.Receive(s1.data(),s1.length());//Use low-level Receive
-    buf.Receive(s2.data(),s2.length());
+    int totLen=0;
+    for(auto sv:in)totLen+=sv.length();
+    marshalling_integer(totLen).Marshal(buf);
+    for(auto sv:in)buf.Receive(sv.data(),sv.length());//Use low-level Receive
   }
 };
 }
