@@ -5,18 +5,18 @@
 #include<string_view>
 
 namespace cmw{
-class string_join{
+class string_plus{
   // hand_written_marshalling_code
-  ::std::initializer_list<::std::string_view> in;
+  ::std::initializer_list<::std::string_view> lst;
 
  public:
-  string_join (::std::initializer_list<::std::string_view> lst):in(lst){}
+  string_plus (::std::initializer_list<::std::string_view> in):lst(in){}
 
   void Marshal (SendBuffer& buf,bool=false)const{
-    int totLen=0;
-    for(auto sv:in)totLen+=sv.length();
+    int32_t totLen=0;
+    for(auto sv:lst)totLen+=sv.length();
     marshalling_integer(totLen).Marshal(buf);
-    for(auto sv:in)buf.Receive(sv.data(),sv.length());//Use low-level Receive
+    for(auto sv:lst)buf.Receive(sv.data(),sv.length());//Use low-level Receive
   }
 };
 }

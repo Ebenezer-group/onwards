@@ -12,7 +12,6 @@
 #include<ReceiveBufferCompressed.hh>
 #include<ReceiveBufferStack.hh>
 #include<setDirectory.hh>
-#include<string_join.hh>
 #include<syslog_wrapper.hh>
 #include<SendBufferCompressed.hh>
 #include<SendBufferStack.hh>

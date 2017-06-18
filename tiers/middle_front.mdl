@@ -1,7 +1,6 @@
-../string_join.hh
 ../udp_stuff.hh
 message-lengths   variable
 middle_messages_front
   -out -max_length=cmw::udp_packet_max (bool)
-  -out -max_length=cmw::udp_packet_max -no_inline (bool,cmw::string_join)
+  -out -max_length=cmw::udp_packet_max -no_inline (bool,cmw::string_plus)
 }
