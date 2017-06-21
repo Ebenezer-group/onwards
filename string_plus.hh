@@ -6,7 +6,6 @@
 
 namespace cmw{
 class string_plus{
-  // hand_written_marshalling_code
   ::std::initializer_list<::std::string_view> lst;
 
  public:

@@ -42,13 +42,13 @@ genz.exe 14 /Users/brian/onwards/example/example.mdl
 
 14 is an account number.  Substitute your account number there.
 
-The path for a .mdl file is next.  Zero or more header 
-files are listed in a .mdl file to specify a request.  
-There's more info on .mdl files here -- 
+The path for a .mdl file is next.  Zero or more header
+files are listed in a .mdl file to specify a request.
+There's more info on .mdl files here --
 http://webEbenezer.net/middle.html.
 
 Once you have built the software, I suggest copying
-example.mdl to one of your directories and modifying 
+example.mdl to one of your directories and modifying
 the copy according to your needs.
 
 

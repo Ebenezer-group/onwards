@@ -4,7 +4,7 @@
 
 namespace cmw{
 class SendBuffer;
-template <class R> class ReceiveBuffer;
+template<class R> class ReceiveBuffer;
 }
 
 struct cmw_account{
@@ -13,7 +13,7 @@ struct cmw_account{
 
   cmw_account (int num,char* pass):number(num),password(pass){}
 
-  template <class R>
+  template<class R>
   explicit cmw_account (::cmw::ReceiveBuffer<R>&);
 
   void MarshalMemberData (::cmw::SendBuffer&)const;

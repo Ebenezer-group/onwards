@@ -72,7 +72,7 @@ struct cmw_request{
   int32_t latest_update;
   int fd;
 
-  template <class R>
+  template<class R>
   explicit cmw_request (ReceiveBuffer<R>& buf):accountNbr(buf){
     buf.CopyString(path);
     auto const pos=::strrchr(path,'/');

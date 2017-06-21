@@ -7,7 +7,6 @@
 #include<SendBufferStack.hh>
 #include<syslog_wrapper.hh>
 #include"zz.front_messages_middle.hh"
-#include<string_view>
 #include<stdio.h>
 #include<stdlib.h> //exit
 
