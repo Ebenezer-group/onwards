@@ -16,7 +16,7 @@
 #include<SendBufferCompressed.hh>
 #include<SendBufferStack.hh>
 #include<udp_stuff.hh>
-#include"zz.middle_messages_front.hh"
+#include"zz.middle_front.hh"
 
 #include<memory> //unique_ptr
 #include<vector>
@@ -59,7 +59,7 @@ public:
   }
 };
 
-#include"zz.middle_messages_back.hh"
+#include"zz.middle_back.hh"
 
 int32_t previous_updatedtime;
 int32_t current_updatedtime;
@@ -138,7 +138,7 @@ void cmwAmbassador::login (){
     poll_wrapper(nullptr,0,loginPause);
   }
 
-  middle_messages_back::Marshal(cmwSendbuf,Login,accounts);
+  middle_back::Marshal(cmwSendbuf,Login,accounts);
   while(!cmwSendbuf.Flush());
   while(!cmwBuf.GotPacket());
   if(cmwBuf.GiveBool())set_nonblocking(fds[0].fd);
@@ -146,7 +146,7 @@ void cmwAmbassador::login (){
 }
 
 void cmwAmbassador::reset (char const* explanation){
-  middle_messages_front::Marshal(localsendbuf,false,{explanation});
+  middle_front::Marshal(localsendbuf,false,{explanation});
   for(auto& t:pendingTransactions){
     if(t.get()){
       localsendbuf.Send((::sockaddr*)&t->front_tier,sizeof(t->front_tier));
@@ -199,7 +199,6 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
 
   CHECK_FIELD_NAME("Login-attempts-interval-in-milliseconds");
   loginPause=::strtol(::strtok(nullptr,"\n "),0,10);
-
   CHECK_FIELD_NAME("Keepalive-interval-in-milliseconds");
   int keepaliveInterval=::strtol(::strtok(nullptr,"\n "),0,10);
 
@@ -210,7 +209,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
     if(0==poll_wrapper(fds,2,keepaliveInterval)){
       try{
         if(++unrepliedKeepalives>1)throw failure("No reply from CMW");
-        middle_messages_back::Marshal(cmwSendbuf,Keepalive);
+        middle_back::Marshal(cmwSendbuf,Keepalive);
         fds[0].events|=POLLOUT;
         pendingTransactions.push_back(nullptr);
       }catch(::std::exception const& ex){
@@ -232,8 +231,8 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
                 setDirectory(request.path);
                 empty_container<File>{cmwBuf};
                 request.save_lastruntime();
-                middle_messages_front::Marshal(localsendbuf,true);
-              }else middle_messages_front::Marshal(localsendbuf,false,
+                middle_front::Marshal(localsendbuf,true);
+              }else middle_front::Marshal(localsendbuf,false,
                                  {"CMW:",cmwBuf.GiveString_view()});
               localsendbuf.Send((::sockaddr*)&request.front_tier
                                 ,sizeof(request.front_tier));
@@ -251,7 +250,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
         assert(!pendingTransactions.empty());
         if(pendingTransactions.front().get()){
           auto const& request=*pendingTransactions.front();
-          middle_messages_front::Marshal(localsendbuf,false,{ex.what()});
+          middle_front::Marshal(localsendbuf,false,{ex.what()});
           localsendbuf.Send((::sockaddr*)&request.front_tier
                             ,sizeof(request.front_tier));
         }else --unrepliedKeepalives;
@@ -270,7 +269,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
         gotAddress=true;
         auto request=::std::make_unique<cmw_request>(recbuf);
         //::std::unique_ptr request{new cmw_request(recbuf)};
-        middle_messages_back::Marshal(cmwSendbuf,Generate,request->accountNbr
+        middle_back::Marshal(cmwSendbuf,Generate,request->accountNbr
                                       ,request_generator(request->filename),500000);
         request->latest_update=current_updatedtime;
         request->front_tier=front;
@@ -278,7 +277,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
       }catch(::std::exception const& ex){
         syslog_wrapper(LOG_ERR,"Mediate request: %s",ex.what());
         if(gotAddress){
-          middle_messages_front::Marshal(localsendbuf,false,{ex.what()});
+          middle_front::Marshal(localsendbuf,false,{ex.what()});
           localsendbuf.Send((::sockaddr*)&front,frontlen);
         }
         continue;

@@ -6,7 +6,7 @@
 #include<ReceiveBufferStack.hh>
 #include<SendBufferStack.hh>
 #include<syslog_wrapper.hh>
-#include"zz.front_messages_middle.hh"
+#include"zz.front_middle.hh"
 #include<stdio.h>
 #include<stdlib.h> //exit
 
@@ -29,8 +29,7 @@ int main (int argc,char** argv){
 
 sk: ::pollfd pfd{sendbuf.sock_,POLLIN,0};
     int waitMillisecs=9000;
-    front_messages_middle::Marshal(sendbuf,marshalling_integer(argv[1])
-                                   ,argv[2]);
+    front_middle::Marshal(sendbuf,marshalling_integer(argv[1]),argv[2]);
     for(int j=0;j<2;++j,waitMillisecs*=2){
       sendbuf.Send(rp->ai_addr,rp->ai_addrlen);
 #ifdef __linux__

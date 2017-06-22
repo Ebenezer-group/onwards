@@ -4,7 +4,7 @@
 #include"udp_stuff.hh"
 #include<string_plus.hh>
 
-namespace middle_messages_front{
+namespace middle_front{
 inline void Marshal (::cmw::SendBuffer& buf
          ,bool az1
          ,int32_t max_length=cmw::udp_packet_max){

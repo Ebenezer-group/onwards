@@ -6,7 +6,7 @@
 #include<marshalling_integer.hh>
 #include<vector>
 
-namespace middle_messages_back{
+namespace middle_back{
 void Marshal (::cmw::SendBuffer& buf
          ,message_id_8 const& az1
          ,::std::vector<cmw_account> const& az2
