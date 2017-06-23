@@ -1,13 +1,13 @@
 //   The following Middle code was used as input to the C++
 //   Middleware Writer.
 //
-//   send_example_messages
+//   send_messages
 //      -out (message_id_8, ::std::vector<int32_t>, ::std::string)
 //      -out (message_id_8, ::std::set<int32_t>)
 //      -out (message_id_8, ::std::array<::std::array<float,2>, 3>)
 //   }
 //
-//   receive_example_messages
+//   receive_messages
 //      -in                (::std::vector<int32_t>, ::std::string)
 //      -in                (::std::set<int32_t>)
 //      -in                (::std::array<::std::array<float,2>, 3>)
@@ -18,7 +18,7 @@
 #include <platforms.hh>
 #include <plf_colony.h>
 #include <SendBufferStack.hh>
-#include "zz.send_example_messages.hh"
+#include "zz.send_messages.hh"
 
 #include <array>
 #include <iostream>
@@ -44,14 +44,14 @@ int main()
       case messageid1:
       {
         ::std::vector<int32_t> vec {100,97,94,91,88,85};
-        send_example_messages::Marshal(buffer,messageid1,vec,"Proverbs 24:27");
+        send_messages::Marshal(buffer,messageid1,vec,"Proverbs 24:27");
         break;
       }
 
       case messageid2:
       {
         ::std::set<int32_t> iset {100,97,94,91,88,85};
-        send_example_messages::Marshal(buffer,messageid2,iset);
+        send_messages::Marshal(buffer,messageid2,iset);
         break;
       }
 
@@ -61,14 +61,14 @@ int main()
                                                     ,{{3.3,4.4}}
                                                     ,{{5.5,6.6}}
                                                   }};
-        send_example_messages::Marshal(buffer,messageid3,ar);
+        send_messages::Marshal(buffer,messageid3,ar);
         break;
       }
 
       case messageid4:
       {
         ::plf::colony<::std::string> clny {"Beautiful words ", "wonderful words ", "of life"};
-        send_example_messages::Marshal(buffer,messageid4,clny);
+        send_messages::Marshal(buffer,messageid4,clny);
         break;
       }
 

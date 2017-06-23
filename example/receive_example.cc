@@ -5,7 +5,7 @@
 #include <plf_colony.h>
 #include <ReceiveBufferStack.hh>
 #include <udp_stuff.hh>
-#include "zz.receive_example_messages.hh"
+#include "zz.receive_messages.hh"
 
 #include <array>
 #include <iostream>
@@ -30,7 +30,7 @@ int main()
       {
         ::std::vector<int32_t> vec;
         ::std::string str;
-        receive_example_messages::Give(buffer,vec,str);
+        receive_messages::Give(buffer,vec,str);
         for(auto val:vec){::std::cout<<val<<" ";}
         ::std::cout<<'\n'<<str;
       }
@@ -39,7 +39,7 @@ int main()
       case messageid2:
       {
         ::std::set<int32_t> iset;
-        receive_example_messages::Give(buffer,iset);
+        receive_messages::Give(buffer,iset);
         for(auto val:iset){::std::cout<<val<<" ";}
       }
       break;
@@ -47,7 +47,7 @@ int main()
       case messageid3:
       {
         ::std::array<std::array<float,2>, 3> a;
-        receive_example_messages::Give(buffer,a);
+        receive_messages::Give(buffer,a);
         for(auto subarray:a){
           for(auto val:subarray){::std::cout<<val<<" ";}
           ::std::cout<<::std::endl;
@@ -58,7 +58,7 @@ int main()
       case messageid4:
       {
         ::plf::colony<::std::string> clny;
-        receive_example_messages::Give(buffer,clny);
+        receive_messages::Give(buffer,clny);
         for(auto val:clny){::std::cout<<val<<" ";}
       }
       break;

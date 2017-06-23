@@ -8,7 +8,7 @@
 #include<string>
 #include<vector>
 
-namespace send_example_messages{
+namespace send_messages{
 inline void Marshal (::cmw::SendBuffer& buf
          ,message_id_8 const& az1
          ,::std::vector<int32_t> const& az2
