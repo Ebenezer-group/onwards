@@ -5,9 +5,9 @@ CXX=g++7 -std=c++17
 
 LIBS=-L./ -L/usr/lib
 
-MIDDLE:= tiers/cmwAmbassador
 FRONT:= tiers/genz
-TIERS:= $(MIDDLE) $(FRONT)
+MIDDLE:= tiers/cmwAmbassador
+TIERS:= $(FRONT) $(MIDDLE)
 objects:=marshalling_integer.o
 TARGETS:= $(objects) $(TIERS)
 all: $(TARGETS)
@@ -15,11 +15,11 @@ all: $(TARGETS)
 #zz.middle_messages_back.hh: account_info.hh remote.mdl cmw.req
 #	genz 2 /usr/home/brian/onwards/tiers/cmw.req
 
-$(MIDDLE): $(MIDDLE).cc $(objects)
+$(FRONT): $(FRONT).cc $(objects)
 	$(CXX) $(CXXFLAGS) -I. $@.cc $(objects) -o $@
 	size $@
 
-$(FRONT): $(FRONT).cc $(objects)
+$(MIDDLE): $(MIDDLE).cc $(objects)
 	$(CXX) $(CXXFLAGS) -I. $@.cc $(objects) -o $@
 	size $@
 

@@ -9,10 +9,10 @@ be used in conjunction with the CMW.
 Building
 There are two makefiles here: one for BSD/Linux and one for
 Windows.  The BSD version is called "makefile" and the Windows
-version is called "makefile.windows".  If you're using Windows,
-you may want to rename makefile.windows to makefile.  If you're
-using a big-endian machine, add -DCMW_ENDIAN_BIG to the
-CXXFLAGS in the makefile.
+version is called "makefile.windows".  If you're using a 
+Microsoft compiler, you may want to rename makefile.windows to 
+makefile.  If you're using a big-endian machine, add 
+-DCMW_ENDIAN_BIG to the CXXFLAGS in the makefile.
 
 Two programs are built.  The programs are the middle and front
 tiers of the C++ Middleware Writer (CMW).  The middle tier is
