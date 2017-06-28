@@ -1,6 +1,6 @@
 CXXFLAGS=-Os -Wundef -W -Wall -Wextra -Wreorder
 
-CXX=g++7 -std=c++17
+CXX=g++8 -std=c++17
 #CXX=clang++ -std=c++1z -stdlib=libc++
 
 LIBS=-L./ -L/usr/lib
@@ -29,8 +29,8 @@ example: $(EXAMPLES)
 example/send_example: example/send_example.cc $(objects)
 	$(CXX) -o $@ $(CXXFLAGS) -I. -I./example $@.cc $(objects)
 	size $@
-example/receive_example: example/receive_example.cc $(objects)
-	$(CXX) -o $@ $(CXXFLAGS) -I. -I./example $@.cc $(objects)
+example/receive_example: example/receive_example.cc
+	$(CXX) -o $@ $(CXXFLAGS) -I. -I./example $@.cc
 	size $@
 
 clean:
