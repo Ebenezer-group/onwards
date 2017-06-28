@@ -1,6 +1,6 @@
 CXXFLAGS=-Os -Wundef -W -Wall -Wextra -Wreorder
 
-CXX=g++8 -std=c++17
+CXX=g++7 -std=c++17
 #CXX=clang++ -std=c++1z -stdlib=libc++
 
 LIBS=-L./ -L/usr/lib
