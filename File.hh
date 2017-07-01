@@ -4,7 +4,6 @@
 #include"SendBuffer.hh"
 #include<string>
 #include<string_view>
-#include<utility> //move
 #include<stdint.h>
 
 #include<fcntl.h> //open
@@ -24,7 +23,6 @@ class File{
 public:
   explicit File (char const *n):name(n){}
   explicit File (::std::string_view n):name(n){}
-  File (File&& mv) noexcept :name(::std::move(mv.name)){} // No need to copy fd.
 
   template<class R>
   explicit File (ReceiveBuffer<R>& buf):name(buf.GiveString_view()){
