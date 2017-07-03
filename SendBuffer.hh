@@ -109,11 +109,11 @@ public:
   }
 
   void FillInSize (int32_t max){
-    int32_t marshalled_bytes=index-saved_size;
-    if(marshalled_bytes>max)
+    int32_t marshalledBytes=index-saved_size;
+    if(marshalledBytes>max)
       throw failure("Size of marshalled data exceeds max of: ")<<max;
 
-    ::memcpy(buf+saved_size,&marshalled_bytes,sizeof(marshalled_bytes));
+    Receive(saved_size,marshalledBytes);
     saved_size=index;
   }
 
