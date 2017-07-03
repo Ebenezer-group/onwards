@@ -8,17 +8,17 @@ be used in conjunction with the CMW.
 
 Building
 There are two makefiles here: one for Gcc/Clang and one for
-Visual Studio.  The Gcc version is called "makefile" and the 
-Visual Studio version is "makefile.vs".  If you're using a 
-Microsoft compiler, you may want to rename makefile.vs to 
-makefile.  If you're using a big-endian machine, add 
+Visual Studio.  The Gcc version is called "makefile" and the
+Visual Studio version is "makefile.vs".  If you're using a
+Microsoft compiler, you may want to rename makefile.vs to
+makefile.  If you're using a big-endian machine, add
 -DCMW_ENDIAN_BIG to the CXXFLAGS in the makefile.
 
 Two programs are built.  The programs are the middle and front
 tiers of the C++ Middleware Writer (CMW).  The middle tier is
 called the CMW Ambassador (CMWA).  The front tier is called
 "genz" and is a command line interface.  On Windows, only the
-front tier is built.  The middle tier is still needed for 
+front tier is built.  The middle tier is still needed for
 Windows users so it needs to be running on a BSD/Linux box or
 VM.
 
@@ -45,12 +45,12 @@ genz.exe 14 /Users/brian/onwards/example/example.mdl
 14 is an account number.  Substitute your account number there.
 
 The path for a Middle file (.mdl) is next.  Zero or more header
-files are listed in a Middle file to specify a request.  There's 
+files are listed in a Middle file to specify a request.  There's
 more info on Middle files here --
 http://webEbenezer.net/middle.html.
 
-Once you have built the software, I suggest copying example.mdl 
-to one of your directories and modifying the copy according to 
+Once you have built the software, I suggest copying example.mdl
+to one of your directories and modifying the copy according to
 your needs.
 
 
@@ -60,12 +60,12 @@ If genz fails with "No reply received.  Is the CMWA running?"
 make sure the middle tier is running.
 
 Another possible problem could be due to "breaking changes"
-between the back and middle tiers.  (We may have changed the 
-protocol between these tiers and now older versions of the 
-middle tier no longer work right.)  The thing to do in this 
-case is to check our website for an announcement/email that 
-you may have missed.  Probably you will have to clone/download 
-the new version of the repository and then reinstall in order 
+between the back and middle tiers.  (We may have changed the
+protocol between these tiers and now older versions of the
+middle tier no longer work right.)  The thing to do in this
+case is to check our website for an announcement/email that
+you may have missed.  Probably you will have to clone/download
+the new version of the repository and then reinstall in order
 to fix the problem.
 
 If you move/rename header files listed in your .mdl files,

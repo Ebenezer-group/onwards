@@ -14,10 +14,10 @@ EXAMPLES:=example\send_example.exe example\receive_example.exe
 example: $(EXAMPLES)
 
 example\send_example.exe: example\send_example.cc $(objects)
-	$(CC) -Fe:$@ $(CFLAGS) -I. example\send_example.cc $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+	$(CC) -Fe:$@ $(CFLAGS) -I. -I example example\send_example.cc $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
 example\receive_example.exe: example\receive_example.cc
-	$(CC) -Fe:$@ $(CFLAGS) -I. example\receive_example.cc  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+	$(CC) -Fe:$@ $(CFLAGS) -I. -I example example\receive_example.cc  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
 clean:
 	del $(objects) tiers\genz.exe $(EXAMPLES)
