@@ -40,7 +40,7 @@ public:
 
   void Marshal (SendBuffer& buf,bool=false)const{
     auto index=buf.ReserveBytes(1);
-    if(File{fname}.Marshal(buf))buf.Receive(index,true);
+    if(MarshalFile(fname,buf))buf.Receive(index,true);
     else{
       buf.Receive(index,false);
       buf.Receive(fname);
@@ -53,7 +53,7 @@ public:
       if('/'==lineBuf[0]&&'/'==lineBuf[1])continue;
       char const* token=::strtok(lineBuf,"\n ");
       if(!::strcmp("message-lengths",token))break;
-      if(File{token}.Marshal(buf))++updatedFiles;
+      if(MarshalFile(token,buf))++updatedFiles;
     }
     buf.Receive(index,updatedFiles);
   }

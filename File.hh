@@ -34,24 +34,26 @@ public:
 
   ~File (){if(0!=fd)::close(fd);}
 
-  bool Marshal (SendBuffer& buf,bool=false)const{
-    struct stat sb;
-    if(::stat(name.c_str(),&sb)<0)throw failure("File::Marshal stat ")<<name;
-    if(sb.st_mtime>previous_updatedtime){
-      if((fd=::open(name.c_str(),O_RDONLY))<0)
-        throw failure("File::Marshal open ")<<name<<" "<<errno;
-      if('.'==name[0]||name[0]=='/')buf.Receive(::strrchr(name.c_str(),'/')+1);
-      else buf.Receive(name);
-
-      buf.ReceiveFile(fd,sb.st_size);
-      if(sb.st_mtime>current_updatedtime)current_updatedtime=sb.st_mtime;
-      return true;
-    }
-    return false;
-  }
-
   ::std::string const& Name ()const{return name;}
 };
+
+bool MarshalFile (char const* name,SendBuffer& buf){
+  struct stat sb;
+  if(::stat(name,&sb)<0)throw failure("MarshalFile stat ")<<name;
+  if(sb.st_mtime>previous_updatedtime){
+    if('.'==name[0]||name[0]=='/')buf.Receive(::strrchr(name,'/')+1);
+    else buf.Receive(name);
+
+    int fd;
+    if((fd=::open(name,O_RDONLY))<0)
+      throw failure("MarshalFile open ")<<name<<" "<<errno;
+    try{buf.ReceiveFile(fd,sb.st_size);}catch(...){::close(fd);}
+    ::close(fd);
+    if(sb.st_mtime>current_updatedtime)current_updatedtime=sb.st_mtime;
+    return true;
+  }
+  return false;
+}
 
 template<class T>
 class empty_container{
