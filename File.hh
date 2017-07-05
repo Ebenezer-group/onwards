@@ -2,7 +2,7 @@
 #include"ErrorWords.hh"
 #include"ReceiveBuffer.hh"
 #include"SendBuffer.hh"
-#include<string>
+#include<fixed_string.hh>
 #include<string_view>
 #include<stdint.h>
 
@@ -17,27 +17,27 @@ extern int32_t current_updatedtime;
 
 namespace cmw{
 class File{
-  ::std::string name;
-  int mutable fd=0;
+  fixed_string_120 name;
+  int fd=0;
 
 public:
-  explicit File (char const *n):name(n){}
   explicit File (::std::string_view n):name(n){}
 
   template<class R>
-  explicit File (ReceiveBuffer<R>& buf):name(buf.GiveString_view()){
+  explicit File (ReceiveBuffer<R>& buf):name(buf){
     fd=::open(name.c_str(),O_WRONLY|O_CREAT|O_TRUNC
               ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-    if(fd<0)throw failure("File::File open ")<<name<<" "<<errno;
+    if(fd<0)throw failure("File::File open ")<<name.c_str()<<" "<<errno;
     buf.GiveFile(fd);
   }
 
   ~File (){if(0!=fd)::close(fd);}
 
-  ::std::string const& Name ()const{return name;}
+  char const* Name ()const{return name.c_str();}
 };
 
-bool MarshalFile (char const* name,SendBuffer& buf){
+
+inline bool MarshalFile (char const* name,SendBuffer& buf){
   struct stat sb;
   if(::stat(name,&sb)<0)throw failure("MarshalFile stat ")<<name;
   if(sb.st_mtime>previous_updatedtime){
@@ -60,7 +60,7 @@ class empty_container{
 public:
   template<class R>
   explicit empty_container (ReceiveBuffer<R>& buf){
-    for(auto n=marshalling_integer{buf}.operator()();n>0;--n)T{buf};
+    for(auto n=marshalling_integer{buf}();n>0;--n)T{buf};
   }
 };
 }
