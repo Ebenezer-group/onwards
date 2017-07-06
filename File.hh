@@ -2,7 +2,6 @@
 #include"ErrorWords.hh"
 #include"ReceiveBuffer.hh"
 #include"SendBuffer.hh"
-#include<fixed_string.hh>
 #include<string_view>
 #include<stdint.h>
 
@@ -17,37 +16,36 @@ extern int32_t current_updatedtime;
 
 namespace cmw{
 class File{
-  fixed_string_120 name;
-  int fd=0;
+  ::std::string_view name;
 
 public:
   explicit File (::std::string_view n):name(n){}
 
   template<class R>
-  explicit File (ReceiveBuffer<R>& buf):name(buf){
-    fd=::open(name.c_str(),O_WRONLY|O_CREAT|O_TRUNC
+  explicit File (ReceiveBuffer<R>& buf):name(buf.GiveString_view_plus()){
+    int fd=::open(name.data(),O_WRONLY|O_CREAT|O_TRUNC
               ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-    if(fd<0)throw failure("File::File open ")<<name.c_str()<<" "<<errno;
-    buf.GiveFile(fd);
+    if(fd<0)throw failure("File ctor:open ")<<name.data()<<" "<<errno;
+    try{buf.GiveFile(fd);}catch(...){::close(fd);throw;}
+    ::close(fd);
   }
 
-  ~File (){if(0!=fd)::close(fd);}
-
-  char const* Name ()const{return name.c_str();}
+  char const* Name ()const{return name.data();}
 };
 
 
-inline bool MarshalFile (char const* name,SendBuffer& buf){
+inline bool MarshalFile (char const* fname,SendBuffer& buf){
   struct stat sb;
-  if(::stat(name,&sb)<0)throw failure("MarshalFile stat ")<<name;
+  if(::stat(fname,&sb)<0)throw failure("MarshalFile stat ")<<fname;
   if(sb.st_mtime>previous_updatedtime){
-    if('.'==name[0]||name[0]=='/')buf.Receive(::strrchr(name,'/')+1);
-    else buf.Receive(name);
+    if('.'==fname[0]||fname[0]=='/')buf.Receive(::strrchr(fname,'/')+1);
+    else buf.Receive(fname);
+    buf.InsertNull();
 
     int fd;
-    if((fd=::open(name,O_RDONLY))<0)
-      throw failure("MarshalFile open ")<<name<<" "<<errno;
-    try{buf.ReceiveFile(fd,sb.st_size);}catch(...){::close(fd);}
+    if((fd=::open(fname,O_RDONLY))<0)
+      throw failure("MarshalFile open ")<<fname<<" "<<errno;
+    try{buf.ReceiveFile(fd,sb.st_size);}catch(...){::close(fd);throw;}
     ::close(fd);
     if(sb.st_mtime>current_updatedtime)current_updatedtime=sb.st_mtime;
     return true;

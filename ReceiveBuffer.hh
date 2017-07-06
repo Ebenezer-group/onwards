@@ -274,6 +274,12 @@ public:
     return view;
   }
 
+  auto GiveString_view_plus(){
+    ::std::string_view view(GiveString_view());
+    GiveOne();
+    return view;
+  }
+
 #ifndef CMW_WINDOWS
   template<ssize_t N>
   void CopyString (char (&dest)[N]){

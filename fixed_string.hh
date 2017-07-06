@@ -15,7 +15,7 @@ class fixed_string{
  public:
   explicit fixed_string (char const* s):length(::strlen(s)){
     if(length>N-1)throw failure("fixed_string ctor");
-    ::strncpy(&str[0],s,length);
+    ::strcpy(&str[0],s);
   }
 
   explicit fixed_string (::std::string_view s):length(s.length()){

@@ -32,9 +32,9 @@ protected:
 public:
   sock_type sock_=-1;
 
-  SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
+  inline SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
-  void Receive (void const* data,int size){
+  inline void Receive (void const* data,int size){
     if(size>bufsize-index)
       throw failure("Size of marshalled data exceeds space available: ")
         <<bufsize<<" "<<saved_size;
@@ -64,7 +64,7 @@ public:
     ::memcpy(buf+where,&val,sizeof(T));
   }
 
-  void ReceiveFile (file_type fd,int32_t fl_sz){
+  inline void ReceiveFile (file_type fd,int32_t fl_sz){
     Receive(fl_sz);
     if(fl_sz> bufsize-index)
       throw failure("SendBuffer::ReceiveFile ")<<bufsize;
@@ -74,15 +74,15 @@ public:
     index+=fl_sz;
   }
 
-  void Receive (bool b){Receive(static_cast<unsigned char>(b));}
+  inline void Receive (bool b){Receive(static_cast<unsigned char>(b));}
 
-  void Receive (char* cstr){
+  inline void Receive (char* cstr){
     marshalling_integer slen(::strlen(cstr));
     slen.Marshal(*this);
     Receive(cstr,slen());
   }
 
-  void Receive (char const* cstr){
+  inline void Receive (char const* cstr){
     marshalling_integer slen(::strlen(cstr));
     slen.Marshal(*this);
     Receive(cstr,slen());
@@ -100,6 +100,7 @@ public:
     Receive(s.data(),slen());
   }
 
+  inline void InsertNull (){uint8_t z=0;Receive(z);}
   inline int GetIndex (){return index;}
   inline int ReserveBytes (int num){
     if(num>bufsize-index)throw failure("SendBuffer::ReserveBytes");
@@ -108,7 +109,7 @@ public:
     return copy;
   }
 
-  void FillInSize (int32_t max){
+  inline void FillInSize (int32_t max){
     int32_t marshalledBytes=index-saved_size;
     if(marshalledBytes>max)
       throw failure("Size of marshalled data exceeds max of: ")<<max;
