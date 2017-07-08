@@ -67,20 +67,19 @@ int32_t current_updatedtime;
 
 struct cmw_request{
   marshalling_integer const accountNbr;
-  char path[120];
+  fixed_string_120 path;
   char const* filename;
   ::sockaddr_in6 front_tier;
   int32_t latest_update;
   int fd;
 
   template<class R>
-  explicit cmw_request (ReceiveBuffer<R>& buf):accountNbr(buf){
-    buf.CopyString(path);
-    auto const pos=::strrchr(path,'/');
-    if(NULL==pos)throw failure("cmw_request didn't find a /");
+  explicit cmw_request (ReceiveBuffer<R>& buf):accountNbr(buf),path(buf){
+    char* const pos=::strrchr(path(),'/');
+    if(nullptr==pos)throw failure("cmw_request didn't find a /");
     *pos='\0';
     filename=pos+1;
-    setDirectory(path);
+    setDirectory(path());
     char lastrunFile[60];
     ::snprintf(lastrunFile,sizeof(lastrunFile),"%s.lastrun",filename);
     fd=::open(lastrunFile,O_RDWR);
@@ -90,7 +89,7 @@ struct cmw_request{
         throw failure("pread ")<<errno;
     }else{
       fd=::open(lastrunFile,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-      if(fd<0)throw failure("open ")<<errno;
+      if(fd<0)throw failure("open ")<<lastrunFile<<" "<<errno;
     }
     current_updatedtime=previous_updatedtime;
   }
@@ -179,7 +178,7 @@ bool cmwAmbassador::sendData (){
 cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
   ,cmwSendbuf(1000000)
 {
-  char lineBuf[140];
+  char lineBuf[120];
   FILE_wrapper Fl(configfile,"r");
   while(::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl)){
     char const* token=::strtok(lineBuf," ");
@@ -203,9 +202,8 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
   CHECK_FIELD_NAME("Keepalive-interval-in-milliseconds");
   int keepaliveInterval=::strtol(::strtok(nullptr,"\n "),0,10);
 
-  fds[0].events=fds[1].events=POLLIN;
   login();
-
+  fds[0].events=fds[1].events=POLLIN;
   for(;;){
     if(0==poll_wrapper(fds,2,keepaliveInterval)){
       try{
@@ -229,7 +227,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
             if(pendingTransactions.front().get()){
               auto const& request=*pendingTransactions.front();
               if(cmwBuf.GiveBool()){
-                setDirectory(request.path);
+                setDirectory(request.path.c_str());
                 empty_container<File>{cmwBuf};
                 request.save_lastruntime();
                 middle_front::Marshal(localsendbuf,true);

@@ -36,6 +36,7 @@ class fixed_string{
     buf.Receive(&str[0],length);
   }
 
+  char* operator() (){return &str[0];}
   char const* c_str ()const{return &str[0];}
   char operator[] (int index)const{return str[index];}
 };
