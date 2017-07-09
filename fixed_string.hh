@@ -13,6 +13,8 @@ class fixed_string{
   ::std::array<char,N> str;
 
  public:
+  fixed_string ()=default;
+
   explicit fixed_string (char const* s):length(::strlen(s)){
     if(length>N-1)throw failure("fixed_string ctor");
     ::strcpy(&str[0],s);
