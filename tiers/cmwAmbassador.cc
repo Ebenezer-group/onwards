@@ -66,12 +66,12 @@ int32_t previous_updatedtime;
 int32_t current_updatedtime;
 
 struct cmw_request{
-  marshalling_integer const accountNbr;
-  fixed_string_120 path;
-  char const* filename;
   ::sockaddr_in6 front;
   ::socklen_t frontlen=sizeof(front);
   int32_t latest_update;
+  marshalling_integer const accountNbr;
+  fixed_string_120 path;
+  char const* filename;
   int fd;
 
   cmw_request ()=default;
@@ -149,10 +149,8 @@ void cmwAmbassador::login (){
 
 void cmwAmbassador::reset (char const* explanation){
   middle_front::Marshal(localsendbuf,false,string_plus{explanation});
-  for(auto& t:pendingRequests){
-    if(t.get()){
-      localsendbuf.Send((::sockaddr*)&t->front,t->frontlen);
-    }
+  for(auto& r:pendingRequests){
+    if(r.get())localsendbuf.Send((::sockaddr*)&r->front,r->frontlen);
   }
   pendingRequests.clear();
   close_socket(cmwBuf.sock_);
