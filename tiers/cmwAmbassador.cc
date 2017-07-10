@@ -258,7 +258,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
 
     if(fds[1].revents&POLLIN){
       auto& request=
-              pendingRequests.emplace_back(::std::make_unique<cmw_request>());
+              pendingRequests.emplace_back(::std::unique_ptr<cmw_request>());
       bool gotAddress=false;
       try{
         ReceiveBufferStack<SameFormat>
@@ -269,7 +269,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
                              ,request_generator(request->filename),500000);
         request->latest_update=current_updatedtime;
       }catch(::std::exception const& ex){
-        syslog_wrapper(LOG_ERR,"Mediate request: %s",ex.what());
+        syslog_wrapper(LOG_ERR,"Accept request: %s",ex.what());
         if(gotAddress){
           middle_front::Marshal(localsendbuf,false,string_plus{ex.what()});
           localsendbuf.Send((::sockaddr*)&request->front,request->frontlen);

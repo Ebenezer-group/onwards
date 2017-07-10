@@ -5,15 +5,15 @@
 // Copyright (C) 2006-2011 Lasse Mikkel Reinhold
 // lar@quicklz.com
 //
-// QuickLZ can be used for free under the GPL 1, 2 or 3 license (where anything 
-// released into public must be open source) or under a commercial license if such 
-// has been acquired (see http://www.quicklz.com/order.html). The commercial license 
+// QuickLZ can be used for free under the GPL 1, 2 or 3 license (where anything
+// released into public must be open source) or under a commercial license if such
+// has been acquired (see http://www.quicklz.com/order.html). The commercial license
 // does not cover derived or ported versions created by third parties under GPL.
 
-// You can edit following user settings. Data must be decompressed with the same 
+// You can edit following user settings. Data must be decompressed with the same
 // setting of QLZ_COMPRESSION_LEVEL and QLZ_STREAMING_BUFFER as it was compressed
 // (see manual). If QLZ_STREAMING_BUFFER > 0, scratch buffers must be initially
-// zeroed out (see manual). First #ifndef makes it possible to define settings from 
+// zeroed out (see manual). First #ifndef makes it possible to define settings from
 // the outside like the compiler command line.
 
 // 1.5.0 final
@@ -63,7 +63,7 @@ typedef unsigned short int ui16;
 #endif
 
 // hash entry
-typedef struct 
+typedef struct
 {
 #if QLZ_COMPRESSION_LEVEL == 1
 	ui32 cache;
@@ -78,7 +78,7 @@ typedef struct
 
 } qlz_hash_compress;
 
-typedef struct 
+typedef struct
 {
 #if QLZ_COMPRESSION_LEVEL == 1
 	const unsigned char *offset;
