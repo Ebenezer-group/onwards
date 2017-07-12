@@ -15,7 +15,7 @@ class fixed_string{
  public:
   fixed_string ()=default;
 
-  explicit fixed_string (char const* s):length(::strlen(s)){
+  inline explicit fixed_string (char const* s):length(::strlen(s)){
     if(length>N-1)throw failure("fixed_string ctor");
     ::strcpy(&str[0],s);
   }
@@ -33,10 +33,12 @@ class fixed_string{
     str[length]='\0';
   }
 
-  void Marshal (SendBuffer& buf,bool=false)const{
+  inline void Marshal (SendBuffer& buf,bool=false)const{
     marshalling_integer(length).Marshal(buf);
     buf.Receive(&str[0],length);
   }
+
+  inline auto bytes_available (){return N-(length+1);}
 
   char* operator() (){return &str[0];}
   char const* c_str ()const{return &str[0];}

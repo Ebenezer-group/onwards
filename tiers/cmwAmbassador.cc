@@ -160,9 +160,7 @@ void cmwAmbassador::reset (char const* explanation){
 }
 
 bool cmwAmbassador::sendData (){
-  try{
-    return cmwSendbuf.Flush();
-  }catch(::std::exception const& ex){
+  try{return cmwSendbuf.Flush();}catch(::std::exception const& ex){
     syslog_wrapper(LOG_ERR,"Problem sending data to CMW: %s",ex.what());
     reset("Problem sending data to CMW");
   }
