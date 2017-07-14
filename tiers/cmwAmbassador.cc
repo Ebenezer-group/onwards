@@ -83,16 +83,16 @@ struct cmw_request{
     *pos='\0';
     filename=pos+1;
     setDirectory(path());
-    char lastrunFile[60];
-    ::snprintf(lastrunFile,sizeof(lastrunFile),"%s.lastrun",filename);
-    fd=::open(lastrunFile,O_RDWR);
-    previous_updatedtime=0;
+    char lastrun[60];
+    ::snprintf(lastrun,sizeof(lastrun),"%s.lastrun",filename);
+    fd=::open(lastrun,O_RDWR);
     if(fd>=0){
       if(::pread(fd,&previous_updatedtime,sizeof(previous_updatedtime),0)==-1)
         throw failure("pread ")<<errno;
     }else{
-      fd=::open(lastrunFile,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-      if(fd<0)throw failure("open ")<<lastrunFile<<" "<<errno;
+      fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+      if(fd<0)throw failure("open ")<<lastrun<<" "<<errno;
+      previous_updatedtime=0;
     }
     current_updatedtime=previous_updatedtime;
   }
@@ -116,8 +116,8 @@ class cmwAmbassador{
   SendBufferStack<> localsendbuf;
   ::std::vector<cmw_account> accounts;
   ::std::vector<::std::unique_ptr<cmw_request>> pendingRequests;
-  int loginPause;
   ::pollfd fds[2];
+  int loginPause;
 
   void login ();
   void reset (char const*);
@@ -256,21 +256,21 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
 
     if(fds[1].revents&POLLIN){
       auto& request=
-              pendingRequests.emplace_back(::std::unique_ptr<cmw_request>());
+              *pendingRequests.emplace_back(::std::unique_ptr<cmw_request>());
       bool gotAddress=false;
       try{
         ReceiveBufferStack<SameFormat>
-            recbuf(fds[1].fd,(::sockaddr*)&request->front,&request->frontlen);
+            recbuf(fds[1].fd,(::sockaddr*)&request.front,&request.frontlen);
         gotAddress=true;
-	new (request.get()) cmw_request(recbuf);
-        middle_back::Marshal(cmwSendbuf,Generate,request->accountNbr
-                             ,request_generator(request->filename),500000);
-        request->latest_update=current_updatedtime;
+	new (&request) cmw_request(recbuf);
+        middle_back::Marshal(cmwSendbuf,Generate,request.accountNbr
+                             ,request_generator(request.filename),500000);
+        request.latest_update=current_updatedtime;
       }catch(::std::exception const& ex){
         syslog_wrapper(LOG_ERR,"Accept request: %s",ex.what());
         if(gotAddress){
           middle_front::Marshal(localsendbuf,false,string_plus{ex.what()});
-          localsendbuf.Send((::sockaddr*)&request->front,request->frontlen);
+          localsendbuf.Send((::sockaddr*)&request.front,request.frontlen);
         }
 	pendingRequests.pop_back();
         continue;
