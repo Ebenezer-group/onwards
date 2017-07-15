@@ -23,7 +23,7 @@ inline void Marshal (::cmw::SendBuffer& buf
          ,message_id_8 const& az1
          ,::cmw::marshalling_integer const& az2
          ,request_generator const& az3
-         ,int32_t max_length=10000){
+         ,int32_t max_length=700000){
   try{
     buf.ReserveBytes(4);
     buf.Receive(az1);

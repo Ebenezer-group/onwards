@@ -86,13 +86,13 @@ struct cmw_request{
     char lastrun[60];
     ::snprintf(lastrun,sizeof(lastrun),"%s.lastrun",filename);
     fd=::open(lastrun,O_RDWR);
+    previous_updatedtime=0;
     if(fd>=0){
       if(::pread(fd,&previous_updatedtime,sizeof(previous_updatedtime),0)==-1)
         throw failure("pread ")<<errno;
     }else{
       fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
       if(fd<0)throw failure("open ")<<lastrun<<" "<<errno;
-      previous_updatedtime=0;
     }
     current_updatedtime=previous_updatedtime;
   }
@@ -256,7 +256,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
 
     if(fds[1].revents&POLLIN){
       auto& request=
-              *pendingRequests.emplace_back(::std::unique_ptr<cmw_request>());
+              *pendingRequests.emplace_back(::std::make_unique<cmw_request>());
       bool gotAddress=false;
       try{
         ReceiveBufferStack<SameFormat>
@@ -264,7 +264,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
         gotAddress=true;
 	new (&request) cmw_request(recbuf);
         middle_back::Marshal(cmwSendbuf,Generate,request.accountNbr
-                             ,request_generator(request.filename),500000);
+                             ,request_generator(request.filename));
         request.latest_update=current_updatedtime;
       }catch(::std::exception const& ex){
         syslog_wrapper(LOG_ERR,"Accept request: %s",ex.what());

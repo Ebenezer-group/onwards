@@ -20,7 +20,7 @@ class fixed_string{
     ::strcpy(&str[0],s);
   }
 
-  explicit fixed_string (::std::string_view s):length(s.length()){
+  inline explicit fixed_string (::std::string_view s):length(s.length()){
     if(length>N-1)throw failure("fixed_string ctor");
     ::strncpy(&str[0],s.data(),length);
     str[length]='\0';
@@ -40,9 +40,9 @@ class fixed_string{
 
   inline auto bytes_available (){return N-(length+1);}
 
-  char* operator() (){return &str[0];}
-  char const* c_str ()const{return &str[0];}
-  char operator[] (int index)const{return str[index];}
+  inline char* operator() (){return &str[0];}
+  inline char const* c_str ()const{return &str[0];}
+  inline char operator[] (int index)const{return str[index];}
 };
 
 using fixed_string_60=fixed_string<60>;

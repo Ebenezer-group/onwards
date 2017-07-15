@@ -4,6 +4,6 @@ account_info.hh
 message-lengths  variable
 middle_back
   -out -no_inline (message_id_8,::std::vector<cmw_account>)
-  -out            (message_id_8,::cmw::marshalling_integer,request_generator)
+  -out -max_length=700000 (message_id_8,::cmw::marshalling_integer,request_generator)
   -out (message_id_8)
 }

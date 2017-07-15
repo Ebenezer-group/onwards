@@ -16,11 +16,11 @@ all: $(TARGETS)
 #	genz 2 /usr/home/brian/onwards/tiers/cmw.req
 
 $(FRONT): $(FRONT).cc $(objects)
-	$(CXX) $(CXXFLAGS) -I. $@.cc $(objects) -o $@
+	$(CXX) $(CXXFLAGS) -I. -o $@ $@.cc $(objects)
 	size $@
 
 $(MIDDLE): $(MIDDLE).cc $(objects)
-	$(CXX) $(CXXFLAGS) -I. $@.cc $(objects) -o $@
+	$(CXX) $(CXXFLAGS) -I. -o $@ $@.cc $(objects)
 	size $@
 
 EXAMPLES:= example/send_example example/receive_example

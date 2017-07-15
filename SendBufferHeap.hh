@@ -2,13 +2,10 @@
 #include"SendBuffer.hh"
 
 namespace cmw{
-
-class SendBufferHeap : public SendBuffer
-{
+class SendBufferHeap:public SendBuffer{
 public:
-  SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz)
-  {}
+  inline SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
 
-  ~SendBufferHeap () { delete [] SendBuffer::buf; }
+  inline ~SendBufferHeap (){delete [] SendBuffer::buf;}
 };
 }

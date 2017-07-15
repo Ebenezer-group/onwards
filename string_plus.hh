@@ -9,9 +9,9 @@ class string_plus{
   ::std::initializer_list<::std::string_view> lst;
 
  public:
-  string_plus (::std::initializer_list<::std::string_view> in):lst(in){}
+  inline string_plus (::std::initializer_list<::std::string_view> in):lst(in){}
 
-  void Marshal (SendBuffer& buf,bool=false)const{
+  inline void Marshal (SendBuffer& buf,bool=false)const{
     int32_t totLen=0;
     for(auto sv:lst)totLen+=sv.length();
     marshalling_integer(totLen).Marshal(buf);
