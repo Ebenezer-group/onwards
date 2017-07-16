@@ -5,25 +5,16 @@
 #include<string_plus.hh>
 
 namespace middle_front{
-inline void Marshal (::cmw::SendBuffer& buf
-         ,bool az1
-         ,int32_t max_length=cmw::udp_packet_max){
-  try{
-    buf.ReserveBytes(4);
-    buf.Receive(az1);
-    buf.FillInSize(max_length);
-  }catch(...){buf.Rollback();throw;}
-}
-
 void Marshal (::cmw::SendBuffer& buf
          ,bool az1
-         ,cmw::string_plus const& az2
-         ,int32_t max_length=cmw::udp_packet_max){
+         ,cmw::string_plus const& az2={}){
   try{
     buf.ReserveBytes(4);
     buf.Receive(az1);
+    if(az1)goto rtn;
     az2.Marshal(buf);
-    buf.FillInSize(max_length);
+rtn:
+    buf.FillInSize(cmw::udp_packet_max);
   }catch(...){buf.Rollback();throw;}
 }
 }
