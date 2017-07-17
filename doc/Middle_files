@@ -4,8 +4,8 @@ serialization code the C++ Middleware Writer should output.
 Lines like the following are the basis of Middle code:
 [ options ] (T1, T2, ...  Tn)
 
-Options start with a dash (-) symbol. After any options, a list of 
-C++ types is enclosed in a pair of parentheses.  One or more of 
+Options start with a dash (-) symbol. After any options, a list of
+C++ types is enclosed in a pair of parentheses.  One or more of
 these lines are wrapped by a name and a closing brace (}) like this:
 
 middle_front
@@ -13,46 +13,46 @@ middle_front
   -out (bool, ::std::string_view)
 }
 
-Based on that input, the C++ Middleware Writer (CMW) creates a 
-middle_front namespace in a file called zz.middle_front.hh. 
-Functions are created within the namespace for each of the lines 
+Based on that input, the C++ Middleware Writer (CMW) creates a
+middle_front namespace in a file called zz.middle_front.hh.
+Functions are created within the namespace for each of the lines
 with matching parentheses.
 
 These are the available options:
 [ -out ] [ -in ] [ -no_inline ] [ -max_length= ] [ -yea_nay ]
 
-The out and in options are used to tailor the output. If you 
-specify just -out, only the message-building/sending function 
+The out and in options are used to tailor the output. If you
+specify just -out, only the message-building/sending function
 is generated. If you specify just -in, only the message-parsing/
-receiving function gets generated. If you specify neither, both 
+receiving function gets generated. If you specify neither, both
 message-sending and message-receiving functions will be created.
 
-The no_inline option indicates that a generated function should 
-not be marked as inline. If you only include a generated header 
-in one translation unit, it's safe to use no_inline. This option 
+The no_inline option indicates that a generated function should
+not be marked as inline. If you only include a generated header
+in one translation unit, it's safe to use no_inline. This option
 may help reduce the size of your executables.
 
-The max_length option allows users to specify the maximum length 
-for a message. If the length of the message exceeds the value 
-specified, an exception will be thrown. If this option isn't used, 
+The max_length option allows users to specify the maximum length
+for a message. If the length of the message exceeds the value
+specified, an exception will be thrown. If this option isn't used,
 the CMW supplies a default value of 10,000.
 
 The yea_nay option is used to support a common messaging
-idiom where a response to a request is a bool followed by 
+idiom where a response to a request is a bool followed by
 optional data.  Rather than having two messages like this:
-  -out -max_length=udp_packet_max (bool)
-  -out -max_length=udp_packet_max -no_inline (bool,cmw::string_plus)
+  -out (bool)
+  -out (bool,cmw::string_plus)
 
 , the following can be used:
-  -out -max_length=udp_packet_max -no_inline -yea_nay (bool,cmw::string_plus)
+  -out -yea_nay (bool,cmw::string_plus)
 
-.  When yea_nay is used, the parts of the message after the bool 
-are only used if the value of the bool is false.  This option 
+.  When yea_nay is used, the object(s) after the bool are only
+marshalled if the value of the bool is false.  This option
 leads to less output from the CMW and smaller executable sizes.
 
 By convention, Middle files have a .mdl suffix.
 
-Don't be confused by the middle tier of the CMW. The front, middle 
+Don't be confused by the middle tier of the CMW. The front, middle
 and back tiers use code that's been generated based on Middle files.
 
 Use // to comment out a line of Middle code.
