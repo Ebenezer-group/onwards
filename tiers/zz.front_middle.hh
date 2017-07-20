@@ -7,13 +7,12 @@
 namespace front_middle{
 void Marshal (::cmw::SendBuffer& buf
          ,cmw::marshalling_integer const& az1
-         , const char* az2
-         ,int32_t max_length=cmw::udp_packet_max){
+         , const char* az2){
   try{
     buf.ReserveBytes(4);
     az1.Marshal(buf);
     buf.Receive(az2);
-    buf.FillInSize(max_length);
+    buf.FillInSize(cmw::udp_packet_max);
   }catch(...){buf.Rollback();throw;}
 }
 }

@@ -46,7 +46,7 @@ optional data.  Rather than having two messages like this:
 , the following can be used:
   -out -yea_nay (bool,cmw::string_plus)
 
-.  When yea_nay is used, the object(s) after the bool are only
+.  When yea_nay is used, the object(s) after the bool is only
 marshalled if the value of the bool is false.  This option
 leads to less output from the CMW and smaller executable sizes.
 

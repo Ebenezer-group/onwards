@@ -11,9 +11,9 @@ void Marshal (::cmw::SendBuffer& buf
   try{
     buf.ReserveBytes(4);
     buf.Receive(az1);
-    if(az1)goto rtn;
+    if(az1)goto rt;
     az2.Marshal(buf);
-rtn:
+rt:
     buf.FillInSize(cmw::udp_packet_max);
   }catch(...){buf.Rollback();throw;}
 }
