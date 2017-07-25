@@ -9,36 +9,36 @@
 namespace cmw{
 template<int N>
 class fixed_string{
-  int length;
+  marshalling_integer length;
   ::std::array<char,N> str;
 
  public:
   fixed_string ()=default;
 
   inline explicit fixed_string (char const* s):length(::strlen(s)){
-    if(length>N-1)throw failure("fixed_string ctor");
+    if(length()>N-1)throw failure("fixed_string ctor");
     ::strcpy(&str[0],s);
   }
 
   inline explicit fixed_string (::std::string_view s):length(s.length()){
-    if(length>N-1)throw failure("fixed_string ctor");
+    if(length()>N-1)throw failure("fixed_string ctor");
     ::strncpy(&str[0],s.data(),length);
     str[length]='\0';
   }
 
   template<class R>
-  explicit fixed_string (ReceiveBuffer<R>& buf):length(marshalling_integer(buf)()){
-    if(length>N-1)throw failure("fixed_string stream ctor");
-    buf.Give(&str[0],length);
-    str[length]='\0';
+  explicit fixed_string (ReceiveBuffer<R>& buf):length(buf){
+    if(length()>N-1)throw failure("fixed_string stream ctor");
+    buf.Give(&str[0],length());
+    str[length()]='\0';
   }
 
   inline void Marshal (SendBuffer& buf,bool=false)const{
-    marshalling_integer(length).Marshal(buf);
-    buf.Receive(&str[0],length);
+    length.Marshal(buf);
+    buf.Receive(&str[0],length());
   }
 
-  inline auto bytes_available (){return N-(length+1);}
+  inline auto bytes_available (){return N-(length()+1);}
 
   inline char* operator() (){return &str[0];}
   inline char const* c_str ()const{return &str[0];}

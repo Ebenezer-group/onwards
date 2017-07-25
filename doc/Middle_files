@@ -10,7 +10,7 @@ these lines are wrapped by a name and a closing brace (}) like this:
 
 send_messages
     -out (message_id_8, ::std::vector<int32_t>, ::std::string)
-    -out (message_id_8, ::std::array<::std::array<float,2>, 3>)
+    -out (message_id_8, ::std::array<float,3>)
     -out (message_id_8, ::plf::colony<::std::string>)
 }
 
