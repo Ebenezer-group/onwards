@@ -22,7 +22,7 @@ class fixed_string{
 
   inline explicit fixed_string (::std::string_view s):length(s.length()){
     if(length()>N-1)throw failure("fixed_string ctor");
-    ::strncpy(&str[0],s.data(),length);
+    ::strncpy(&str[0],s.data(),length());
     str[length]='\0';
   }
 
