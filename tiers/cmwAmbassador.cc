@@ -129,7 +129,7 @@ public:
 void cmwAmbassador::login (){
   for(;;){
     fds[0].fd=cmwSendbuf.sock_=cmwBuf.sock_=
-       connect_wrapper("174.20.7.204",
+       connect_wrapper("174.20.55.90",
 #ifdef CMW_ENDIAN_BIG
                        "56790");
 #else
@@ -262,7 +262,7 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
         ReceiveBufferStack<SameFormat>
             recbuf(fds[1].fd,(::sockaddr*)&request.front,&request.frontlen);
         gotAddress=true;
-	new (&request) cmw_request(recbuf);
+	new (&request)cmw_request(recbuf);
         middle_back::Marshal(cmwSendbuf,Generate,request.accountNbr
                              ,request_generator(request.filename));
         request.latest_update=current_updatedtime;
