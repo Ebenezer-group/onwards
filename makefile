@@ -6,7 +6,7 @@ CXX=g++ -std=c++17
 LIBS=-L./ -L/usr/lib
 
 FRONT:= tiers/genz
-MIDDLE:= tiers/cmwAmbassador
+MIDDLE:= tiers/cmwA
 TIERS:= $(FRONT) $(MIDDLE)
 objects:=marshalling_integer.o
 TARGETS:= $(objects) $(TIERS)

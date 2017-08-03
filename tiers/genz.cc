@@ -41,7 +41,7 @@ sk: ::pollfd pfd{sendbuf.sock_,POLLIN,0};
         throw failure("CMWA:")<<buf.GiveString_view();
       }
     }
-    throw failure("No reply received.  Is the cmwAmbassador running?");
+    throw failure("No reply received.  Is the cmwA running?");
   }catch(::std::exception const& ex){
     ::printf("%s: %s\n",argv[0],ex.what());
 #ifndef CMW_WINDOWS

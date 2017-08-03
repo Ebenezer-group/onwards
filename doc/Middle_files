@@ -41,8 +41,8 @@ how to use this option:
   -max_length=cmw::udp_packet_max
 
 
-The yea_nay option is used to support a common messaging idiom 
-where a response to a request is a bool followed by optional 
+The yea_nay option is used to support a common messaging idiom
+where a response to a request is a bool followed by optional
 data.  Rather than having two messages like this:
   -out (bool)
   -out (bool,cmw::string_plus)
