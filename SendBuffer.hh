@@ -34,6 +34,8 @@ public:
 
   inline SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
+  auto data (){return buf;}
+
   inline void Receive (void const* data,int size){
     if(size>bufsize-index)
       throw failure("Size of marshalled data exceeds space available: ")

@@ -22,19 +22,18 @@ with matching parentheses.
 These are the available options:
  -out, -in, -no_inline, -max_length, -yea_nay
 
-The out and in options are used to tailor the output. If you
-specify just -out, only the message-building/sending function
-is generated. If you specify just -in, only the message-parsing/
-receiving function gets generated. If you specify neither, both
-message-sending and message-receiving functions will be created.
+The out and in options are used to tailor the output.  If you
+specify only -out, only the message-building/sending function is 
+generated.  If you specify only -in, only the message-parsing/
+receiving function gets generated.
 
 The no_inline option indicates that a generated function should
-not be marked as inline. If you only include a generated header
-in one translation unit, it's safe to use no_inline. This option
+not be marked as inline.  If you only include a generated header
+in one translation unit, it's safe to use no_inline.  This option
 may help reduce the size of your executables.
 
 The max_length option allows users to specify the maximum length
-for a message. If the length of the message exceeds the value
+for a message.  If the length of the message exceeds the value
 specified, an exception will be thrown. If this option isn't used,
 the CMW supplies a default value of 10,000.  Here's an example of
 how to use this option:
