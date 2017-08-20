@@ -16,9 +16,9 @@ makefile.  If you're using a big-endian machine, add
 
 Two programs are built.  The programs are the middle and front
 tiers of the C++ Middleware Writer (CMW).  The middle tier is
-called the cmwA, which is short for CMW Ambassador.  The front 
-tier is called "genz" and is a command line interface.  On 
-Windows, only the front tier is built.  The middle tier is 
+called the cmwA, which is short for CMW Ambassador.  The front
+tier is called "genz" and is a command line interface.  On
+Windows, only the front tier is built.  The middle tier is
 still needed for Windows users so it needs to be running on a
 BSD/Linux box or VM.
 
@@ -26,11 +26,11 @@ BSD/Linux box or VM.
 Accounts
 An account is needed to use the CMW.  Before running the
 programs, you have to get an account and modify your
-cmwA.cfg file to include your account number(s) and 
-password(s).  To get an account send an email to 
-support@webEbenezer.net and include a password between 10 
-and 50 characters long for your account.  We'll reply by 
-giving you an account number. 
+cmwA.cfg file to include your account number(s) and
+password(s).  To get an account send an email to
+support@webEbenezer.net and include a password between 10
+and 50 characters long for your account.  We'll reply by
+giving you an account number.
 
 
 Running the cmwA (after installing):

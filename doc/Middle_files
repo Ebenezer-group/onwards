@@ -23,7 +23,7 @@ These are the available options:
  -out, -in, -no_inline, -max_length, -yea_nay
 
 The out and in options are used to tailor the output.  If you
-specify only -out, only the message-building/sending function is 
+specify only -out, only the message-building/sending function is
 generated.  If you specify only -in, only the message-parsing/
 receiving function gets generated.
 

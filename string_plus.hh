@@ -12,10 +12,10 @@ class string_plus{
   inline string_plus (::std::initializer_list<::std::string_view> in):lst(in){}
 
   inline void Marshal (SendBuffer& buf,bool=false)const{
-    int32_t totLen=0;
-    for(auto sv:lst)totLen+=sv.length();
-    marshalling_integer(totLen).Marshal(buf);
-    for(auto sv:lst)buf.Receive(sv.data(),sv.length());//Use low-level Receive
+    int32_t total=0;
+    for(auto s:lst)total+=s.length();
+    marshalling_integer(total).Marshal(buf);
+    for(auto s:lst)buf.Receive(s.data(),s.length());//Use low-level Receive
   }
 };
 }

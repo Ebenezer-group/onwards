@@ -12,6 +12,7 @@
 #include<ReceiveBufferCompressed.hh>
 #include<ReceiveBufferStack.hh>
 #include<setDirectory.hh>
+#include<string_plus.hh>
 #include<syslog_wrapper.hh>
 #include<SendBufferCompressed.hh>
 #include<SendBufferStack.hh>
@@ -129,7 +130,7 @@ public:
 void cmwAmbassador::login (){
   for(;;){
     fds[0].fd=cmwSendbuf.sock_=cmwBuf.sock_=
-       connect_wrapper("174.20.55.90",
+       connect_wrapper("70.56.166.91",
 #ifdef CMW_ENDIAN_BIG
                        "56790");
 #else
