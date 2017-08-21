@@ -56,8 +56,8 @@ template<class T>
 class empty_container{
 public:
   template<class R>
-  explicit empty_container (ReceiveBuffer<R>& buf){
-    for(auto n=marshalling_integer{buf}();n>0;--n)T{buf};
+  explicit empty_container (ReceiveBuffer<R>& b){
+    for(auto n=marshalling_integer{b}();n>0;--n)T{b};
   }
 };
 }

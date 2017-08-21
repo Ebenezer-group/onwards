@@ -2,14 +2,14 @@
 #include"SendBuffer.hh"
 
 // Encode integer into variable-length format.
-void ::cmw::marshalling_integer::Marshal (SendBuffer& buf,bool)const{
-  uint32_t N=value;
+void ::cmw::marshalling_integer::Marshal (SendBuffer& b,bool)const{
+  uint32_t n=value;
   for(;;){
-    uint8_t abyte=N&127;
-    N>>=7;
-    if(0==N){buf.Receive(abyte);return;}
+    uint8_t abyte=n&127;
+    n>>=7;
+    if(0==n){b.Receive(abyte);return;}
     abyte|=128;
-    buf.Receive(abyte);
-    --N;
+    b.Receive(abyte);
+    --n;
   }
 }

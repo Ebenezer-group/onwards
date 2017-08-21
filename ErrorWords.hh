@@ -6,38 +6,38 @@
 
 namespace cmw{
 class failure:public ::std::exception{
-  ::std::string whatStr;
+  ::std::string str;
 
 public:
-  inline explicit failure (char const* w):whatStr(w){}
-  inline explicit failure (::std::string_view w):whatStr(w){}
+  inline explicit failure (char const* w):str(w){}
+  inline explicit failure (::std::string_view w):str(w){}
 
   inline failure (char const* w,int tot){
-    if(tot>0)whatStr.reserve(tot);
-    whatStr=w;
+    if(tot>0)str.reserve(tot);
+    str=w;
   }
 
-  inline char const* what ()const noexcept {return whatStr.c_str();}
+  inline char const* what ()const noexcept {return str.c_str();}
   //::std::string_view what_view ()const noexcept
-  //{return ::std::string_view(whatStr);}
+  //{return ::std::string_view(str);}
 
   inline failure& operator<< (::std::string const& s){
-    whatStr.append(s);
+    str.append(s);
     return *this;
   }
 
   inline failure& operator<< (::std::string_view const& s){
-    whatStr.append(s);
+    str.append(s);
     return *this;
   }
 
   inline failure& operator<< (char* s){
-    whatStr.append(s);
+    str.append(s);
     return *this;
   }
 
   inline failure& operator<< (char const* s){
-    whatStr.append(s);
+    str.append(s);
     return *this;
   }
 
@@ -48,9 +48,9 @@ public:
   }
 
   template<class T>
-  failure& operator<< (T val){
+  failure& operator<< (T t){
     using ::std::to_string;
-    return *this<<to_string(val);
+    return *this<<to_string(t);
   }
 };
 
@@ -59,8 +59,8 @@ public:
   inline explicit connection_lost (char const* w):failure(w){}
 
   template<class T>
-  connection_lost& operator<< (T val){
-    failure::operator<<(val);
+  connection_lost& operator<< (T t){
+    failure::operator<<(t);
     return *this;
   }
 };
