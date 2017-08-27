@@ -9,8 +9,8 @@ FRONT:=tiers/genz
 MIDDLE:=tiers/cmwA
 TIERS:=$(FRONT) $(MIDDLE)
 objects:=marshalling_integer.o
-TARGETS:= $(objects) $(TIERS)
-all: $(TARGETS)
+TARGETS:=$(objects) $(TIERS)
+all:$(TARGETS)
 
 #zz.middle_messages_back.hh: account_info.hh remote.mdl cmw.req
 #	genz 2 /usr/home/brian/onwards/tiers/cmw.req
@@ -23,8 +23,8 @@ $(MIDDLE): $(MIDDLE).cc $(objects)
 	$(CXX) $(CXXFLAGS) -I. -o $@ $@.cc $(objects)
 	size $@
 
-EXAMPLES:= example/send_example example/receive_example
-example: $(EXAMPLES)
+EXAMPLES:=example/send_example example/receive_example
+example:$(EXAMPLES)
 
 example/send_example: example/send_example.cc $(objects)
 	$(CXX) -o $@ $(CXXFLAGS) -I. -I./example $@.cc $(objects)

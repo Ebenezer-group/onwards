@@ -161,8 +161,8 @@ void cmwAmbassador::reset (char const* explanation){
 }
 
 bool cmwAmbassador::sendData (){
-  try{return cmwSendbuf.Flush();}catch(::std::exception const& ex){
-    syslog_wrapper(LOG_ERR,"Problem sending data to CMW: %s",ex.what());
+  try{return cmwSendbuf.Flush();}catch(::std::exception const& e){
+    syslog_wrapper(LOG_ERR,"Problem sending data to CMW: %s",e.what());
     reset("Problem sending data to CMW");
   }
   return true;
@@ -209,8 +209,8 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
         middle_back::Marshal(cmwSendbuf,Keepalive);
         fds[0].events|=POLLOUT;
         pendingRequests.push_back(nullptr);
-      }catch(::std::exception const& ex){
-        syslog_wrapper(LOG_ERR,"Keepalive: %s",ex.what());
+      }catch(::std::exception const& e){
+        syslog_wrapper(LOG_ERR,"Keepalive: %s",e.what());
         reset("Keepalive problem");
       }
       continue;
@@ -237,16 +237,16 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
             pendingRequests.erase(::std::begin(pendingRequests));
           }while(cmwBuf.NextMessage());
         }
-      }catch(connection_lost const& ex){
-        syslog_wrapper(LOG_ERR,"Got end of stream notice: %s",ex.what());
+      }catch(connection_lost const& e){
+        syslog_wrapper(LOG_ERR,"Got end of stream notice: %s",e.what());
         reset("CMW stopped before your request was processed");
         continue;
-      }catch(::std::exception const& ex){
-        syslog_wrapper(LOG_ERR,"Problem handling reply from CMW %s",ex.what());
+      }catch(::std::exception const& e){
+        syslog_wrapper(LOG_ERR,"Problem handling reply from CMW %s",e.what());
         assert(!pendingRequests.empty());
         if(pendingRequests.front().get()){
           auto const& request=*pendingRequests.front();
-          middle_front::Marshal(localsendbuf,false,string_plus{ex.what()});
+          middle_front::Marshal(localsendbuf,false,string_plus{e.what()});
           localsendbuf.Send((::sockaddr*)&request.front,request.frontlen);
         }
         pendingRequests.erase(::std::begin(pendingRequests));
@@ -267,10 +267,10 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
         middle_back::Marshal(cmwSendbuf,Generate,request.accountNbr
                              ,request_generator(request.filename));
         request.latest_update=current_updatedtime;
-      }catch(::std::exception const& ex){
-        syslog_wrapper(LOG_ERR,"Accept request: %s",ex.what());
+      }catch(::std::exception const& e){
+        syslog_wrapper(LOG_ERR,"Accept request: %s",e.what());
         if(gotAddress){
-          middle_front::Marshal(localsendbuf,false,string_plus{ex.what()});
+          middle_front::Marshal(localsendbuf,false,string_plus{e.what()});
           localsendbuf.Send((::sockaddr*)&request.front,request.frontlen);
         }
 	pendingRequests.pop_back();
@@ -281,13 +281,13 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
   }
 }
 
-int main (int argc,char** argv){
+int main (int ac,char** av){
   try{
-    ::openlog(*argv,LOG_PID|LOG_NDELAY,LOG_USER);
-    if(argc!=2)throw failure("Usage: ")<<*argv<<" config-file-name";
-    cmwAmbassador(*(argv+1));
-  }catch(::std::exception const& ex){
-    syslog_wrapper(LOG_ERR,"Program ending: %s",ex.what());
+    ::openlog(*av,LOG_PID|LOG_NDELAY,LOG_USER);
+    if(ac!=2)throw failure("Usage: ")<<*av<<" config-file-name";
+    cmwAmbassador(*(av+1));
+  }catch(::std::exception const& e){
+    syslog_wrapper(LOG_ERR,"Program ending: %s",e.what());
   }catch(...){
     syslog_wrapper(LOG_ERR,"Unknown exception!");
   }

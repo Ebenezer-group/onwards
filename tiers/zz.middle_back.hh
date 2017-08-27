@@ -8,34 +8,34 @@
 
 namespace middle_back{
 void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& az1
-         ,::std::vector<cmw_account> const& az2){
+         ,message_id_8 const& a1
+         ,::std::vector<cmw_account> const& a2){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(az1);
-    buf.ReceiveGroup(az2);
+    buf.Receive(a1);
+    buf.ReceiveGroup(a2);
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& az1
-         ,::cmw::marshalling_integer const& az2
-         ,request_generator const& az3){
+         ,message_id_8 const& a1
+         ,::cmw::marshalling_integer const& a2
+         ,request_generator const& a3){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(az1);
-    az2.Marshal(buf);
-    az3.Marshal(buf);
+    buf.Receive(a1);
+    a2.Marshal(buf);
+    a3.Marshal(buf);
     buf.FillInSize(700000);
   }catch(...){buf.Rollback();throw;}
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& az1){
+         ,message_id_8 const& a1){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(az1);
+    buf.Receive(a1);
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}
 }

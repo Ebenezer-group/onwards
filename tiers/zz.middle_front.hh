@@ -6,13 +6,13 @@
 
 namespace middle_front{
 void Marshal (::cmw::SendBuffer& buf
-         ,bool az1
-         ,cmw::string_plus const& az2={}){
+         ,bool a1
+         ,cmw::string_plus const& a2={}){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(az1);
-    if(az1)goto rt;
-    az2.Marshal(buf);
+    buf.Receive(a1);
+    if(a1)goto rt;
+    a2.Marshal(buf);
 rt:
     buf.FillInSize(cmw::udp_packet_max);
   }catch(...){buf.Rollback();throw;}

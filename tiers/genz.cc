@@ -12,14 +12,14 @@
 
 using namespace ::cmw;
 
-int main (int argc,char** argv){
+int main (int ac,char** av){
   try{
-    if(argc<3||argc>5)
+    if(ac<3||ac>5)
       throw failure("Usage: genz account-number .mdl-file-path [node] [port]");
 
     windows_start();
-    getaddrinfo_wrapper res(argc<4?"::1"/*"127.0.0.1"*/:argv[3]
-                            ,argc<5?"55555":argv[4],SOCK_DGRAM);
+    getaddrinfo_wrapper res(ac<4?"::1"/*"127.0.0.1"*/:av[3]
+                            ,ac<5?"55555":av[4],SOCK_DGRAM);
     auto rp=res.get();
     SendBufferStack<> sendbuf;
     for(;rp!=nullptr;rp=rp->ai_next){
@@ -29,7 +29,7 @@ int main (int argc,char** argv){
 
 sk: ::pollfd pfd{sendbuf.sock_,POLLIN,0};
     int waitSeconds=9;
-    front_middle::Marshal(sendbuf,marshalling_integer(argv[1]),argv[2]);
+    front_middle::Marshal(sendbuf,marshalling_integer(av[1]),av[2]);
     for(int j=0;j<2;++j,waitSeconds*=2){
       sendbuf.Send(rp->ai_addr,rp->ai_addrlen);
 #ifdef __linux__
@@ -42,12 +42,12 @@ sk: ::pollfd pfd{sendbuf.sock_,POLLIN,0};
       }
     }
     throw failure("No reply received.  Is the cmwA running?");
-  }catch(::std::exception const& ex){
-    ::printf("%s: %s\n",argv[0],ex.what());
+  }catch(::std::exception const& e){
+    ::printf("%s: %s\n",av[0],e.what());
 #ifndef CMW_WINDOWS
-    ::openlog(argv[0],LOG_NDELAY,LOG_USER);
+    ::openlog(av[0],LOG_NDELAY,LOG_USER);
 #endif
-    syslog_wrapper(LOG_ERR,"%s",ex.what());
+    syslog_wrapper(LOG_ERR,"%s",e.what());
   }
   return EXIT_FAILURE;
 }

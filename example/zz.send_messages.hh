@@ -10,26 +10,26 @@
 
 namespace send_messages{
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& az1
-         ,::std::vector<int32_t> const& az2
-         ,::std::string const& az3){
+         ,message_id_8 const& a1
+         ,::std::vector<int32_t> const& a2
+         ,::std::string const& a3){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(az1);
-    buf.ReceiveBlock(az2);
-    buf.Receive(az3);
+    buf.Receive(a1);
+    buf.ReceiveBlock(a2);
+    buf.Receive(a3);
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& az1
-         ,::std::set<int32_t> const& az2){
+         ,message_id_8 const& a1
+         ,::std::set<int32_t> const& a2){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(az1);
-    buf.Receive(static_cast<int32_t>(az2.size()));
-    for(auto const& it2:az2){
+    buf.Receive(a1);
+    buf.Receive(static_cast<int32_t>(a2.size()));
+    for(auto const& it2:a2){
       buf.Receive(it2);
     }
     buf.FillInSize(10000);
@@ -37,24 +37,24 @@ inline void Marshal (::cmw::SendBuffer& buf
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& az1
-         ,::std::array<::std::array<float, 2>, 3> const& az2){
+         ,message_id_8 const& a1
+         ,::std::array<::std::array<float, 2>, 3> const& a2){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(az1);
-    buf.Receive(&az2, sizeof az2);
+    buf.Receive(a1);
+    buf.Receive(&a2, sizeof a2);
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& az1
-         ,::plf::colony<::std::string> const& az2){
+         ,message_id_8 const& a1
+         ,::plf::colony<::std::string> const& a2){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(az1);
-    buf.Receive(static_cast<int32_t>(az2.size()));
-    for(auto const& it3:az2){
+    buf.Receive(a1);
+    buf.Receive(static_cast<int32_t>(a2.size()));
+    for(auto const& it3:a2){
       buf.Receive(it3);
     }
     buf.FillInSize(10000);

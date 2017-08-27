@@ -12,42 +12,42 @@
 namespace receive_messages{
 template <class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
-         ,::std::vector<int32_t>& az1
-         ,::std::string& az2){
+         ,::std::vector<int32_t>& a1
+         ,::std::string& a2){
   int32_t count[1];
   count[0]=::cmw::Give<uint32_t>(buf);
   if(count[0]>0){
-    az1.resize(az1.size()+count[0]);
-    buf.GiveBlock(&(*(az1.end()-count[0])),count[0]);
+    a1.resize(a1.size()+count[0]);
+    buf.GiveBlock(&(*(a1.end()-count[0])),count[0]);
   }
-  az2=buf.GiveString();
+  a2=buf.GiveString();
 }
 
 template <class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
-         ,::std::set<int32_t>& az1){
+         ,::std::set<int32_t>& a1){
   int32_t count[1];
   count[0]=::cmw::Give<uint32_t>(buf);
-  auto endIt1=az1.end();
+  auto endIt1=a1.end();
   for(;count[0]>0;--count[0]){
-    az1.emplace_hint(endIt1,::cmw::Give<uint32_t>(buf));
+    a1.emplace_hint(endIt1,::cmw::Give<uint32_t>(buf));
   }
 }
 
 template <class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
-         ,::std::array<::std::array<float, 2>, 3>& az1){
-  buf.GiveBlock(&az1[0][0], sizeof az1 / sizeof(float));
+         ,::std::array<::std::array<float, 2>, 3>& a1){
+  buf.GiveBlock(&a1[0][0], sizeof a1 / sizeof(float));
 }
 
 template <class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
-         ,::plf::colony<::std::string>& az1){
+         ,::plf::colony<::std::string>& a1){
   int32_t count[1];
   count[0]=::cmw::Give<uint32_t>(buf);
-  az1.reserve(az1.size()+count[0]);
+  a1.reserve(a1.size()+count[0]);
   for(;count[0]>0;--count[0]){
-    az1.insert(buf.GiveString());
+    a1.insert(buf.GiveString());
   }
 }
 }
