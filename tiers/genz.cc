@@ -38,7 +38,7 @@ sk: ::pollfd pfd{sendbuf.sock_,POLLIN,0};
       if(poll_wrapper(&pfd,1,waitSeconds*1000)>0){
         ReceiveBufferStack<SameFormat> buf(pfd.fd);
         if(buf.GiveBool())::exit(EXIT_SUCCESS);
-        throw failure("CMWA:")<<buf.GiveString_view();
+        throw failure("cmwA:")<<buf.GiveString_view();
       }
     }
     throw failure("No reply received.  Is the cmwA running?");

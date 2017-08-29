@@ -33,7 +33,13 @@ int main()
   try{
     windows_start();
     SendBufferStack<> buffer;
-    getaddrinfo_wrapper res("::1"/*"127.0.0.1"*/,"12345",SOCK_DGRAM);
+    getaddrinfo_wrapper res(
+#ifdef __linux__
+		    "127.0.0.1"
+#else
+		    "::1"
+#endif
+		    ,"12345",SOCK_DGRAM);
     auto rp=res.get();
     buffer.sock_=::socket(rp->ai_family,rp->ai_socktype,0);
 

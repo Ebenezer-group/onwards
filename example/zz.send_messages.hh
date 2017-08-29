@@ -10,52 +10,52 @@
 
 namespace send_messages{
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& a1
-         ,::std::vector<int32_t> const& a2
-         ,::std::string const& a3){
+         ,message_id_8 const& a
+         ,::std::vector<int32_t> const& b
+         ,::std::string const& c){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(a1);
-    buf.ReceiveBlock(a2);
-    buf.Receive(a3);
+    buf.Receive(a);
+    buf.ReceiveBlock(b);
+    buf.Receive(c);
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& a1
-         ,::std::set<int32_t> const& a2){
+         ,message_id_8 const& a
+         ,::std::set<int32_t> const& b){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(a1);
-    buf.Receive(static_cast<int32_t>(a2.size()));
-    for(auto const& it2:a2){
-      buf.Receive(it2);
+    buf.Receive(a);
+    buf.Receive(static_cast<int32_t>(b.size()));
+    for(auto const& i1:b){
+      buf.Receive(i1);
     }
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& a1
-         ,::std::array<::std::array<float, 2>, 3> const& a2){
+         ,message_id_8 const& a
+         ,::std::array<::std::array<float, 2>, 3> const& b){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(a1);
-    buf.Receive(&a2, sizeof a2);
+    buf.Receive(a);
+    buf.Receive(&b, sizeof b);
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& a1
-         ,::plf::colony<::std::string> const& a2){
+         ,message_id_8 const& a
+         ,::plf::colony<::std::string> const& b){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(a1);
-    buf.Receive(static_cast<int32_t>(a2.size()));
-    for(auto const& it3:a2){
-      buf.Receive(it3);
+    buf.Receive(a);
+    buf.Receive(static_cast<int32_t>(b.size()));
+    for(auto const& i2:b){
+      buf.Receive(i2);
     }
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}
