@@ -18,7 +18,13 @@ int main (int ac,char** av){
       throw failure("Usage: genz account-number .mdl-file-path [node] [port]");
 
     windows_start();
-    getaddrinfo_wrapper res(ac<4?"::1"/*"127.0.0.1"*/:av[3]
+    getaddrinfo_wrapper res(ac<4?
+#ifdef __linux__
+		            "127.0.0.1"
+#else
+		            "::1"
+#endif
+                            :av[3]
                             ,ac<5?"55555":av[4],SOCK_DGRAM);
     auto rp=res.get();
     SendBufferStack<> sendbuf;
