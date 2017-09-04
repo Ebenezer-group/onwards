@@ -7,31 +7,31 @@ class SendBuffer;
 template<class R> class ReceiveBuffer;
 
 class marshalling_integer{
-  int32_t value;
+  int32_t val;
 
 public:
   inline marshalling_integer (){}
-  inline explicit marshalling_integer (int32_t v):value(v){}
-  inline explicit marshalling_integer (char const* v):value(::strtol(v,0,10)){}
+  inline explicit marshalling_integer (int32_t v):val(v){}
+  inline explicit marshalling_integer (char const* v):val(::strtol(v,0,10)){}
 
   // Reads a sequence of bytes in variable-length format and
   // composes a 32 bit integer.
   template<class R>
-  explicit marshalling_integer (ReceiveBuffer<R>& b):value(0){
+  explicit marshalling_integer (ReceiveBuffer<R>& b):val(0){
     uint32_t shift=1;
     for(;;){
       uint8_t abyte=b.GiveOne();
-      value+= (abyte&127)*shift;
+      val+= (abyte&127)*shift;
       if((abyte&128)==0)return;
       shift<<=7;
-      value+=shift;
+      val+=shift;
     }
   }
 
-  inline void operator= (int32_t rs){value=rs;}
-  inline auto operator() ()const{return value;}
-  inline bool operator== (marshalling_integer rs)const{return value==rs();}
-  inline bool operator== (int32_t rs)const{return value==rs;}
+  inline void operator= (int32_t rs){val=rs;}
+  inline auto operator() ()const{return val;}
+  inline bool operator== (marshalling_integer rs)const{return val==rs();}
+  inline bool operator== (int32_t rs)const{return val==rs;}
   void Marshal (SendBuffer&,bool=false)const;
 };
 }

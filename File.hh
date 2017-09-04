@@ -34,16 +34,16 @@ public:
 };
 
 
-inline bool MarshalFile (char const* fname,SendBuffer& buf){
+inline bool MarshalFile (char const* name,SendBuffer& buf){
   struct stat sb;
-  if(::stat(fname,&sb)<0)throw failure("MarshalFile stat ")<<fname;
+  if(::stat(name,&sb)<0)throw failure("MarshalFile stat ")<<name;
   if(sb.st_mtime>previous_updatedtime){
-    if('.'==fname[0]||fname[0]=='/')buf.Receive(::strrchr(fname,'/')+1);
-    else buf.Receive(fname);
+    if('.'==name[0]||name[0]=='/')buf.Receive(::strrchr(name,'/')+1);
+    else buf.Receive(name);
     buf.InsertNull();
 
-    int d=::open(fname,O_RDONLY);
-    if(d<0)throw failure("MarshalFile open ")<<fname<<" "<<errno;
+    int d=::open(name,O_RDONLY);
+    if(d<0)throw failure("MarshalFile open ")<<name<<" "<<errno;
     try{buf.ReceiveFile(d,sb.st_size);}catch(...){::close(d);throw;}
     ::close(d);
     if(sb.st_mtime>current_updatedtime)current_updatedtime=sb.st_mtime;
