@@ -17,7 +17,7 @@ public:
     str=w;
   }
 
-  inline char const* what ()const noexcept {return str.c_str();}
+  inline char const* what ()const noexcept{return str.c_str();}
   //::std::string_view what_view ()const noexcept
   //{return ::std::string_view(str);}
 
@@ -42,9 +42,9 @@ public:
   }
 
   inline failure& operator<< (int i){
-    char buf[20];
-    ::sprintf(buf,"%d",i);
-    return *this<<buf;
+    char b[20];
+    ::sprintf(b,"%d",i);
+    return *this<<b;
   }
 
   template<class T>

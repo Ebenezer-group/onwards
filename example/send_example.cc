@@ -31,7 +31,7 @@ using namespace ::cmw;
 int main()
 {
   try{
-    windows_start();
+    windowsStart();
     SendBufferStack<> buffer;
     getaddrinfo_wrapper res(
 #ifdef __linux__

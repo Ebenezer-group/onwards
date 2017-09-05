@@ -7,16 +7,15 @@
 using sock_type=SOCKET;
 using file_type=HANDLE;
 inline int GetError (){return WSAGetLastError();}
-inline void windows_start (){
-  WSADATA wsa;
-  int rc=WSAStartup(MAKEWORD(2,2),&wsa);
+inline void windowsStart (){
+  WSADATA w;
+  int rc=WSAStartup(MAKEWORD(2,2),&w);
   if(0!=rc)throw ::cmw::failure("WSAStartup:")<<rc;
 }
-
 #else
 #include<errno.h>
 using sock_type=int;
 using file_type=int;
 inline int GetError (){return errno;}
-inline void windows_start (){}
+inline void windowsStart (){}
 #endif
