@@ -5,11 +5,11 @@
 #include<unistd.h>
 #endif
 
-inline void setDirectory (char const* dir){
+inline void setDirectory (char const* d){
 #ifdef CMW_WINDOWS
-  if(!SetCurrentDirectory(dir))
+  if(!SetCurrentDirectory(d))
 #else
-  if(::chdir(dir)==-1)
+  if(::chdir(d)==-1)
 #endif
-    throw ::cmw::failure("setDirectory ")<<dir<<" "<<GetError();
+    throw ::cmw::failure("setDirectory ")<<d<<" "<<GetError();
 }

@@ -34,8 +34,8 @@ inline auto tcp_server (char const* port){
   throw failure("tcp_server");
 }
 
-inline auto accept_wrapper(sock_type sock){
-  auto nu=::accept(sock,nullptr,nullptr);
+inline auto accept_wrapper(sock_type s){
+  auto nu=::accept(s,nullptr,nullptr);
   if(nu>=0)return nu;
 
   if(ECONNABORTED==GetError())return 0;
@@ -43,10 +43,10 @@ inline auto accept_wrapper(sock_type sock){
 }
 
 #if defined(__FreeBSD__)||defined(__linux__)
-inline auto accept4_wrapper(sock_type sock,int flags){
-  ::sockaddr amb_addr;
-  ::socklen_t amblen=sizeof(amb_addr);
-  auto nu=::accept4(sock,&amb_addr,&amblen,flags);
+inline auto accept4_wrapper(sock_type s,int flags){
+  ::sockaddr amb;
+  ::socklen_t len=sizeof(amb);
+  auto nu=::accept4(s,&amb,&len,flags);
   if(nu>=0)return nu;
 
   if(ECONNABORTED==GetError())return 0;
