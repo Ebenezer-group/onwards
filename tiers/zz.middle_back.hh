@@ -20,13 +20,11 @@ void Marshal (::cmw::SendBuffer& buf
 
 inline void Marshal (::cmw::SendBuffer& buf
          ,message_id_8 const& a
-         ,::cmw::marshalling_integer const& b
-         ,request_generator const& c){
+         ,cmwRequest const& b){
   try{
     buf.ReserveBytes(4);
     buf.Receive(a);
     b.Marshal(buf);
-    c.Marshal(buf);
     buf.FillInSize(700000);
   }catch(...){buf.Rollback();throw;}
 }

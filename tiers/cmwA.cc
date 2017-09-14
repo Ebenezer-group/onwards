@@ -31,42 +31,11 @@
 #include<unistd.h> //pread
 
 using namespace ::cmw;
-class request_generator{
-  // hand_written_marshalling_code
-  char const* fname;
-  FILE_wrapper Fl;
-
-public:
-  explicit request_generator (char const* file):fname(file),Fl{file,"r"}{}
-
-  void Marshal (SendBuffer& buf,bool=false)const{
-    auto index=buf.ReserveBytes(1);
-    if(MarshalFile(fname,buf))buf.Receive(index,true);
-    else{
-      buf.Receive(index,false);
-      buf.Receive(fname);
-      buf.InsertNull();
-    }
-
-    char lineBuf[100];
-    int8_t updatedFiles=0;
-    index=buf.ReserveBytes(sizeof(updatedFiles));
-    while(::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl)){
-      if('/'==lineBuf[0]&&'/'==lineBuf[1])continue;
-      char const* token=::strtok(lineBuf,"\n ");
-      if(!::strcmp("message-lengths",token))break;
-      if(MarshalFile(token,buf))++updatedFiles;
-    }
-    buf.Receive(index,updatedFiles);
-  }
-};
-
-#include"zz.middle_back.hh"
 
 int32_t previous_updatedtime;
 int32_t current_updatedtime;
 
-struct cmw_request{
+struct cmwRequest{
   ::sockaddr_in6 front;
   ::socklen_t frontlen=sizeof(front);
   int32_t latest_update;
@@ -75,12 +44,12 @@ struct cmw_request{
   char const* filename;
   int fd;
 
-  cmw_request ()=default;
+  cmwRequest ()=default;
 
   template<class R>
-  explicit cmw_request (ReceiveBuffer<R>& buf):accountNbr(buf),path(buf){
+  explicit cmwRequest (ReceiveBuffer<R>& buf):accountNbr(buf),path(buf){
     char* const pos=::strrchr(path(),'/');
-    if(nullptr==pos)throw failure("cmw_request didn't find a /");
+    if(nullptr==pos)throw failure("cmwRequest didn't find a /");
     *pos='\0';
     filename=pos+1;
     setDirectory(path());
@@ -89,8 +58,10 @@ struct cmw_request{
     fd=::open(lastrun,O_RDWR);
     previous_updatedtime=0;
     if(fd>=0){
-      if(::pread(fd,&previous_updatedtime,sizeof(previous_updatedtime),0)==-1)
+      if(::pread(fd,&previous_updatedtime,sizeof(previous_updatedtime),0)==-1){
+        ::close(fd);
         throw failure("pread ")<<errno;
+      }
     }else{
       fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
       if(fd<0)throw failure("open ")<<lastrun<<" "<<errno;
@@ -101,8 +72,34 @@ struct cmw_request{
   void save_lastruntime ()const
   {Write(fd,&latest_update,sizeof(latest_update));}
 
-  ~cmw_request (){::close(fd);}
+  // hand_written_marshalling_code
+  void Marshal (SendBuffer& buf,bool=false)const{
+    accountNbr.Marshal(buf);
+    auto index=buf.ReserveBytes(1);
+    if(MarshalFile(filename,buf))buf.Receive(index,true);
+    else{
+      buf.Receive(index,false);
+      buf.Receive(filename);
+      buf.InsertNull();
+    }
+
+    char line[100];
+    int8_t updatedFiles=0;
+    index=buf.ReserveBytes(sizeof(updatedFiles));
+    FILE_wrapper Fl{filename,"r"};
+    while(::fgets(line,sizeof(line),Fl.Hndl)){
+      if('/'==line[0]&&'/'==line[1])continue;
+      char const* tok=::strtok(line,"\n ");
+      if(!::strcmp("message-lengths",tok))break;
+      if(MarshalFile(tok,buf))++updatedFiles;
+    }
+    buf.Receive(index,updatedFiles);
+  }
+
+  ~cmwRequest (){::close(fd);}
 };
+
+#include"zz.middle_back.hh"
 
 class cmwAmbassador{
   ReceiveBufferCompressed<
@@ -116,7 +113,7 @@ class cmwAmbassador{
   SendBufferCompressed cmwSendbuf;
   SendBufferStack<> localsendbuf;
   ::std::vector<cmw_account> accounts;
-  ::std::vector<::std::unique_ptr<cmw_request>> pendingRequests;
+  ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
   ::pollfd fds[2];
   int loginPause;
 
@@ -168,9 +165,9 @@ bool cmwAmbassador::sendData (){
   return true;
 }
 
-#define CHECK_FIELD_NAME(fieldname)             \
-  ::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl);     \
-  if(::strcmp(fieldname,::strtok(lineBuf," "))) \
+#define CHECK_FIELD_NAME(fieldname)\
+  ::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl);\
+  if(::strcmp(fieldname,::strtok(lineBuf," ")))\
     throw failure("Expected ")<<fieldname;
 
 cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
@@ -179,14 +176,14 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
   char lineBuf[120];
   FILE_wrapper Fl(configfile,"r");
   while(::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl)){
-    char const* token=::strtok(lineBuf," ");
-    if(!::strcmp("Account-number",token)){
+    char const* tok=::strtok(lineBuf," ");
+    if(!::strcmp("Account-number",tok)){
       auto num=::strtol(::strtok(nullptr,"\n "),0,10);
       CHECK_FIELD_NAME("Password");
       accounts.emplace_back(num,::strtok(nullptr,"\n "));
     }else{
       if(accounts.empty())throw failure("An account number is required.");
-      if(!::strcmp("UDP-port-number",token))break;
+      if(!::strcmp("UDP-port-number",tok))break;
       else throw failure("UDP-port-number is required.");
     }
   }
@@ -257,19 +254,18 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
 
     if(fds[1].revents&POLLIN){
       auto& request=
-              *pendingRequests.emplace_back(::std::make_unique<cmw_request>());
-      bool gotAddress=false;
+              *pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
+      bool gotAddr=false;
       try{
         ReceiveBufferStack<SameFormat>
-            recbuf(fds[1].fd,(::sockaddr*)&request.front,&request.frontlen);
-        gotAddress=true;
-	new (&request)cmw_request(recbuf);
-        middle_back::Marshal(cmwSendbuf,Generate,request.accountNbr
-                             ,request_generator(request.filename));
+            rbuf(fds[1].fd,(::sockaddr*)&request.front,&request.frontlen);
+        gotAddr=true;
+	new (&request)cmwRequest(rbuf);
+        middle_back::Marshal(cmwSendbuf,Generate,request);
         request.latest_update=current_updatedtime;
       }catch(::std::exception const& e){
         syslog_wrapper(LOG_ERR,"Accept request: %s",e.what());
-        if(gotAddress){
+        if(gotAddr){
           middle_front::Marshal(localsendbuf,false,string_plus{e.what()});
           localsendbuf.Send((::sockaddr*)&request.front,request.frontlen);
         }

@@ -20,9 +20,9 @@ public:
   explicit marshalling_integer (ReceiveBuffer<R>& b):val(0){
     uint32_t shift=1;
     for(;;){
-      uint8_t abyte=b.GiveOne();
-      val+= (abyte&127)*shift;
-      if((abyte&128)==0)return;
+      uint8_t a=b.GiveOne();
+      val+= (a&127)*shift;
+      if((a&128)==0)return;
       shift<<=7;
       val+=shift;
     }
