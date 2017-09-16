@@ -7,16 +7,15 @@ class SendBuffer;
 template<class R> class ReceiveBuffer;
 }
 
-struct cmw_account{
+struct cmwAccount{
   ::cmw::marshalling_integer number;
   ::cmw::fixed_string_60 password;
 
-  cmw_account (int n,char* p):number(n),password(p){}
+  cmwAccount (int n,char* p):number(n),password(p){}
 
   template<class R>
-  explicit cmw_account (::cmw::ReceiveBuffer<R>&);
+  explicit cmwAccount (::cmw::ReceiveBuffer<R>&);
 
   void MarshalMemberData (::cmw::SendBuffer&)const;
-  void Marshal (::cmw::SendBuffer& b,bool=false)const
-  {MarshalMemberData(b);}
+  void Marshal (::cmw::SendBuffer& b,bool=false)const{MarshalMemberData(b);}
 };

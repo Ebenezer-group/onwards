@@ -9,7 +9,7 @@
 namespace middle_back{
 void Marshal (::cmw::SendBuffer& buf
          ,message_id_8 const& a
-         ,::std::vector<cmw_account> const& b){
+         ,::std::vector<cmwAccount> const& b){
   try{
     buf.ReserveBytes(4);
     buf.Receive(a);
@@ -40,7 +40,7 @@ inline void Marshal (::cmw::SendBuffer& buf
 }
 
 inline void
-cmw_account::MarshalMemberData (::cmw::SendBuffer& buf)const{
+cmwAccount::MarshalMemberData (::cmw::SendBuffer& buf)const{
   number.Marshal(buf);
   password.Marshal(buf);
 }

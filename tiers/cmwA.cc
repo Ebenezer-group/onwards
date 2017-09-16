@@ -41,7 +41,7 @@ struct cmwRequest{
   int32_t latest_update;
   marshalling_integer const accountNbr;
   fixed_string_120 path;
-  char const* filename;
+  char const* middlefile;
   int fd;
 
   cmwRequest ()=default;
@@ -51,10 +51,10 @@ struct cmwRequest{
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)throw failure("cmwRequest didn't find a /");
     *pos='\0';
-    filename=pos+1;
+    middlefile=pos+1;
     setDirectory(path());
     char lastrun[60];
-    ::snprintf(lastrun,sizeof(lastrun),"%s.lastrun",filename);
+    ::snprintf(lastrun,sizeof(lastrun),"%s.lastrun",middlefile);
     fd=::open(lastrun,O_RDWR);
     previous_updatedtime=0;
     if(fd>=0){
@@ -72,21 +72,20 @@ struct cmwRequest{
   void save_lastruntime ()const
   {Write(fd,&latest_update,sizeof(latest_update));}
 
-  // hand_written_marshalling_code
   void Marshal (SendBuffer& buf,bool=false)const{
     accountNbr.Marshal(buf);
     auto index=buf.ReserveBytes(1);
-    if(MarshalFile(filename,buf))buf.Receive(index,true);
+    if(MarshalFile(middlefile,buf))buf.Receive(index,true);
     else{
       buf.Receive(index,false);
-      buf.Receive(filename);
+      buf.Receive(middlefile);
       buf.InsertNull();
     }
 
     char line[100];
     int8_t updatedFiles=0;
     index=buf.ReserveBytes(sizeof(updatedFiles));
-    FILE_wrapper Fl{filename,"r"};
+    FILE_wrapper Fl{middlefile,"r"};
     while(::fgets(line,sizeof(line),Fl.Hndl)){
       if('/'==line[0]&&'/'==line[1])continue;
       char const* tok=::strtok(line,"\n ");
@@ -112,7 +111,7 @@ class cmwAmbassador{
 
   SendBufferCompressed cmwSendbuf;
   SendBufferStack<> localsendbuf;
-  ::std::vector<cmw_account> accounts;
+  ::std::vector<cmwAccount> accounts;
   ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
   ::pollfd fds[2];
   int loginPause;
