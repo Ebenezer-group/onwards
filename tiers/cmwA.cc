@@ -1,4 +1,4 @@
-#include"account_info.hh"
+#include"account.hh"
 #include<close_socket.hh>
 #include<connect_wrapper.hh>
 #include<ErrorWords.hh>
@@ -30,10 +30,9 @@
 #include<netinet/in.h> //sockaddr_in6,socklen_t
 #include<unistd.h> //pread
 
-using namespace ::cmw;
-
 int32_t previous_updatedtime;
 int32_t current_updatedtime;
+using namespace ::cmw;
 
 struct cmwRequest{
   ::sockaddr_in6 front;
@@ -165,17 +164,17 @@ bool cmwAmbassador::sendData (){
 }
 
 #define CHECK_FIELD_NAME(fieldname)\
-  ::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl);\
-  if(::strcmp(fieldname,::strtok(lineBuf," ")))\
+  ::fgets(line,sizeof(line),Fl.Hndl);\
+  if(::strcmp(fieldname,::strtok(line," ")))\
     throw failure("Expected ")<<fieldname;
 
 cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
   ,cmwSendbuf(1000000)
 {
-  char lineBuf[120];
+  char line[120];
   FILE_wrapper Fl(configfile,"r");
-  while(::fgets(lineBuf,sizeof(lineBuf),Fl.Hndl)){
-    char const* tok=::strtok(lineBuf," ");
+  while(::fgets(line,sizeof(line),Fl.Hndl)){
+    char const* tok=::strtok(line," ");
     if(!::strcmp("Account-number",tok)){
       auto num=::strtol(::strtok(nullptr,"\n "),0,10);
       CHECK_FIELD_NAME("Password");
