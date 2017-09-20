@@ -8,7 +8,7 @@
 #endif
 
 namespace cmw{
-inline int poll_wrapper(::pollfd* fds,int num,int timeout=-1){
+inline int poll_wrapper (::pollfd* fds,int num,int timeout=-1){
   int rc=::poll(fds,num,timeout);
   if(rc>=0)return rc;
   throw failure("poll ")<<GetError();

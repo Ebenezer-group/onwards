@@ -218,15 +218,15 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
           do{
             assert(!pendingRequests.empty());
             if(pendingRequests.front().get()){
-              auto const& request=*pendingRequests.front();
+              auto const& req=*pendingRequests.front();
               if(cmwBuf.GiveBool()){
-                setDirectory(request.path.c_str());
+                setDirectory(req.path.c_str());
                 empty_container<File>{cmwBuf};
-                request.save_lastruntime();
+                req.save_lastruntime();
                 middle_front::Marshal(localsendbuf,true);
               }else middle_front::Marshal(localsendbuf,false,
                                  string_plus{"CMW:",cmwBuf.GiveString_view()});
-              localsendbuf.Send((::sockaddr*)&request.front,request.frontlen);
+              localsendbuf.Send((::sockaddr*)&req.front,req.frontlen);
               localsendbuf.Reset();
             }
             pendingRequests.erase(::std::begin(pendingRequests));
@@ -240,9 +240,9 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
         syslog_wrapper(LOG_ERR,"Problem handling reply from CMW %s",e.what());
         assert(!pendingRequests.empty());
         if(pendingRequests.front().get()){
-          auto const& request=*pendingRequests.front();
+          auto const& req=*pendingRequests.front();
           middle_front::Marshal(localsendbuf,false,string_plus{e.what()});
-          localsendbuf.Send((::sockaddr*)&request.front,request.frontlen);
+          localsendbuf.Send((::sockaddr*)&req.front,req.frontlen);
         }
         pendingRequests.erase(::std::begin(pendingRequests));
       }
@@ -251,21 +251,20 @@ cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
     if(fds[0].revents&POLLOUT&&sendData())fds[0].events=POLLIN;
 
     if(fds[1].revents&POLLIN){
-      auto& request=
-              *pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
+      auto& req=*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
       bool gotAddr=false;
       try{
         ReceiveBufferStack<SameFormat>
-            rbuf(fds[1].fd,(::sockaddr*)&request.front,&request.frontlen);
+            rbuf(fds[1].fd,(::sockaddr*)&req.front,&req.frontlen);
         gotAddr=true;
-	new (&request)cmwRequest(rbuf);
-        middle_back::Marshal(cmwSendbuf,Generate,request);
-        request.latest_update=current_updatedtime;
+	new (&req)cmwRequest(rbuf);
+        middle_back::Marshal(cmwSendbuf,Generate,req);
+        req.latest_update=current_updatedtime;
       }catch(::std::exception const& e){
         syslog_wrapper(LOG_ERR,"Accept request: %s",e.what());
         if(gotAddr){
           middle_front::Marshal(localsendbuf,false,string_plus{e.what()});
-          localsendbuf.Send((::sockaddr*)&request.front,request.frontlen);
+          localsendbuf.Send((::sockaddr*)&req.front,req.frontlen);
         }
 	pendingRequests.pop_back();
         continue;

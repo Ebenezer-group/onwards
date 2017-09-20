@@ -2,7 +2,7 @@
 #include"ErrorWords.hh"
 #include"platforms.hh"
 
-#if !defined(CMW_WINDOWS)
+#ifndef CMW_WINDOWS
 #include<netdb.h>
 #include<sys/socket.h>
 #include<sys/types.h>

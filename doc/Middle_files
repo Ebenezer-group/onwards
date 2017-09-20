@@ -6,7 +6,7 @@ Lines like the following are the basis of Middle code:
 
 Options start with a dash (-) symbol. After any options, a list of
 C++ types is enclosed in a pair of parentheses.  One or more of
-these lines are wrapped by a name and a closing brace (}) like this:
+these lines are wrapped by a name and a closing brace like this:
 
 send_messages
     -out (message_id_8, ::std::vector<int32_t>, ::std::string)
