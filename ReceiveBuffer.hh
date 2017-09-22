@@ -228,50 +228,50 @@ public:
   bool GiveBool (){return GiveOne()!=0;}
 
   auto GiveString (){
-    marshalling_integer slen(*this);
-    if(slen()>msgLength-index)
+    marshalling_integer len(*this);
+    if(len()>msgLength-index)
       throw failure("ReceiveBuffer::GiveString");
-    ::std::string str(buf+subTotal+index,slen());
-    index+=slen();
-    return str;
+    ::std::string s(buf+subTotal+index,len());
+    index+=len();
+    return s;
   }
 
   auto GiveString_view(){
-    marshalling_integer slen(*this);
-    if(slen()>msgLength-index)
+    marshalling_integer len(*this);
+    if(len()>msgLength-index)
       throw failure("ReceiveBuffer::GiveString_view");
-    ::std::string_view view(buf+subTotal+index,slen());
-    index+=slen();
-    return view;
+    ::std::string_view v(buf+subTotal+index,len());
+    index+=len();
+    return v;
   }
 
   auto GiveString_view_plus(){
-    auto view=GiveString_view();
+    auto v=GiveString_view();
     GiveOne();
-    return view;
+    return v;
   }
 
 #ifndef CMW_WINDOWS
   template<ssize_t N>
   void CopyString (char (&dest)[N]){
-    marshalling_integer slen(*this);
-    if(slen()+1>N)throw failure("ReceiveBuffer::CopyString");
-    Give(dest,slen());
-    dest[slen()]='\0';
+    marshalling_integer len(*this);
+    if(len()+1>N)throw failure("ReceiveBuffer::CopyString");
+    Give(dest,len());
+    dest[len()]='\0';
   }
 #endif
 
   void AppendTo(::std::string& s){
-    marshalling_integer slen(*this);
-    if(slen()>msgLength-index)throw failure("ReceiveBuffer::AppendTo");
-    s.append(buf+subTotal+index,slen());
-    index+=slen();
+    marshalling_integer len(*this);
+    if(len()>msgLength-index)throw failure("ReceiveBuffer::AppendTo");
+    s.append(buf+subTotal+index,len());
+    index+=len();
   }
 
   template<class T>
-  void Giveilist (T& intrlst){
+  void Giveilist (T& lst){
     for(int count=Give<uint32_t>();count>0;--count)
-      intrlst.push_back(*T::value_type::BuildPolyInstance(*this));
+      lst.push_back(*T::value_type::BuildPolyInstance(*this));
   }
 
   template<class T>

@@ -28,10 +28,10 @@ public:
     }
   }
 
-  inline void operator= (int32_t rs){val=rs;}
+  inline void operator= (int32_t r){val=r;}
   inline auto operator() ()const{return val;}
-  inline bool operator== (marshalling_integer rs)const{return val==rs();}
-  inline bool operator== (int32_t rs)const{return val==rs;}
+  inline bool operator== (marshalling_integer r)const{return val==r();}
+  inline bool operator== (int32_t r)const{return val==r;}
   void Marshal (SendBuffer&,bool=false)const;
 };
 }

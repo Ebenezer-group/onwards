@@ -10,9 +10,9 @@ inline auto connect_wrapper(char const* node,char const* port){
     sock_type s=::socket(r->ai_family,r->ai_socktype,0);
     if(-1==s)continue;
     if(0==::connect(s,r->ai_addr,r->ai_addrlen))return s;
-    auto save=errno;
+    auto e=errno;
     close_socket(s);
-    errno=save;
+    errno=e;
     return -1;
   }
   return -1;

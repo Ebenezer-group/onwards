@@ -3,12 +3,12 @@
 #include"IO.hh"
 #include"marshalling_integer.hh"
 #include"platforms.hh"
-#include<string>
-#include<string_view>
-#include<type_traits>
 #include<stdint.h>
 #include<stdio.h> //snprintf
+#include<string>
+#include<string_view>
 #include<string.h>
+#include<type_traits>
 
 #include<limits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8
@@ -79,27 +79,27 @@ public:
   inline void Receive (bool b){Receive(static_cast<unsigned char>(b));}
 
   inline void Receive (char* cstr){
-    marshalling_integer slen(::strlen(cstr));
-    slen.Marshal(*this);
-    Receive(cstr,slen());
+    marshalling_integer len(::strlen(cstr));
+    len.Marshal(*this);
+    Receive(cstr,len());
   }
 
   inline void Receive (char const* cstr){
-    marshalling_integer slen(::strlen(cstr));
-    slen.Marshal(*this);
-    Receive(cstr,slen());
+    marshalling_integer len(::strlen(cstr));
+    len.Marshal(*this);
+    Receive(cstr,len());
   }
 
   inline void Receive (::std::string const& s){
-    marshalling_integer slen(s.size());
-    slen.Marshal(*this);
-    Receive(s.data(),slen());
+    marshalling_integer len(s.size());
+    len.Marshal(*this);
+    Receive(s.data(),len());
   }
 
   inline void Receive (::std::string_view const& s){
-    marshalling_integer slen(s.size());
-    slen.Marshal(*this);
-    Receive(s.data(),slen());
+    marshalling_integer len(s.size());
+    len.Marshal(*this);
+    Receive(s.data(),len());
   }
 
   inline void InsertNull (){uint8_t z=0;Receive(z);}

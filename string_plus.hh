@@ -9,7 +9,7 @@ class string_plus{
   ::std::initializer_list<::std::string_view> lst;
 
  public:
-  inline string_plus (::std::initializer_list<::std::string_view> in):lst(in){}
+  inline string_plus (::std::initializer_list<::std::string_view> l):lst(l){}
 
   inline void Marshal (SendBuffer& buf,bool=false)const{
     int32_t t=0;

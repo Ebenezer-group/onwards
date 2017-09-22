@@ -13,9 +13,9 @@ inline sock_type udp_server (char const* port){
     auto s=::socket(r->ai_family,r->ai_socktype,0);
     if(-1==s)continue;
     if(0==::bind(s,r->ai_addr,r->ai_addrlen))return s;
-    auto save=GetError();
+    auto v=GetError();
     close_socket(s);
-    throw failure("udp_server ")<<save;
+    throw failure("udp_server ")<<v;
   }
   throw failure("udp_server");
 }
