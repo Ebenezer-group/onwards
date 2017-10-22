@@ -1,5 +1,5 @@
 ../udp_stuff.hh
 message-lengths  variable
 middle_front
-  -out -max_length=cmw::udp_packet_max -no_inline -yea_nay (bool,cmw::string_plus)
+  -out -max_length=cmw::udp_packet_max -no_inline -yea_nay (bool,cmw::stringPlus)
 }

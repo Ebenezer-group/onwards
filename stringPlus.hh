@@ -5,11 +5,11 @@
 #include<string_view>
 
 namespace cmw{
-class string_plus{
+class stringPlus{
   ::std::initializer_list<::std::string_view> lst;
 
  public:
-  inline string_plus (::std::initializer_list<::std::string_view> l):lst(l){}
+  inline stringPlus (::std::initializer_list<::std::string_view> l):lst(l){}
 
   inline void Marshal (SendBuffer& buf,bool=false)const{
     int32_t t=0;

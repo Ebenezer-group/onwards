@@ -12,5 +12,5 @@ middle_back
 
 middle_front
   -out -max_length=cmw::udp_packet_max (bool)
-  -out -max_length=cmw::udp_packet_max -no_inline (bool,cmw::string_plus)
+  -out -max_length=cmw::udp_packet_max -no_inline (bool,cmw::stringPlus)
 }
