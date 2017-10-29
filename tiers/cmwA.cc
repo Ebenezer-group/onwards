@@ -22,17 +22,38 @@
 #include<memory> //unique_ptr
 #include<vector>
 #include<assert.h>
+#include<errno.h>
+#include<fcntl.h> //open
 #include<stdint.h>
 #include<stdio.h>
 #include<stdlib.h> //strtol
 #include<string.h>
-#include<errno.h>
+#include<sys/types.h>
+#include<sys/stat.h>
 #include<netinet/in.h> //sockaddr_in6,socklen_t
-#include<unistd.h> //pread
+#include<unistd.h> //pread,close
 
 int32_t previous_updatedtime;
 int32_t current_updatedtime;
 using namespace ::cmw;
+
+bool MarshalFile (char const* name,SendBuffer& buf){
+  struct stat sb;
+  if(::stat(name,&sb)<0)throw failure("MarshalFile stat ")<<name;
+  if(sb.st_mtime>previous_updatedtime){
+    if('.'==name[0]||name[0]=='/')buf.Receive(::strrchr(name,'/')+1);
+    else buf.Receive(name);
+    buf.InsertNull();
+
+    int d=::open(name,O_RDONLY);
+    if(d<0)throw failure("MarshalFile open ")<<name<<" "<<errno;
+    try{buf.ReceiveFile(d,sb.st_size);}catch(...){::close(d);throw;}
+    ::close(d);
+    if(sb.st_mtime>current_updatedtime)current_updatedtime=sb.st_mtime;
+    return true;
+  }
+  return false;
+}
 
 struct cmwRequest{
   ::sockaddr_in6 front;
@@ -286,3 +307,4 @@ int main (int ac,char** av){
   }
   return EXIT_FAILURE;
 }
+
