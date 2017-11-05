@@ -6,13 +6,13 @@
 namespace cmw{
 class FILE_wrapper{
 public:
-  FILE* Hndl;
+  FILE* hndl;
 
   inline FILE_wrapper (char const* fn,char const* mode){
-    if((Hndl=::fopen(fn,mode))==nullptr)
+    if((hndl=::fopen(fn,mode))==nullptr)
       throw failure("FILE_wrapper ")<<fn<<" "<<mode<<" "<<GetError();
   }
 
-  inline ~FILE_wrapper (){::fclose(Hndl);}
+  inline ~FILE_wrapper (){::fclose(hndl);}
 };
 }

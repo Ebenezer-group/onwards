@@ -38,7 +38,7 @@ int32_t current_updatedtime;
 using namespace ::cmw;
 
 bool MarshalFile (char const* name,SendBuffer& buf){
-  struct stat sb;
+  struct ::stat sb;
   if(::stat(name,&sb)<0)throw failure("MarshalFile stat ")<<name;
   if(sb.st_mtime>previous_updatedtime){
     if('.'==name[0]||name[0]=='/')buf.Receive(::strrchr(name,'/')+1);
@@ -94,30 +94,29 @@ struct cmwRequest{
 
   void Marshal (SendBuffer& buf,bool=false)const{
     accountNbr.Marshal(buf);
-    auto index=buf.ReserveBytes(1);
-    if(MarshalFile(middlefile,buf))buf.Receive(index,true);
+    auto ind=buf.ReserveBytes(1);
+    if(MarshalFile(middlefile,buf))buf.Receive(ind,true);
     else{
-      buf.Receive(index,false);
+      buf.Receive(ind,false);
       buf.Receive(middlefile);
       buf.InsertNull();
     }
 
     char line[100];
     int8_t updatedFiles=0;
-    index=buf.ReserveBytes(sizeof(updatedFiles));
-    FILE_wrapper Fl{middlefile,"r"};
-    while(::fgets(line,sizeof(line),Fl.Hndl)){
+    ind=buf.ReserveBytes(sizeof(updatedFiles));
+    FILE_wrapper f{middlefile,"r"};
+    while(::fgets(line,sizeof(line),f.hndl)){
       if('/'==line[0]&&'/'==line[1])continue;
-      char const* tok=::strtok(line,"\n ");
+      auto tok=::strtok(line,"\n ");
       if(!::strcmp("message-lengths",tok))break;
       if(MarshalFile(tok,buf))++updatedFiles;
     }
-    buf.Receive(index,updatedFiles);
+    buf.Receive(ind,updatedFiles);
   }
 
   ~cmwRequest (){::close(fd);}
 };
-
 #include"zz.middle_back.hh"
 
 class cmwAmbassador{
@@ -140,7 +139,7 @@ class cmwAmbassador{
   void reset (char const*);
   bool sendData ();
 public:
-  cmwAmbassador (char const*);
+  cmwAmbassador (char*);
 };
 
 void cmwAmbassador::login (){
@@ -185,17 +184,17 @@ bool cmwAmbassador::sendData (){
 }
 
 #define CHECK_FIELD_NAME(fieldname)\
-  ::fgets(line,sizeof(line),Fl.Hndl);\
+  ::fgets(line,sizeof(line),fl.hndl);\
   if(::strcmp(fieldname,::strtok(line," ")))\
     throw failure("Expected ")<<fieldname;
 
-cmwAmbassador::cmwAmbassador (char const* configfile):cmwBuf(1100000)
+cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
   ,cmwSendbuf(1000000)
 {
   char line[120];
-  FILE_wrapper Fl(configfile,"r");
-  while(::fgets(line,sizeof(line),Fl.Hndl)){
-    char const* tok=::strtok(line," ");
+  FILE_wrapper fl(configfile,"r");
+  while(::fgets(line,sizeof(line),fl.hndl)){
+    auto tok=::strtok(line," ");
     if(!::strcmp("Account-number",tok)){
       auto num=::strtol(::strtok(nullptr,"\n "),0,10);
       CHECK_FIELD_NAME("Password");
