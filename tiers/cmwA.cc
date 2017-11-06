@@ -277,7 +277,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
         ReceiveBufferStack<SameFormat>
             rbuf(fds[1].fd,(::sockaddr*)&req.front,&req.frontlen);
         gotAddr=true;
-	new (&req)cmwRequest(rbuf);
+	new(&req)cmwRequest(rbuf);
         middle_back::Marshal(cmwSendbuf,Generate,req);
         req.latest_update=current_updatedtime;
       }catch(::std::exception const& e){
