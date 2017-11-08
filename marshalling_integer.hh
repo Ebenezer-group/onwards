@@ -1,6 +1,6 @@
 #pragma once
 #include<stdint.h>
-#include<stdlib.h> //strtol
+#include<stdlib.h>//strtol
 
 namespace cmw{
 class SendBuffer;
@@ -14,8 +14,8 @@ public:
   inline explicit marshalling_integer (int32_t v):val(v){}
   inline explicit marshalling_integer (char const* v):val(::strtol(v,0,10)){}
 
-  // Reads a sequence of bytes in variable-length format and
-  // composes a 32 bit integer.
+  //Reads a sequence of bytes in variable-length format and
+  //composes a 32 bit integer.
   template<class R>
   explicit marshalling_integer (ReceiveBuffer<R>& b):val(0){
     uint32_t shift=1;

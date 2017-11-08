@@ -1,4 +1,4 @@
-// Messages the middle tier either sends to or receives from the back tier.
+//Messages the middle tier either sends to or receives from the back tier.
 ../message_id_types.hh
 account.hh
 message-lengths  variable

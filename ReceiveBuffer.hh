@@ -80,7 +80,7 @@ public:
     }
   }
 
-  // Overloads for uint8_t and int8_t
+  //Overloads for uint8_t and int8_t
   template<template<class> class B>
   void ReadBlock (B<LeastSignificantFirst>& buf
                   ,uint8_t* data,int elements){

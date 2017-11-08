@@ -1,7 +1,7 @@
 #include"marshalling_integer.hh"
 #include"SendBuffer.hh"
 
-// Encode integer into variable-length format.
+//Encode integer into variable-length format.
 void ::cmw::marshalling_integer::Marshal (SendBuffer& b,bool)const{
   uint32_t n=val;
   for(;;){
