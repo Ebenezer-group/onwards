@@ -2,7 +2,7 @@
 ../message_id_types.hh
 account.hh
 message-lengths  variable
-middle_back
+middleBack
   -out -no_inline (message_id_8,::std::vector<cmwAccount>)
   -out -max_length=700000 (message_id_8,cmwRequest)
   -out (message_id_8)

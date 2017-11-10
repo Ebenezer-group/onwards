@@ -17,7 +17,7 @@
 #include<SendBufferCompressed.hh>
 #include<SendBufferStack.hh>
 #include<udp_stuff.hh>
-#include"zz.middle_front.hh"
+#include"zz.middleFront.hh"
 
 #include<memory> //unique_ptr
 #include<vector>
@@ -117,7 +117,7 @@ struct cmwRequest{
 
   ~cmwRequest (){::close(fd);}
 };
-#include"zz.middle_back.hh"
+#include"zz.middleBack.hh"
 
 class cmwAmbassador{
   ReceiveBufferCompressed<

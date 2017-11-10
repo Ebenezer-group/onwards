@@ -6,7 +6,7 @@
 #include<ReceiveBufferStack.hh>
 #include<SendBufferStack.hh>
 #include<syslog_wrapper.hh>
-#include"zz.front_middle.hh"
+#include"zz.frontMiddle.hh"
 #include<stdio.h>
 #include<stdlib.h> //exit
 
