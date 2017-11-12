@@ -3,6 +3,7 @@
 #include"IO.hh"
 #include"marshalling_integer.hh"
 #include"platforms.hh"
+#include<initializer_list>
 #include<stdint.h>
 #include<stdio.h> //snprintf
 #include<string>
@@ -21,6 +22,8 @@ static_assert(::std::numeric_limits<float>::is_iec559
 #endif
 
 namespace cmw{
+using stringPlus=::std::initializer_list<::std::string_view>;
+
 class SendBuffer{
   int32_t saved_size=0;
 
@@ -100,6 +103,13 @@ public:
     marshalling_integer len(s.size());
     len.Marshal(*this);
     Receive(s.data(),len());
+  }
+
+  inline void Receive (stringPlus lst){
+    int32_t t=0;
+    for(auto s:lst)t+=s.length();
+    marshalling_integer{t}.Marshal(*this);
+    for(auto s:lst)Receive(s.data(),s.length());//Use low-level Receive
   }
 
   inline void InsertNull (){uint8_t z=0;Receive(z);}

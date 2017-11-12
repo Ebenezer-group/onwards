@@ -276,10 +276,9 @@ public:
 
   template<class T>
   void Giverbtree (T& rbt){
-    auto endIt(rbt.end());
-    for(int count=Give<uint32_t>();count>0;--count){
+    auto endIt=rbt.end();
+    for(int count=Give<uint32_t>();count>0;--count)
       rbt.insert_unique(endIt,*T::value_type::BuildPolyInstance(*this));
-    }
   }
 
 private:

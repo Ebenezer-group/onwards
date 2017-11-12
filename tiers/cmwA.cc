@@ -12,26 +12,25 @@
 #include<ReceiveBufferCompressed.hh>
 #include<ReceiveBufferStack.hh>
 #include<setDirectory.hh>
-#include<stringPlus.hh>
 #include<syslog_wrapper.hh>
 #include<SendBufferCompressed.hh>
 #include<SendBufferStack.hh>
 #include<udp_stuff.hh>
 #include"zz.middleFront.hh"
 
-#include<memory> //unique_ptr
+#include<memory>//unique_ptr
 #include<vector>
 #include<assert.h>
 #include<errno.h>
-#include<fcntl.h> //open
+#include<fcntl.h>//open
 #include<stdint.h>
 #include<stdio.h>
-#include<stdlib.h> //strtol
+#include<stdlib.h>//strtol
 #include<string.h>
 #include<sys/types.h>
 #include<sys/stat.h>
-#include<netinet/in.h> //sockaddr_in6,socklen_t
-#include<unistd.h> //pread,close
+#include<netinet/in.h>//sockaddr_in6,socklen_t
+#include<unistd.h>//pread,close
 
 int32_t previous_updatedtime;
 int32_t current_updatedtime;
@@ -164,7 +163,7 @@ void cmwAmbassador::login (){
 }
 
 void cmwAmbassador::reset (char const* explanation){
-  middle_front::Marshal(localsendbuf,false,stringPlus{explanation});
+  middle_front::Marshal(localsendbuf,false,{explanation});
   for(auto& r:pendingRequests){
     if(r.get())localsendbuf.Send((::sockaddr*)&r->front,r->frontlen);
   }
@@ -245,7 +244,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
                 req.save_lastruntime();
                 middle_front::Marshal(localsendbuf,true);
               }else middle_front::Marshal(localsendbuf,false,
-                                 stringPlus{"CMW:",cmwBuf.GiveString_view()});
+                                 {"CMW:",cmwBuf.GiveString_view()});
               localsendbuf.Send((::sockaddr*)&req.front,req.frontlen);
               localsendbuf.Reset();
             }
@@ -261,7 +260,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
         assert(!pendingRequests.empty());
         if(pendingRequests.front().get()){
           auto const& req=*pendingRequests.front();
-          middle_front::Marshal(localsendbuf,false,stringPlus{e.what()});
+          middle_front::Marshal(localsendbuf,false,{e.what()});
           localsendbuf.Send((::sockaddr*)&req.front,req.frontlen);
         }
         pendingRequests.erase(::std::begin(pendingRequests));
