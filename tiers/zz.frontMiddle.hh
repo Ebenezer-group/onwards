@@ -4,7 +4,7 @@
 #include"udp_stuff.hh"
 #include<marshalling_integer.hh>
 
-namespace front_middle{
+namespace frontMiddle{
 void Marshal (::cmw::SendBuffer& buf
          ,cmw::marshalling_integer const& a
          , const char* b){

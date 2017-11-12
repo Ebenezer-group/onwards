@@ -5,7 +5,7 @@
 #include"account.hh"
 #include<vector>
 
-namespace middle_back{
+namespace middleBack{
 void Marshal (::cmw::SendBuffer& buf
          ,message_id_8 const& a
          ,::std::vector<cmwAccount> const& b){

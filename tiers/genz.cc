@@ -35,7 +35,7 @@ int main (int ac,char** av){
 
 sk: ::pollfd pfd{sendbuf.sock_,POLLIN,0};
     int waitSeconds=9;
-    front_middle::Marshal(sendbuf,marshalling_integer(av[1]),av[2]);
+    frontMiddle::Marshal(sendbuf,marshalling_integer(av[1]),av[2]);
     for(int j=0;j<2;++j,waitSeconds*=2){
       sendbuf.Send(rp->ai_addr,rp->ai_addrlen);
 #ifdef __linux__

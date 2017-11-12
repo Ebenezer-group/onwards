@@ -3,7 +3,7 @@
 #include<SendBuffer.hh>
 #include"udp_stuff.hh"
 
-namespace middle_front{
+namespace middleFront{
 void Marshal (::cmw::SendBuffer& buf
          ,bool a
          ,cmw::stringPlus const& b={}){
