@@ -3,7 +3,7 @@
 #include"ErrorWords.hh"
 #include"IO.hh"
 #include"platforms.hh"
-#include"SendBufferHeap.hh"
+#include"SendBuffer.hh"
 #include<string.h>
 
 namespace cmw {

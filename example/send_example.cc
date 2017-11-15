@@ -17,7 +17,7 @@
 #include "message_ids.hh"
 #include <platforms.hh>
 #include <plf_colony.h>
-#include <SendBufferStack.hh>
+#include <SendBuffer.hh>
 #include "zz.send_messages.hh"
 
 #include <array>

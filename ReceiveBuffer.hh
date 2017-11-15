@@ -5,7 +5,7 @@
 #include<stdint.h>
 #include<string>
 #include<string_view>
-#include<string.h> //memcpy
+#include<string.h>//memcpy
 
 #include<limits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8

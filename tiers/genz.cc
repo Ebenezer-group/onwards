@@ -4,11 +4,10 @@
 #include<platforms.hh>
 #include<poll_wrapper.hh>
 #include<ReceiveBufferStack.hh>
-#include<SendBufferStack.hh>
 #include<syslog_wrapper.hh>
 #include"zz.frontMiddle.hh"
 #include<stdio.h>
-#include<stdlib.h> //exit
+#include<stdlib.h>//exit
 
 using namespace ::cmw;
 

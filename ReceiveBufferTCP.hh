@@ -5,7 +5,7 @@
 #include"IO.hh"
 #include"platforms.hh"
 #include"ReceiveBuffer.hh"
-#include<string.h> //memmove
+#include<string.h>//memmove
 
 namespace cmw{
 template<class R>

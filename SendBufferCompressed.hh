@@ -2,7 +2,7 @@
 #include"ErrorWords.hh"
 #include"IO.hh"
 #include"quicklz.h"
-#include"SendBufferHeap.hh"
+#include"SendBuffer.hh"
 #include<string.h>
 
 namespace cmw{

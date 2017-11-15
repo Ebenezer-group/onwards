@@ -3,7 +3,7 @@
 #include"platforms.hh"
 #ifndef CMW_WINDOWS
 #include<fcntl.h>
-#include<unistd.h> //close
+#include<unistd.h>//close
 #endif
 
 namespace cmw{

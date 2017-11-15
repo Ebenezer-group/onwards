@@ -3,9 +3,10 @@
 #include"IO.hh"
 #include"marshalling_integer.hh"
 #include"platforms.hh"
+#include"udp_stuff.hh"
 #include<initializer_list>
 #include<stdint.h>
-#include<stdio.h> //snprintf
+#include<stdio.h>//snprintf
 #include<string>
 #include<string_view>
 #include<string.h>
@@ -172,5 +173,19 @@ public:
 private:
   SendBuffer (SendBuffer const&);
   SendBuffer& operator= (SendBuffer);
+};
+
+template<unsigned long N=udp_packet_max>
+class SendBufferStack:public SendBuffer{
+  unsigned char ar[N];
+
+public:
+  SendBufferStack ():SendBuffer(ar,N){}
+};
+
+class SendBufferHeap:public SendBuffer{
+public:
+  inline SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
+  inline ~SendBufferHeap (){delete [] SendBuffer::buf;}
 };
 }

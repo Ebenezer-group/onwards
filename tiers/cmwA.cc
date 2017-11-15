@@ -14,7 +14,6 @@
 #include<setDirectory.hh>
 #include<syslog_wrapper.hh>
 #include<SendBufferCompressed.hh>
-#include<SendBufferStack.hh>
 #include<udp_stuff.hh>
 #include"zz.middleFront.hh"
 
@@ -282,7 +281,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
       }catch(::std::exception const& e){
         syslog_wrapper(LOG_ERR,"Accept request: %s",e.what());
         if(gotAddr){
-          middleFront::Marshal(localsendbuf,false,stringPlus{e.what()});
+          middleFront::Marshal(localsendbuf,false,{e.what()});
           localsendbuf.Send((::sockaddr*)&req.front,req.frontlen);
         }
 	pendingRequests.pop_back();
