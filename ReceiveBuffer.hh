@@ -2,6 +2,8 @@
 #include"ErrorWords.hh"
 #include"IO.hh"
 #include"marshalling_integer.hh"
+#include"platforms.hh"
+#include"udp_stuff.hh"
 #include<stdint.h>
 #include<string>
 #include<string_view>
@@ -288,4 +290,16 @@ private:
 
 template<class T,class R>
 T Give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
+
+
+template<class R,int size=udp_packet_max>
+class ReceiveBufferStack:public ReceiveBuffer<R>{
+  char ar[size];
+
+public:
+  ReceiveBufferStack (sock_type sock,::sockaddr* fromAddr=nullptr
+                      ,::socklen_t* fromLen=nullptr):
+    ReceiveBuffer<R>(ar,sockRead(sock,ar,size,fromAddr,fromLen))
+  {this->NextMessage();}
+};
 }

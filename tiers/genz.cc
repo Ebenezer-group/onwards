@@ -3,7 +3,7 @@
 #include<getaddrinfo_wrapper.hh>
 #include<platforms.hh>
 #include<poll_wrapper.hh>
-#include<ReceiveBufferStack.hh>
+#include<ReceiveBuffer.hh>
 #include<syslog_wrapper.hh>
 #include"zz.frontMiddle.hh"
 #include<stdio.h>

@@ -10,7 +10,6 @@
 #include<poll_wrapper.hh>
 #include<ReceiveBuffer.hh>
 #include<ReceiveBufferCompressed.hh>
-#include<ReceiveBufferStack.hh>
 #include<setDirectory.hh>
 #include<syslog_wrapper.hh>
 #include<SendBufferCompressed.hh>
