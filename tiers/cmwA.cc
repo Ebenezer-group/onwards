@@ -57,7 +57,7 @@ struct cmwRequest{
   ::socklen_t frontlen=sizeof(front);
   int32_t latest_update;
   marshalling_integer const accountNbr;
-  fixed_string_120 path;
+  fixedString_120 path;
   char const* middlefile;
   int fd;
 

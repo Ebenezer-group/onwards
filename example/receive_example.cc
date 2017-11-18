@@ -3,7 +3,7 @@
 #include "message_ids.hh"
 #include <platforms.hh>
 #include <plf_colony.h>
-#include <ReceiveBufferStack.hh>
+#include <ReceiveBuffer.hh>
 #include <udp_stuff.hh>
 #include "zz.receive_messages.hh"
 

@@ -31,14 +31,14 @@ inline int sockRead (sock_type s,char* data,int len
 inline auto Write (HANDLE h,void const* data,int len){
   DWORD bytesWritten=0;
   if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
-    throw failure("Write--WriteFile ")<<GetLastError();
+    throw failure("Write ")<<GetLastError();
   return bytesWritten;
 }
 
 inline auto Read (HANDLE h,void* data,int len){
   DWORD bytesRead=0;
   if (!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
-    throw failure("Read--ReadFile")<<GetLastError();
+    throw failure("Read ")<<GetLastError();
   return bytesRead;
 }
 #else
