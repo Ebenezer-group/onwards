@@ -26,7 +26,7 @@ namespace cmw{
 using stringPlus=::std::initializer_list<::std::string_view>;
 
 class SendBuffer{
-  int32_t saved_size=0;
+  int32_t savedSize=0;
 
 protected:
   int index=0;
@@ -43,7 +43,7 @@ public:
   inline void Receive (void const* data,int size){
     if(size>bufsize-index)
       throw failure("Size of marshalled data exceeds space available: ")
-        <<bufsize<<" "<<saved_size;
+        <<bufsize<<" "<<savedSize;
     ::memcpy(buf+index,data,size);
     index+=size;
   }
@@ -123,16 +123,16 @@ public:
   }
 
   inline void FillInSize (int32_t max){
-    int32_t marshalledBytes=index-saved_size;
+    int32_t marshalledBytes=index-savedSize;
     if(marshalledBytes>max)
       throw failure("Size of marshalled data exceeds max of: ")<<max;
 
-    Receive(saved_size,marshalledBytes);
-    saved_size=index;
+    Receive(savedSize,marshalledBytes);
+    savedSize=index;
   }
 
-  inline void Reset (){saved_size=index=0;}
-  inline void Rollback (){index=saved_size;}
+  inline void Reset (){savedSize=index=0;}
+  inline void Rollback (){index=savedSize;}
 
   template<class T>
   void ReceiveBlock (T const& grp){
@@ -161,7 +161,7 @@ public:
     }
 
     index-=bytes;
-    saved_size=index;
+    savedSize=index;
     ::memmove(buf,buf+bytes,index);
     return false;
   }

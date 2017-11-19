@@ -77,9 +77,7 @@ public:
   template<template<class> class B,class U>
   void ReadBlock (B<LeastSignificantFirst>& buf
                   ,U* data,int elements){
-    for(int i=0;i<elements;++i){
-      *(data+i)=buf.template Give<U>();
-    }
+    for(int i=0;i<elements;++i){*(data+i)=buf.template Give<U>();}
   }
 
   //Overloads for uint8_t and int8_t
@@ -145,9 +143,7 @@ public:
   template<template<class> class B,class U>
   void ReadBlock (B<MostSignificantFirst>& buf
                   ,U* data,int elements){
-    for(int i=0;i<elements;++i){
-      *(data+i)=buf.template Give<U>();
-    }
+    for(int i=0;i<elements;++i){*(data+i)=buf.template Give<U>();}
   }
 
   template<template<class> class B>
@@ -169,7 +165,6 @@ class ReceiveBuffer{
   R reader;
   int msgLength=0;
   int subTotal=0;
-
 protected:
   int index=0;
   int packetLength;

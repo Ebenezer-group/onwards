@@ -3,7 +3,7 @@
 account.hh
 message-lengths  variable
 middleBack
-  -out -no_inline (message_id_8,::std::vector<cmwAccount>)
-  -out -max_length=700000 (message_id_8,cmwRequest)
+  -out -noInline (message_id_8,::std::vector<cmwAccount>)
+  -out -maxLength=700000 (message_id_8,cmwRequest)
   -out (message_id_8)
 }

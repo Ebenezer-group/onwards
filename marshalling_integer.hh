@@ -30,8 +30,11 @@ public:
 
   inline void operator= (int32_t r){val=r;}
   inline auto operator() ()const{return val;}
-  inline bool operator== (marshalling_integer r)const{return val==r();}
-  inline bool operator== (int32_t r)const{return val==r;}
   void Marshal (SendBuffer&,bool=false)const;
 };
+
+inline bool operator== (marshalling_integer l, marshalling_integer r)
+{return l()==r();}
+inline bool operator== (marshalling_integer l, int32_t r)
+{return l()==r;}
 }
