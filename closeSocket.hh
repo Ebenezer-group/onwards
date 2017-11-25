@@ -7,15 +7,15 @@
 #endif
 
 namespace cmw{
-inline void close_socket (sock_type sock){
+inline void closeSocket (sock_type sock){
 #ifdef CMW_WINDOWS
   if(::closesocket(sock)==SOCKET_ERROR){
-    throw failure("close_socket ")<<GetError();
+    throw failure("closeSocket ")<<GetError();
 #else
   if(::close(sock)==-1){
     auto errval=errno;
     if(EINTR==errval&&::close(sock)==0)return;
-    throw failure("close_socket")<<errval;
+    throw failure("closeSocket")<<errval;
 #endif
   }
 }

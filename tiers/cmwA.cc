@@ -1,5 +1,5 @@
 #include"account.hh"
-#include<close_socket.hh>
+#include<closeSocket.hh>
 #include<connect_wrapper.hh>
 #include<ErrorWords.hh>
 #include<File.hh>
@@ -55,11 +55,11 @@ bool MarshalFile (char const* name,SendBuffer& buf){
 struct cmwRequest{
   ::sockaddr_in6 front;
   ::socklen_t frontlen=sizeof(front);
-  int32_t latest_update;
   marshalling_integer const accountNbr;
   fixedString_120 path;
   char const* middlefile;
   int fd;
+  int32_t latestUpdate;
 
   cmwRequest ()=default;
 
@@ -87,7 +87,7 @@ struct cmwRequest{
   }
 
   void save_lastruntime ()const
-  {Write(fd,&latest_update,sizeof(latest_update));}
+  {Write(fd,&latestUpdate,sizeof(latestUpdate));}
 
   void Marshal (SendBuffer& buf,bool=false)const{
     accountNbr.Marshal(buf);
@@ -166,7 +166,7 @@ void cmwAmbassador::reset (char const* explanation){
     if(r.get())localsendbuf.Send((::sockaddr*)&r->front,r->frontlen);
   }
   pendingRequests.clear();
-  close_socket(cmwBuf.sock_);
+  closeSocket(cmwBuf.sock_);
   cmwBuf.Reset();
   cmwSendbuf.CompressedReset();
   login();
@@ -276,7 +276,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
         gotAddr=true;
 	new(&req)cmwRequest(rbuf);
         middleBack::Marshal(cmwSendbuf,Generate,req);
-        req.latest_update=current_updatedtime;
+        req.latestUpdate=current_updatedtime;
       }catch(::std::exception const& e){
         syslog_wrapper(LOG_ERR,"Accept request: %s",e.what());
         if(gotAddr){

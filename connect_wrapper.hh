@@ -1,5 +1,5 @@
 #pragma once
-#include"close_socket.hh"
+#include"closeSocket.hh"
 #include"getaddrinfo_wrapper.hh"
 #include"platforms.hh"
 
@@ -11,7 +11,7 @@ inline auto connect_wrapper(char const* node,char const* port){
     if(-1==s)continue;
     if(0==::connect(s,r->ai_addr,r->ai_addrlen))return s;
     auto e=errno;
-    close_socket(s);
+    closeSocket(s);
     errno=e;
     return -1;
   }

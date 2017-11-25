@@ -1,5 +1,5 @@
 #pragma once
-#include"close_socket.hh"
+#include"closeSocket.hh"
 #include"ErrorWords.hh"
 #include"getaddrinfo_wrapper.hh"
 #include"platforms.hh"
@@ -14,7 +14,7 @@ inline sock_type udp_server (char const* port){
     if(-1==s)continue;
     if(0==::bind(s,r->ai_addr,r->ai_addrlen))return s;
     auto v=GetError();
-    close_socket(s);
+    closeSocket(s);
     throw failure("udp_server ")<<v;
   }
   throw failure("udp_server");

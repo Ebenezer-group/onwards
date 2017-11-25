@@ -145,13 +145,13 @@ public:
   template<class T>
   void ReceiveGroup (T const& grp,bool sendType=false){
     Receive(static_cast<int32_t>(grp.size()));
-    for(auto const& it:grp)it.Marshal(*this,sendType);
+    for(auto const& e:grp)e.Marshal(*this,sendType);
   }
 
   template<class T>
   void ReceiveGroupPointer (T const& grp,bool sendType=false){
     Receive(static_cast<int32_t>(grp.size()));
-    for(auto const& it:grp)it->Marshal(*this,sendType);
+    for(auto p:grp)p->Marshal(*this,sendType);
   }
 
   inline bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0){

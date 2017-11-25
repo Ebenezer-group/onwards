@@ -1,5 +1,5 @@
 #pragma once
-#include"close_socket.hh"
+#include"closeSocket.hh"
 #include"ErrorWords.hh"
 #include"getaddrinfo_wrapper.hh"
 #include"platforms.hh"
@@ -15,17 +15,17 @@ inline auto tcp_server (char const* port){
     int on=1;
     if(::setsockopt(sock,SOL_SOCKET,SO_REUSEADDR
                     ,(char const*)&on,sizeof(on))<0){
-      close_socket(sock);
+      closeSocket(sock);
       throw failure("tcp_server setsockopt ")<<GetError();
     }
 
     if(::bind(sock,r->ai_addr,r->ai_addrlen)<0){
-      close_socket(sock);
+      closeSocket(sock);
       throw failure("tcp_server bind ")<<GetError();
     }
 
     if(::listen(sock,SOMAXCONN)<0){
-      close_socket(sock);
+      closeSocket(sock);
       throw failure("tcp_server listen ")<<GetError();
     }
 
