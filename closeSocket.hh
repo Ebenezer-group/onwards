@@ -20,9 +20,9 @@ inline void closeSocket (sock_type sock){
   }
 }
 
-inline void set_nonblocking (sock_type sock){
+inline void setNonblocking (sock_type sock){
 #ifndef CMW_WINDOWS
-  if(::fcntl(sock,F_SETFL,O_NONBLOCK)==-1)throw failure("set_nonb:")<<errno;
+  if(::fcntl(sock,F_SETFL,O_NONBLOCK)==-1)throw failure("setNonb:")<<errno;
 #endif
 }
 }

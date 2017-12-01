@@ -38,7 +38,7 @@ sk: ::pollfd pfd{sendbuf.sock_,POLLIN,0};
     for(int j=0;j<2;++j,waitSeconds*=2){
       sendbuf.Send(rp->ai_addr,rp->ai_addrlen);
 #ifdef __linux__
-      set_nonblocking(pfd.fd);
+      setNonblocking(pfd.fd);
 #endif
       if(poll_wrapper(&pfd,1,waitSeconds*1000)>0){
         ReceiveBufferStack<SameFormat> buf(pfd.fd);

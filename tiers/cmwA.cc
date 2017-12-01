@@ -156,7 +156,7 @@ void cmwAmbassador::login (){
   middleBack::Marshal(cmwSendbuf,Login,accounts);
   while(!cmwSendbuf.Flush());
   while(!cmwBuf.GotPacket());
-  if(cmwBuf.GiveBool())set_nonblocking(fds[0].fd);
+  if(cmwBuf.GiveBool())setNonblocking(fds[0].fd);
   else throw failure("Login:")<<cmwBuf.GiveString_view();
 }
 
@@ -204,7 +204,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
   }
   fds[1].fd=localsendbuf.sock_=udp_server(::strtok(nullptr,"\n "));
 #ifdef __linux__
-  set_nonblocking(fds[1].fd);
+  setNonblocking(fds[1].fd);
 #endif
 
   CHECK_FIELD_NAME("Login-attempts-interval-in-milliseconds");
