@@ -25,18 +25,18 @@ int main (int ac,char** av){
 #endif
                             :av[3]
                             ,ac<5?"55555":av[4],SOCK_DGRAM);
-    auto rp=res.get();
-    SendBufferStack<> sendbuf;
-    for(;rp!=nullptr;rp=rp->ai_next){
-      if((sendbuf.sock_=::socket(rp->ai_family,rp->ai_socktype,0))!=-1)goto sk;
+    auto r=res.get();
+    SendBufferStack<> sbuf;
+    for(;r!=nullptr;r=r->ai_next){
+      if((sbuf.sock_=::socket(r->ai_family,r->ai_socktype,0))!=-1)goto sk;
     }
-    if(-1==sendbuf.sock_)throw failure("socket call(s) ")<<GetError();
+    if(-1==sbuf.sock_)throw failure("socket call(s) ")<<GetError();
 
-sk: ::pollfd pfd{sendbuf.sock_,POLLIN,0};
+sk: ::pollfd pfd{sbuf.sock_,POLLIN,0};
     int waitSeconds=9;
-    frontMiddle::Marshal(sendbuf,marshalling_integer(av[1]),av[2]);
+    frontMiddle::Marshal(sbuf,marshalling_integer(av[1]),av[2]);
     for(int j=0;j<2;++j,waitSeconds*=2){
-      sendbuf.Send(rp->ai_addr,rp->ai_addrlen);
+      sbuf.Send(r->ai_addr,r->ai_addrlen);
 #ifdef __linux__
       setNonblocking(pfd.fd);
 #endif

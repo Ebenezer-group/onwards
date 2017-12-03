@@ -21,7 +21,7 @@ class getaddrinfo_wrapper{
   }
 
   inline ~getaddrinfo_wrapper (){::freeaddrinfo(addr);}
-  inline ::addrinfo const* get (){return addr;}
+  inline auto get (){return addr;}
 
   getaddrinfo_wrapper (getaddrinfo_wrapper const&)=delete;
   getaddrinfo_wrapper& operator= (getaddrinfo_wrapper)=delete;

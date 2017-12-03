@@ -126,7 +126,7 @@ class cmwAmbassador{
   > cmwBuf;
 
   SendBufferCompressed cmwSendbuf;
-  SendBufferStack<> localsendbuf;
+  SendBufferStack<> localbuf;
   ::std::vector<cmwAccount> accounts;
   ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
   ::pollfd fds[2];
@@ -161,9 +161,9 @@ void cmwAmbassador::login (){
 }
 
 void cmwAmbassador::reset (char const* explanation){
-  middleFront::Marshal(localsendbuf,false,{explanation});
+  middleFront::Marshal(localbuf,false,{explanation});
   for(auto& r:pendingRequests){
-    if(r.get())localsendbuf.Send((::sockaddr*)&r->front,r->frontlen);
+    if(r.get())localbuf.Send((::sockaddr*)&r->front,r->frontlen);
   }
   pendingRequests.clear();
   closeSocket(cmwBuf.sock_);
@@ -202,7 +202,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
       else throw failure("UDP-port-number is required.");
     }
   }
-  fds[1].fd=localsendbuf.sock_=udp_server(::strtok(nullptr,"\n "));
+  fds[1].fd=localbuf.sock_=udp_server(::strtok(nullptr,"\n "));
 #ifdef __linux__
   setNonblocking(fds[1].fd);
 #endif
@@ -228,7 +228,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
       continue;
     }
 
-    localsendbuf.Reset();
+    localbuf.Reset();
     if(fds[0].revents&POLLIN){
       try{
         if(cmwBuf.GotPacket()){
@@ -240,11 +240,11 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
                 setDirectory(req.path.c_str());
                 empty_container<File>{cmwBuf};
                 req.save_lastruntime();
-                middleFront::Marshal(localsendbuf,true);
-              }else middleFront::Marshal(localsendbuf,false,
+                middleFront::Marshal(localbuf,true);
+              }else middleFront::Marshal(localbuf,false,
                                  {"CMW:",cmwBuf.GiveString_view()});
-              localsendbuf.Send((::sockaddr*)&req.front,req.frontlen);
-              localsendbuf.Reset();
+              localbuf.Send((::sockaddr*)&req.front,req.frontlen);
+              localbuf.Reset();
             }
             pendingRequests.erase(::std::begin(pendingRequests));
           }while(cmwBuf.NextMessage());
@@ -258,8 +258,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
         assert(!pendingRequests.empty());
         if(pendingRequests.front().get()){
           auto const& req=*pendingRequests.front();
-          middleFront::Marshal(localsendbuf,false,{e.what()});
-          localsendbuf.Send((::sockaddr*)&req.front,req.frontlen);
+          middleFront::Marshal(localbuf,false,{e.what()});
+          localbuf.Send((::sockaddr*)&req.front,req.frontlen);
         }
         pendingRequests.erase(::std::begin(pendingRequests));
       }
@@ -280,8 +280,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
       }catch(::std::exception const& e){
         syslog_wrapper(LOG_ERR,"Accept request: %s",e.what());
         if(gotAddr){
-          middleFront::Marshal(localsendbuf,false,{e.what()});
-          localsendbuf.Send((::sockaddr*)&req.front,req.frontlen);
+          middleFront::Marshal(localbuf,false,{e.what()});
+          localbuf.Send((::sockaddr*)&req.front,req.frontlen);
         }
 	pendingRequests.pop_back();
         continue;
