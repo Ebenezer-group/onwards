@@ -40,7 +40,7 @@ int main()
 		    "::1"
 #endif
 		    ,"12345",SOCK_DGRAM);
-    auto rp=res.get();
+    auto rp=res();
     buffer.sock_=::socket(rp->ai_family,rp->ai_socktype,0);
 
     ::std::cout<<"Enter the ID of the message to send: 1, 2, 3 or 4."<<::std::endl;

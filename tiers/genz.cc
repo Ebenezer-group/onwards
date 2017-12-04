@@ -25,7 +25,7 @@ int main (int ac,char** av){
 #endif
                             :av[3]
                             ,ac<5?"55555":av[4],SOCK_DGRAM);
-    auto r=res.get();
+    auto r=res();
     SendBufferStack<> sbuf;
     for(;r!=nullptr;r=r->ai_next){
       if((sbuf.sock_=::socket(r->ai_family,r->ai_socktype,0))!=-1)goto sk;

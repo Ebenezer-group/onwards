@@ -8,7 +8,7 @@
 namespace cmw{
 inline auto tcp_server (char const* port){
   getaddrinfo_wrapper res(nullptr,port,SOCK_STREAM,AI_PASSIVE);
-  for(auto r=res.get();r!=nullptr;r=r->ai_next){
+  for(auto r=res();r!=nullptr;r=r->ai_next){
     sock_type sock=::socket(r->ai_family,r->ai_socktype,0);
     if(-1==sock)continue;
 
