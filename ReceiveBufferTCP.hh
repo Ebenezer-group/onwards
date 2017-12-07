@@ -19,18 +19,18 @@ public:
 
 
   void BulkRead (){
-    if(0 == bytesAvailable)
-      this->index = 0;
-    bytesAvailable += sockRead(sock_,this->buf+bytesAvailable
-                               ,this->bufsize-bytesAvailable);
+    if(0==bytesAvailable)
+      this->index=0;
+    bytesAvailable+=sockRead(sock_,this->buf+bytesAvailable
+                             ,this->bufsize-bytesAvailable);
   }
 
   bool GotPacket (){
-    try {
+    try{
       static bool initial=true;
       if(initial){
         this->packetLength=sizeof this->packetLength;
-        if (bytesAvailable<this->packetLength) {
+        if(bytesAvailable<this->packetLength){
           if(this->index>0){
             ::memmove(this->buf,this->buf+this->index,bytesAvailable);
             this->index = 0;
@@ -62,6 +62,6 @@ public:
     }
   }
 
-  void Reset (){bytesAvailable = 0;}
+  void Reset (){bytesAvailable=0;}
 };
 }

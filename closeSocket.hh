@@ -13,16 +13,16 @@ inline void closeSocket (sock_type sock){
     throw failure("closeSocket ")<<GetError();
 #else
   if(::close(sock)==-1){
-    auto errval=errno;
-    if(EINTR==errval&&::close(sock)==0)return;
-    throw failure("closeSocket")<<errval;
+    auto err=errno;
+    if(EINTR==err&&::close(sock)==0)return;
+    throw failure("closeSocket")<<err;
 #endif
   }
 }
 
-inline void setNonblocking (sock_type sock){
+inline void setNonblocking (sock_type s){
 #ifndef CMW_WINDOWS
-  if(::fcntl(sock,F_SETFL,O_NONBLOCK)==-1)throw failure("setNonb:")<<errno;
+  if(::fcntl(s,F_SETFL,O_NONBLOCK)==-1)throw failure("setNonb:")<<errno;
 #endif
 }
 }
