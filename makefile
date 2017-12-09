@@ -12,8 +12,8 @@ objects:=marshalling_integer.o
 TARGETS:=$(objects) $(TIERS)
 all:$(TARGETS)
 
-#zz.middle_back.hh: account.hh middle_back.mdl
-#	genz 2 /usr/home/brian/onwards/tiers/middle_back.mdl
+#zz.middle_back.hh: account.hh middleBack.mdl
+#	genz 2 /usr/home/brian/onwards/tiers/middleBack.mdl
 
 $(FRONT): $(FRONT).cc $(objects)
 	$(CXX) $(CXXFLAGS) -I. -o $@ $@.cc $(objects)

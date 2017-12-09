@@ -226,23 +226,21 @@ public:
 
   auto GiveString (){
     marshalling_integer len(*this);
-    if(len()>msgLength-index)
-      throw failure("ReceiveBuffer::GiveString");
+    if(len()>msgLength-index)throw failure("ReceiveBuffer::GiveString");
     ::std::string s(buf+subTotal+index,len());
     index+=len();
     return s;
   }
 
-  auto GiveString_view(){
+  auto GiveString_view (){
     marshalling_integer len(*this);
-    if(len()>msgLength-index)
-      throw failure("ReceiveBuffer::GiveString_view");
+    if(len()>msgLength-index)throw failure("ReceiveBuffer::GiveString_view");
     ::std::string_view v(buf+subTotal+index,len());
     index+=len();
     return v;
   }
 
-  auto GiveString_view_plus(){
+  auto GiveString_view_plus (){
     auto v=GiveString_view();
     GiveOne();
     return v;
@@ -258,7 +256,7 @@ public:
   }
 #endif
 
-  void AppendTo(::std::string& s){
+  void AppendTo (::std::string& s){
     marshalling_integer len(*this);
     if(len()>msgLength-index)throw failure("ReceiveBuffer::AppendTo");
     s.append(buf+subTotal+index,len());
