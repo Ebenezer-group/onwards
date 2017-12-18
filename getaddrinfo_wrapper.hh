@@ -17,7 +17,7 @@ class getaddrinfo_wrapper{
                               ,int socktype,int flags=0){
     ::addrinfo hints={flags,AF_UNSPEC,socktype,0,0,0,0,0};
     int rc=::getaddrinfo(node,port,&hints,&addr);
-    if(rc!=0)throw failure("Getaddrinfo: ")<<gai_strerror(rc);
+    if(rc!=0)throw failure("Getaddrinfo ")<<gai_strerror(rc);
   }
 
   inline ~getaddrinfo_wrapper (){::freeaddrinfo(addr);}

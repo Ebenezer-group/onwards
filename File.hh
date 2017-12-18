@@ -29,10 +29,10 @@ public:
 };
 
 template<class T>
-class empty_container{
+class emptyContainer{
 public:
   template<class R>
-  explicit empty_container (ReceiveBuffer<R>& b){
+  explicit emptyContainer (ReceiveBuffer<R>& b){
     for(auto n=marshalling_integer{b}();n>0;--n)T{b};
   }
 };

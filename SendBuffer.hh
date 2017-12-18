@@ -70,14 +70,14 @@ public:
     ::memcpy(buf+where,&val,sizeof(T));
   }
 
-  inline void ReceiveFile (file_type fd,int32_t fl_sz){
-    Receive(fl_sz);
-    if(fl_sz> bufsize-index)
+  inline void ReceiveFile (file_type d,int32_t sz){
+    Receive(sz);
+    if(sz>bufsize-index)
       throw failure("SendBuffer::ReceiveFile ")<<bufsize;
 
-    if(Read(fd,&buf[index],fl_sz)!=fl_sz)
+    if(Read(d,&buf[index],sz)!=sz)
       throw failure("SendBuffer::ReceiveFile Read");
-    index+=fl_sz;
+    index+=sz;
   }
 
   inline void Receive (bool b){Receive(static_cast<unsigned char>(b));}

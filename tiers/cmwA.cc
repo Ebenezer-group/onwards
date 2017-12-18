@@ -238,7 +238,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
               auto const& req=*pendingRequests.front();
               if(cmwBuf.GiveBool()){
                 setDirectory(req.path.c_str());
-                empty_container<File>{cmwBuf};
+                emptyContainer<File>{cmwBuf};
                 req.save_lastruntime();
                 middleFront::Marshal(localbuf,true);
               }else middleFront::Marshal(localbuf,false,

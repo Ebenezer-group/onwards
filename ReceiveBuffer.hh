@@ -213,10 +213,10 @@ public:
   void GiveBlock (T* data,unsigned int elements)
   {reader.ReadBlock(*this,data,elements);}
 
-  void GiveFile (file_type fd){
+  void GiveFile (file_type d){
     int sz=Give<uint32_t>();
     while(sz>0){
-      int rc=Write(fd,buf+subTotal+index,sz);
+      int rc=Write(d,buf+subTotal+index,sz);
       sz-=rc;
       index+=rc;
     }
