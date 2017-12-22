@@ -6,7 +6,6 @@
 #include"message_ids.hh"
 #include<ReceiveBuffer.hh>
 #include<ReceiveBufferCompressed.hh>
-#include<setDirectory.hh>
 #include<SendBufferCompressed.hh>
 #include<udp_stuff.hh>
 #include<wrappers.hh>
@@ -82,8 +81,7 @@ struct cmwRequest{
     current_updatedtime=previous_updatedtime;
   }
 
-  void save_lastruntime ()const
-  {Write(fd,&latestUpdate,sizeof(latestUpdate));}
+  void save_lastruntime ()const{Write(fd,&latestUpdate,sizeof(latestUpdate));}
 
   void Marshal (SendBuffer& buf,bool=false)const{
     accountNbr.Marshal(buf);
