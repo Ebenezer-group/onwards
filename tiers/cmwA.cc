@@ -5,8 +5,7 @@
 #include<marshalling_integer.hh>
 #include"message_ids.hh"
 #include<ReceiveBuffer.hh>
-#include<ReceiveBufferCompressed.hh>
-#include<SendBufferCompressed.hh>
+#include<SendBuffer.hh>
 #include<udp_stuff.hh>
 #include<wrappers.hh>
 #include"zz.middleFront.hh"

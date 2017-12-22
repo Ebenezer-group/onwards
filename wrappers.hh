@@ -3,19 +3,16 @@
 #include"platforms.hh"
 #include<stdio.h>
 
-#ifndef CMW_WINDOWS
-#include<fcntl.h>
-#include<netdb.h>
-#include<sys/socket.h>
-#include<sys/types.h>
-#include<unistd.h>//close,chdir
-#endif
-
 #ifdef CMW_WINDOWS
 #define poll WSAPoll
 #define LOG_INFO 0
 #define LOG_ERR 0
 #else
+#include<fcntl.h>
+#include<netdb.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<unistd.h>//close,chdir
 #include<poll.h>
 #include<stdarg.h>
 #include<syslog.h>

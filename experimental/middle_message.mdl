@@ -4,13 +4,13 @@ account_info.hh
 output whole
 message-lengths  variable
 // Messages the middle tier either sends to or receives from the back tier.
-middle_back
+middleBack
   -out -noInline (message_id_8,::std::vector<cmw_account>)
   -out            (message_id_8,::cmw::marshalling_integer,request_generator)
   -out (message_id_8)
 }
 
-middle_front
+middleFront
   -out -maxLength=cmw::udp_packet_max (bool)
   -out -maxLength=cmw::udp_packet_max -noInline (bool,cmw::stringPlus)
 }
