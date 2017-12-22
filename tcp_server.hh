@@ -1,8 +1,7 @@
 #pragma once
-#include"closeSocket.hh"
 #include"ErrorWords.hh"
-#include"getaddrinfo_wrapper.hh"
 #include"platforms.hh"
+#include"wrappers.hh"
 #include<fcntl.h>
 
 namespace cmw{
