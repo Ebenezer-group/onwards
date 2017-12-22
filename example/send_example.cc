@@ -13,7 +13,7 @@
 //      -in                (::std::array<::std::array<float,2>, 3>)
 //   }
 
-#include <getaddrinfo_wrapper.hh>
+#include <wrappers.hh>
 #include "message_ids.hh"
 #include <platforms.hh>
 #include <plf_colony.h>

@@ -1,10 +1,7 @@
-#include<closeSocket.hh>
 #include<ErrorWords.hh>
-#include<getaddrinfo_wrapper.hh>
 #include<platforms.hh>
-#include<poll_wrapper.hh>
 #include<ReceiveBuffer.hh>
-#include<syslog_wrapper.hh>
+#include<wrappers.hh>
 #include"zz.frontMiddle.hh"
 #include<stdio.h>
 #include<stdlib.h>//exit

@@ -1,7 +1,6 @@
 #pragma once
-#include"closeSocket.hh"
 #include"ErrorWords.hh"
-#include"getaddrinfo_wrapper.hh"
+#include"wrappers.hh"
 #include"platforms.hh"
 
 namespace cmw{

@@ -1,19 +1,15 @@
 #include"account.hh"
-#include<closeSocket.hh>
-#include<connect_wrapper.hh>
 #include<ErrorWords.hh>
 #include<File.hh>
-#include<FILE_wrapper.hh>
 #include<IO.hh>
 #include<marshalling_integer.hh>
 #include"message_ids.hh"
-#include<poll_wrapper.hh>
 #include<ReceiveBuffer.hh>
 #include<ReceiveBufferCompressed.hh>
 #include<setDirectory.hh>
-#include<syslog_wrapper.hh>
 #include<SendBufferCompressed.hh>
 #include<udp_stuff.hh>
+#include<wrappers.hh>
 #include"zz.middleFront.hh"
 
 #include<memory>//unique_ptr
