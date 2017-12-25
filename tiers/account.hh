@@ -1,5 +1,5 @@
 #pragma once
-#include<marshalling_integer.hh>
+#include<marshallingInt.hh>
 #include<fixedString.hh>
 
 namespace cmw{
@@ -8,8 +8,8 @@ template<class R> class ReceiveBuffer;
 }
 
 struct cmwAccount{
-  ::cmw::marshalling_integer number;
-  ::cmw::fixedString_60 password;
+  ::cmw::marshallingInt number;
+  ::cmw::fixedString60 password;
 
   cmwAccount (int n,char* p):number(n),password(p){}
 

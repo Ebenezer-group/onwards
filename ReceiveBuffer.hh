@@ -1,7 +1,7 @@
 #pragma once
 #include"ErrorWords.hh"
 #include"IO.hh"
-#include"marshalling_integer.hh"
+#include"marshallingInt.hh"
 #include"platforms.hh"
 #include"quicklz.h"
 #include"udp_stuff.hh"
@@ -226,7 +226,7 @@ public:
   bool GiveBool (){return GiveOne()!=0;}
 
   auto GiveString (){
-    marshalling_integer len(*this);
+    marshallingInt len(*this);
     if(len()>msgLength-index)throw failure("ReceiveBuffer::GiveString");
     ::std::string s(buf+subTotal+index,len());
     index+=len();
@@ -234,7 +234,7 @@ public:
   }
 
   auto GiveString_view (){
-    marshalling_integer len(*this);
+    marshallingInt len(*this);
     if(len()>msgLength-index)throw failure("ReceiveBuffer::GiveString_view");
     ::std::string_view v(buf+subTotal+index,len());
     index+=len();
@@ -250,7 +250,7 @@ public:
 #ifndef CMW_WINDOWS
   template<ssize_t N>
   void CopyString (char (&dest)[N]){
-    marshalling_integer len(*this);
+    marshallingInt len(*this);
     if(len()+1>N)throw failure("ReceiveBuffer::CopyString");
     Give(dest,len());
     dest[len()]='\0';
@@ -258,7 +258,7 @@ public:
 #endif
 
   void AppendTo (::std::string& s){
-    marshalling_integer len(*this);
+    marshallingInt len(*this);
     if(len()>msgLength-index)throw failure("ReceiveBuffer::AppendTo");
     s.append(buf+subTotal+index,len());
     index+=len();

@@ -2,7 +2,7 @@
 #include<ErrorWords.hh>
 #include<File.hh>
 #include<IO.hh>
-#include<marshalling_integer.hh>
+#include<marshallingInt.hh>
 #include"message_ids.hh"
 #include<ReceiveBuffer.hh>
 #include<SendBuffer.hh>
@@ -49,8 +49,8 @@ bool MarshalFile (char const* name,SendBuffer& buf){
 struct cmwRequest{
   ::sockaddr_in6 front;
   ::socklen_t frontlen=sizeof(front);
-  marshalling_integer const accountNbr;
-  fixedString_120 path;
+  marshallingInt const accountNbr;
+  fixedString120 path;
   char const* middlefile;
   int fd;
   int32_t latestUpdate;

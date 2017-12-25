@@ -1,6 +1,6 @@
 #pragma once
 #include"ErrorWords.hh"
-#include"marshalling_integer.hh"
+#include"marshallingInt.hh"
 #include"ReceiveBuffer.hh"
 #include<string_view>
 
@@ -33,7 +33,7 @@ class emptyContainer{
 public:
   template<class R>
   explicit emptyContainer (ReceiveBuffer<R>& b){
-    for(auto n=marshalling_integer{b}();n>0;--n)T{b};
+    for(auto n=marshallingInt{b}();n>0;--n)T{b};
   }
 };
 }

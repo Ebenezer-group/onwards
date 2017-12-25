@@ -1,7 +1,7 @@
 #pragma once
 #include"ErrorWords.hh"
 #include"IO.hh"
-#include"marshalling_integer.hh"
+#include"marshallingInt.hh"
 #include"platforms.hh"
 #include"quicklz.h"
 #include"udp_stuff.hh"
@@ -84,25 +84,25 @@ public:
   inline void Receive (bool b){Receive(static_cast<unsigned char>(b));}
 
   inline void Receive (char* cstr){
-    marshalling_integer len(::strlen(cstr));
+    marshallingInt len(::strlen(cstr));
     len.Marshal(*this);
     Receive(cstr,len());
   }
 
   inline void Receive (char const* cstr){
-    marshalling_integer len(::strlen(cstr));
+    marshallingInt len(::strlen(cstr));
     len.Marshal(*this);
     Receive(cstr,len());
   }
 
   inline void Receive (::std::string const& s){
-    marshalling_integer len(s.size());
+    marshallingInt len(s.size());
     len.Marshal(*this);
     Receive(s.data(),len());
   }
 
   inline void Receive (::std::string_view const& s){
-    marshalling_integer len(s.size());
+    marshallingInt len(s.size());
     len.Marshal(*this);
     Receive(s.data(),len());
   }
@@ -110,7 +110,7 @@ public:
   inline void Receive (stringPlus lst){
     int32_t t=0;
     for(auto s:lst)t+=s.length();
-    marshalling_integer{t}.Marshal(*this);
+    marshallingInt{t}.Marshal(*this);
     for(auto s:lst)Receive(s.data(),s.length());//Use low-level Receive
   }
 

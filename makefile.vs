@@ -1,11 +1,11 @@
 CC=cl
 CFLAGS= -std:c++latest -EHsc -O2 -nologo -D"NOMINMAX"
 
-objects=marshalling_integer.obj
+objects=marshallingInt.obj
 all: $(objects) tiers\genz.exe
 
-marshalling_integer.obj: marshalling_integer.hh
-	$(CC) $(CFLAGS) -c marshalling_integer.cc
+marshallingInt.obj: marshallingInt.hh
+	$(CC) $(CFLAGS) -c marshallingInt.cc
 
 tiers\genz.exe: tiers\genz.cc $(objects)
 	$(CC) -Fe:$@ $(CFLAGS) -I. tiers\genz.cc /link $(objects)  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
@@ -23,7 +23,7 @@ clean:
 	del $(objects) tiers\genz.exe $(EXAMPLES)
 
 INSTALL_DIR=\Users\Store
-includes=tcp_server.hh udp_stuff.hh ErrorWords.hh File.hh IO.hh marshalling_integer.hh SendBuffer*.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh message_id_types.hh wrappers.hh quicklz.h
+includes=tcp_server.hh udp_stuff.hh ErrorWords.hh File.hh IO.hh marshallingInt.hh SendBuffer*.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh message_id_types.hh wrappers.hh quicklz.h
 
 install:
 	copy $(includes)     $(INSTALL_DIR)\include

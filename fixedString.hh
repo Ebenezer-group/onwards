@@ -1,6 +1,6 @@
 #pragma once
 #include"ErrorWords.hh"
-#include"marshalling_integer.hh"
+#include"marshallingInt.hh"
 #include"SendBuffer.hh"
 #include<array>
 #include<string_view>
@@ -9,7 +9,7 @@
 namespace cmw{
 template<int N>
 class fixedString{
-  marshalling_integer len;
+  marshallingInt len;
   ::std::array<char,N> str;
 
  public:
@@ -45,6 +45,6 @@ class fixedString{
   inline char operator[] (int i)const{return str[i];}
 };
 
-using fixedString_60=fixedString<60>;
-using fixedString_120=fixedString<120>;
+using fixedString60=fixedString<60>;
+using fixedString120=fixedString<120>;
 }

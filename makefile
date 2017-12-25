@@ -1,6 +1,6 @@
 CXXFLAGS=-Os -Wundef -W -Wall -Wextra -Wreorder
 
-CXX=g++-7 -std=c++17
+CXX=g++7 -std=c++17
 #CXX=clang++ -std=c++1z -stdlib=libc++
 
 LIBS=-L./ -L/usr/lib
@@ -8,7 +8,7 @@ LIBS=-L./ -L/usr/lib
 FRONT:=tiers/genz
 MIDDLE:=tiers/cmwA
 TIERS:=$(FRONT) $(MIDDLE)
-objects:=marshalling_integer.o
+objects:=marshallingInt.o
 TARGETS:=$(objects) $(TIERS)
 all:$(TARGETS)
 
@@ -37,14 +37,14 @@ clean:
 	rm -f $(TARGETS) $(EXAMPLES)
 
 INSTALL_DIR=/usr/local
-includes=tcp_server.hh udp_stuff.hh ErrorWords.hh File.hh IO.hh marshalling_integer.hh SendBuffer*.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh message_id_types.hh wrappers.hh quicklz.h
+includes=tcp_server.hh udp_stuff.hh ErrorWords.hh File.hh IO.hh marshallingInt.hh SendBuffer*.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh message_id_types.hh wrappers.hh quicklz.h
 
 install:
 	cp -f $(includes) $(INSTALL_DIR)/include
-	cp -f marshalling_integer.o $(INSTALL_DIR)/lib
+	cp -f marshallingInt.o $(INSTALL_DIR)/lib
 	cp -f $(TIERS) $(INSTALL_DIR)/bin
 
 uninstall:
 	cd $(INSTALL_DIR)/include && rm -f $(includes)
-	rm -f $(INSTALL_DIR)/lib/marshalling_integer.o
+	rm -f $(INSTALL_DIR)/lib/marshallingInt.o
 

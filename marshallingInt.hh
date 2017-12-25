@@ -6,18 +6,18 @@ namespace cmw{
 class SendBuffer;
 template<class R> class ReceiveBuffer;
 
-class marshalling_integer{
+class marshallingInt{
   int32_t val;
 
 public:
-  inline marshalling_integer (){}
-  inline explicit marshalling_integer (int32_t v):val(v){}
-  inline explicit marshalling_integer (char const* v):val(::strtol(v,0,10)){}
+  inline marshallingInt (){}
+  inline explicit marshallingInt (int32_t v):val(v){}
+  inline explicit marshallingInt (char const* v):val(::strtol(v,0,10)){}
 
   //Reads a sequence of bytes in variable-length format and
   //composes a 32 bit integer.
   template<class R>
-  explicit marshalling_integer (ReceiveBuffer<R>& b):val(0){
+  explicit marshallingInt (ReceiveBuffer<R>& b):val(0){
     uint32_t shift=1;
     for(;;){
       uint8_t a=b.GiveOne();
@@ -33,8 +33,8 @@ public:
   void Marshal (SendBuffer&,bool=false)const;
 };
 
-inline bool operator== (marshalling_integer l, marshalling_integer r)
+inline bool operator== (marshallingInt l, marshallingInt r)
 {return l()==r();}
-inline bool operator== (marshalling_integer l, int32_t r)
+inline bool operator== (marshallingInt l, int32_t r)
 {return l()==r;}
 }
