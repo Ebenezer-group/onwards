@@ -12,7 +12,7 @@ objects:=marshallingInt.o
 TARGETS:=$(objects) $(TIERS)
 all:$(TARGETS)
 
-#zz.middle_back.hh: account.hh middleBack.mdl
+#zz.middleBack.hh: account.hh middleBack.mdl
 #	genz 2 /usr/home/brian/onwards/tiers/middleBack.mdl
 
 $(FRONT): $(FRONT).cc $(objects)
@@ -37,7 +37,7 @@ clean:
 	rm -f $(TARGETS) $(EXAMPLES)
 
 INSTALL_DIR=/usr/local
-includes=tcp_server.hh udp_stuff.hh ErrorWords.hh File.hh IO.hh marshallingInt.hh SendBuffer*.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh message_id_types.hh wrappers.hh quicklz.h
+includes=tcp_server.hh udpStuff.hh ErrorWords.hh File.hh IO.hh marshallingInt.hh SendBuffer*.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh message_id_types.hh wrappers.hh quicklz.h
 
 install:
 	cp -f $(includes) $(INSTALL_DIR)/include

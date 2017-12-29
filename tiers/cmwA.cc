@@ -6,7 +6,7 @@
 #include"message_ids.hh"
 #include<ReceiveBuffer.hh>
 #include<SendBuffer.hh>
-#include<udp_stuff.hh>
+#include<udpStuff.hh>
 #include<wrappers.hh>
 #include"zz.middleFront.hh"
 
@@ -195,7 +195,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
       else throw failure("UDP-port-number is required.");
     }
   }
-  fds[1].fd=localbuf.sock_=udp_server(::strtok(nullptr,"\n "));
+  fds[1].fd=localbuf.sock_=udpServer(::strtok(nullptr,"\n "));
 #ifdef __linux__
   setNonblocking(fds[1].fd);
 #endif

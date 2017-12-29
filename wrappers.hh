@@ -94,7 +94,6 @@ inline void setNonblocking (sock_type s){
   if(::fcntl(s,F_SETFL,O_NONBLOCK)==-1)throw failure("setNonb:")<<errno;
 #endif
 }
-}
 
 inline void setDirectory (char const* d){
 #ifdef CMW_WINDOWS
@@ -102,5 +101,6 @@ inline void setDirectory (char const* d){
 #else
   if(::chdir(d)==-1)
 #endif
-    throw ::cmw::failure("setDirectory ")<<d<<" "<<GetError();
+    throw failure("setDirectory ")<<d<<" "<<GetError();
+}
 }

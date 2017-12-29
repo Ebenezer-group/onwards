@@ -1,4 +1,4 @@
-../udp_stuff.hh
+../udpStuff.hh
 message-lengths  variable
 frontMiddle
   -out -maxLength=cmw::udp_packet_max -noInline (::cmw::marshallingInt,const char*)

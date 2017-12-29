@@ -4,7 +4,7 @@
 #include <platforms.hh>
 #include <plf_colony.h>
 #include <ReceiveBuffer.hh>
-#include <udp_stuff.hh>
+#include <udpStuff.hh>
 #include "zz.receive_messages.hh"
 
 #include <array>
@@ -19,7 +19,7 @@ int main()
 {
   try{
     windowsStart();
-    auto sd=udp_server("12345");
+    auto sd=udpServer("12345");
 
     for(;;){
       ReceiveBufferStack<SameFormat> buffer(sd);
