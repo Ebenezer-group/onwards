@@ -1,6 +1,6 @@
 #pragma once
-#include<marshallingInt.hh>
 #include<fixedString.hh>
+#include<marshallingInt.hh>
 
 namespace cmw{
 class SendBuffer;

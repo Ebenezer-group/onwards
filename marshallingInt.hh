@@ -21,7 +21,7 @@ public:
     uint32_t shift=1;
     for(;;){
       uint8_t a=b.GiveOne();
-      val+= (a&127)*shift;
+      val+=(a&127)*shift;
       if((a&128)==0)return;
       shift<<=7;
       val+=shift;
@@ -33,8 +33,6 @@ public:
   void Marshal (SendBuffer&,bool=false)const;
 };
 
-inline bool operator== (marshallingInt l, marshallingInt r)
-{return l()==r();}
-inline bool operator== (marshallingInt l, int32_t r)
-{return l()==r;}
+inline bool operator== (marshallingInt l,marshallingInt r){return l()==r();}
+inline bool operator== (marshallingInt l,int32_t r){return l()==r;}
 }
