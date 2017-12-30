@@ -189,14 +189,16 @@ public:
   inline ~SendBufferHeap (){delete [] SendBuffer::buf;}
 };
 
-struct compress_wrapper{
-  ::qlz_state_compress* qlz_compress;
-  compress_wrapper ():qlz_compress(new ::qlz_state_compress()){}
-  ~compress_wrapper (){delete qlz_compress;}
+template<typename T>
+struct Wrapper{
+  T* p;
+  Wrapper ():p(new T()){}
+  ~Wrapper (){delete p;}
+  void reset (){::memset(p,0,sizeof(T));}
 };
 
 class SendBufferCompressed:public SendBufferHeap{
-  compress_wrapper compress;
+  Wrapper<::qlz_state_compress> compress;
   int compSize;
   int compIndex=0;
   char* compressedBuf;
@@ -224,16 +226,14 @@ public:
       if(index+(index>>3)+400>compSize-compIndex)
         throw failure("Not enough room in compressed buf");
       compIndex+=::qlz_compress(buf,compressedBuf+compIndex
-                                ,index,compress.qlz_compress);
+                                ,index,compress.p);
       Reset();
       if(rc)rc=FlushFlush(toAddr,toLen);
     }
     return rc;
   }
 
-  inline void CompressedReset (){Reset();compIndex=0;
-    ::memset(compress.qlz_compress,0,sizeof(::qlz_state_compress));
-  }
+  inline void CompressedReset (){Reset();compIndex=0;compress.reset();}
 };
 
 
@@ -516,14 +516,9 @@ public:
   {this->NextMessage();}
 };
 
-struct decompress_wrapper{
-  ::qlz_state_decompress* qlz_decompress;
-  decompress_wrapper ():qlz_decompress(new ::qlz_state_decompress()){}
-  ~decompress_wrapper (){delete qlz_decompress;}
-};
 
 template<class R>
-class ReceiveBufferCompressed:private decompress_wrapper,public ReceiveBuffer<R>
+class ReceiveBufferCompressed:Wrapper<::qlz_state_decompress>,public ReceiveBuffer<R>
 {
   int const bufsize;
   int bytesRead=0;
@@ -558,7 +553,7 @@ public:
                           ,compressedSize-bytesRead);
       if(bytesRead<compressedSize)return false;
 
-      ::qlz_decompress(compressedStart,this->buf,decompress_wrapper::qlz_decompress);
+      ::qlz_decompress(compressedStart,this->buf,Wrapper<::qlz_state_decompress>::p);
       bytesRead=0;
       this->Update();
       return true;
@@ -568,8 +563,9 @@ public:
     }
   }
 
-  void Reset (){bytesRead=0;
-    ::memset(decompress_wrapper::qlz_decompress,0,sizeof(::qlz_state_decompress));
-  }
+  void Reset (){bytesRead=0;Wrapper<::qlz_state_decompress>::reset();}
 };
 }
+
+using message_id_8=uint8_t;
+using message_id_16=uint16_t;

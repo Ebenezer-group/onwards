@@ -1,5 +1,5 @@
 #pragma once
-#include<message_id_types.hh>
+#include<SendBuffer.hh>
 
 message_id_8 const Login=1;
 message_id_8 const Generate=2;

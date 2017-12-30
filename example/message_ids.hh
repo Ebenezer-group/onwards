@@ -1,5 +1,5 @@
 #pragma once
-#include <message_id_types.hh>
+#include <SendBuffer.hh>
 
 message_id_8 const messageid1= 1;
 message_id_8 const messageid2= 2;
