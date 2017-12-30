@@ -1,6 +1,5 @@
 #include<ErrorWords.hh>
-#include<platforms.hh>
-#include<ReceiveBuffer.hh>
+#include<SendBuffer.hh>
 #include<wrappers.hh>
 #include"zz.frontMiddle.hh"
 #include<stdio.h>

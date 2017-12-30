@@ -2,7 +2,6 @@
 
 #include"ErrorWords.hh"
 #include"IO.hh"
-#include"platforms.hh"
 #include"SendBuffer.hh"
 #include<string.h>
 

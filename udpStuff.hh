@@ -1,6 +1,5 @@
 #pragma once
 #include"ErrorWords.hh"
-#include"platforms.hh"
 #include"wrappers.hh"
 
 namespace cmw{

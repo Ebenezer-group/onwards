@@ -15,7 +15,6 @@
 
 #include <wrappers.hh>
 #include "message_ids.hh"
-#include <platforms.hh>
 #include <plf_colony.h>
 #include <SendBuffer.hh>
 #include "zz.send_messages.hh"

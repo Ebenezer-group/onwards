@@ -3,7 +3,6 @@
 //#include<iostream>
 #include"ErrorWords.hh"
 #include"IO.hh"
-#include"platforms.hh"
 #include"ReceiveBuffer.hh"
 #include<string.h>//memmove
 

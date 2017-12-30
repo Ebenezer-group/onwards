@@ -37,7 +37,7 @@ clean:
 	rm -f $(TARGETS) $(EXAMPLES)
 
 INSTALL_DIR=/usr/local
-includes=tcp_server.hh udpStuff.hh ErrorWords.hh File.hh IO.hh marshallingInt.hh SendBuffer*.hh ReceiveBuffer*.hh cmw_complex.hh platforms.hh message_id_types.hh wrappers.hh quicklz.h
+includes=tcp_server.hh udpStuff.hh ErrorWords.hh File.hh IO.hh marshallingInt.hh SendBuffer*.hh ReceiveBuffer*.hh cmw_complex.hh message_id_types.hh wrappers.hh quicklz.h
 
 install:
 	cp -f $(includes) $(INSTALL_DIR)/include

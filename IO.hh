@@ -1,6 +1,5 @@
 #pragma once
 #include"ErrorWords.hh"
-#include"platforms.hh"
 #ifndef CMW_WINDOWS
 #include<sys/types.h>
 #include<sys/socket.h>
@@ -20,9 +19,9 @@ inline int sockRead (sock_type s,char* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
   int rc=::recvfrom(s,data,len,0,addr,fromLen);
   if(rc>0)return rc;
-  if(rc==0)throw connection_lost("sockRead eof sock:")<<s<<" len:"<<len;
+  if(rc==0)throw connectionLost("sockRead eof sock:")<<s<<" len:"<<len;
   auto err=GetError();
-  if(ECONNRESET==err)throw connection_lost("sockRead-ECONNRESET");
+  if(ECONNRESET==err)throw connectionLost("sockRead-ECONNRESET");
   if(EAGAIN==err||EWOULDBLOCK==err)return 0;
   throw failure("sockRead sock:")<<s<<" len:"<<len<<" "<<err;
 }
@@ -51,7 +50,7 @@ inline int Write (int fd,void const* data,int len){
 inline int Read (int fd,void* data,int len){
   int rc=::read(fd,data,len);
   if(rc>0)return rc;
-  if(rc==0)throw connection_lost("Read--eof len: ")<<len;
+  if(rc==0)throw connectionLost("Read--eof len: ")<<len;
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
   throw failure("Read -- len:")<<len<<" "<<errno;
 }

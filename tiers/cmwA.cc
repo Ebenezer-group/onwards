@@ -4,7 +4,6 @@
 #include<IO.hh>
 #include<marshallingInt.hh>
 #include"message_ids.hh"
-#include<ReceiveBuffer.hh>
 #include<SendBuffer.hh>
 #include<udpStuff.hh>
 #include<wrappers.hh>
@@ -242,7 +241,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
             pendingRequests.erase(::std::begin(pendingRequests));
           }while(cmwBuf.NextMessage());
         }
-      }catch(connection_lost const& e){
+      }catch(connectionLost const& e){
         syslog_wrapper(LOG_ERR,"Got end of stream notice: %s",e.what());
         reset("CMW stopped before your request was processed");
         continue;

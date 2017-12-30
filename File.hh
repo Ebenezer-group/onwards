@@ -1,7 +1,7 @@
 #pragma once
 #include"ErrorWords.hh"
 #include"marshallingInt.hh"
-#include"ReceiveBuffer.hh"
+#include"SendBuffer.hh"
 #include<string_view>
 
 #include<fcntl.h>//open
