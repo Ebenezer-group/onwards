@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ErrorWords.hh"
-#include "IO.hh"
 #include "ReceiveBuffer.hh"
 
 namespace cmw {
