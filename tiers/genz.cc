@@ -1,5 +1,5 @@
+#include<Buffer.hh>
 #include<ErrorWords.hh>
-#include<SendBuffer.hh>
 #include<wrappers.hh>
 #include"zz.frontMiddle.hh"
 #include<stdio.h>
@@ -36,7 +36,7 @@ sk: ::pollfd pfd{sbuf.sock_,POLLIN,0};
 #ifdef __linux__
       setNonblocking(pfd.fd);
 #endif
-      if(poll_wrapper(&pfd,1,waitSeconds*1000)>0){
+      if(pollWrapper(&pfd,1,waitSeconds*1000)>0){
         ReceiveBufferStack<SameFormat> buf(pfd.fd);
         if(buf.GiveBool())::exit(EXIT_SUCCESS);
         throw failure("cmwA:")<<buf.GiveString_view();
@@ -48,7 +48,7 @@ sk: ::pollfd pfd{sbuf.sock_,POLLIN,0};
 #ifndef CMW_WINDOWS
     ::openlog(av[0],LOG_NDELAY,LOG_USER);
 #endif
-    syslog_wrapper(LOG_ERR,"%s",e.what());
+    syslogWrapper(LOG_ERR,"%s",e.what());
   }
   return EXIT_FAILURE;
 }

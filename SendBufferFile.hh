@@ -1,7 +1,7 @@
 #pragma once
 
+#include"Buffer.hh"
 #include"ErrorWords.hh"
-#include"SendBuffer.hh"
 #include<string.h>
 
 namespace cmw {

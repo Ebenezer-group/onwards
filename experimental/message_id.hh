@@ -1,6 +1,6 @@
 #pragma once
 #include<stdint.h>
-#include<SendBuffer.hh>
+#include<Buffer.hh>
 
 namespace cmw{
 template<class R> class ReceiveBuffer;

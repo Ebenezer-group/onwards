@@ -1,8 +1,8 @@
 //  This program receives messages sent by sendexample.
 
+#include <Buffer.hh>
 #include "message_ids.hh"
 #include <plf_colony.h>
-#include <SendBuffer.hh>
 #include <udpStuff.hh>
 #include "zz.receive_messages.hh"
 

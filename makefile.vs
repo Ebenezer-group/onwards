@@ -23,7 +23,7 @@ clean:
 	del $(objects) tiers\genz.exe $(EXAMPLES)
 
 INSTALL_DIR=\Users\Store
-includes=tcpServer.hh udpStuff.hh ErrorWords.hh File.hh marshallingInt.hh SendBuffer*.hh ReceiveBuffer*.hh cmw_complex.hh wrappers.hh quicklz.h
+includes=tcpServer.hh udpStuff.hh ErrorWords.hh File.hh marshallingInt.hh *Buffer*.hh cmw_complex.hh wrappers.hh quicklz.h
 
 install:
 	copy $(includes)     $(INSTALL_DIR)\include

@@ -1,5 +1,5 @@
 #include"marshallingInt.hh"
-#include"SendBuffer.hh"
+#include"Buffer.hh"
 
 //Encode integer into variable-length format.
 void ::cmw::marshallingInt::Marshal (SendBuffer& b,bool)const{

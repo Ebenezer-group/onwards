@@ -61,7 +61,7 @@ inline void closeSocket (sock_type s){
   }
 }
 
-inline sock_type connect_wrapper(char const* node,char const* port){
+inline sock_type connectWrapper(char const* node,char const* port){
   getaddrinfo_wrapper res(node,port,SOCK_STREAM);
   for(auto r=res();r!=nullptr;r=r->ai_next){
     auto s=::socket(r->ai_family,r->ai_socktype,0);
@@ -75,14 +75,14 @@ inline sock_type connect_wrapper(char const* node,char const* port){
   return -1;
 }
 
-inline int poll_wrapper (::pollfd* fds,int num,int timeout=-1){
+inline int pollWrapper (::pollfd* fds,int num,int timeout=-1){
   int rc=::poll(fds,num,timeout);
   if(rc>=0)return rc;
   throw failure("poll ")<<GetError();
 }
 
 template<typename... T>
-void syslog_wrapper (int priority,char const* format,T... t){
+void syslogWrapper (int priority,char const* format,T... t){
 #ifndef CMW_WINDOWS
   ::syslog(priority,format,t...);
 #endif

@@ -1,9 +1,9 @@
 #include"account.hh"
+#include<Buffer.hh>
 #include<ErrorWords.hh>
 #include<File.hh>
 #include<marshallingInt.hh>
 #include"message_ids.hh"
-#include<SendBuffer.hh>
 #include<udpStuff.hh>
 #include<wrappers.hh>
 #include"zz.middleFront.hh"
@@ -133,7 +133,7 @@ public:
 void cmwAmbassador::login (){
   for(;;){
     fds[0].fd=cmwSendbuf.sock_=cmwBuf.sock_=
-       connect_wrapper("70.56.166.91",
+       connectWrapper("70.56.166.91",
 #ifdef CMW_ENDIAN_BIG
                        "56790");
 #else
@@ -141,7 +141,7 @@ void cmwAmbassador::login (){
 #endif
     if(fds[0].fd!=-1)break;
     ::printf("connect_wrapper %d\n",errno);
-    poll_wrapper(nullptr,0,loginPause);
+    pollWrapper(nullptr,0,loginPause);
   }
 
   middleBack::Marshal(cmwSendbuf,Login,accounts);
@@ -165,7 +165,7 @@ void cmwAmbassador::reset (char const* explanation){
 
 bool cmwAmbassador::sendData (){
   try{return cmwSendbuf.Flush();}catch(::std::exception const& e){
-    syslog_wrapper(LOG_ERR,"Problem sending data to CMW: %s",e.what());
+    syslogWrapper(LOG_ERR,"Problem sending data to CMW: %s",e.what());
     reset("Problem sending data to CMW");
   }
   return true;
@@ -206,14 +206,14 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
   login();
   fds[0].events=fds[1].events=POLLIN;
   for(;;){
-    if(0==poll_wrapper(fds,2,keepaliveInterval)){
+    if(0==pollWrapper(fds,2,keepaliveInterval)){
       try{
         if(!pendingRequests.empty())throw failure("No reply from CMW");
         middleBack::Marshal(cmwSendbuf,Keepalive);
         fds[0].events|=POLLOUT;
         pendingRequests.push_back(nullptr);
       }catch(::std::exception const& e){
-        syslog_wrapper(LOG_ERR,"Keepalive: %s",e.what());
+        syslogWrapper(LOG_ERR,"Keepalive: %s",e.what());
         reset("Keepalive problem");
       }
       continue;
@@ -241,11 +241,11 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
           }while(cmwBuf.NextMessage());
         }
       }catch(connectionLost const& e){
-        syslog_wrapper(LOG_ERR,"Got end of stream notice: %s",e.what());
+        syslogWrapper(LOG_ERR,"Got end of stream notice: %s",e.what());
         reset("CMW stopped before your request was processed");
         continue;
       }catch(::std::exception const& e){
-        syslog_wrapper(LOG_ERR,"Problem handling reply from CMW %s",e.what());
+        syslogWrapper(LOG_ERR,"Problem handling reply from CMW %s",e.what());
         assert(!pendingRequests.empty());
         if(pendingRequests.front().get()){
           auto const& req=*pendingRequests.front();
@@ -269,7 +269,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
         middleBack::Marshal(cmwSendbuf,Generate,req);
         req.latestUpdate=current_updatedtime;
       }catch(::std::exception const& e){
-        syslog_wrapper(LOG_ERR,"Accept request: %s",e.what());
+        syslogWrapper(LOG_ERR,"Accept request: %s",e.what());
         if(gotAddr){
           middleFront::Marshal(localbuf,false,{e.what()});
           localbuf.Send((::sockaddr*)&req.front,req.frontlen);
@@ -288,9 +288,9 @@ int main (int ac,char** av){
     if(ac!=2)throw failure("Usage: ")<<*av<<" config-file-name";
     cmwAmbassador(*(av+1));
   }catch(::std::exception const& e){
-    syslog_wrapper(LOG_ERR,"Program ending: %s",e.what());
+    syslogWrapper(LOG_ERR,"Program ending: %s",e.what());
   }catch(...){
-    syslog_wrapper(LOG_ERR,"Unknown exception!");
+    syslogWrapper(LOG_ERR,"Unknown exception!");
   }
   return EXIT_FAILURE;
 }

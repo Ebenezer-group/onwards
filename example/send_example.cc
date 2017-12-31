@@ -13,10 +13,10 @@
 //      -in                (::std::array<::std::array<float,2>, 3>)
 //   }
 
-#include <wrappers.hh>
+#include <Buffer.hh>
 #include "message_ids.hh"
 #include <plf_colony.h>
-#include <SendBuffer.hh>
+#include <wrappers.hh>
 #include "zz.send_messages.hh"
 
 #include <array>
