@@ -6,7 +6,7 @@ namespace cmw{
 auto const udp_packet_max=1280;
 
 inline sock_type udpServer (char const* port){
-  getaddrinfo_wrapper res(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
+  getaddrinfoWrapper res(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
   for(auto r=res();r!=nullptr;r=r->ai_next){
     auto s=::socket(r->ai_family,r->ai_socktype,0);
     if(-1==s)continue;

@@ -13,7 +13,7 @@ int main (int ac,char** av){
       throw failure("Usage: genz account-number .mdl-file-path [node] [port]");
 
     windowsStart();
-    getaddrinfo_wrapper res(ac<4?
+    getaddrinfoWrapper res(ac<4?
 #ifdef __linux__
 		            "127.0.0.1"
 #else

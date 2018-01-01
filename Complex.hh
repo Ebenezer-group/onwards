@@ -1,5 +1,5 @@
 #pragma once
-#include<ReceiveBuffer.hh>
+#include<Buffer.hh>
 #include<complex>
 
 namespace cmw{

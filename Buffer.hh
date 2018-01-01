@@ -5,20 +5,20 @@
 #include"udpStuff.hh"
 #include<initializer_list>
 #include<limits>
-#include<stdint.h>
-#include<stdio.h>//snprintf
 #include<string>
 #include<string_view>
-#include<string.h>//memcpy
 #include<type_traits>
 
 static_assert(::std::numeric_limits<unsigned char>::digits==8
               ,"Only 8 bit char supported");
 static_assert(::std::numeric_limits<float>::is_iec559
               ,"Only IEEE 754 supported");
+#include<stdint.h>
+#include<stdio.h>//snprintf
+#include<string.h>//memcpy
 #ifndef CMW_WINDOWS
-#include<sys/types.h>
 #include<sys/socket.h>
+#include<sys/types.h>
 #include<unistd.h>//read,write
 #endif
 
@@ -229,7 +229,7 @@ class SendBufferStack:public SendBuffer{
   unsigned char ar[N];
 
 public:
-  SendBufferStack ():SendBuffer(ar,N){}
+  inline SendBufferStack ():SendBuffer(ar,N){}
 };
 
 class SendBufferHeap:public SendBuffer{
@@ -252,7 +252,7 @@ class SendBufferCompressed:public SendBufferHeap{
   int compIndex=0;
   char* compressedBuf;
 
-  bool FlushFlush (::sockaddr* toAddr,::socklen_t toLen){
+  inline bool FlushFlush (::sockaddr* toAddr,::socklen_t toLen){
     int const bytes=sockWrite(sock_,compressedBuf,compIndex,toAddr,toLen);
     if(bytes==compIndex){compIndex=0;return true;}
 
@@ -262,12 +262,12 @@ class SendBufferCompressed:public SendBufferHeap{
   }
 
 public:
-  SendBufferCompressed (int sz):SendBufferHeap(sz),compSize(sz+(sz>>3)+400)
+  inline SendBufferCompressed (int sz):SendBufferHeap(sz),compSize(sz+(sz>>3)+400)
                                 ,compressedBuf(new char[compSize]){}
 
-  ~SendBufferCompressed (){delete[] compressedBuf;}
+  inline ~SendBufferCompressed (){delete[] compressedBuf;}
 
-  bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0){
+  inline bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0){
     bool rc=true;
     if(compIndex>0)rc=FlushFlush(toAddr,toLen);
 

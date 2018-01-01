@@ -30,22 +30,22 @@ public:
   inline ~FILE_wrapper (){::fclose(hndl);}
 };
 
-class getaddrinfo_wrapper{
+class getaddrinfoWrapper{
   ::addrinfo* addr;
 
  public:
-  inline getaddrinfo_wrapper (char const* node,char const* port
+  inline getaddrinfoWrapper (char const* node,char const* port
                               ,int socktype,int flags=0){
     ::addrinfo hints={flags,AF_UNSPEC,socktype,0,0,0,0,0};
     int rc=::getaddrinfo(node,port,&hints,&addr);
     if(rc!=0)throw failure("Getaddrinfo ")<<gai_strerror(rc);
   }
 
-  inline ~getaddrinfo_wrapper (){::freeaddrinfo(addr);}
+  inline ~getaddrinfoWrapper (){::freeaddrinfo(addr);}
   inline auto operator() (){return addr;}
 
-  getaddrinfo_wrapper (getaddrinfo_wrapper const&)=delete;
-  getaddrinfo_wrapper& operator= (getaddrinfo_wrapper)=delete;
+  getaddrinfoWrapper (getaddrinfoWrapper const&)=delete;
+  getaddrinfoWrapper& operator= (getaddrinfoWrapper)=delete;
 };
 
 inline void closeSocket (sock_type s){
@@ -62,7 +62,7 @@ inline void closeSocket (sock_type s){
 }
 
 inline sock_type connectWrapper(char const* node,char const* port){
-  getaddrinfo_wrapper res(node,port,SOCK_STREAM);
+  getaddrinfoWrapper res(node,port,SOCK_STREAM);
   for(auto r=res();r!=nullptr;r=r->ai_next){
     auto s=::socket(r->ai_family,r->ai_socktype,0);
     if(-1==s)continue;
