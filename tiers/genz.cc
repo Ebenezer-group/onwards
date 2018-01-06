@@ -15,12 +15,11 @@ int main (int ac,char** av){
     windowsStart();
     getaddrinfoWrapper res(ac<4?
 #ifdef __linux__
-		            "127.0.0.1"
+                           "127.0.0.1":av[3]
 #else
-		            "::1"
+                           "::1":av[3]
 #endif
-                            :av[3]
-                            ,ac<5?"55555":av[4],SOCK_DGRAM);
+                           ,ac<5?"55555":av[4],SOCK_DGRAM);
     SendBufferStack<> sbuf;
     sbuf.sock_=res.getSock();
 
