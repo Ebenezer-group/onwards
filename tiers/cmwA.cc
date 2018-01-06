@@ -3,7 +3,7 @@
 #include<ErrorWords.hh>
 #include<File.hh>
 #include<marshallingInt.hh>
-#include"message_ids.hh"
+#include"messageIDs.hh"
 #include<udpStuff.hh>
 #include<wrappers.hh>
 #include"zz.middleFront.hh"
@@ -135,12 +135,12 @@ void cmwAmbassador::login (){
     fds[0].fd=cmwSendbuf.sock_=cmwBuf.sock_=
        connectWrapper("70.56.166.91",
 #ifdef CMW_ENDIAN_BIG
-                       "56790");
+                      "56790");
 #else
-                       "56789");
+                      "56789");
 #endif
     if(fds[0].fd!=-1)break;
-    ::printf("connect_wrapper %d\n",errno);
+    ::printf("connectWrapper %d\n",errno);
     pollWrapper(nullptr,0,loginPause);
   }
 

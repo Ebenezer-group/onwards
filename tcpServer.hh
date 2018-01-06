@@ -5,7 +5,7 @@
 
 namespace cmw{
 inline sock_type tcpServer (char const* port){
-  getaddrinfo_wrapper res(nullptr,port,SOCK_STREAM,AI_PASSIVE);
+  getaddrinfoWrapper res(nullptr,port,SOCK_STREAM,AI_PASSIVE);
   for(auto r=res();r!=nullptr;r=r->ai_next){
     auto sock=::socket(r->ai_family,r->ai_socktype,0);
     if(-1==sock)continue;
@@ -32,23 +32,23 @@ inline sock_type tcpServer (char const* port){
   throw failure("tcpServer");
 }
 
-inline auto accept_wrapper(sock_type s){
+inline auto acceptWrapper(sock_type s){
   auto nu=::accept(s,nullptr,nullptr);
   if(nu>=0)return nu;
 
   if(ECONNABORTED==GetError())return 0;
-  throw failure("accept_wrapper ")<<GetError();
+  throw failure("acceptWrapper ")<<GetError();
 }
 
 #if defined(__FreeBSD__)||defined(__linux__)
-inline auto accept4_wrapper(sock_type s,int flags){
+inline auto accept4Wrapper(sock_type s,int flags){
   ::sockaddr amb;
   ::socklen_t len=sizeof(amb);
   auto nu=::accept4(s,&amb,&len,flags);
   if(nu>=0)return nu;
 
   if(ECONNABORTED==GetError())return 0;
-  throw failure("accept4_wrapper ")<<GetError();
+  throw failure("accept4Wrapper ")<<GetError();
 }
 #endif
 }

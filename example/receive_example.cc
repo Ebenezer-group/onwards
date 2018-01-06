@@ -22,7 +22,7 @@ int main()
 
     for(;;){
       ReceiveBufferStack<SameFormat> buffer(sd);
-      auto const msgid=buffer.Give<message_id_8>();
+      auto const msgid=Give<message_id_8>(buffer);
       ::std::cout<<"Message id: " << static_cast<unsigned>(msgid)<<'\n';
       switch(msgid){
       case messageid1:

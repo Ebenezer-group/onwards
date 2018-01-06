@@ -21,18 +21,14 @@ int main (int ac,char** av){
 #endif
                             :av[3]
                             ,ac<5?"55555":av[4],SOCK_DGRAM);
-    auto r=res();
     SendBufferStack<> sbuf;
-    for(;r!=nullptr;r=r->ai_next){
-      if((sbuf.sock_=::socket(r->ai_family,r->ai_socktype,0))!=-1)goto sk;
-    }
-    if(-1==sbuf.sock_)throw failure("socket call(s) ")<<GetError();
+    sbuf.sock_=res.getSock();
 
-sk: ::pollfd pfd{sbuf.sock_,POLLIN,0};
+    ::pollfd pfd{sbuf.sock_,POLLIN,0};
     int waitSeconds=9;
     frontMiddle::Marshal(sbuf,marshallingInt(av[1]),av[2]);
     for(int j=0;j<2;++j,waitSeconds*=2){
-      sbuf.Send(r->ai_addr,r->ai_addrlen);
+      sbuf.Send(res()->ai_addr,res()->ai_addrlen);
 #ifdef __linux__
       setNonblocking(pfd.fd);
 #endif

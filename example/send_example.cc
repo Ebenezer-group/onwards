@@ -39,8 +39,7 @@ int main()
 		    "::1"
 #endif
 		    ,"12345",SOCK_DGRAM);
-    auto rp=res();
-    buffer.sock_=::socket(rp->ai_family,rp->ai_socktype,0);
+    buffer.sock_=res.getSock();
 
     ::std::cout<<"Enter the ID of the message to send: 1, 2, 3 or 4."<<::std::endl;
     int messageID;
@@ -80,7 +79,7 @@ int main()
       default:
         return 0;
     }
-    buffer.Send(rp->ai_addr, rp->ai_addrlen);
+    buffer.Send(res()->ai_addr, res()->ai_addrlen);
     return 1;
   } catch(::std::exception const& ex){
     ::std::cout<<"failure: " << ex.what()<<::std::endl;
