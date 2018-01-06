@@ -45,5 +45,5 @@ int main (int ac,char** av){
 #endif
     syslogWrapper(LOG_ERR,"%s",e.what());
   }
-  return EXIT_FAILURE;
+  ::exit(EXIT_FAILURE);
 }
