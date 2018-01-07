@@ -2,17 +2,15 @@
 #include"ErrorWords.hh"
 #include"marshallingInt.hh"
 #include"quicklz.h"
-#include"udpStuff.hh"
 #include<initializer_list>
 #include<limits>
 #include<string>
 #include<string_view>
 #include<type_traits>
-
-static_assert(::std::numeric_limits<unsigned char>::digits==8
-              ,"Only 8 bit char supported");
+static_assert(::std::numeric_limits<unsigned char>::digits==8);
 static_assert(::std::numeric_limits<float>::is_iec559
               ,"Only IEEE 754 supported");
+
 #include<stdint.h>
 #include<stdio.h>//snprintf
 #include<string.h>//memcpy
@@ -87,7 +85,7 @@ public:
 
   inline SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
-  auto data (){return buf;}
+  inline auto data (){return buf;}
 
   inline void Receive (void const* data,int size){
     if(size>bufsize-index)
@@ -224,6 +222,7 @@ private:
   SendBuffer& operator= (SendBuffer);
 };
 
+auto const udp_packet_max=1280;
 template<unsigned long N=udp_packet_max>
 class SendBufferStack:public SendBuffer{
   unsigned char ar[N];
@@ -559,9 +558,9 @@ class ReceiveBufferStack:public ReceiveBuffer<R>{
   char ar[size];
 
 public:
-  ReceiveBufferStack (sock_type sock,::sockaddr* fromAddr=nullptr
+  ReceiveBufferStack (sock_type s,::sockaddr* fromAddr=nullptr
                       ,::socklen_t* fromLen=nullptr):
-    ReceiveBuffer<R>(ar,sockRead(sock,ar,size,fromAddr,fromLen))
+    ReceiveBuffer<R>(ar,sockRead(s,ar,size,fromAddr,fromLen))
   {this->NextMessage();}
 };
 

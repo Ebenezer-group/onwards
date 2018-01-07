@@ -1,6 +1,6 @@
 CXXFLAGS=-Os -Wundef -W -Wall -Wextra -Wreorder
 
-CXX=g++7 -std=c++17
+CXX=g++-7 -std=c++17
 #CXX=clang++ -std=c++1z -stdlib=libc++
 
 LIBS=-L./ -L/usr/lib
@@ -37,7 +37,7 @@ clean:
 	rm -f $(TARGETS) $(EXAMPLES)
 
 INSTALL_DIR=/usr/local
-includes=udpStuff.hh ErrorWords.hh File.hh marshallingInt.hh *Buffer*.hh cmw_complex.hh wrappers.hh quicklz.h
+includes=ErrorWords.hh File.hh marshallingInt.hh *Buffer*.hh cmw_complex.hh wrappers.hh quicklz.h
 
 install:
 	cp -f $(includes) $(INSTALL_DIR)/include
