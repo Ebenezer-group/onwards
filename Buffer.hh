@@ -49,7 +49,7 @@ public:
 
   inline void operator= (int32_t r){val=r;}
   inline auto operator() ()const{return val;}
-  void Marshal (SendBuffer&,bool=false)const;
+  inline void Marshal (SendBuffer&,bool=false)const;
 };
 
 inline bool operator== (marshallingInt l,marshallingInt r){return l()==r();}
@@ -255,6 +255,18 @@ private:
   SendBuffer (SendBuffer const&);
   SendBuffer& operator= (SendBuffer);
 };
+
+//Encode integer into variable-length format.
+void marshallingInt::Marshal (SendBuffer& b,bool)const{
+  uint32_t n=val;
+  for(;;){
+    uint8_t a=n&127;
+    n>>=7;
+    if(0==n){b.Receive(a);return;}
+    b.Receive(a|=128);
+    --n;
+  }
+}
 
 auto const udp_packet_max=1280;
 template<unsigned long N=udp_packet_max>
