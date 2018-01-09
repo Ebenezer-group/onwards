@@ -1,6 +1,5 @@
 #pragma once
 #include<Buffer.hh>
-#include<fixedString.hh>
 
 struct cmwAccount{
   ::cmw::marshallingInt number;
