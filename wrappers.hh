@@ -108,7 +108,13 @@ inline void setDirectory (char const* d){
 
 inline sock_type tcpServer (char const* port){
   getaddrinfoWrapper res(nullptr,port,SOCK_STREAM,AI_PASSIVE);
+#if 0
+  auto r=res();
+  r=r->ai_next;
+  for(;r!=nullptr;r=r->ai_next){
+#else
   for(auto r=res();r!=nullptr;r=r->ai_next){
+#endif
     auto s=::socket(r->ai_family,r->ai_socktype,0);
     if(-1==s)continue;
 

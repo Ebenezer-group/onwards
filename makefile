@@ -37,7 +37,7 @@ clean:
 	rm -f $(TARGETS) $(EXAMPLES)
 
 INSTALL_DIR=/usr/local
-includes=ErrorWords.hh File.hh marshallingInt.hh *Buffer*.hh cmw_complex.hh wrappers.hh quicklz.h
+includes=ErrorWords.hh File.hh *Buffer*.hh cmw_complex.hh wrappers.hh quicklz.h
 
 install:
 	cp -f $(includes) $(INSTALL_DIR)/include

@@ -1,11 +1,6 @@
 #pragma once
+#include<Buffer.hh>
 #include<fixedString.hh>
-#include<marshallingInt.hh>
-
-namespace cmw{
-class SendBuffer;
-template<class R> class ReceiveBuffer;
-}
 
 struct cmwAccount{
   ::cmw::marshallingInt number;
