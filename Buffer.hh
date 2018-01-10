@@ -16,9 +16,11 @@ static_assert(::std::numeric_limits<float>::is_iec559
 #include<stdlib.h>//strtol
 #include<string.h>//memcpy,strlen
 #ifndef CMW_WINDOWS
+#include<fcntl.h>//open
 #include<sys/socket.h>
+#include<sys/stat.h>//open
 #include<sys/types.h>
-#include<unistd.h>//read,write
+#include<unistd.h>//close,read,write
 #endif
 
 namespace cmw{
@@ -700,6 +702,33 @@ class fixedString{
 
 using fixedString60=fixedString<60>;
 using fixedString120=fixedString<120>;
+
+class File{
+  ::std::string_view name;
+
+public:
+  explicit File (::std::string_view n):name(n){}
+
+  template<class R>
+  explicit File (ReceiveBuffer<R>& buf):name(buf.GiveString_view_plus()){
+    int d=::open(name.data(),O_WRONLY|O_CREAT|O_TRUNC
+                 ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    if(d<0)throw failure("File open ")<<name.data()<<" "<<errno;
+    try{buf.GiveFile(d);}catch(...){::close(d);throw;}
+    ::close(d);
+  }
+
+  char const* Name ()const{return name.data();}
+};
+
+template<class T>
+class emptyContainer{
+public:
+  template<class R>
+  explicit emptyContainer (ReceiveBuffer<R>& b){
+    for(auto n=marshallingInt{b}();n>0;--n)T{b};
+  }
+};
 }
 
 using message_id_8=uint8_t;

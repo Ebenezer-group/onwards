@@ -15,7 +15,7 @@
 
 #include <Buffer.hh>
 #include "message_ids.hh"
-#include <plf_colony.h>
+#include "plf_colony.h"
 #include <wrappers.hh>
 #include "zz.send_messages.hh"
 
