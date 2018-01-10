@@ -21,13 +21,13 @@ $(MIDDLE): $(MIDDLE).cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 	size $@
 
-EXAMPLES:=example/send_example example/receive_example
+EXAMPLES:=example/sendExample example/receiveExample
 example:$(EXAMPLES)
 
-example/send_example: example/send_example.cc
+example/sendExample: example/sendExample.cc
 	$(CXX) $(CXXFLAGS) -I./example -o $@ $@.cc
 	size $@
-example/receive_example: example/receive_example.cc
+example/receiveExample: example/receiveExample.cc
 	$(CXX) $(CXXFLAGS) -I./example -o $@ $@.cc
 	size $@
 

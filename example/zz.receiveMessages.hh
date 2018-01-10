@@ -7,7 +7,7 @@
 #include<string>
 #include<vector>
 
-namespace receive_messages{
+namespace receiveMessages{
 template <class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::vector<int32_t>& a

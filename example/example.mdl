@@ -1,12 +1,12 @@
 message-lengths    variable
-send_messages
+sendMessages
     -out (message_id_8, ::std::vector<int32_t>, ::std::string)
     -out (message_id_8, ::std::set<int32_t>)
     -out (message_id_8, ::std::array<::std::array<float,2>, 3>)
     -out (message_id_8, ::plf::colony<::std::string>)
 }
 
-receive_messages
+receiveMessages
     -in                (::std::vector<int32_t>, ::std::string)
     -in                (::std::set<int32_t>)
     -in                (::std::array<::std::array<float,2>, 3>)

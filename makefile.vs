@@ -6,14 +6,14 @@ all: tiers\genz.exe
 tiers\genz.exe: tiers\genz.cc
 	$(CC) -Fe:$@ $(CFLAGS) tiers\genz.cc /link "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
-EXAMPLES:=example\send_example.exe example\receive_example.exe
+EXAMPLES:=example\sendExample.exe example\receiveExample.exe
 example: $(EXAMPLES)
 
-example\send_example.exe: example\send_example.cc
-	$(CC) -Fe:$@ $(CFLAGS) -I example example\send_example.cc "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+example\sendExample.exe: example\sendExample.cc
+	$(CC) -Fe:$@ $(CFLAGS) -I example example\sendExample.cc "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
-example\receive_example.exe: example\receive_example.cc
-	$(CC) -Fe:$@ $(CFLAGS) -I example example\receive_example.cc  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+example\receiveExample.exe: example\receiveExample.cc
+	$(CC) -Fe:$@ $(CFLAGS) -I example example\receiveExample.cc  "\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib"  "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 
 clean:
 	del tiers\genz.exe $(EXAMPLES)

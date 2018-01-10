@@ -1,10 +1,10 @@
-//  This program receives messages sent by sendexample.
+//  This program receives messages sent by sendExample.
 
 #include <Buffer.hh>
-#include "message_ids.hh"
+#include "messageIDs.hh"
 #include <plf_colony.h>
 #include <wrappers.hh>
-#include "zz.receive_messages.hh"
+#include "zz.receiveMessages.hh"
 
 #include <array>
 #include <iostream>
@@ -29,7 +29,7 @@ int main()
       {
         ::std::vector<int32_t> vec;
         ::std::string str;
-        receive_messages::Give(buffer,vec,str);
+        receiveMessages::Give(buffer,vec,str);
         for(auto val:vec){::std::cout<<val<<" ";}
         ::std::cout<<'\n'<<str;
       }
@@ -38,7 +38,7 @@ int main()
       case messageid2:
       {
         ::std::set<int32_t> iset;
-        receive_messages::Give(buffer,iset);
+        receiveMessages::Give(buffer,iset);
         for(auto val:iset){::std::cout<<val<<" ";}
       }
       break;
@@ -46,7 +46,7 @@ int main()
       case messageid3:
       {
         ::std::array<std::array<float,2>, 3> a;
-        receive_messages::Give(buffer,a);
+        receiveMessages::Give(buffer,a);
         for(auto subarray:a){
           for(auto val:subarray){::std::cout<<val<<" ";}
           ::std::cout<<::std::endl;
@@ -57,7 +57,7 @@ int main()
       case messageid4:
       {
         ::plf::colony<::std::string> clny;
-        receive_messages::Give(buffer,clny);
+        receiveMessages::Give(buffer,clny);
         for(auto val:clny){::std::cout<<val<<" ";}
       }
       break;

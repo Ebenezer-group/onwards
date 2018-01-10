@@ -7,7 +7,7 @@
 #include<string>
 #include<vector>
 
-namespace send_messages{
+namespace sendMessages{
 inline void Marshal (::cmw::SendBuffer& buf
          ,message_id_8 const& a
          ,::std::vector<int32_t> const& b
