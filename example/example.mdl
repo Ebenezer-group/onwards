@@ -1,4 +1,5 @@
-message-lengths    variable
+splitOutput
+--
 sendMessages
     -out (message_id_8, ::std::vector<int32_t>, ::std::string)
     -out (message_id_8, ::std::set<int32_t>)

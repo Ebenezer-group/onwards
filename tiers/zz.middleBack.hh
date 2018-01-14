@@ -6,7 +6,7 @@
 
 namespace middleBack{
 void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& a
+         ,message_id_8 a
          ,::std::vector<cmwAccount> const& b){
   try{
     buf.ReserveBytes(4);
@@ -17,7 +17,7 @@ void Marshal (::cmw::SendBuffer& buf
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& a
+         ,message_id_8 a
          ,cmwRequest const& b){
   try{
     buf.ReserveBytes(4);
@@ -28,7 +28,7 @@ inline void Marshal (::cmw::SendBuffer& buf
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 const& a){
+         ,message_id_8 a){
   try{
     buf.ReserveBytes(4);
     buf.Receive(a);
@@ -41,4 +41,19 @@ inline void
 cmwAccount::MarshalMemberData (::cmw::SendBuffer& buf)const{
   number.Marshal(buf);
   password.Marshal(buf);
+}
+
+namespace middleFront{
+void Marshal (::cmw::SendBuffer& buf
+         ,bool a
+         ,cmw::stringPlus const& b={}){
+  try{
+    buf.ReserveBytes(4);
+    buf.Receive(a);
+    if(a)goto rt;
+    buf.Receive(b);
+rt:
+    buf.FillInSize(cmw::udp_packet_max);
+  }catch(...){buf.Rollback();throw;}
+}
 }

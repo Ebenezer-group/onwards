@@ -8,7 +8,7 @@
 #include<vector>
 
 namespace receiveMessages{
-template <class R>
+template<class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::vector<int32_t>& a
          ,::std::string& b){
@@ -21,7 +21,7 @@ void Give (::cmw::ReceiveBuffer<R>& buf
   b=buf.GiveString();
 }
 
-template <class R>
+template<class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::set<int32_t>& a){
   int32_t count[1];
@@ -32,13 +32,13 @@ void Give (::cmw::ReceiveBuffer<R>& buf
   }
 }
 
-template <class R>
+template<class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::array<::std::array<float, 2>, 3>& a){
   buf.GiveBlock(&a[0][0], sizeof a / sizeof(float));
 }
 
-template <class R>
+template<class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::plf::colony<::std::string>& a){
   int32_t count[1];

@@ -3,8 +3,6 @@ CXXFLAGS=-I. -Os -Wundef -W -Wall -Wextra -Wreorder
 CXX=g++-7 -std=c++17
 #CXX=clang++ -std=c++1z -stdlib=libc++
 
-LIBS=-L./ -L/usr/lib
-
 FRONT:=tiers/genz
 MIDDLE:=tiers/cmwA
 TIERS:=$(FRONT) $(MIDDLE)

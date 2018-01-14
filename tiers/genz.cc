@@ -24,7 +24,7 @@ int main (int ac,char** av){
     sbuf.sock_=res.getSock();
 
     ::pollfd pfd{sbuf.sock_,POLLIN,0};
-    int waitSeconds=9;
+    int waitSeconds=8;
     frontMiddle::Marshal(sbuf,marshallingInt(av[1]),av[2]);
     for(int j=0;j<2;++j,waitSeconds*=2){
       sbuf.Send(res()->ai_addr,res()->ai_addrlen);

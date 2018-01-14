@@ -1,4 +1,0 @@
-message-lengths  variable
-middleFront
-  -out -maxLength=cmw::udp_packet_max -noInline -yeaNay (bool,cmw::stringPlus)
-}

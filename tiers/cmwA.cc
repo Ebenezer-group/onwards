@@ -3,7 +3,6 @@
 #include<ErrorWords.hh>
 #include"messageIDs.hh"
 #include<wrappers.hh>
-#include"zz.middleFront.hh"
 
 #include<memory>//unique_ptr
 #include<vector>
@@ -94,7 +93,9 @@ struct cmwRequest{
     while(::fgets(line,sizeof(line),f.hndl)){
       if('/'==line[0]&&'/'==line[1])continue;
       auto tok=::strtok(line,"\n ");
-      if(!::strcmp("message-lengths",tok))break;
+      if(!::strcmp(tok,"fixedMessageLengths")||
+         !::strcmp(tok,"splitOutput"))continue;
+      if(!::strcmp(tok,"--"))break;
       if(MarshalFile(tok,buf))++updatedFiles;
     }
     buf.Receive(ind,updatedFiles);
