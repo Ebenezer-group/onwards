@@ -74,7 +74,7 @@ struct cmwRequest{
     current_updatedtime=previous_updatedtime;
   }
 
-  void save_lastruntime ()const{Write(fd,&latestUpdate,sizeof(latestUpdate));}
+  void saveLastruntime ()const{Write(fd,&latestUpdate,sizeof(latestUpdate));}
 
   void Marshal (SendBuffer& buf,bool=false)const{
     accountNbr.Marshal(buf);
@@ -91,9 +91,8 @@ struct cmwRequest{
     ind=buf.ReserveBytes(sizeof(updatedFiles));
     FILE_wrapper f{middlefile,"r"};
     while(::fgets(line,sizeof(line),f.hndl)){
-      if('/'==line[0]&&'/'==line[1])continue;
       auto tok=::strtok(line,"\n ");
-      if(!::strcmp(tok,"fixedMessageLengths")||
+      if(!::strncmp(tok,"//",2)||!::strcmp(tok,"fixedMessageLengths")||
          !::strcmp(tok,"splitOutput"))continue;
       if(!::strcmp(tok,"--"))break;
       if(MarshalFile(tok,buf))++updatedFiles;
@@ -228,7 +227,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
               if(cmwBuf.GiveBool()){
                 setDirectory(req.path.c_str());
                 emptyContainer<File>{cmwBuf};
-                req.save_lastruntime();
+                req.saveLastruntime();
                 middleFront::Marshal(localbuf,true);
               }else middleFront::Marshal(localbuf,false,
                                  {"CMW:",cmwBuf.GiveString_view()});

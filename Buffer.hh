@@ -29,7 +29,6 @@ template<class R> class ReceiveBuffer;
 
 class marshallingInt{
   int32_t val;
-
 public:
   inline marshallingInt (){}
   inline explicit marshallingInt (int32_t v):val(v){}
@@ -110,7 +109,6 @@ using stringPlus=::std::initializer_list<::std::string_view>;
 
 class SendBuffer{
   int32_t savedSize=0;
-
 protected:
   int index=0;
   int bufsize;
@@ -124,9 +122,8 @@ public:
   inline auto data (){return buf;}
 
   inline void Receive (void const* data,int size){
-    if(size>bufsize-index)
-      throw failure("Size of marshalled data exceeds space available: ")
-        <<bufsize<<" "<<savedSize;
+    if(size>bufsize-index)throw failure("SendBuffer low-level receive:")<<
+        size<<" "<<index;
     ::memcpy(buf+index,data,size);
     index+=size;
   }
@@ -141,25 +138,21 @@ public:
 
   template<class T>
   void Receive (T val){
-    static_assert(::std::is_arithmetic<T>::value
-                  ,"SendBuffer expecting arithmetic type");
+    static_assert(::std::is_arithmetic<T>::value);
     Receive(&val,sizeof(T));
   }
 
   template<class T>
   void Receive (int where,T val){
-    static_assert(::std::is_arithmetic<T>::value
-                  ,"SendBuffer expecting arithmetic type");
+    static_assert(::std::is_arithmetic<T>::value);
     ::memcpy(buf+where,&val,sizeof(T));
   }
 
   inline void ReceiveFile (file_type d,int32_t sz){
     Receive(sz);
-    if(sz>bufsize-index)
-      throw failure("SendBuffer::ReceiveFile ")<<bufsize;
+    if(sz>bufsize-index)throw failure("SendBuffer ReceiveFile ")<<sz;
 
-    if(Read(d,&buf[index],sz)!=sz)
-      throw failure("SendBuffer::ReceiveFile Read");
+    if(Read(d,&buf[index],sz)!=sz)throw failure("SendBuffer ReceiveFile Read");
     index+=sz;
   }
 
@@ -282,7 +275,7 @@ public:
 class SendBufferHeap:public SendBuffer{
 public:
   inline SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
-  inline ~SendBufferHeap (){delete [] SendBuffer::buf;}
+  inline ~SendBufferHeap (){delete[] SendBuffer::buf;}
 };
 
 template<typename T>
@@ -310,7 +303,7 @@ class SendBufferCompressed:public SendBufferHeap{
 
 public:
   inline SendBufferCompressed (int sz):SendBufferHeap(sz),compSize(sz+(sz>>3)+400)
-                                ,compressedBuf(new char[compSize]){}
+                               ,compressedBuf(new char[compSize]){}
 
   inline ~SendBufferCompressed (){delete[] compressedBuf;}
 
@@ -693,7 +686,7 @@ class fixedString{
     b.Receive(&str[0],len());
   }
 
-  inline auto bytes_available (){return N-(len()+1);}
+  inline auto bytesAvailable (){return N-(len()+1);}
 
   inline char* operator() (){return &str[0];}
   inline char const* c_str ()const{return &str[0];}
@@ -705,7 +698,6 @@ using fixedString120=fixedString<120>;
 
 class File{
   ::std::string_view name;
-
 public:
   explicit File (::std::string_view n):name(n){}
 
