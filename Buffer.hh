@@ -105,8 +105,6 @@ inline int Read (int fd,void* data,int len){
 }
 #endif
 
-using stringPlus=::std::initializer_list<::std::string_view>;
-
 class SendBuffer{
   int32_t savedSize=0;
 protected:
@@ -119,20 +117,10 @@ public:
 
   inline SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
-  inline auto data (){return buf;}
-
   inline void Receive (void const* data,int size){
     if(size>bufsize-index)throw failure("SendBuffer low-level receive:")<<
         size<<" "<<index;
     ::memcpy(buf+index,data,size);
-    index+=size;
-  }
-
-  template<typename... T>
-  void Receive_variadic (char const* format,T... t){
-    auto maxsize=bufsize-index;
-    auto size=::snprintf(buf+index,maxsize,format,t...);
-    if(size>maxsize)throw failure("SendBuffer::Receive_variadic");
     index+=size;
   }
 
@@ -142,55 +130,6 @@ public:
     Receive(&val,sizeof(T));
   }
 
-  template<class T>
-  void Receive (int where,T val){
-    static_assert(::std::is_arithmetic<T>::value);
-    ::memcpy(buf+where,&val,sizeof(T));
-  }
-
-  inline void ReceiveFile (file_type d,int32_t sz){
-    Receive(sz);
-    if(sz>bufsize-index)throw failure("SendBuffer ReceiveFile ")<<sz;
-
-    if(Read(d,&buf[index],sz)!=sz)throw failure("SendBuffer ReceiveFile Read");
-    index+=sz;
-  }
-
-  inline void Receive (bool b){Receive(static_cast<unsigned char>(b));}
-
-  inline void Receive (char* cstr){
-    marshallingInt len(::strlen(cstr));
-    len.Marshal(*this);
-    Receive(cstr,len());
-  }
-
-  inline void Receive (char const* cstr){
-    marshallingInt len(::strlen(cstr));
-    len.Marshal(*this);
-    Receive(cstr,len());
-  }
-
-  inline void Receive (::std::string const& s){
-    marshallingInt len(s.size());
-    len.Marshal(*this);
-    Receive(s.data(),len());
-  }
-
-  inline void Receive (::std::string_view const& s){
-    marshallingInt len(s.size());
-    len.Marshal(*this);
-    Receive(s.data(),len());
-  }
-
-  inline void Receive (stringPlus lst){
-    int32_t t=0;
-    for(auto s:lst)t+=s.length();
-    marshallingInt{t}.Marshal(*this);
-    for(auto s:lst)Receive(s.data(),s.length());//Use low-level Receive
-  }
-
-  inline void InsertNull (){uint8_t z=0;Receive(z);}
-  inline int GetIndex (){return index;}
   inline int ReserveBytes (int num){
     if(num>bufsize-index)throw failure("SendBuffer::ReserveBytes");
     auto copy=index;
@@ -198,10 +137,16 @@ public:
     return copy;
   }
 
+  template<class T>
+  void Receive (int where,T val){
+    static_assert(::std::is_arithmetic<T>::value);
+    ::memcpy(buf+where,&val,sizeof(T));
+  }
+
   inline void FillInSize (int32_t max){
     int32_t marshalledBytes=index-savedSize;
     if(marshalledBytes>max)
-      throw failure("Size of marshalled data exceeds max of: ")<<max;
+      throw failure("Size of marshalled data exceeds max: ")<<max;
 
     Receive(savedSize,marshalledBytes);
     savedSize=index;
@@ -210,24 +155,20 @@ public:
   inline void Reset (){savedSize=index=0;}
   inline void Rollback (){index=savedSize;}
 
-  template<class T>
-  void ReceiveBlock (T const& grp){
-    int32_t count=grp.size();
-    Receive(count);
-    if(count>0)
-      Receive(&*grp.begin(),count*sizeof(typename T::value_type));
+  template<typename... T>
+  void Receive_variadic (char const* format,T... t){
+    auto maxsize=bufsize-index;
+    auto size=::snprintf(buf+index,maxsize,format,t...);
+    if(size>maxsize)throw failure("SendBuffer::Receive_variadic");
+    index+=size;
   }
 
-  template<class T>
-  void ReceiveGroup (T const& grp,bool sendType=false){
-    Receive(static_cast<int32_t>(grp.size()));
-    for(auto const& e:grp)e.Marshal(*this,sendType);
-  }
+  inline void ReceiveFile (file_type d,int32_t sz){
+    Receive(sz);
+    if(sz>bufsize-index)throw failure("SendBuffer ReceiveFile ")<<sz;
 
-  template<class T>
-  void ReceiveGroupPointer (T const& grp,bool sendType=false){
-    Receive(static_cast<int32_t>(grp.size()));
-    for(auto p:grp)p->Marshal(*this,sendType);
+    if(Read(d,buf+index,sz)!=sz)throw failure("SendBuffer ReceiveFile Read");
+    index+=sz;
   }
 
   inline bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0){
@@ -245,11 +186,62 @@ public:
   //UDP-friendly alternative to Flush
   inline void Send (::sockaddr* toAddr=nullptr,::socklen_t toLen=0)
   {sockWrite(sock_,buf,index,toAddr,toLen);}
+  inline auto data (){return buf;}
+  inline int GetIndex (){return index;}
 
 private:
   SendBuffer (SendBuffer const&);
   SendBuffer& operator= (SendBuffer);
 };
+
+inline void Receive (SendBuffer&b,bool bl){b.Receive(static_cast<unsigned char>(bl));}
+
+inline void Receive (SendBuffer& b,char const* s){
+  marshallingInt len(::strlen(s));
+  len.Marshal(b);
+  b.Receive(s,len());
+}
+
+inline void Receive (SendBuffer& b,::std::string const& s){
+  marshallingInt len(s.size());
+  len.Marshal(b);
+  b.Receive(s.data(),len());
+}
+
+inline void Receive (SendBuffer& b,::std::string_view const& s){
+  marshallingInt(s.size()).Marshal(b);
+  b.Receive(s.data(),s.size());
+}
+
+using stringPlus=::std::initializer_list<::std::string_view>;
+inline void Receive (SendBuffer& b,stringPlus lst){
+  int32_t t=0;
+  for(auto s:lst)t+=s.length();
+  marshallingInt{t}.Marshal(b);
+  for(auto s:lst)b.Receive(s.data(),s.length());//Use low-level Receive
+}
+
+inline void InsertNull (SendBuffer& b){uint8_t z=0;b.Receive(z);}
+
+template<class T>
+void ReceiveBlock (SendBuffer& b,T const& grp){
+  int32_t count=grp.size();
+  b.Receive(count);
+  if(count>0)
+    b.Receive(&*grp.begin(),count*sizeof(typename T::value_type));
+}
+
+template<class T>
+void ReceiveGroup (SendBuffer& b,T const& grp,bool sendType=false){
+  b.Receive(static_cast<int32_t>(grp.size()));
+  for(auto const& e:grp)e.Marshal(b,sendType);
+}
+
+template<class T>
+void ReceiveGroupPointer (SendBuffer& b,T const& grp,bool sendType=false){
+  b.Receive(static_cast<int32_t>(grp.size()));
+  for(auto p:grp)p->Marshal(b,sendType);
+}
 
 //Encode integer into variable-length format.
 void marshallingInt::Marshal (SendBuffer& b,bool)const{

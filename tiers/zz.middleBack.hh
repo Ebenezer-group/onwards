@@ -11,7 +11,7 @@ void Marshal (::cmw::SendBuffer& buf
   try{
     buf.ReserveBytes(4);
     buf.Receive(a);
-    buf.ReceiveGroup(b);
+    ReceiveGroup(buf,b);
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}
 }
@@ -49,9 +49,9 @@ void Marshal (::cmw::SendBuffer& buf
          ,cmw::stringPlus const& b={}){
   try{
     buf.ReserveBytes(4);
-    buf.Receive(a);
+    Receive(buf,a);
     if(a)goto rt;
-    buf.Receive(b);
+    Receive(buf,b);
 rt:
     buf.FillInSize(cmw::udp_packet_max);
   }catch(...){buf.Rollback();throw;}

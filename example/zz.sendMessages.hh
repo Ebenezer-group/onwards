@@ -15,8 +15,8 @@ inline void Marshal (::cmw::SendBuffer& buf
   try{
     buf.ReserveBytes(4);
     buf.Receive(a);
-    buf.ReceiveBlock(b);
-    buf.Receive(c);
+    ReceiveBlock(buf,b);
+    Receive(buf,c);
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}
 }
@@ -54,7 +54,7 @@ inline void Marshal (::cmw::SendBuffer& buf
     buf.Receive(a);
     buf.Receive(static_cast<int32_t>(b.size()));
     for(auto const& i2:b){
-      buf.Receive(i2);
+      Receive(buf,i2);
     }
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}

@@ -26,9 +26,9 @@ bool MarshalFile (char const* name,SendBuffer& buf){
   struct ::stat sb;
   if(::stat(name,&sb)<0)throw failure("MarshalFile stat ")<<name;
   if(sb.st_mtime>previous_updatedtime){
-    if('.'==name[0]||name[0]=='/')buf.Receive(::strrchr(name,'/')+1);
-    else buf.Receive(name);
-    buf.InsertNull();
+    if('.'==name[0]||name[0]=='/')Receive(buf,::strrchr(name,'/')+1);
+    else Receive(buf,name);
+    InsertNull(buf);
 
     int d=::open(name,O_RDONLY);
     if(d<0)throw failure("MarshalFile open ")<<name<<" "<<errno;
@@ -82,8 +82,8 @@ struct cmwRequest{
     if(MarshalFile(middlefile,buf))buf.Receive(ind,true);
     else{
       buf.Receive(ind,false);
-      buf.Receive(middlefile);
-      buf.InsertNull();
+      Receive(buf,middlefile);
+      InsertNull(buf);
     }
 
     char line[100];

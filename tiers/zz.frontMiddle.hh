@@ -9,7 +9,7 @@ void Marshal (::cmw::SendBuffer& buf
   try{
     buf.ReserveBytes(4);
     a.Marshal(buf);
-    buf.Receive(b);
+    Receive(buf,b);
     buf.FillInSize(cmw::udp_packet_max);
   }catch(...){buf.Rollback();throw;}
 }
