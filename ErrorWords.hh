@@ -73,8 +73,8 @@ public:
 };
 
 #ifdef CMW_WINDOWS
-using sock_type=SOCKET;
-using file_type=HANDLE;
+using sockType=SOCKET;
+using fileType=HANDLE;
 inline int GetError (){return WSAGetLastError();}
 inline void windowsStart (){
   WSADATA w;
@@ -82,8 +82,8 @@ inline void windowsStart (){
   if(0!=rc)throw failure("WSAStartup:")<<rc;
 }
 #else
-using sock_type=int;
-using file_type=int;
+using sockType=int;
+using fileType=int;
 inline int GetError (){return errno;}
 inline void windowsStart (){}
 #endif

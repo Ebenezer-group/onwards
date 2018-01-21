@@ -56,7 +56,7 @@ public:
 inline bool operator== (marshallingInt l,marshallingInt r){return l()==r();}
 inline bool operator== (marshallingInt l,int32_t r){return l()==r;}
 
-inline int sockWrite (sock_type s,void const* data,int len
+inline int sockWrite (sockType s,void const* data,int len
                       ,sockaddr* addr=nullptr,socklen_t toLen=0){
   int rc=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);
   if(rc>0)return rc;
@@ -64,7 +64,7 @@ inline int sockWrite (sock_type s,void const* data,int len
   if(EAGAIN==err||EWOULDBLOCK==err)return 0;
   throw failure("sockWrite sock:")<<s<<" "<<err;}
 
-inline int sockRead (sock_type s,char* data,int len
+inline int sockRead (sockType s,char* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
   int rc=::recvfrom(s,data,len,0,addr,fromLen);
   if(rc>0)return rc;
@@ -113,7 +113,7 @@ protected:
   unsigned char* buf;
 
 public:
-  sock_type sock_=-1;
+  sockType sock_=-1;
 
   inline SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
@@ -163,7 +163,7 @@ public:
     index+=size;
   }
 
-  inline void ReceiveFile (file_type d,int32_t sz){
+  inline void ReceiveFile (fileType d,int32_t sz){
     Receive(sz);
     if(sz>bufsize-index)throw failure("SendBuffer ReceiveFile ")<<sz;
 
@@ -514,7 +514,7 @@ public:
   void GiveBlock (T* data,unsigned int elements)
   {reader.ReadBlock(*this,data,elements);}
 
-  void GiveFile (file_type d){
+  void GiveFile (fileType d){
     int sz=Give<uint32_t>();
     while(sz>0){
       int rc=Write(d,buf+subTotal+index,sz);
@@ -591,7 +591,7 @@ class ReceiveBufferStack:public ReceiveBuffer<R>{
   char ar[size];
 
 public:
-  ReceiveBufferStack (sock_type s,::sockaddr* fromAddr=nullptr
+  ReceiveBufferStack (sockType s,::sockaddr* fromAddr=nullptr
                       ,::socklen_t* fromLen=nullptr):
     ReceiveBuffer<R>(ar,sockRead(s,ar,size,fromAddr,fromLen))
   {this->NextMessage();}
@@ -607,7 +607,7 @@ class ReceiveBufferCompressed:Wrapper<::qlz_state_decompress>,public ReceiveBuff
   char* compressedStart;
 
 public:
-  sock_type sock_;
+  sockType sock_;
 
   explicit ReceiveBufferCompressed (int size):ReceiveBuffer<R>(new char[size],0)
 					      ,bufsize(size){}

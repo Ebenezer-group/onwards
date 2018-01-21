@@ -8,14 +8,14 @@ Options start with a dash (-) symbol. After any options, a list of
 C++ types is enclosed in a pair of parentheses.  One or more of
 these lines are wrapped by a name and a closing brace like this:
 
-send_messages
+sendMessages
     -out (message_id_8, ::std::vector<int32_t>, ::std::string)
     -out (message_id_8, ::std::array<float,3>)
     -out (message_id_8, ::plf::colony<::std::string>)
 }
 
 Based on that input, the C++ Middleware Writer (CMW) creates a
-send_messages namespace in a file called zz.send_messages.hh.
+sendMessages namespace in a file called zz.sendMessages.hh.
 Functions are created within the namespace for each of the lines
 with matching parentheses.
 

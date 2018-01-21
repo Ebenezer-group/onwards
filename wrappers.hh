@@ -29,7 +29,7 @@ struct FILE_wrapper{
   inline ~FILE_wrapper (){::fclose(hndl);}
 };
 
-inline void closeSocket (sock_type s){
+inline void closeSocket (sockType s){
 #ifdef CMW_WINDOWS
   if(::closesocket(s)==SOCKET_ERROR){
     throw failure("closeSocket ")<<GetError();
@@ -68,7 +68,7 @@ class getaddrinfoWrapper{
   getaddrinfoWrapper& operator= (getaddrinfoWrapper)=delete;
 };
 
-inline sock_type connectWrapper(char const* node,char const* port){
+inline sockType connectWrapper(char const* node,char const* port){
   getaddrinfoWrapper res(node,port,SOCK_STREAM);
   auto s=res.getSock();
   if(0==::connect(s,res()->ai_addr,res()->ai_addrlen))return s;
@@ -91,7 +91,7 @@ void syslogWrapper (int priority,char const* format,T... t){
 #endif
 }
 
-inline void setNonblocking (sock_type s){
+inline void setNonblocking (sockType s){
 #ifndef CMW_WINDOWS
   if(::fcntl(s,F_SETFL,O_NONBLOCK)==-1)throw failure("setNonb:")<<errno;
 #endif
@@ -106,7 +106,7 @@ inline void setDirectory (char const* d){
     throw failure("setDirectory ")<<d<<" "<<GetError();
 }
 
-inline sock_type tcpServer (char const* port){
+inline sockType tcpServer (char const* port){
   getaddrinfoWrapper res(nullptr,port,SOCK_STREAM,AI_PASSIVE);
 #if 0
   auto r=res();
@@ -143,7 +143,7 @@ inline sock_type tcpServer (char const* port){
   throw failure("tcpServer");
 }
 
-inline int acceptWrapper(sock_type s){
+inline int acceptWrapper(sockType s){
   int nu=::accept(s,nullptr,nullptr);
   if(nu>=0)return nu;
 
@@ -152,7 +152,7 @@ inline int acceptWrapper(sock_type s){
 }
 
 #if defined(__FreeBSD__)||defined(__linux__)
-inline int accept4Wrapper(sock_type s,int flags){
+inline int accept4Wrapper(sockType s,int flags){
   ::sockaddr amb;
   ::socklen_t len=sizeof(amb);
   int nu=::accept4(s,&amb,&len,flags);
@@ -163,7 +163,7 @@ inline int accept4Wrapper(sock_type s,int flags){
 }
 #endif
 
-inline sock_type udpServer (char const* port){
+inline sockType udpServer (char const* port){
   getaddrinfoWrapper res(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
   auto s=res.getSock();
   if(0==::bind(s,res()->ai_addr,res()->ai_addrlen))return s;
