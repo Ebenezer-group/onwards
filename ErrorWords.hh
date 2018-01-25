@@ -1,7 +1,9 @@
 #pragma once
 #include<exception>
 #include<string>
+#if __cplusplus>=201703L
 #include<string_view>
+#endif
 #include<stdio.h>//sprintf
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #define CMW_WINDOWS
@@ -17,7 +19,9 @@ class failure:public ::std::exception{
 
 public:
   inline explicit failure (char const* w):str(w){}
+#if __cplusplus>=201703L
   inline explicit failure (::std::string_view w):str(w){}
+#endif
 
   inline failure (char const* w,int tot){
     if(tot>0)str.reserve(tot);
@@ -33,10 +37,12 @@ public:
     return *this;
   }
 
+#if __cplusplus>=201703L
   inline failure& operator<< (::std::string_view const& s){
     str.append(s);
     return *this;
   }
+#endif
 
   inline failure& operator<< (char* s){
     str.append(s);

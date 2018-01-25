@@ -5,7 +5,9 @@
 #include<initializer_list>
 #include<limits>
 #include<string>
+#if __cplusplus>=201703L
 #include<string_view>
+#endif
 #include<type_traits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8);
 static_assert(::std::numeric_limits<float>::is_iec559
@@ -125,22 +127,22 @@ public:
   }
 
   template<class T>
-  void Receive (T val){
+  void Receive (T t){
     static_assert(::std::is_arithmetic<T>::value);
-    Receive(&val,sizeof(T));
+    Receive(&t,sizeof(T));
   }
 
-  inline int ReserveBytes (int num){
-    if(num>bufsize-index)throw failure("SendBuffer::ReserveBytes");
-    auto copy=index;
-    index+=num;
-    return copy;
+  inline int ReserveBytes (int n){
+    if(n>bufsize-index)throw failure("SendBuffer::ReserveBytes");
+    auto i=index;
+    index+=n;
+    return i;
   }
 
   template<class T>
-  void Receive (int where,T val){
+  void Receive (int where,T t){
     static_assert(::std::is_arithmetic<T>::value);
-    ::memcpy(buf+where,&val,sizeof(T));
+    ::memcpy(buf+where,&t,sizeof(T));
   }
 
   inline void FillInSize (int32_t max){
@@ -208,6 +210,7 @@ inline void Receive (SendBuffer& b,::std::string const& s){
   b.Receive(s.data(),len());
 }
 
+#if __cplusplus>=201703L
 inline void Receive (SendBuffer& b,::std::string_view const& s){
   marshallingInt(s.size()).Marshal(b);
   b.Receive(s.data(),s.size());
@@ -220,6 +223,7 @@ inline void Receive (SendBuffer& b,stringPlus lst){
   marshallingInt{t}.Marshal(b);
   for(auto s:lst)b.Receive(s.data(),s.length());//Use low-level Receive
 }
+#endif
 
 inline void InsertNull (SendBuffer& b){uint8_t z=0;b.Receive(z);}
 
@@ -533,6 +537,7 @@ public:
     return s;
   }
 
+#if __cplusplus>=201703L
   auto GiveString_view (){
     marshallingInt len(*this);
     if(len()>msgLength-index)throw failure("ReceiveBuffer::GiveString_view");
@@ -546,6 +551,7 @@ public:
     GiveOne();
     return v;
   }
+#endif
 
 #ifndef CMW_WINDOWS
   template<ssize_t N>
@@ -660,11 +666,13 @@ class fixedString{
     ::strcpy(&str[0],s);
   }
 
+#if __cplusplus>=201703L
   inline explicit fixedString (::std::string_view s):len(s.length()){
     if(len()>N-1)throw failure("fixedString ctor");
     ::strncpy(&str[0],s.data(),len());
     str[len()]='\0';
   }
+#endif
 
   template<class R>
   explicit fixedString (ReceiveBuffer<R>& b):len(b){
@@ -688,6 +696,7 @@ class fixedString{
 using fixedString60=fixedString<60>;
 using fixedString120=fixedString<120>;
 
+#if __cplusplus>=201703L
 class File{
   ::std::string_view name;
 public:
@@ -704,6 +713,7 @@ public:
 
   char const* Name ()const{return name.data();}
 };
+#endif
 
 template<class T>
 class emptyContainer{
