@@ -529,7 +529,7 @@ public:
 
   bool GiveBool (){return GiveOne()!=0;}
 
-  auto GiveString (){
+  ::std::string GiveString (){
     marshallingInt len(*this);
     if(len()>msgLength-index)throw failure("ReceiveBuffer::GiveString");
     ::std::string s(buf+subTotal+index,len());
@@ -686,7 +686,7 @@ class fixedString{
     b.Receive(&str[0],len());
   }
 
-  inline auto bytesAvailable (){return N-(len()+1);}
+  inline int bytesAvailable (){return N-(len()+1);}
 
   inline char* operator() (){return &str[0];}
   inline char const* c_str ()const{return &str[0];}

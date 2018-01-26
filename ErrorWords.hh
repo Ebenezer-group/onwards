@@ -1,15 +1,13 @@
 #pragma once
 #include<exception>
 #include<string>
-#if __cplusplus>=201703L||_MSVC_LANG>=201403L
-#include<string_view>
-#endif
 #include<stdio.h>//sprintf
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #define CMW_WINDOWS
 #include<winsock2.h>
 #include<ws2tcpip.h>
 #else
+#define _MSVC_LANG 0
 #include<errno.h>
 #endif
 
