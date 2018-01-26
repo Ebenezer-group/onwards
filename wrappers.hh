@@ -54,8 +54,8 @@ class getaddrinfoWrapper{
   }
 
   inline ~getaddrinfoWrapper (){::freeaddrinfo(addr);}
-  inline auto operator() (){return addr;}
-  inline auto getSock (){
+  inline ::addrinfo* operator() (){return addr;}
+  inline sockType getSock (){
     for(;addr!=nullptr;addr=addr->ai_next){
       auto s=::socket(addr->ai_family,addr->ai_socktype,0);
       if(-1==s)continue;

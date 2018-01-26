@@ -9,7 +9,7 @@
 #include<string_view>
 #endif
 #include<type_traits>
-static_assert(::std::numeric_limits<unsigned char>::digits==8);
+static_assert(::std::numeric_limits<unsigned char>::digits==8,"");
 static_assert(::std::numeric_limits<float>::is_iec559
               ,"Only IEEE 754 supported");
 
@@ -51,7 +51,7 @@ public:
   }
 
   inline void operator= (int32_t r){val=r;}
-  inline auto operator() ()const{return val;}
+  inline int32_t operator() ()const{return val;}
   inline void Marshal (SendBuffer&,bool=false)const;
 };
 
@@ -128,7 +128,7 @@ public:
 
   template<class T>
   void Receive (T t){
-    static_assert(::std::is_arithmetic<T>::value);
+    static_assert(::std::is_arithmetic<T>::value,"");
     Receive(&t,sizeof(T));
   }
 
@@ -141,7 +141,7 @@ public:
 
   template<class T>
   void Receive (int where,T t){
-    static_assert(::std::is_arithmetic<T>::value);
+    static_assert(::std::is_arithmetic<T>::value,"");
     ::memcpy(buf+where,&t,sizeof(T));
   }
 
@@ -188,7 +188,7 @@ public:
   //UDP-friendly alternative to Flush
   inline void Send (::sockaddr* toAddr=nullptr,::socklen_t toLen=0)
   {sockWrite(sock_,buf,index,toAddr,toLen);}
-  inline auto data (){return buf;}
+  inline unsigned char* data (){return buf;}
   inline int GetIndex (){return index;}
 
 private:
