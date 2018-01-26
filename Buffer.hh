@@ -5,7 +5,7 @@
 #include<initializer_list>
 #include<limits>
 #include<string>
-#if __cplusplus>=201703L
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
 #include<string_view>
 #endif
 #include<type_traits>
@@ -210,7 +210,7 @@ inline void Receive (SendBuffer& b,::std::string const& s){
   b.Receive(s.data(),len());
 }
 
-#if __cplusplus>=201703L
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
 inline void Receive (SendBuffer& b,::std::string_view const& s){
   marshallingInt(s.size()).Marshal(b);
   b.Receive(s.data(),s.size());
@@ -537,7 +537,7 @@ public:
     return s;
   }
 
-#if __cplusplus>=201703L
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
   auto GiveString_view (){
     marshallingInt len(*this);
     if(len()>msgLength-index)throw failure("ReceiveBuffer::GiveString_view");
@@ -666,7 +666,7 @@ class fixedString{
     ::strcpy(&str[0],s);
   }
 
-#if __cplusplus>=201703L
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
   inline explicit fixedString (::std::string_view s):len(s.length()){
     if(len()>N-1)throw failure("fixedString ctor");
     ::strncpy(&str[0],s.data(),len());
@@ -696,7 +696,7 @@ class fixedString{
 using fixedString60=fixedString<60>;
 using fixedString120=fixedString<120>;
 
-#if __cplusplus>=201703L
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
 class File{
   ::std::string_view name;
 public:

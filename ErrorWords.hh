@@ -1,7 +1,7 @@
 #pragma once
 #include<exception>
 #include<string>
-#if __cplusplus>=201703L
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
 #include<string_view>
 #endif
 #include<stdio.h>//sprintf
@@ -19,7 +19,7 @@ class failure:public ::std::exception{
 
 public:
   inline explicit failure (char const* w):str(w){}
-#if __cplusplus>=201703L
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
   inline explicit failure (::std::string_view w):str(w){}
 #endif
 
@@ -37,7 +37,7 @@ public:
     return *this;
   }
 
-#if __cplusplus>=201703L
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
   inline failure& operator<< (::std::string_view const& s){
     str.append(s);
     return *this;
