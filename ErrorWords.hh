@@ -10,6 +10,9 @@
 #define _MSVC_LANG 0
 #include<errno.h>
 #endif
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
+#include<string_view>
+#endif
 
 namespace cmw{
 class failure:public ::std::exception{

@@ -24,8 +24,8 @@ BSD/Linux box or VM.
 
 A C++ 2017 or newer compiler is required to build the middle
 and front tiers of the CMW.  That doesn't mean your project
-has to use a C++ 2017 or newer compiler.  A C++ 2011 or 
-newer compiler is required to process the output of the CMW.
+has to use a C++ 2017 compiler.  A C++ 2011 or newer compiler
+is able to process output from the CMW.
 
 
 Accounts
