@@ -108,6 +108,8 @@ inline int Read (int fd,void* data,int len){
 #endif
 
 class SendBuffer{
+  SendBuffer (SendBuffer const&);
+  SendBuffer& operator= (SendBuffer);
   int32_t savedSize=0;
 protected:
   int index=0;
@@ -119,9 +121,12 @@ public:
 
   inline SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
+  inline void checkSpace (int n){
+    if(n>bufsize-index)throw failure("SendBuffer checkSpace:")<<n<<" "<<index;
+  }
+
   inline void Receive (void const* data,int size){
-    if(size>bufsize-index)throw failure("SendBuffer low-level receive:")<<
-        size<<" "<<index;
+    checkSpace(size);
     ::memcpy(buf+index,data,size);
     index+=size;
   }
@@ -133,7 +138,7 @@ public:
   }
 
   inline int ReserveBytes (int n){
-    if(n>bufsize-index)throw failure("SendBuffer::ReserveBytes");
+    checkSpace(n);
     auto i=index;
     index+=n;
     return i;
@@ -167,9 +172,8 @@ public:
 
   inline void ReceiveFile (fileType d,int32_t sz){
     Receive(sz);
-    if(sz>bufsize-index)throw failure("SendBuffer ReceiveFile ")<<sz;
-
-    if(Read(d,buf+index,sz)!=sz)throw failure("SendBuffer ReceiveFile Read");
+    checkSpace(sz);
+    if(Read(d,buf+index,sz)!=sz)throw failure("SendBuffer ReceiveFile");
     index+=sz;
   }
 
@@ -188,12 +192,9 @@ public:
   //UDP-friendly alternative to Flush
   inline void Send (::sockaddr* toAddr=nullptr,::socklen_t toLen=0)
   {sockWrite(sock_,buf,index,toAddr,toLen);}
+
   inline unsigned char* data (){return buf;}
   inline int GetIndex (){return index;}
-
-private:
-  SendBuffer (SendBuffer const&);
-  SendBuffer& operator= (SendBuffer);
 };
 
 inline void Receive (SendBuffer&b,bool bl){b.Receive(static_cast<unsigned char>(bl));}
@@ -219,9 +220,9 @@ inline void Receive (SendBuffer& b,::std::string_view const& s){
 using stringPlus=::std::initializer_list<::std::string_view>;
 inline void Receive (SendBuffer& b,stringPlus lst){
   int32_t t=0;
-  for(auto s:lst)t+=s.length();
+  for(auto s:lst)t+=s.size();
   marshallingInt{t}.Marshal(b);
-  for(auto s:lst)b.Receive(s.data(),s.length());//Use low-level Receive
+  for(auto s:lst)b.Receive(s.data(),s.size());//Use low-level Receive
 }
 #endif
 
@@ -271,7 +272,7 @@ public:
 class SendBufferHeap:public SendBuffer{
 public:
   inline SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
-  inline ~SendBufferHeap (){delete[] SendBuffer::buf;}
+  inline ~SendBufferHeap (){delete[]SendBuffer::buf;}
 };
 
 template<typename T>
@@ -286,22 +287,22 @@ class SendBufferCompressed:public SendBufferHeap{
   Wrapper<::qlz_state_compress> compress;
   int compSize;
   int compIndex=0;
-  char* compressedBuf;
+  char* compBuf;
 
   inline bool FlushFlush (::sockaddr* toAddr,::socklen_t toLen){
-    int const bytes=sockWrite(sock_,compressedBuf,compIndex,toAddr,toLen);
+    int const bytes=sockWrite(sock_,compBuf,compIndex,toAddr,toLen);
     if(bytes==compIndex){compIndex=0;return true;}
 
     compIndex-=bytes;
-    ::memmove(compressedBuf,compressedBuf+bytes,compIndex);
+    ::memmove(compBuf,compBuf+bytes,compIndex);
     return false;
   }
 
 public:
   inline SendBufferCompressed (int sz):SendBufferHeap(sz),compSize(sz+(sz>>3)+400)
-                               ,compressedBuf(new char[compSize]){}
+                               ,compBuf(new char[compSize]){}
 
-  inline ~SendBufferCompressed (){delete[] compressedBuf;}
+  inline ~SendBufferCompressed (){delete[]compBuf;}
 
   inline bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0){
     bool rc=true;
@@ -310,8 +311,7 @@ public:
     if(index>0){
       if(index+(index>>3)+400>compSize-compIndex)
         throw failure("Not enough room in compressed buf");
-      compIndex+=::qlz_compress(buf,compressedBuf+compIndex
-                                ,index,compress.p);
+      compIndex+=::qlz_compress(buf,compBuf+compIndex,index,compress.p);
       Reset();
       if(rc)rc=FlushFlush(toAddr,toLen);
     }
