@@ -145,7 +145,7 @@ void cmwAmbassador::login (){
   while(!cmwSendbuf.Flush());
   while(!cmwBuf.GotPacket());
   if(cmwBuf.GiveBool())setNonblocking(fds[0].fd);
-  else throw failure("Login:")<<cmwBuf.GiveString_view();
+  else throw failure("Login:")<<cmwBuf.GiveStringView();
 }
 
 void cmwAmbassador::reset (char const* explanation){
@@ -230,7 +230,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
                 req.saveLastruntime();
                 middleFront::Marshal(localbuf,true);
               }else middleFront::Marshal(localbuf,false,
-                                 {"CMW:",cmwBuf.GiveString_view()});
+                                 {"CMW:",cmwBuf.GiveStringView()});
               localbuf.Send((::sockaddr*)&req.front,req.frontlen);
               localbuf.Reset();
             }

@@ -476,16 +476,19 @@ protected:
 public:
   explicit ReceiveBuffer (char* addr,int bytes):packetLength(bytes),buf(addr){}
 
+  void checkData (int n){
+    if(n>msgLength-index)throw
+      failure("ReceiveBuffer::checkData:")<<n<<" "<<msgLength<<" "<<index;
+  }
+
   void Give (void* address,int len){
-    if(len>msgLength-index)
-      throw failure("ReceiveBuffer::Give: bytes remaining < len ")<<len;
+    checkData(len);
     ::memcpy(address,buf+subTotal+index,len);
     index+=len;
   }
 
   char GiveOne (){
-    if(index>=msgLength)
-      throw failure("ReceiveBuffer::GiveOne: out of data");
+    checkData(1);
     return buf[subTotal+index++];
   }
 
@@ -518,6 +521,7 @@ public:
 
   void GiveFile (fileType d){
     int sz=Give<uint32_t>();
+    checkData(sz);
     while(sz>0){
       int rc=Write(d,buf+subTotal+index,sz);
       sz-=rc;
@@ -529,23 +533,23 @@ public:
 
   ::std::string GiveString (){
     marshallingInt len(*this);
-    if(len()>msgLength-index)throw failure("ReceiveBuffer::GiveString");
+    checkData(len());
     ::std::string s(buf+subTotal+index,len());
     index+=len();
     return s;
   }
 
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
-  auto GiveString_view (){
+  auto GiveStringView (){
     marshallingInt len(*this);
-    if(len()>msgLength-index)throw failure("ReceiveBuffer::GiveString_view");
+    checkData(len());
     ::std::string_view v(buf+subTotal+index,len());
     index+=len();
     return v;
   }
 
-  auto GiveString_view_plus (){
-    auto v=GiveString_view();
+  auto GiveStringView_plus (){
+    auto v=GiveStringView();
     GiveOne();
     return v;
   }
@@ -563,7 +567,7 @@ public:
 
   void AppendTo (::std::string& s){
     marshallingInt len(*this);
-    if(len()>msgLength-index)throw failure("ReceiveBuffer::AppendTo");
+    checkData(len());
     s.append(buf+subTotal+index,len());
     index+=len();
   }
@@ -701,7 +705,7 @@ public:
   explicit File (::std::string_view n):name(n){}
 
   template<class R>
-  explicit File (ReceiveBuffer<R>& buf):name(buf.GiveString_view_plus()){
+  explicit File (ReceiveBuffer<R>& buf):name(buf.GiveStringView_plus()){
     int d=::open(name.data(),O_WRONLY|O_CREAT|O_TRUNC
                  ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     if(d<0)throw failure("File open ")<<name.data()<<" "<<errno;

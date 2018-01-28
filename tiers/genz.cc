@@ -34,7 +34,7 @@ int main (int ac,char** av){
       if(pollWrapper(&pfd,1,waitSeconds*1000)>0){
         ReceiveBufferStack<SameFormat> buf(pfd.fd);
         if(buf.GiveBool())::exit(EXIT_SUCCESS);
-        throw failure("cmwA:")<<buf.GiveString_view();
+        throw failure("cmwA:")<<buf.GiveStringView();
       }
     }
     throw failure("No reply received.  Is the cmwA running?");
