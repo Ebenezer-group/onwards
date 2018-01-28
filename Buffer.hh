@@ -113,7 +113,7 @@ class SendBuffer{
   int32_t savedSize=0;
 protected:
   int index=0;
-  int bufsize;
+  int const bufsize;
   unsigned char* buf;
 
 public:
@@ -179,9 +179,7 @@ public:
 
   inline bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0){
     int const bytes=sockWrite(sock_,buf,index,toAddr,toLen);
-    if(bytes==index){
-      Reset();return true;
-    }
+    if(bytes==index){Reset();return true;}
 
     index-=bytes;
     savedSize=index;
