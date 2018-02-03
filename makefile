@@ -1,7 +1,7 @@
-CXXFLAGS=-I. -Os -Wundef -W -Wall -Wextra -Wreorder
-
 CXX=g++-7
 #CXX=clang++ -stdlib=libc++
+
+CXXFLAGS=-I. -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@
 
 FRONT:=tiers/genz
 MIDDLE:=tiers/cmwA
@@ -12,28 +12,29 @@ all:$(TIERS)
 #	genz 2 /usr/home/brian/onwards/tiers/middleBack.mdl
 
 $(FRONT): $(FRONT).cc
-	$(CXX) -std=c++17 $(CXXFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -std=c++17 $@.cc
 	size $@
 
 $(MIDDLE): $(MIDDLE).cc
-	$(CXX) -std=c++17 $(CXXFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -std=c++17 $@.cc
 	size $@
 
 EXAMPLES:=example/sendExample example/receiveExample
 example:$(EXAMPLES)
 
+EXFLAGS:=-std=c++11 -I./example
 example/sendExample: example/sendExample.cc
-	$(CXX) -std=c++11 $(CXXFLAGS) -I./example -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) $(EXFLAGS) $@.cc
 	size $@
 example/receiveExample: example/receiveExample.cc
-	$(CXX) -std=c++11 $(CXXFLAGS) -I./example -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) $(EXFLAGS) $@.cc
 	size $@
 
 clean:
 	rm -f $(TIERS) $(EXAMPLES)
 
 INSTALL_DIR=/usr/local
-includes=ErrorWords.hh *Buffer*.hh Complex.hh wrappers.hh quicklz.h
+includes=ErrorWords.hh Buffer.hh Complex.hh wrappers.hh quicklz.h
 
 install:
 	cp -f $(includes) $(INSTALL_DIR)/include
