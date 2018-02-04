@@ -6,7 +6,7 @@
 
 namespace middleBack{
 void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 a
+         ,messageID_8 a
          ,::std::vector<cmwAccount> const& b){
   try{
     buf.ReserveBytes(4);
@@ -17,7 +17,7 @@ void Marshal (::cmw::SendBuffer& buf
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 a
+         ,messageID_8 a
          ,cmwRequest const& b){
   try{
     buf.ReserveBytes(4);
@@ -28,7 +28,7 @@ inline void Marshal (::cmw::SendBuffer& buf
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 a){
+         ,messageID_8 a){
   try{
     buf.ReserveBytes(4);
     buf.Receive(a);

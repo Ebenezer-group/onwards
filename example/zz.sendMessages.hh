@@ -9,7 +9,7 @@
 
 namespace sendMessages{
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 a
+         ,messageID_8 a
          ,::std::vector<int32_t> const& b
          ,::std::string const& c){
   try{
@@ -22,7 +22,7 @@ inline void Marshal (::cmw::SendBuffer& buf
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 a
+         ,messageID_8 a
          ,::std::set<int32_t> const& b){
   try{
     buf.ReserveBytes(4);
@@ -36,7 +36,7 @@ inline void Marshal (::cmw::SendBuffer& buf
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 a
+         ,messageID_8 a
          ,::std::array<::std::array<float, 2>, 3> const& b){
   try{
     buf.ReserveBytes(4);
@@ -47,7 +47,7 @@ inline void Marshal (::cmw::SendBuffer& buf
 }
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,message_id_8 a
+         ,messageID_8 a
          ,::plf::colony<::std::string> const& b){
   try{
     buf.ReserveBytes(4);

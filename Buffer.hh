@@ -531,21 +531,22 @@ public:
 
   bool GiveBool (){return GiveOne()!=0;}
 
-  ::std::string GiveString (){
+  template<class T>
+  T GiveStringy (){
     marshallingInt len(*this);
     checkData(len());
-    ::std::string s(buf+subTotal+index,len());
+    T s(buf+subTotal+index,len());
     index+=len();
     return s;
   }
 
+  ::std::string GiveString (){
+    return GiveStringy<::std::string>();
+  }
+
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
   auto GiveStringView (){
-    marshallingInt len(*this);
-    checkData(len());
-    ::std::string_view v(buf+subTotal+index,len());
-    index+=len();
-    return v;
+    return GiveStringy<::std::string_view>();
   }
 
   auto GiveStringView_plus (){
@@ -564,13 +565,6 @@ public:
     dest[len()]='\0';
   }
 #endif
-
-  void AppendTo (::std::string& s){
-    marshallingInt len(*this);
-    checkData(len());
-    s.append(buf+subTotal+index,len());
-    index+=len();
-  }
 
   template<class T>
   void Giveilist (T& lst){
@@ -727,5 +721,5 @@ public:
 };
 }
 
-using message_id_8=uint8_t;
-using message_id_16=uint16_t;
+using messageID_8=uint8_t;
+using messageID_16=uint16_t;
