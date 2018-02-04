@@ -64,17 +64,17 @@ inline int sockWrite (sockType s,void const* data,int len
   if(rc>0)return rc;
   auto err=GetError();
   if(EAGAIN==err||EWOULDBLOCK==err)return 0;
-  throw failure("sockWrite sock:")<<s<<" "<<err;}
+  throw failure("sockWrite:")<<s<<" "<<err;}
 
 inline int sockRead (sockType s,char* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
   int rc=::recvfrom(s,data,len,0,addr,fromLen);
   if(rc>0)return rc;
-  if(rc==0)throw connectionLost("sockRead eof sock:")<<s<<" len:"<<len;
+  if(rc==0)throw connectionLost("sockRead eof:")<<s<<" "<<len;
   auto err=GetError();
   if(ECONNRESET==err)throw connectionLost("sockRead-ECONNRESET");
   if(EAGAIN==err||EWOULDBLOCK==err)return 0;
-  throw failure("sockRead sock:")<<s<<" len:"<<len<<" "<<err;
+  throw failure("sockRead:")<<s<<" "<<len<<" "<<err;
 }
 
 #ifdef CMW_WINDOWS
@@ -101,9 +101,9 @@ inline int Write (int fd,void const* data,int len){
 inline int Read (int fd,void* data,int len){
   int rc=::read(fd,data,len);
   if(rc>0)return rc;
-  if(rc==0)throw connectionLost("Read--eof len: ")<<len;
+  if(rc==0)throw connectionLost("Read eof:")<<len;
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
-  throw failure("Read -- len:")<<len<<" "<<errno;
+  throw failure("Read:")<<len<<" "<<errno;
 }
 #endif
 

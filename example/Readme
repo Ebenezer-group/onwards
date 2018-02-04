@@ -13,6 +13,5 @@ make example -C ..
 from the example subdirectory.
 
 It helps to have two command prompts available to run the
-examples.  Start the receiveExample program prior to running
-sendExample.
+examples.  Start receiveExample prior to running sendExample.
 

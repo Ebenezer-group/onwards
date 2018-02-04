@@ -9,7 +9,7 @@ TIERS:=$(FRONT) $(MIDDLE)
 all:$(TIERS)
 
 #zz.middleBack.hh: account.hh middleBack.mdl
-#	genz 2 /usr/home/brian/onwards/tiers/middleBack.mdl
+#	genz 2 /home/brian/onwards/tiers/middleBack.mdl
 
 $(FRONT): $(FRONT).cc
 	$(CXX) $(CXXFLAGS) -std=c++17 $@.cc
