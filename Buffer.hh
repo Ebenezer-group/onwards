@@ -478,7 +478,7 @@ public:
 
   void checkData (int n){
     if(n>msgLength-index)throw
-      failure("ReceiveBuffer::checkData:")<<n<<" "<<msgLength<<" "<<index;
+      failure("ReceiveBuffer checkData:")<<n<<" "<<msgLength<<" "<<index;
   }
 
   void Give (void* address,int len){
@@ -529,8 +529,6 @@ public:
     }
   }
 
-  bool GiveBool (){return GiveOne()!=0;}
-
   template<class T>
   T GiveStringy (){
     marshallingInt len(*this);
@@ -539,22 +537,6 @@ public:
     index+=len();
     return s;
   }
-
-  ::std::string GiveString (){
-    return GiveStringy<::std::string>();
-  }
-
-#if __cplusplus>=201703L||_MSVC_LANG>=201403L
-  auto GiveStringView (){
-    return GiveStringy<::std::string_view>();
-  }
-
-  auto GiveStringView_plus (){
-    auto v=GiveStringView();
-    GiveOne();
-    return v;
-  }
-#endif
 
 #ifndef CMW_WINDOWS
   template<ssize_t N>
@@ -587,6 +569,27 @@ private:
 template<class T,class R>
 T Give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
 
+template<class R>
+bool GiveBool (ReceiveBuffer<R>& buf){return buf.GiveOne()!=0;}
+
+template<class R>
+::std::string GiveString (ReceiveBuffer<R>& buf){
+  return buf.template GiveStringy<::std::string>();
+}
+
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
+template<class R>
+auto GiveStringView (ReceiveBuffer<R>& buf){
+  return buf.template GiveStringy<::std::string_view>();
+}
+
+template<class R>
+auto GiveStringView_plus (ReceiveBuffer<R>& buf){
+  auto v=GiveStringView(buf);
+  buf.GiveOne();
+  return v;
+}
+#endif
 
 template<class R,int size=udp_packet_max>
 class ReceiveBufferStack:public ReceiveBuffer<R>{
@@ -699,7 +702,7 @@ public:
   explicit File (::std::string_view n):name(n){}
 
   template<class R>
-  explicit File (ReceiveBuffer<R>& buf):name(buf.GiveStringView_plus()){
+  explicit File (ReceiveBuffer<R>& buf):name(GiveStringView_plus(buf)){
     int d=::open(name.data(),O_WRONLY|O_CREAT|O_TRUNC
                  ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     if(d<0)throw failure("File open ")<<name.data()<<" "<<errno;

@@ -13,22 +13,22 @@ void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::vector<int32_t>& a
          ,::std::string& b){
   int32_t count[1];
-  count[0]=::cmw::Give<uint32_t>(buf);
+  count[0]=Give<uint32_t>(buf);
   if(count[0]>0){
     a.resize(a.size()+count[0]);
     buf.GiveBlock(&(*(a.end()-count[0])),count[0]);
   }
-  b=buf.GiveString();
+  b=GiveString(buf);
 }
 
 template<class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::set<int32_t>& a){
   int32_t count[1];
-  count[0]=::cmw::Give<uint32_t>(buf);
+  count[0]=Give<uint32_t>(buf);
   auto endIt1=a.end();
   for(;count[0]>0;--count[0]){
-    a.emplace_hint(endIt1,::cmw::Give<uint32_t>(buf));
+    a.emplace_hint(endIt1,Give<uint32_t>(buf));
   }
 }
 
@@ -42,10 +42,10 @@ template<class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::plf::colony<::std::string>& a){
   int32_t count[1];
-  count[0]=::cmw::Give<uint32_t>(buf);
+  count[0]=Give<uint32_t>(buf);
   a.reserve(a.size()+count[0]);
   for(;count[0]>0;--count[0]){
-    a.insert(buf.GiveString());
+    a.insert(GiveString(buf));
   }
 }
 }

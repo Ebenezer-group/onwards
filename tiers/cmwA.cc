@@ -144,8 +144,8 @@ void cmwAmbassador::login (){
   middleBack::Marshal(cmwSendbuf,Login,accounts);
   while(!cmwSendbuf.Flush());
   while(!cmwBuf.GotPacket());
-  if(cmwBuf.GiveBool())setNonblocking(fds[0].fd);
-  else throw failure("Login:")<<cmwBuf.GiveStringView();
+  if(GiveBool(cmwBuf))setNonblocking(fds[0].fd);
+  else throw failure("Login:")<<GiveStringView(cmwBuf);
 }
 
 void cmwAmbassador::reset (char const* explanation){
@@ -224,13 +224,13 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
             assert(!pendingRequests.empty());
             if(pendingRequests.front().get()){
               auto const& req=*pendingRequests.front();
-              if(cmwBuf.GiveBool()){
+              if(GiveBool(cmwBuf)){
                 setDirectory(req.path.c_str());
                 emptyContainer<File>{cmwBuf};
                 req.saveLastruntime();
                 middleFront::Marshal(localbuf,true);
               }else middleFront::Marshal(localbuf,false,
-                                 {"CMW:",cmwBuf.GiveStringView()});
+                                 {"CMW:",GiveStringView(cmwBuf)});
               localbuf.Send((::sockaddr*)&req.front,req.frontlen);
               localbuf.Reset();
             }
