@@ -2,9 +2,9 @@
 //   Middleware Writer.
 //
 //   sendMessages
-//      -out (message_id_8, ::std::vector<int32_t>, ::std::string)
-//      -out (message_id_8, ::std::set<int32_t>)
-//      -out (message_id_8, ::std::array<::std::array<float,2>, 3>)
+//      -out (messageID_8, ::std::vector<int32_t>, ::std::string)
+//      -out (messageID_8, ::std::set<int32_t>)
+//      -out (messageID_8, ::std::array<::std::array<float,2>, 3>)
 //   }
 //
 //   receiveMessages

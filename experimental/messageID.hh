@@ -6,22 +6,22 @@ namespace cmw{
 template<class R> class ReceiveBuffer;
 
 template<class T>
-class message_id{
+class messageID{
   T const value;
 
 public:
-  explicit constexpr message_id (T val):value(val){}
+  explicit constexpr messageID (T val):value(val){}
 
   template<class R>
-  explicit message_id (ReceiveBuffer<R>& buf):value(buf.template Give<T>()){}
+  explicit messageID (ReceiveBuffer<R>& buf):value(Give<T>(buf)){}
 
   void Marshal (SendBuffer& buf,bool=false)const{buf.Receive(value);}
   constexpr T operator() ()const{return value;}
-  bool operator== (message_id rhs)const{return value==rhs();}
+  bool operator== (messageID rhs)const{return value==rhs();}
   bool operator== (T rhs)const{return value==rhs;}
 };
 
-using message_id8=message_id<uint8_t>;
-using message_id16=message_id<uint16_t>;
-using messageid_t=uint8_t;
+using messageID8=messageID<uint8_t>;
+using messageID16=messageID<uint16_t>;
+using messageID_t=uint8_t;
 }
