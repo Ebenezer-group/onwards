@@ -15,9 +15,8 @@ public:
   template<class R>
   explicit messageID (ReceiveBuffer<R>& buf):value(Give<T>(buf)){}
 
-  void Marshal (SendBuffer& buf,bool=false)const{buf.Receive(value);}
+  void Marshal (SendBuffer& buf)const{buf.Receive(value);}
   constexpr T operator() ()const{return value;}
-  bool operator== (messageID rhs)const{return value==rhs();}
   bool operator== (T rhs)const{return value==rhs;}
 };
 

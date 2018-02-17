@@ -76,7 +76,7 @@ struct cmwRequest{
 
   void saveLastruntime ()const{Write(fd,&latestUpdate,sizeof(latestUpdate));}
 
-  void Marshal (SendBuffer& buf,bool=false)const{
+  void Marshal (SendBuffer& buf)const{
     accountNbr.Marshal(buf);
     auto ind=buf.ReserveBytes(1);
     if(MarshalFile(middlefile,buf))buf.Receive(ind,true);

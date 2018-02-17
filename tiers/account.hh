@@ -11,5 +11,5 @@ struct cmwAccount{
   explicit cmwAccount (::cmw::ReceiveBuffer<R>&);
 
   void MarshalMemberData (::cmw::SendBuffer&)const;
-  void Marshal (::cmw::SendBuffer& b,bool=false)const{MarshalMemberData(b);}
+  void Marshal (::cmw::SendBuffer& b)const{MarshalMemberData(b);}
 };

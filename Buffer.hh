@@ -235,9 +235,9 @@ void ReceiveBlock (SendBuffer& b,T const& grp){
 }
 
 template<class T>
-void ReceiveGroup (SendBuffer& b,T const& grp,bool sendType=false){
+void ReceiveGroup (SendBuffer& b,T const& grp){
   b.Receive(static_cast<int32_t>(grp.size()));
-  for(auto const& e:grp)e.Marshal(b,sendType);
+  for(auto const& e:grp)e.Marshal(b);
 }
 
 template<class T>
@@ -323,8 +323,7 @@ public:
 class SameFormat{
 public:
   template<template<class> class B,class U>
-  void Read (B<SameFormat>& buf,U& data)
-  {buf.Give(&data,sizeof(U));}
+  void Read (B<SameFormat>& buf,U& data){buf.Give(&data,sizeof(U));}
 
   template<template<class> class B,class U>
   void ReadBlock (B<SameFormat>& buf,U* data,int elements)
