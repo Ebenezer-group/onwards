@@ -45,9 +45,9 @@ struct cmwRequest{
   ::socklen_t frontlen=sizeof(front);
   marshallingInt const accountNbr;
   fixedString120 path;
-  char const* middlefile;
+  char const* middleFile;
   int fd;
-  int32_t latestUpdate;
+  ::int32_t latestUpdate;
 
   cmwRequest ()=default;
 
@@ -56,10 +56,10 @@ struct cmwRequest{
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)throw failure("cmwRequest didn't find a /");
     *pos='\0';
-    middlefile=pos+1;
+    middleFile=pos+1;
     setDirectory(path());
     char lastrun[60];
-    ::snprintf(lastrun,sizeof(lastrun),"%s.lastrun",middlefile);
+    ::snprintf(lastrun,sizeof(lastrun),"%s.lastrun",middleFile);
     fd=::open(lastrun,O_RDWR);
     previous_updatedtime=0;
     if(fd>=0){
@@ -79,17 +79,17 @@ struct cmwRequest{
   void Marshal (SendBuffer& buf)const{
     accountNbr.Marshal(buf);
     auto ind=buf.ReserveBytes(1);
-    if(MarshalFile(middlefile,buf))buf.Receive(ind,true);
+    if(MarshalFile(middleFile,buf))buf.Receive(ind,true);
     else{
       buf.Receive(ind,false);
-      Receive(buf,middlefile);
+      Receive(buf,middleFile);
       InsertNull(buf);
     }
 
     char line[100];
     int8_t updatedFiles=0;
     ind=buf.ReserveBytes(sizeof(updatedFiles));
-    FILE_wrapper f{middlefile,"r"};
+    FILE_wrapper f{middleFile,"r"};
     while(::fgets(line,sizeof(line),f.hndl)){
       auto tok=::strtok(line,"\n ");
       if(!::strncmp(tok,"//",2)||!::strcmp(tok,"fixedMessageLengths")||
@@ -262,7 +262,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
         ReceiveBufferStack<SameFormat>
             rbuf(fds[1].fd,(::sockaddr*)&req.front,&req.frontlen);
         gotAddr=true;
-	new(&req)cmwRequest(rbuf);
+        new(&req)cmwRequest(rbuf);
         middleBack::Marshal(cmwSendbuf,Generate,req);
         req.latestUpdate=current_updatedtime;
       }catch(::std::exception const& e){
@@ -271,7 +271,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
           middleFront::Marshal(localbuf,false,{e.what()});
           localbuf.Send((::sockaddr*)&req.front,req.frontlen);
         }
-	pendingRequests.pop_back();
+        pendingRequests.pop_back();
         continue;
       }
       if(!sendData())fds[0].events|=POLLOUT;

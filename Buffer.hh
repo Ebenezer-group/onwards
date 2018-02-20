@@ -714,8 +714,7 @@ public:
 #endif
 
 template<class T>
-class emptyContainer{
-public:
+struct emptyContainer{
   template<class R>
   explicit emptyContainer (ReceiveBuffer<R>& b){
     for(auto n=marshallingInt{b}();n>0;--n)T{b};

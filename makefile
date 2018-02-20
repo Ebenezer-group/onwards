@@ -3,24 +3,21 @@ CXX=g++-7
 
 CXXFLAGS=-I. -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@
 
-FRONT:=tiers/genz
-MIDDLE:=tiers/cmwA
-TIERS:=$(FRONT) $(MIDDLE)
-all:$(TIERS)
+TIERS:=tiers/genz tiers/cmwA
+EXAMPLES:=example/sendExample example/receiveExample
+all:$(TIERS) $(EXAMPLES)
+PHONY: all
 
 #zz.middleBack.hh: account.hh middleBack.mdl
 #	genz 2 /home/brian/onwards/tiers/middleBack.mdl
 
-$(FRONT): $(FRONT).cc
+tiers/genz: tiers/genz.cc
 	$(CXX) $(CXXFLAGS) -std=c++17 $@.cc
 	size $@
 
-$(MIDDLE): $(MIDDLE).cc
+tiers/cmwA: tiers/cmwA.cc
 	$(CXX) $(CXXFLAGS) -std=c++17 $@.cc
 	size $@
-
-EXAMPLES:=example/sendExample example/receiveExample
-example:$(EXAMPLES)
 
 EXFLAGS:=-std=c++11 -I./example
 example/sendExample: example/sendExample.cc

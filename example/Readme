@@ -2,16 +2,6 @@ These example programs don't require a C++ Middleware Writer
 account in order to run them.  They also don't require a
 C++ 2017 compiler.  They are built with -std=c++11.
 
-To build the examples run
-
-make example
-
-from the onwards directory.  Or
-
-make example -C ..
-
-from the example subdirectory.
-
 It helps to have two command prompts available to run the
 examples.  Start receiveExample prior to running sendExample.
 
