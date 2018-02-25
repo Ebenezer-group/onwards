@@ -226,7 +226,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
               auto const& req=*pendingRequests.front();
               if(GiveBool(cmwBuf)){
                 setDirectory(req.path.c_str());
-                emptyContainer<File>{cmwBuf};
+                GiveFiles(cmwBuf);
                 req.saveLastruntime();
                 middleFront::Marshal(localbuf,true);
               }else middleFront::Marshal(localbuf,false,

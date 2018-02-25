@@ -6,7 +6,7 @@ CXXFLAGS=-I. -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@
 TIERS:=tiers/genz tiers/cmwA
 EXAMPLES:=example/sendExample example/receiveExample
 all:$(TIERS) $(EXAMPLES)
-PHONY: all
+PHONY:all
 
 #zz.middleBack.hh: account.hh middleBack.mdl
 #	genz 2 /home/brian/onwards/tiers/middleBack.mdl

@@ -52,7 +52,7 @@ public:
 
   inline void operator= (int32_t r){val=r;}
   inline int32_t operator() ()const{return val;}
-  inline void Marshal (SendBuffer&,bool=false)const;
+  inline void Marshal (SendBuffer&)const;
 };
 
 inline bool operator== (marshallingInt l,marshallingInt r){return l()==r();}
@@ -247,7 +247,7 @@ void ReceiveGroupPointer (SendBuffer& b,T const& grp,bool sendType=false){
 }
 
 //Encode integer into variable-length format.
-void marshallingInt::Marshal (SendBuffer& b,bool)const{
+void marshallingInt::Marshal (SendBuffer& b)const{
   uint32_t n=val;
   for(;;){
     uint8_t a=n&127;
@@ -287,8 +287,8 @@ class SendBufferCompressed:public SendBufferHeap{
   int compIndex=0;
   char* compBuf;
 
-  inline bool FlushFlush (::sockaddr* toAddr,::socklen_t toLen){
-    int const bytes=sockWrite(sock_,compBuf,compIndex,toAddr,toLen);
+  inline bool FlushFlush (::sockaddr* addr,::socklen_t len){
+    int const bytes=sockWrite(sock_,compBuf,compIndex,addr,len);
     if(bytes==compIndex){compIndex=0;return true;}
 
     compIndex-=bytes;
@@ -302,16 +302,16 @@ public:
 
   inline ~SendBufferCompressed (){delete[]compBuf;}
 
-  inline bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0){
+  inline bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
     bool rc=true;
-    if(compIndex>0)rc=FlushFlush(toAddr,toLen);
+    if(compIndex>0)rc=FlushFlush(addr,len);
 
     if(index>0){
       if(index+(index>>3)+400>compSize-compIndex)
         throw failure("Not enough room in compressed buf");
       compIndex+=::qlz_compress(buf,compBuf+compIndex,index,compress.p);
       Reset();
-      if(rc)rc=FlushFlush(toAddr,toLen);
+      if(rc)rc=FlushFlush(addr,len);
     }
     return rc;
   }
@@ -320,8 +320,7 @@ public:
 };
 
 
-class SameFormat{
-public:
+struct SameFormat{
   template<template<class> class B,class U>
   void Read (B<SameFormat>& buf,U& data){buf.Give(&data,sizeof(U));}
 
@@ -330,8 +329,7 @@ public:
   {buf.Give(data,elements*sizeof(U));}
 };
 
-class LeastSignificantFirst{
-public:
+struct LeastSignificantFirst{
   template<template<class> class B>
   void Read (B<LeastSignificantFirst>& buf,uint8_t& val)
   {val=buf.GiveOne();}
@@ -396,8 +394,7 @@ public:
   }
 };
 
-class MostSignificantFirst{
-public:
+struct MostSignificantFirst{
   template<template<class> class B>
   void Read (B<MostSignificantFirst>& buf,uint8_t& val)
   {val=buf.GiveOne();}
@@ -679,7 +676,7 @@ class fixedString{
     str[len()]='\0';
   }
 
-  inline void Marshal (SendBuffer& b,bool=false)const{
+  inline void Marshal (SendBuffer& b)const{
     len.Marshal(b);
     b.Receive(&str[0],len());
   }
@@ -711,15 +708,12 @@ public:
 
   char const* Name ()const{return name.data();}
 };
-#endif
 
-template<class T>
-struct emptyContainer{
-  template<class R>
-  explicit emptyContainer (ReceiveBuffer<R>& b){
-    for(auto n=marshallingInt{b}();n>0;--n)T{b};
-  }
-};
+template<class R>
+void GiveFiles (ReceiveBuffer<R>& b){
+  for(auto n=marshallingInt{b}();n>0;--n)File{b};
+}
+#endif
 }
 
 using messageID_8=uint8_t;
