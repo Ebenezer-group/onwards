@@ -21,7 +21,9 @@ int main()
     auto sd=udpServer("12345");
 
     for(;;){
-      ReceiveBufferStack<SameFormat> buffer(sd);
+      BufferStack<SameFormat> buffer;
+      buffer.sock_=sd;
+      buffer.GetPacket();
       auto const msgid=Give<messageID_8>(buffer);
       ::std::cout<<"Message id: " << static_cast<unsigned>(msgid)<<'\n';
       switch(msgid){

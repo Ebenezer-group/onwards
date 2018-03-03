@@ -31,7 +31,7 @@ int main()
 {
   try{
     windowsStart();
-    SendBufferStack<> buffer;
+    BufferStack<SameFormat> buffer;
     getaddrinfoWrapper res(
 #ifdef __linux__
 		    "127.0.0.1"

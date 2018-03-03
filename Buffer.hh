@@ -163,10 +163,10 @@ public:
   inline void Rollback (){index=savedSize;}
 
   template<typename... T>
-  void Receive_variadic (char const* format,T... t){
-    auto maxsize=bufsize-index;
-    auto size=::snprintf(buf+index,maxsize,format,t...);
-    if(size>maxsize)throw failure("SendBuffer::Receive_variadic");
+  void Receive_variadic (char const* format,T&&... t){
+    auto max=bufsize-index;
+    auto size=::snprintf(buf+index,max,format,t...);
+    if(size>max)throw failure("SendBuffer Receive_variadic");
     index+=size;
   }
 
@@ -177,8 +177,8 @@ public:
     index+=sz;
   }
 
-  inline bool Flush (::sockaddr* toAddr=nullptr,::socklen_t toLen=0){
-    int const bytes=sockWrite(sock_,buf,index,toAddr,toLen);
+  inline bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
+    int const bytes=sockWrite(sock_,buf,index,addr,len);
     if(bytes==index){Reset();return true;}
 
     index-=bytes;
@@ -188,8 +188,8 @@ public:
   }
 
   //UDP-friendly alternative to Flush
-  inline void Send (::sockaddr* toAddr=nullptr,::socklen_t toLen=0)
-  {sockWrite(sock_,buf,index,toAddr,toLen);}
+  inline void Send (::sockaddr* addr=nullptr,::socklen_t len=0)
+  {sockWrite(sock_,buf,index,addr,len);}
 
   inline unsigned char* data (){return buf;}
   inline int GetIndex (){return index;}
@@ -257,15 +257,6 @@ void marshallingInt::Marshal (SendBuffer& b)const{
     --n;
   }
 }
-
-auto const udp_packet_max=1280;
-template<unsigned long N=udp_packet_max>
-class SendBufferStack:public SendBuffer{
-  unsigned char ar[N];
-
-public:
-  inline SendBufferStack ():SendBuffer(ar,N){}
-};
 
 class SendBufferHeap:public SendBuffer{
 public:
@@ -587,15 +578,19 @@ auto GiveStringView_plus (ReceiveBuffer<R>& buf){
 }
 #endif
 
-template<class R,int size=udp_packet_max>
-class ReceiveBufferStack:public ReceiveBuffer<R>{
-  char ar[size];
+auto const udp_packet_max=1280;
+template<class R,int N=udp_packet_max>
+class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
+  unsigned char ar[N];
+  char ar2[N];
 
 public:
-  ReceiveBufferStack (sockType s,::sockaddr* fromAddr=nullptr
-                      ,::socklen_t* fromLen=nullptr):
-    ReceiveBuffer<R>(ar,sockRead(s,ar,size,fromAddr,fromLen))
-  {this->NextMessage();}
+  BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>(ar2,0){}
+
+  void GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
+    this->packetLength=sockRead(sock_,ar2,N,addr,len);
+    this->Update();
+  }
 };
 
 

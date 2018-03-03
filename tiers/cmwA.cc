@@ -114,7 +114,7 @@ class cmwAmbassador{
   > cmwBuf;
 
   SendBufferCompressed cmwSendbuf;
-  SendBufferStack<> localbuf;
+  BufferStack<SameFormat> localbuf;
   ::std::vector<cmwAccount> accounts;
   ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
   ::pollfd fds[2];
@@ -259,10 +259,9 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
       auto& req=*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
       bool gotAddr=false;
       try{
-        ReceiveBufferStack<SameFormat>
-            rbuf(fds[1].fd,(::sockaddr*)&req.front,&req.frontlen);
+        localbuf.GetPacket((::sockaddr*)&req.front,&req.frontlen);
         gotAddr=true;
-        new(&req)cmwRequest(rbuf);
+        new(&req)cmwRequest(localbuf);
         middleBack::Marshal(cmwSendbuf,Generate,req);
         req.latestUpdate=current_updatedtime;
       }catch(::std::exception const& e){
