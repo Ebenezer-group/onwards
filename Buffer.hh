@@ -258,56 +258,19 @@ void marshallingInt::Marshal (SendBuffer& b)const{
   }
 }
 
-class SendBufferHeap:public SendBuffer{
-public:
-  inline SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
-  inline ~SendBufferHeap (){delete[]SendBuffer::buf;}
-};
-
-template<typename T>
-struct Wrapper{
-  T* p;
-  Wrapper ():p(new T()){}
-  ~Wrapper (){delete p;}
-  void reset (){::memset(p,0,sizeof(T));}
-};
-
-class SendBufferCompressed:public SendBufferHeap{
-  Wrapper<::qlz_state_compress> compress;
-  int compSize;
-  int compIndex=0;
-  char* compBuf;
-
-  inline bool FlushFlush (::sockaddr* addr,::socklen_t len){
-    int const bytes=sockWrite(sock_,compBuf,compIndex,addr,len);
-    if(bytes==compIndex){compIndex=0;return true;}
-
-    compIndex-=bytes;
-    ::memmove(compBuf,compBuf+bytes,compIndex);
-    return false;
-  }
+auto const udp_packet_max=1280;
+template<class R,int N=udp_packet_max>
+class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
+  unsigned char ar[N];
+  char ar2[N];
 
 public:
-  inline SendBufferCompressed (int sz):SendBufferHeap(sz),compSize(sz+(sz>>3)+400)
-                               ,compBuf(new char[compSize]){}
+  BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>(ar2,0){}
 
-  inline ~SendBufferCompressed (){delete[]compBuf;}
-
-  inline bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
-    bool rc=true;
-    if(compIndex>0)rc=FlushFlush(addr,len);
-
-    if(index>0){
-      if(index+(index>>3)+400>compSize-compIndex)
-        throw failure("Not enough room in compressed buf");
-      compIndex+=::qlz_compress(buf,compBuf+compIndex,index,compress.p);
-      Reset();
-      if(rc)rc=FlushFlush(addr,len);
-    }
-    return rc;
+  void GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
+    this->packetLength=sockRead(sock_,ar2,N,addr,len);
+    this->Update();
   }
-
-  inline void CompressedReset (){Reset();compIndex=0;compress.reset();}
 };
 
 
@@ -578,40 +541,74 @@ auto GiveStringView_plus (ReceiveBuffer<R>& buf){
 }
 #endif
 
-auto const udp_packet_max=1280;
-template<class R,int N=udp_packet_max>
-class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
-  unsigned char ar[N];
-  char ar2[N];
+template<typename T>
+void reset (T* p){::memset(p,0,sizeof(T));}
+
+class SendBufferCompressed:public SendBuffer{
+  ::qlz_state_compress* compress;
+  int compSize;
+  int compIndex=0;
+  char* compBuf;
+
+  inline bool FlushFlush (::sockaddr* addr,::socklen_t len){
+    int const bytes=sockWrite(sock_,compBuf,compIndex,addr,len);
+    if(bytes==compIndex){compIndex=0;return true;}
+    compIndex-=bytes;
+    ::memmove(compBuf,compBuf+bytes,compIndex);
+    return false;
+  }
 
 public:
-  BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>(ar2,0){}
-
-  void GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
-    this->packetLength=sockRead(sock_,ar2,N,addr,len);
-    this->Update();
+  inline SendBufferCompressed (int sz,int d):SendBuffer(new unsigned char[sz],sz)
+              ,compress(nullptr),compSize(sz+(sz>>3)+400),compBuf(nullptr){(void)d;}
+  inline explicit SendBufferCompressed (int sz):SendBufferCompressed(sz,0){
+    compress=new ::qlz_state_compress();
+    compBuf=new char[compSize];
   }
+
+  inline ~SendBufferCompressed (){
+    delete[]SendBuffer::buf,delete compress;delete[]compBuf;
+  }
+
+  inline bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
+    bool rc=true;
+    if(compIndex>0)rc=FlushFlush(addr,len);
+
+    if(index>0){
+      if(index+(index>>3)+400>compSize-compIndex)
+        throw failure("Not enough room in compressed buf");
+      compIndex+=::qlz_compress(buf,compBuf+compIndex,index,compress);
+      Reset();
+      if(rc)rc=FlushFlush(addr,len);
+    }
+    return rc;
+  }
+
+  inline void CompressedReset (){Reset();compIndex=0;reset(compress);}
 };
 
-
 template<class R>
-class ReceiveBufferCompressed:Wrapper<::qlz_state_decompress>,public ReceiveBuffer<R>
+class ReceiveBufferCompressed:public ReceiveBuffer<R>
 {
+  ::qlz_state_decompress* decomp;
   int const bufsize;
   int bytesRead=0;
-  int compressedSize;
   char* compressedStart;
 
 public:
   sockType sock_;
 
-  explicit ReceiveBufferCompressed (int size):ReceiveBuffer<R>(new char[size],0)
-					      ,bufsize(size){}
+  ReceiveBufferCompressed (int sz,int d):ReceiveBuffer<R>(new char[sz],0)
+                                         ,decomp(nullptr),bufsize(sz){(void)d;}
+  explicit ReceiveBufferCompressed (int sz):ReceiveBufferCompressed<R>(sz,0){
+    decomp=new ::qlz_state_decompress();
+  }
 
-  ~ReceiveBufferCompressed (){delete[] this->buf;}
+  ~ReceiveBufferCompressed (){delete[]this->buf;delete decomp;}
 
   bool GotPacket (){
     try{
+      static int compressedSize;
       if(bytesRead<9){
         bytesRead+=sockRead(sock_,this->buf+bytesRead,9-bytesRead);
         if(bytesRead<9)return false;
@@ -630,7 +627,7 @@ public:
                           ,compressedSize-bytesRead);
       if(bytesRead<compressedSize)return false;
 
-      ::qlz_decompress(compressedStart,this->buf,Wrapper<::qlz_state_decompress>::p);
+      ::qlz_decompress(compressedStart,this->buf,decomp);
       bytesRead=0;
       this->Update();
       return true;
@@ -640,7 +637,7 @@ public:
     }
   }
 
-  void Reset (){bytesRead=0;Wrapper<::qlz_state_decompress>::reset();}
+  void Reset (){bytesRead=0;reset(decomp);}
 };
 
 template<int N>
