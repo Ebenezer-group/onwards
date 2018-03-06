@@ -153,7 +153,7 @@ public:
   inline void FillInSize (int32_t max){
     int32_t marshalledBytes=index-savedSize;
     if(marshalledBytes>max)
-      throw failure("Size of marshalled data exceeds max: ")<<max;
+      throw failure("Size of marshalled data exceeds max ")<<max;
 
     Receive(savedSize,marshalledBytes);
     savedSize=index;
@@ -550,9 +550,10 @@ struct SendBufferHeap:public SendBuffer{
 };
 
 template<typename R>
-class BufferCompressed:public SendBufferHeap,public ReceiveBuffer<R>{
+struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
+private:
   ::qlz_state_compress* compress;
-  int compSize;
+  int const compSize;
   int compIndex=0;
   char* compBuf;
 
@@ -561,7 +562,7 @@ class BufferCompressed:public SendBufferHeap,public ReceiveBuffer<R>{
   int bytesRead=0;
   char* compressedStart;
 
-  inline bool doFlush (::sockaddr* addr,::socklen_t len){
+  bool doFlush (::sockaddr* addr,::socklen_t len){
     int const bytes=sockWrite(sock_,compBuf,compIndex,addr,len);
     if(bytes==compIndex){compIndex=0;return true;}
     compIndex-=bytes;
@@ -570,23 +571,24 @@ class BufferCompressed:public SendBufferHeap,public ReceiveBuffer<R>{
   }
 
 public:
-  inline BufferCompressed (int sz,int d):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz],0)
+  BufferCompressed (int sz,int d):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz],0)
               ,compress(nullptr),compSize(sz+(sz>>3)+400),compBuf(nullptr)
               ,decomp(nullptr),bufSize(sz){(void)d;}
-  inline explicit BufferCompressed (int sz):BufferCompressed(sz,0){
+
+  explicit BufferCompressed (int sz):BufferCompressed(sz,0){
     compress=new ::qlz_state_compress();
     compBuf=new char[compSize];
     decomp=new ::qlz_state_decompress();
   }
 
-  inline ~BufferCompressed (){
+  ~BufferCompressed (){
     delete[]this->rbuf;
     delete compress;
     delete[]compBuf;
     delete decomp;
   }
 
-  inline bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
+  bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
     bool rc=true;
     if(compIndex>0)rc=doFlush(addr,len);
 
@@ -600,7 +602,7 @@ public:
     return rc;
   }
 
-  inline void CompressedReset (){
+  void CompressedReset (){
     Reset();
     reset(compress);
     reset(decomp);
