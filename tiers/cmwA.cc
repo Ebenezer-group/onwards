@@ -105,7 +105,7 @@ struct cmwRequest{
 #include"zz.middleBack.hh"
 
 class cmwAmbassador{
-  ReceiveBufferCompressed<
+  BufferCompressed<
 #ifdef CMW_ENDIAN_BIG
     LeastSignificantFirst
 #else
@@ -113,7 +113,6 @@ class cmwAmbassador{
 #endif
   > cmwBuf;
 
-  SendBufferCompressed cmwSendbuf;
   BufferStack<SameFormat> localbuf;
   ::std::vector<cmwAccount> accounts;
   ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
@@ -129,8 +128,7 @@ public:
 
 void cmwAmbassador::login (){
   for(;;){
-    fds[0].fd=cmwSendbuf.sock_=cmwBuf.sock_=
-       connectWrapper("70.56.166.91",
+    fds[0].fd=cmwBuf.sock_=connectWrapper("70.56.166.91",
 #ifdef CMW_ENDIAN_BIG
                       "56790");
 #else
@@ -141,8 +139,8 @@ void cmwAmbassador::login (){
     pollWrapper(nullptr,0,loginPause);
   }
 
-  middleBack::Marshal(cmwSendbuf,Login,accounts);
-  while(!cmwSendbuf.Flush());
+  middleBack::Marshal(cmwBuf,Login,accounts);
+  while(!cmwBuf.Flush());
   while(!cmwBuf.GotPacket());
   if(GiveBool(cmwBuf))setNonblocking(fds[0].fd);
   else throw failure("Login:")<<GiveStringView(cmwBuf);
@@ -155,13 +153,12 @@ void cmwAmbassador::reset (char const* explanation){
   }
   pendingRequests.clear();
   closeSocket(cmwBuf.sock_);
-  cmwBuf.Reset();
-  cmwSendbuf.CompressedReset();
+  cmwBuf.CompressedReset();
   login();
 }
 
 bool cmwAmbassador::sendData (){
-  try{return cmwSendbuf.Flush();}catch(::std::exception const& e){
+  try{return cmwBuf.Flush();}catch(::std::exception const& e){
     syslogWrapper(LOG_ERR,"Problem sending data to CMW: %s",e.what());
     reset("Problem sending data to CMW");
   }
@@ -174,7 +171,6 @@ bool cmwAmbassador::sendData (){
     throw failure("Expected ")<<fieldname;
 
 cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
-  ,cmwSendbuf(1000000)
 {
   char line[120];
   FILE_wrapper fl(configfile,"r");
@@ -206,7 +202,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
     if(0==pollWrapper(fds,2,keepaliveInterval)){
       try{
         if(!pendingRequests.empty())throw failure("No reply from CMW");
-        middleBack::Marshal(cmwSendbuf,Keepalive);
+        middleBack::Marshal(cmwBuf,Keepalive);
         fds[0].events|=POLLOUT;
         pendingRequests.push_back(nullptr);
       }catch(::std::exception const& e){
@@ -262,7 +258,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
         localbuf.GetPacket((::sockaddr*)&req.front,&req.frontlen);
         gotAddr=true;
         new(&req)cmwRequest(localbuf);
-        middleBack::Marshal(cmwSendbuf,Generate,req);
+        middleBack::Marshal(cmwBuf,Generate,req);
         req.latestUpdate=current_updatedtime;
       }catch(::std::exception const& e){
         syslogWrapper(LOG_ERR,"Accept request: %s",e.what());

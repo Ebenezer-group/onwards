@@ -419,27 +419,27 @@ class ReceiveBuffer{
   int msgLength=0;
   int subTotal=0;
 protected:
-  int index=0;
+  int rindex=0;
   int packetLength;
-  char* const buf;
+  char* const rbuf;
 
 public:
-  explicit ReceiveBuffer (char* addr,int bytes):packetLength(bytes),buf(addr){}
+  explicit ReceiveBuffer (char* addr,int bytes):packetLength(bytes),rbuf(addr){}
 
   void checkData (int n){
-    if(n>msgLength-index)throw
-      failure("ReceiveBuffer checkData:")<<n<<" "<<msgLength<<" "<<index;
+    if(n>msgLength-rindex)throw
+      failure("ReceiveBuffer checkData:")<<n<<" "<<msgLength<<" "<<rindex;
   }
 
   void Give (void* address,int len){
     checkData(len);
-    ::memcpy(address,buf+subTotal+index,len);
-    index+=len;
+    ::memcpy(address,rbuf+subTotal+rindex,len);
+    rindex+=len;
   }
 
   char GiveOne (){
     checkData(1);
-    return buf[subTotal+index++];
+    return rbuf[subTotal+rindex++];
   }
 
   template<class T>
@@ -452,7 +452,7 @@ public:
   bool NextMessage (){
     subTotal+=msgLength;
     if(subTotal<packetLength){
-      index=0;
+      rindex=0;
       msgLength=sizeof(int32_t);
       msgLength=Give<uint32_t>();
       return true;
@@ -473,9 +473,9 @@ public:
     int sz=Give<uint32_t>();
     checkData(sz);
     while(sz>0){
-      int rc=Write(d,buf+subTotal+index,sz);
+      int rc=Write(d,rbuf+subTotal+rindex,sz);
       sz-=rc;
-      index+=rc;
+      rindex+=rc;
     }
   }
 
@@ -483,8 +483,8 @@ public:
   T GiveStringy (){
     marshallingInt len(*this);
     checkData(len());
-    T s(buf+subTotal+index,len());
-    index+=len();
+    T s(rbuf+subTotal+rindex,len());
+    rindex+=len();
     return s;
   }
 
@@ -544,13 +544,24 @@ auto GiveStringView_plus (ReceiveBuffer<R>& buf){
 template<typename T>
 void reset (T* p){::memset(p,0,sizeof(T));}
 
-class SendBufferCompressed:public SendBuffer{
+struct SendBufferHeap:public SendBuffer{
+  inline SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
+  inline ~SendBufferHeap (){delete[]SendBuffer::buf;}
+};
+
+template<typename R>
+class BufferCompressed:public SendBufferHeap,public ReceiveBuffer<R>{
   ::qlz_state_compress* compress;
   int compSize;
   int compIndex=0;
   char* compBuf;
 
-  inline bool FlushFlush (::sockaddr* addr,::socklen_t len){
+  ::qlz_state_decompress* decomp;
+  int const bufSize;
+  int bytesRead=0;
+  char* compressedStart;
+
+  inline bool doFlush (::sockaddr* addr,::socklen_t len){
     int const bytes=sockWrite(sock_,compBuf,compIndex,addr,len);
     if(bytes==compIndex){compIndex=0;return true;}
     compIndex-=bytes;
@@ -559,75 +570,65 @@ class SendBufferCompressed:public SendBuffer{
   }
 
 public:
-  inline SendBufferCompressed (int sz,int d):SendBuffer(new unsigned char[sz],sz)
-              ,compress(nullptr),compSize(sz+(sz>>3)+400),compBuf(nullptr){(void)d;}
-  inline explicit SendBufferCompressed (int sz):SendBufferCompressed(sz,0){
+  inline BufferCompressed (int sz,int d):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz],0)
+              ,compress(nullptr),compSize(sz+(sz>>3)+400),compBuf(nullptr)
+              ,decomp(nullptr),bufSize(sz){(void)d;}
+  inline explicit BufferCompressed (int sz):BufferCompressed(sz,0){
     compress=new ::qlz_state_compress();
     compBuf=new char[compSize];
+    decomp=new ::qlz_state_decompress();
   }
 
-  inline ~SendBufferCompressed (){
-    delete[]SendBuffer::buf,delete compress;delete[]compBuf;
+  inline ~BufferCompressed (){
+    delete[]this->rbuf;
+    delete compress;
+    delete[]compBuf;
+    delete decomp;
   }
 
   inline bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
     bool rc=true;
-    if(compIndex>0)rc=FlushFlush(addr,len);
+    if(compIndex>0)rc=doFlush(addr,len);
 
     if(index>0){
       if(index+(index>>3)+400>compSize-compIndex)
         throw failure("Not enough room in compressed buf");
       compIndex+=::qlz_compress(buf,compBuf+compIndex,index,compress);
       Reset();
-      if(rc)rc=FlushFlush(addr,len);
+      if(rc)rc=doFlush(addr,len);
     }
     return rc;
   }
 
-  inline void CompressedReset (){Reset();compIndex=0;reset(compress);}
-};
-
-template<class R>
-class ReceiveBufferCompressed:public ReceiveBuffer<R>
-{
-  ::qlz_state_decompress* decomp;
-  int const bufsize;
-  int bytesRead=0;
-  char* compressedStart;
-
-public:
-  sockType sock_;
-
-  ReceiveBufferCompressed (int sz,int d):ReceiveBuffer<R>(new char[sz],0)
-                                         ,decomp(nullptr),bufsize(sz){(void)d;}
-  explicit ReceiveBufferCompressed (int sz):ReceiveBufferCompressed<R>(sz,0){
-    decomp=new ::qlz_state_decompress();
+  inline void CompressedReset (){
+    Reset();
+    reset(compress);
+    reset(decomp);
+    compIndex=bytesRead=0;
   }
-
-  ~ReceiveBufferCompressed (){delete[]this->buf;delete decomp;}
 
   bool GotPacket (){
     try{
       static int compressedSize;
       if(bytesRead<9){
-        bytesRead+=sockRead(sock_,this->buf+bytesRead,9-bytesRead);
+        bytesRead+=sockRead(sock_,this->rbuf+bytesRead,9-bytesRead);
         if(bytesRead<9)return false;
 
-        if((this->packetLength=::qlz_size_decompressed(this->buf))>bufsize)
+        if((this->packetLength=::qlz_size_decompressed(this->rbuf))>bufSize)
           throw failure("Decompress::GotPacket decompressed size too big ")
-                         <<this->packetLength<<" "<<bufsize;
+                         <<this->packetLength<<" "<<bufSize;
 
-        if((compressedSize=::qlz_size_compressed(this->buf))>bufsize)
+        if((compressedSize=::qlz_size_compressed(this->rbuf))>bufSize)
           throw failure("Decompress::GotPacket compressed size too big");
 
-        compressedStart=this->buf+bufsize-compressedSize;
-        ::memmove(compressedStart,this->buf,9);
+        compressedStart=this->rbuf+bufSize-compressedSize;
+        ::memmove(compressedStart,this->rbuf,9);
       }
       bytesRead+=sockRead(sock_,compressedStart+bytesRead
                           ,compressedSize-bytesRead);
       if(bytesRead<compressedSize)return false;
 
-      ::qlz_decompress(compressedStart,this->buf,decomp);
+      ::qlz_decompress(compressedStart,this->rbuf,decomp);
       bytesRead=0;
       this->Update();
       return true;
@@ -636,8 +637,6 @@ public:
       throw;
     }
   }
-
-  void Reset (){bytesRead=0;reset(decomp);}
 };
 
 template<int N>
