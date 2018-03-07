@@ -241,9 +241,9 @@ void ReceiveGroup (SendBuffer& b,T const& grp){
 }
 
 template<class T>
-void ReceiveGroupPointer (SendBuffer& b,T const& grp,bool sendType=false){
+void ReceiveGroupPointer (SendBuffer& b,T const& grp){
   b.Receive(static_cast<int32_t>(grp.size()));
-  for(auto p:grp)p->Marshal(b,sendType);
+  for(auto p:grp)p->Marshal(b);
 }
 
 //Encode integer into variable-length format.
@@ -260,7 +260,8 @@ void marshallingInt::Marshal (SendBuffer& b)const{
 
 auto const udp_packet_max=1280;
 template<class R,int N=udp_packet_max>
-class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
+struct BufferStack:SendBuffer,ReceiveBuffer<R>{
+private:
   unsigned char ar[N];
   char ar2[N];
 

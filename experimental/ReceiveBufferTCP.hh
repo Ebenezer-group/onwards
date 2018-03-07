@@ -2,7 +2,7 @@
 
 //#include<iostream>
 #include"ErrorWords.hh"
-#include"ReceiveBuffer.hh"
+#include"Buffer.hh"
 #include<string.h>//memmove
 
 namespace cmw{
@@ -31,7 +31,7 @@ public:
         if(bytesAvailable<this->packetLength){
           if(this->index>0){
             ::memmove(this->buf,this->buf+this->index,bytesAvailable);
-            this->index = 0;
+            this->index=0;
           }
           return false;
         }
