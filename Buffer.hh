@@ -650,13 +650,13 @@ class fixedString{
  public:
   fixedString ()=default;
 
-  inline explicit fixedString (char const* s):len(::strlen(s)){
+  explicit fixedString (char const* s):len(::strlen(s)){
     if(len()>N-1)throw failure("fixedString ctor");
     ::strcpy(&str[0],s);
   }
 
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
-  inline explicit fixedString (::std::string_view s):len(s.length()){
+  explicit fixedString (::std::string_view s):len(s.length()){
     if(len()>N-1)throw failure("fixedString ctor");
     ::strncpy(&str[0],s.data(),len());
     str[len()]='\0';
@@ -670,16 +670,16 @@ class fixedString{
     str[len()]='\0';
   }
 
-  inline void Marshal (SendBuffer& b)const{
+  void Marshal (SendBuffer& b)const{
     len.Marshal(b);
     b.Receive(&str[0],len());
   }
 
-  inline int bytesAvailable (){return N-(len()+1);}
+  int bytesAvailable (){return N-(len()+1);}
 
-  inline char* operator() (){return &str[0];}
-  inline char const* c_str ()const{return &str[0];}
-  inline char operator[] (int i)const{return str[i];}
+  char* operator() (){return &str[0];}
+  char const* c_str ()const{return &str[0];}
+  char operator[] (int i)const{return str[i];}
 };
 
 using fixedString60=fixedString<60>;
@@ -689,7 +689,7 @@ using fixedString120=fixedString<120>;
 class File{
   ::std::string_view name;
 public:
-  explicit File (::std::string_view n):name(n){}
+  inline explicit File (::std::string_view n):name(n){}
 
   template<class R>
   explicit File (ReceiveBuffer<R>& buf):name(GiveStringView_plus(buf)){
@@ -700,7 +700,7 @@ public:
     ::close(d);
   }
 
-  char const* Name ()const{return name.data();}
+  inline char const* Name ()const{return name.data();}
 };
 
 template<class R>
