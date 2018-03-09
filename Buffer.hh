@@ -545,9 +545,9 @@ auto GiveStringView_plus (ReceiveBuffer<R>& buf){
 template<typename T>
 void reset (T* p){::memset(p,0,sizeof(T));}
 
-struct SendBufferHeap:public SendBuffer{
+struct SendBufferHeap:SendBuffer{
   inline SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
-  inline ~SendBufferHeap (){delete[]SendBuffer::buf;}
+  inline ~SendBufferHeap (){delete[]buf;}
 };
 
 template<typename R>
@@ -559,7 +559,6 @@ private:
   char* compBuf;
 
   ::qlz_state_decompress* decomp;
-  int const bufSize;
   int bytesRead=0;
   char* compressedStart;
 
@@ -574,7 +573,7 @@ private:
 public:
   BufferCompressed (int sz,int d):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz],0)
               ,compress(nullptr),compSize(sz+(sz>>3)+400),compBuf(nullptr)
-              ,decomp(nullptr),bufSize(sz){(void)d;}
+              ,decomp(nullptr){(void)d;}
 
   explicit BufferCompressed (int sz):BufferCompressed(sz,0){
     compress=new ::qlz_state_compress();
@@ -610,28 +609,29 @@ public:
     compIndex=bytesRead=0;
   }
 
+  using ReceiveBuffer<R>::rbuf;
   bool GotPacket (){
     try{
       static int compressedSize;
       if(bytesRead<9){
-        bytesRead+=sockRead(sock_,this->rbuf+bytesRead,9-bytesRead);
+        bytesRead+=sockRead(sock_,rbuf+bytesRead,9-bytesRead);
         if(bytesRead<9)return false;
 
-        if((this->packetLength=::qlz_size_decompressed(this->rbuf))>bufSize)
+        if((this->packetLength=::qlz_size_decompressed(rbuf))>bufsize)
           throw failure("Decompress::GotPacket decompressed size too big ")
-                         <<this->packetLength<<" "<<bufSize;
+                         <<this->packetLength<<" "<<bufsize;
 
-        if((compressedSize=::qlz_size_compressed(this->rbuf))>bufSize)
+        if((compressedSize=::qlz_size_compressed(rbuf))>bufsize)
           throw failure("Decompress::GotPacket compressed size too big");
 
-        compressedStart=this->rbuf+bufSize-compressedSize;
-        ::memmove(compressedStart,this->rbuf,9);
+        compressedStart=rbuf+bufsize-compressedSize;
+        ::memmove(compressedStart,rbuf,9);
       }
       bytesRead+=sockRead(sock_,compressedStart+bytesRead
                           ,compressedSize-bytesRead);
       if(bytesRead<compressedSize)return false;
 
-      ::qlz_decompress(compressedStart,this->rbuf,decomp);
+      ::qlz_decompress(compressedStart,rbuf,decomp);
       bytesRead=0;
       this->Update();
       return true;

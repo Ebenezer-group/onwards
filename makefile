@@ -1,7 +1,7 @@
 CXX=g++-7
 #CXX=clang++ -stdlib=libc++
 
-CXXFLAGS=-I. -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@
+CXXFLAGS=-I. -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
 
 TIERS:=tiers/genz tiers/cmwA
 EXAMPLES:=example/sendExample example/receiveExample
@@ -12,19 +12,19 @@ PHONY:all
 #	genz 2 /home/brian/onwards/tiers/middleBack.mdl
 
 tiers/genz: tiers/genz.cc
-	$(CXX) $(CXXFLAGS) -std=c++17 $@.cc
+	$(CXX) -std=c++17 $(CXXFLAGS)
 	size $@
 
 tiers/cmwA: tiers/cmwA.cc
-	$(CXX) $(CXXFLAGS) -std=c++17 $@.cc
+	$(CXX) -std=c++17 $(CXXFLAGS)
 	size $@
 
 EXFLAGS:=-std=c++11 -I./example
 example/sendExample: example/sendExample.cc
-	$(CXX) $(CXXFLAGS) $(EXFLAGS) $@.cc
+	$(CXX) $(EXFLAGS) $(CXXFLAGS)
 	size $@
 example/receiveExample: example/receiveExample.cc
-	$(CXX) $(CXXFLAGS) $(EXFLAGS) $@.cc
+	$(CXX) $(EXFLAGS) $(CXXFLAGS)
 	size $@
 
 clean:
