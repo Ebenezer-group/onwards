@@ -316,17 +316,17 @@ struct LeastSignificantFirst{
   }
 
   template<template<class> class B>
-  void Read (B<LeastSignificantFirst>& buf,float& val){
+  void Read (B<LeastSignificantFirst>& buf,float& f){
     uint32_t tmp;
     this->Read(buf,tmp);
-    ::memcpy(&val,&tmp,sizeof(val));
+    ::memcpy(&f,&tmp,sizeof(f));
   }
 
   template<template<class> class B>
-  void Read (B<LeastSignificantFirst>& buf,double& val){
+  void Read (B<LeastSignificantFirst>& buf,double& d){
     uint64_t tmp;
     this->Read(buf,tmp);
-    ::memcpy(&val,&tmp,sizeof(val));
+    ::memcpy(&d,&tmp,sizeof(d));
   }
 
   template<template<class> class B,class U>
@@ -381,17 +381,17 @@ struct MostSignificantFirst{
   }
 
   template<template<class> class B>
-  void Read (B<MostSignificantFirst>& buf,float& val){
+  void Read (B<MostSignificantFirst>& buf,float& f){
     uint32_t tmp;
     this->Read(buf,tmp);
-    ::memcpy(&val,&tmp,sizeof(val));
+    ::memcpy(&f,&tmp,sizeof(f));
   }
 
   template<template<class> class B>
-  void Read (B<MostSignificantFirst>& buf,double& val){
+  void Read (B<MostSignificantFirst>& buf,double& d){
     uint64_t tmp;
     this->Read(buf,tmp);
-    ::memcpy(&val,&tmp,sizeof(val));
+    ::memcpy(&d,&tmp,sizeof(d));
   }
 
   template<template<class> class B,class U>
@@ -425,7 +425,7 @@ protected:
   char* const rbuf;
 
 public:
-  explicit ReceiveBuffer (char* addr,int bytes):packetLength(bytes),rbuf(addr){}
+  ReceiveBuffer (char* addr,int bytes):packetLength(bytes),rbuf(addr){}
 
   void checkData (int n){
     if(n>msgLength-rindex)throw
