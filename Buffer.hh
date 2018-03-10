@@ -258,22 +258,6 @@ void marshallingInt::Marshal (SendBuffer& b)const{
   }
 }
 
-auto const udp_packet_max=1280;
-template<class R,int N=udp_packet_max>
-struct BufferStack:SendBuffer,ReceiveBuffer<R>{
-private:
-  unsigned char ar[N];
-  char ar2[N];
-
-public:
-  BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>(ar2,0){}
-
-  void GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
-    this->packetLength=sockRead(sock_,ar2,N,addr,len);
-    this->Update();
-  }
-};
-
 
 struct SameFormat{
   template<template<class> class B,class U>
@@ -541,6 +525,22 @@ auto GiveStringView_plus (ReceiveBuffer<R>& buf){
   return v;
 }
 #endif
+
+auto const udp_packet_max=1280;
+template<class R,int N=udp_packet_max>
+struct BufferStack:SendBuffer,ReceiveBuffer<R>{
+private:
+  unsigned char ar[N];
+  char ar2[N];
+
+public:
+  BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>(ar2,0){}
+
+  void GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
+    this->packetLength=sockRead(sock_,ar2,N,addr,len);
+    this->Update();
+  }
+};
 
 template<typename T>
 void reset (T* p){::memset(p,0,sizeof(T));}
