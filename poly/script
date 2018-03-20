@@ -1,0 +1,3 @@
+g++-7 -I. -I.. -I /home/brian/boost_1_66_0/ -std=c++14 sendPoly.cc -o sendPoly
+g++-7 -I. -I.. -I /home/brian/boost_1_66_0/ -std=c++14 receivePoly.cc -o receivePoly
+
