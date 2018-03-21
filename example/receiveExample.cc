@@ -18,11 +18,10 @@ int main()
 {
   try{
     windowsStart();
-    auto sd=udpServer("12345");
+    BufferStack<SameFormat> buffer;
+    buffer.sock_=udpServer("12345");
 
     for(;;){
-      BufferStack<SameFormat> buffer;
-      buffer.sock_=sd;
       buffer.GetPacket();
       auto const msgid=Give<messageID_8>(buffer);
       ::std::cout<<"Message id: " << static_cast<unsigned>(msgid)<<'\n';
