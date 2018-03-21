@@ -1,9 +1,6 @@
-//  This program receives messages sent by sendExample.
-
 #include <Buffer.hh>
 #include <wrappers.hh>
 #include "zz.testing.hh"
-
 #include <iostream>
 
 using namespace ::cmw;
@@ -11,11 +8,10 @@ using namespace ::cmw;
 int main()
 {
   try{
-    auto sd=udpServer("12345");
+    BufferStack<SameFormat> buffer;
+    buffer.sock_=udpServer("12345");
 
     for(;;){
-      BufferStack<SameFormat> buffer;
-      buffer.sock_=sd;
       buffer.GetPacket();
       ::boost::base_collection<base> b;
       testing::Give(buffer,b);

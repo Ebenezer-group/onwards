@@ -712,11 +712,11 @@ void GiveFiles (ReceiveBuffer<R>& b){
 
 
 template<typename C>
-int32_t MarshalSegment (C&,uint8_t&,SendBuffer&)
+int32_t MarshalSegment (C&,SendBuffer&,uint8_t&)
 {return 0;}
 
 template<typename T,typename... Ts,typename C>
-int32_t MarshalSegment (C& c,uint8_t& segments,SendBuffer& buf){
+int32_t MarshalSegment (C& c,SendBuffer& buf,uint8_t& segments){
   int32_t total=0;
   if(c.template is_registered<T>()){
     total=c.template size<T>();
@@ -727,20 +727,20 @@ int32_t MarshalSegment (C& c,uint8_t& segments,SendBuffer& buf){
       for(T const& t:c.template segment<T>()){t.Marshal(buf);}
     }
   }
-  return total+MarshalSegment<Ts...>(c,segments,buf);
+  return total+MarshalSegment<Ts...>(c,buf,segments);
 }
 
-template<typename... Ts,typename C>
+template<typename ...Ts,typename C>
 void MarshalCollection (C& c,SendBuffer& buf){
   auto ind=buf.ReserveBytes(1);
   uint8_t segments=0;
-  assert(c.size()==MarshalSegment<Ts...>(c,segments,buf));
+  assert(c.size()==MarshalSegment<Ts...>(c,buf,segments));
   buf.Receive(ind,segments);
 }
 
 template<typename T,typename C,typename R>
 void BuildSegment (C& c,ReceiveBuffer<R>& buf){
-  int32_t n=Give<int32_t>(buf);
+  int32_t n=Give<uint32_t>(buf);
   c.template reserve<T>(n);
   for(;n>0;--n){c.template emplace<T>(buf);}
 }
