@@ -18,19 +18,19 @@ int main()
 {
   try{
     windowsStart();
-    BufferStack<SameFormat> buffer;
-    buffer.sock_=udpServer("12345");
+    BufferStack<SameFormat> buf;
+    buf.sock_=udpServer("12345");
 
     for(;;){
-      buffer.GetPacket();
-      auto const msgid=Give<messageID_8>(buffer);
-      ::std::cout<<"Message id: " << static_cast<unsigned>(msgid)<<'\n';
+      buf.GetPacket();
+      auto const msgid=Give<messageID_8>(buf);
+      ::std::cout<<"Message id: "<<static_cast<unsigned>(msgid)<<'\n';
       switch(msgid){
       case messageid1:
       {
         ::std::vector<int32_t> vec;
         ::std::string str;
-        receiveMessages::Give(buffer,vec,str);
+        receiveMessages::Give(buf,vec,str);
         for(auto val:vec){::std::cout<<val<<" ";}
         ::std::cout<<'\n'<<str;
       }
@@ -39,7 +39,7 @@ int main()
       case messageid2:
       {
         ::std::set<int32_t> iset;
-        receiveMessages::Give(buffer,iset);
+        receiveMessages::Give(buf,iset);
         for(auto val:iset){::std::cout<<val<<" ";}
       }
       break;
@@ -47,7 +47,7 @@ int main()
       case messageid3:
       {
         ::std::array<std::array<float,2>, 3> a;
-        receiveMessages::Give(buffer,a);
+        receiveMessages::Give(buf,a);
         for(auto subarray:a){
           for(auto val:subarray){::std::cout<<val<<" ";}
           ::std::cout<<::std::endl;
@@ -58,7 +58,7 @@ int main()
       case messageid4:
       {
         ::plf::colony<::std::string> clny;
-        receiveMessages::Give(buffer,clny);
+        receiveMessages::Give(buf,clny);
         for(auto val:clny){::std::cout<<val<<" ";}
       }
       break;
@@ -70,6 +70,6 @@ int main()
     }
     return 1;
   } catch(std::exception const& ex){
-    ::std::cout << "failure: " << ex.what()<<::std::endl;
+    ::std::cout<<"failure: "<<ex.what()<<::std::endl;
   }
 }

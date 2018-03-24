@@ -9,7 +9,7 @@ int main()
 {
   try{
     BufferStack<SameFormat> buffer;
-    buffer.sock_=udpServer("12345");
+    buffer.sock_=udpServer("13579");
 
     for(;;){
       buffer.GetPacket();

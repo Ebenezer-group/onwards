@@ -36,13 +36,12 @@ The maxLength option allows users to specify the maximum length
 for a message.  If the length of the message exceeds the value
 specified, an exception will be thrown. If this option isn't used,
 the CMW supplies a default value of 10,000.  Here's an example of
-how to use this option:
-  -maxLength=cmw::udp_packet_max
+how to use this option: -maxLength=cmw::udp_packet_max
 
 
-The yeaNay option is used to support a common messaging idiom
-where a response to a request is a bool followed by optional
-data.  Rather than having two messages like this:
+The yeaNay option is used to support a messaging idiom where
+a response to a request is a bool followed by optional data.
+Rather than having two messages like this:
   -out (bool)
   -out (bool,cmw::stringPlus)
 

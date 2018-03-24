@@ -79,14 +79,14 @@ inline int sockRead (sockType s,char* data,int len
 }
 
 #ifdef CMW_WINDOWS
-inline auto Write (HANDLE h,void const* data,int len){
+inline DWORD Write (HANDLE h,void const* data,int len){
   DWORD bytesWritten=0;
   if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
     throw failure("Write ")<<GetLastError();
   return bytesWritten;
 }
 
-inline auto Read (HANDLE h,void* data,int len){
+inline DWORD (HANDLE h,void* data,int len){
   DWORD bytesRead=0;
   if (!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
     throw failure("Read ")<<GetLastError();
@@ -710,31 +710,30 @@ void GiveFiles (ReceiveBuffer<R>& b){
 }
 #endif
 
-
 template<typename C>
-int32_t MarshalSegment (C&,SendBuffer&,uint8_t&)
+int32_t MarshalSegments (C&,SendBuffer&,uint8_t&)
 {return 0;}
 
 template<typename T,typename... Ts,typename C>
-int32_t MarshalSegment (C& c,SendBuffer& buf,uint8_t& segments){
-  int32_t total=0;
+int32_t MarshalSegments (C& c,SendBuffer& buf,uint8_t& segments){
+  int32_t n;
   if(c.template is_registered<T>()){
-    total=c.template size<T>();
-    if(total>0){
+    n=c.template size<T>();
+    if(n>0){
       ++segments;
       buf.Receive(T::typeNum);
-      buf.Receive(total);
+      buf.Receive(n);
       for(T const& t:c.template segment<T>()){t.Marshal(buf);}
     }
-  }
-  return total+MarshalSegment<Ts...>(c,buf,segments);
+  }else n=0;
+  return n+MarshalSegments<Ts...>(c,buf,segments);
 }
 
 template<typename ...Ts,typename C>
 void MarshalCollection (C& c,SendBuffer& buf){
   auto ind=buf.ReserveBytes(1);
   uint8_t segments=0;
-  assert(c.size()==MarshalSegment<Ts...>(c,buf,segments));
+  assert(c.size()==MarshalSegments<Ts...>(c,buf,segments));
   buf.Receive(ind,segments);
 }
 

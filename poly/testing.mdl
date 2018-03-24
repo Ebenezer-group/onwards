@@ -1,6 +1,5 @@
 testing.hh
 --
-
 testing
  -out (::boost::base_collection<base>)
  -in (::boost::base_collection<base>)

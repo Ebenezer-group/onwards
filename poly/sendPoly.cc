@@ -20,7 +20,7 @@ int main (){
 #else
 		         "::1"
 #endif
-		         ,"12345",SOCK_DGRAM);
+		         ,"13579",SOCK_DGRAM);
   buf.sock_=res.getSock();
   testing::Marshal(buf,c);
   buf.Send(res()->ai_addr,res()->ai_addrlen);
