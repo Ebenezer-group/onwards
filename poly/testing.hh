@@ -2,50 +2,53 @@
 #include<Buffer.hh>
 
 struct base{
-    virtual ~base(){}
-    static uint8_t const typeNum=1;
+  base ()=default;
+  virtual ~base(){}
 
-    base ()=default;
-    template<class R>
-    explicit base (::cmw::ReceiveBuffer<R>&);
+  template<class R>
+  explicit base (::cmw::ReceiveBuffer<R>&);
 
-    void MarshalMemberData (::cmw::SendBuffer&)const;
-    void Marshal (::cmw::SendBuffer& b)const{MarshalMemberData(b);}
+  void MarshalMemberData (::cmw::SendBuffer&)const;
+  void Marshal (::cmw::SendBuffer& b)const{MarshalMemberData(b);}
+  static uint8_t const typeNum=0;
 };
 
-struct derived1:base{
-    int32_t a;
-    static uint8_t const typeNum=2;
+class derived1:public base{
+  int32_t a;
+public:
+  derived1 ()=default;
 
-    derived1 ()=default;
-    template<class R>
-    explicit derived1 (::cmw::ReceiveBuffer<R>&);
+  template<class R>
+  explicit derived1 (::cmw::ReceiveBuffer<R>&);
 
-    void MarshalMemberData (::cmw::SendBuffer&)const;
-    void Marshal (::cmw::SendBuffer& b)const{MarshalMemberData(b);}
+  void MarshalMemberData (::cmw::SendBuffer&)const;
+  void Marshal (::cmw::SendBuffer& b)const{MarshalMemberData(b);}
+  static uint8_t const typeNum=1;
 };
 
-struct derived2:base{
-    int32_t b;
-    static uint8_t const typeNum=3;
+class derived2:public base{
+  int32_t b;
+public:
+  derived2 ()=default;
 
-    derived2 ()=default;
-    template<class R>
-    explicit derived2 (::cmw::ReceiveBuffer<R>&);
+  template<class R>
+  explicit derived2 (::cmw::ReceiveBuffer<R>&);
 
-    void MarshalMemberData (::cmw::SendBuffer&)const;
-    void Marshal (::cmw::SendBuffer& b)const{MarshalMemberData(b);}
+  void MarshalMemberData (::cmw::SendBuffer&)const;
+  void Marshal (::cmw::SendBuffer& b)const{MarshalMemberData(b);}
+  static uint8_t const typeNum=2;
 };
 
-struct derived3:derived1{
-    double c=3.14;
-    static uint8_t const typeNum=4;
+class derived3:public derived1{
+  double c=3.14;
+public:
+  derived3 ()=default;
 
-    derived3 ()=default;
-    template<class R>
-    explicit derived3 (::cmw::ReceiveBuffer<R>&);
+  template<class R>
+  explicit derived3 (::cmw::ReceiveBuffer<R>&);
 
-    void MarshalMemberData (::cmw::SendBuffer&)const;
-    void Marshal (::cmw::SendBuffer& b)const{MarshalMemberData(b);}
+  void MarshalMemberData (::cmw::SendBuffer&)const;
+  void Marshal (::cmw::SendBuffer& b)const{MarshalMemberData(b);}
+  static uint8_t const typeNum=3;
 };
 

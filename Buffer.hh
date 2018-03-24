@@ -711,8 +711,7 @@ void GiveFiles (ReceiveBuffer<R>& b){
 #endif
 
 template<typename C>
-int32_t MarshalSegments (C&,SendBuffer&,uint8_t&)
-{return 0;}
+int32_t MarshalSegments (C&,SendBuffer&,uint8_t&){return 0;}
 
 template<typename T,typename... Ts,typename C>
 int32_t MarshalSegments (C& c,SendBuffer& buf,uint8_t& segments){
@@ -731,7 +730,7 @@ int32_t MarshalSegments (C& c,SendBuffer& buf,uint8_t& segments){
 
 template<typename ...Ts,typename C>
 void MarshalCollection (C& c,SendBuffer& buf){
-  auto ind=buf.ReserveBytes(1);
+  auto const ind=buf.ReserveBytes(1);
   uint8_t segments=0;
   assert(c.size()==MarshalSegments<Ts...>(c,buf,segments));
   buf.Receive(ind,segments);
