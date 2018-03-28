@@ -382,7 +382,7 @@ class SendBuffer{
 protected:
   int index=0;
   int const bufsize;
-  unsigned char* buf;
+  unsigned char* const buf;
 
 public:
   sockType sock_=-1;

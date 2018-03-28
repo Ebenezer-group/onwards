@@ -19,14 +19,14 @@ class failure:public ::std::exception{
   ::std::string str;
 
 public:
-  inline explicit failure (char const* w):str(w){}
+  inline explicit failure (char const* s):str(s){}
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
-  inline explicit failure (::std::string_view w):str(w){}
+  inline explicit failure (::std::string_view s):str(s){}
 #endif
 
-  inline failure (char const* w,int tot){
+  inline failure (char const* s,int tot){
     if(tot>0)str.reserve(tot);
-    str=w;
+    str=s;
   }
 
   inline char const* what ()const noexcept{return str.c_str();}
@@ -68,9 +68,8 @@ public:
   }
 };
 
-class connectionLost:public failure{
-public:
-  inline explicit connectionLost (char const* w):failure(w){}
+struct connectionLost:failure{
+  inline explicit connectionLost (char const* s):failure(s){}
 
   template<class T>
   connectionLost& operator<< (T t){

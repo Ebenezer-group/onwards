@@ -42,7 +42,7 @@ bool MarshalFile (char const* name,SendBuffer& buf){
 
 struct cmwRequest{
   ::sockaddr_in6 front;
-  ::socklen_t frontlen=sizeof(front);
+  ::socklen_t frontLen=sizeof(front);
   marshallingInt const accountNbr;
   fixedString120 path;
   char const* middleFile;
@@ -139,7 +139,7 @@ void cmwAmbassador::login (){
     pollWrapper(nullptr,0,loginPause);
   }
 
-  middleBack::Marshal(cmwBuf,Login,accounts);
+  ::middleBack::Marshal(cmwBuf,Login,accounts);
   while(!cmwBuf.Flush());
   while(!cmwBuf.GotPacket());
   if(GiveBool(cmwBuf))setNonblocking(fds[0].fd);
@@ -147,9 +147,9 @@ void cmwAmbassador::login (){
 }
 
 void cmwAmbassador::reset (char const* explanation){
-  middleFront::Marshal(localbuf,false,{explanation});
+  ::middleFront::Marshal(localbuf,false,{explanation});
   for(auto& r:pendingRequests){
-    if(r.get())localbuf.Send((::sockaddr*)&r->front,r->frontlen);
+    if(r.get())localbuf.Send((::sockaddr*)&r->front,r->frontLen);
   }
   pendingRequests.clear();
   closeSocket(cmwBuf.sock_);
@@ -202,7 +202,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
     if(0==pollWrapper(fds,2,keepaliveInterval)){
       try{
         if(!pendingRequests.empty())throw failure("No reply from CMW");
-        middleBack::Marshal(cmwBuf,Keepalive);
+        ::middleBack::Marshal(cmwBuf,Keepalive);
         fds[0].events|=POLLOUT;
         pendingRequests.push_back(nullptr);
       }catch(::std::exception const& e){
@@ -224,10 +224,10 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
                 setDirectory(req.path.c_str());
                 GiveFiles(cmwBuf);
                 req.saveLastruntime();
-                middleFront::Marshal(localbuf,true);
-              }else middleFront::Marshal(localbuf,false,
+                ::middleFront::Marshal(localbuf,true);
+              }else ::middleFront::Marshal(localbuf,false,
                                  {"CMW:",GiveStringView(cmwBuf)});
-              localbuf.Send((::sockaddr*)&req.front,req.frontlen);
+              localbuf.Send((::sockaddr*)&req.front,req.frontLen);
               localbuf.Reset();
             }
             pendingRequests.erase(::std::begin(pendingRequests));
@@ -242,8 +242,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
         assert(!pendingRequests.empty());
         if(pendingRequests.front().get()){
           auto const& req=*pendingRequests.front();
-          middleFront::Marshal(localbuf,false,{e.what()});
-          localbuf.Send((::sockaddr*)&req.front,req.frontlen);
+          ::middleFront::Marshal(localbuf,false,{e.what()});
+          localbuf.Send((::sockaddr*)&req.front,req.frontLen);
         }
         pendingRequests.erase(::std::begin(pendingRequests));
       }
@@ -255,16 +255,16 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
       auto& req=*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
       bool gotAddr=false;
       try{
-        localbuf.GetPacket((::sockaddr*)&req.front,&req.frontlen);
+        localbuf.GetPacket((::sockaddr*)&req.front,&req.frontLen);
         gotAddr=true;
         new(&req)cmwRequest(localbuf);
-        middleBack::Marshal(cmwBuf,Generate,req);
+        ::middleBack::Marshal(cmwBuf,Generate,req);
         req.latestUpdate=current_updatedtime;
       }catch(::std::exception const& e){
         syslogWrapper(LOG_ERR,"Accept request: %s",e.what());
         if(gotAddr){
-          middleFront::Marshal(localbuf,false,{e.what()});
-          localbuf.Send((::sockaddr*)&req.front,req.frontlen);
+          ::middleFront::Marshal(localbuf,false,{e.what()});
+          localbuf.Send((::sockaddr*)&req.front,req.frontLen);
         }
         pendingRequests.pop_back();
         continue;
