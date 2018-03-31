@@ -86,11 +86,10 @@ struct cmwRequest{
       InsertNull(buf);
     }
 
-    char line[100];
     int8_t updatedFiles=0;
     ind=buf.ReserveBytes(sizeof(updatedFiles));
     FILE_wrapper f{middleFile,"r"};
-    while(::fgets(line,sizeof(line),f.hndl)){
+    while(char* line=f.fgets()){
       auto tok=::strtok(line,"\n ");
       if(!::strncmp(tok,"//",2)||!::strcmp(tok,"fixedMessageLengths")||
          !::strcmp(tok,"splitOutput"))continue;
@@ -166,15 +165,13 @@ bool cmwAmbassador::sendData (){
 }
 
 #define CHECK_FIELD_NAME(fieldname)\
-  ::fgets(line,sizeof(line),fl.hndl);\
-  if(::strcmp(fieldname,::strtok(line," ")))\
+  if(::strcmp(fieldname,::strtok(fl.fgets()," ")))\
     throw failure("Expected ")<<fieldname;
 
 cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
 {
-  char line[120];
   FILE_wrapper fl(configfile,"r");
-  while(::fgets(line,sizeof(line),fl.hndl)){
+  while(char* line=fl.fgets()){
     auto tok=::strtok(line," ");
     if(!::strcmp("Account-number",tok)){
       auto num=::strtol(::strtok(nullptr,"\n "),0,10);
@@ -183,7 +180,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
     }else{
       if(accounts.empty())throw failure("An account number is required.");
       if(!::strcmp("UDP-port-number",tok))break;
-      else throw failure("UDP-port-number is required.");
+      else throw failure("Expected UDP-port-number");
     }
   }
   fds[1].fd=localbuf.sock_=udpServer(::strtok(nullptr,"\n "));
@@ -255,8 +252,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
       auto& req=*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
       bool gotAddr=false;
       try{
-        localbuf.GetPacket((::sockaddr*)&req.front,&req.frontLen);
-        gotAddr=true;
+        gotAddr=localbuf.GetPacket((::sockaddr*)&req.front,&req.frontLen);
         new(&req)cmwRequest(localbuf);
         ::middleBack::Marshal(cmwBuf,Generate,req);
         req.latestUpdate=current_updatedtime;

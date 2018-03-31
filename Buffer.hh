@@ -537,9 +537,10 @@ private:
 public:
   BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>(ar2,0){}
 
-  void GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
+  bool GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
     this->packetLength=sockRead(sock_,ar2,N,addr,len);
     this->Update();
+    return true;
   }
 };
 

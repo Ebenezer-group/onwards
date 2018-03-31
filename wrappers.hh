@@ -20,12 +20,14 @@
 namespace cmw{
 struct FILE_wrapper{
   FILE* hndl;
+  char line[100];
 
   inline FILE_wrapper (char const* fn,char const* mode){
     if((hndl=::fopen(fn,mode))==nullptr)
       throw failure("FILE_wrapper ")<<fn<<" "<<mode<<" "<<GetError();
   }
 
+  inline char* fgets (){return ::fgets(line,sizeof(line),hndl);}
   inline ~FILE_wrapper (){::fclose(hndl);}
 };
 
