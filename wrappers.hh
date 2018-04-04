@@ -20,7 +20,7 @@
 namespace cmw{
 struct FILE_wrapper{
   FILE* hndl;
-  char line[100];
+  char line[120];
 
   inline FILE_wrapper (char const* fn,char const* mode){
     if((hndl=::fopen(fn,mode))==nullptr)

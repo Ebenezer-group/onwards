@@ -20,20 +20,20 @@ int main (int ac,char** av){
                            "::1":av[3]
 #endif
                            ,ac<5?"55555":av[4],SOCK_DGRAM);
-    BufferStack<SameFormat> sbuf;
-    sbuf.sock_=res.getSock();
+    BufferStack<SameFormat> buf;
+    buf.sock_=res.getSock();
 
-    ::pollfd pfd{sbuf.sock_,POLLIN,0};
-    ::frontMiddle::Marshal(sbuf,marshallingInt(av[1]),av[2]);
+    ::pollfd pd{buf.sock_,POLLIN,0};
+    ::frontMiddle::Marshal(buf,marshallingInt(av[1]),av[2]);
     for(int j=0,waitTime=8000;j<2;++j,waitTime*=2){
-      sbuf.Send(res()->ai_addr,res()->ai_addrlen);
+      buf.Send(res()->ai_addr,res()->ai_addrlen);
 #ifdef __linux__
-      setNonblocking(pfd.fd);
+      setNonblocking(pd.fd);
 #endif
-      if(pollWrapper(&pfd,1,waitTime)>0){
-        sbuf.GetPacket();
-        if(GiveBool(sbuf))::exit(EXIT_SUCCESS);
-        throw failure("cmwA:")<<GiveStringView(sbuf);
+      if(pollWrapper(&pd,1,waitTime)>0){
+        buf.GetPacket();
+        if(GiveBool(buf))::exit(EXIT_SUCCESS);
+        throw failure("cmwA:")<<GiveStringView(buf);
       }
     }
     throw failure("No reply received.  Is the cmwA running?");

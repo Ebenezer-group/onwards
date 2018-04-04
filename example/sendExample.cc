@@ -13,17 +13,17 @@
 //      -in                (::std::array<::std::array<float,2>, 3>)
 //   }
 
-#include <Buffer.hh>
-#include "messageIDs.hh"
-#include "plf_colony.h"
-#include <wrappers.hh>
-#include "zz.sendMessages.hh"
+#include<Buffer.hh>
+#include"messageIDs.hh"
+#include"plf_colony.h"
+#include<wrappers.hh>
+#include"zz.sendMessages.hh"
 
-#include <array>
-#include <iostream>
-#include <set>
-#include <string>
-#include <vector>
+#include<array>
+#include<iostream>
+#include<set>
+#include<string>
+#include<vector>
 
 using namespace ::cmw;
 
@@ -43,19 +43,19 @@ int main()
 
     ::std::cout<<"Enter the ID of the message to send: 1, 2, 3 or 4."<<::std::endl;
     int messageID;
-    ::std::cin >> messageID;
+    ::std::cin>>messageID;
     switch(messageID){
       case messageid1:
       {
         ::std::vector<int32_t> vec {100,97,94,91,88,85};
-        sendMessages::Marshal(buffer,messageid1,vec,"Proverbs 24:27");
+        ::sendMessages::Marshal(buffer,messageid1,vec,"Proverbs 24:27");
         break;
       }
 
       case messageid2:
       {
         ::std::set<int32_t> iset {100,97,94,91,88,85};
-        sendMessages::Marshal(buffer,messageid2,iset);
+        ::sendMessages::Marshal(buffer,messageid2,iset);
         break;
       }
 
@@ -65,14 +65,15 @@ int main()
                                                     ,{{3.3,4.4}}
                                                     ,{{5.5,6.6}}
                                                   }};
-        sendMessages::Marshal(buffer,messageid3,ar);
+        ::sendMessages::Marshal(buffer,messageid3,ar);
         break;
       }
 
       case messageid4:
       {
         ::plf::colony<::std::string> clny {"Beautiful words ", "wonderful words ", "of life"};
-        sendMessages::Marshal(buffer,messageid4,clny);
+        
+	::sendMessages::Marshal(buffer,messageid4,clny);
         break;
       }
 

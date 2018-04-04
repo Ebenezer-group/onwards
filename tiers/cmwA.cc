@@ -160,18 +160,18 @@ bool cmwAmbassador::sendData (){
   try{return cmwBuf.Flush();}catch(::std::exception const& e){
     syslogWrapper(LOG_ERR,"Problem sending data to CMW: %s",e.what());
     reset("Problem sending data to CMW");
+    return true;
   }
-  return true;
 }
 
-#define CHECK_FIELD_NAME(fieldname)\
-  if(::strcmp(fieldname,::strtok(fl.fgets()," ")))\
-    throw failure("Expected ")<<fieldname;
+#define CHECK_FIELD_NAME(field)\
+  if(::strcmp(field,::strtok(f.fgets()," ")))\
+    throw failure("Expected ")<<field;
 
 cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
 {
-  FILE_wrapper fl(configfile,"r");
-  while(char* line=fl.fgets()){
+  FILE_wrapper f(configfile,"r");
+  while(char* line=f.fgets()){
     auto tok=::strtok(line," ");
     if(!::strcmp("Account-number",tok)){
       auto num=::strtol(::strtok(nullptr,"\n "),0,10);
