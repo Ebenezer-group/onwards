@@ -67,7 +67,7 @@ inline int sockWrite (sockType s,void const* data,int len
   if(EAGAIN==err||EWOULDBLOCK==err)return 0;
   throw failure("sockWrite:")<<s<<" "<<err;}
 
-inline int sockRead (sockType s,char* data,int len
+inline int sockRead (sockType s,void* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
   int rc=::recvfrom(s,data,len,0,addr,fromLen);
   if(rc>0)return rc;
@@ -532,13 +532,12 @@ template<class R,int N=udp_packet_max>
 struct BufferStack:SendBuffer,ReceiveBuffer<R>{
 private:
   unsigned char ar[N];
-  char ar2[N];
 
 public:
-  BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>(ar2,0){}
+  BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>((char*)ar,0){}
 
   bool GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
-    this->packetLength=sockRead(sock_,ar2,N,addr,len);
+    this->packetLength=sockRead(sock_,ar,N,addr,len);
     this->Update();
     return true;
   }

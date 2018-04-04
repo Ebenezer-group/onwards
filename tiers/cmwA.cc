@@ -191,7 +191,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
   CHECK_FIELD_NAME("Login-attempts-interval-in-milliseconds");
   loginPause=::strtol(::strtok(nullptr,"\n "),0,10);
   CHECK_FIELD_NAME("Keepalive-interval-in-milliseconds");
-  int keepaliveInterval=::strtol(::strtok(nullptr,"\n "),0,10);
+  int const keepaliveInterval=::strtol(::strtok(nullptr,"\n "),0,10);
 
   login();
   fds[0].events=fds[1].events=POLLIN;
