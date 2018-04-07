@@ -23,10 +23,10 @@ int main (int ac,char** av){
     BufferStack<SameFormat> buf;
     buf.sock_=res.getSock();
 
-    ::pollfd pd{buf.sock_,POLLIN,0};
     ::frontMiddle::Marshal(buf,marshallingInt(av[1]),av[2]);
     for(int j=0,waitTime=8000;j<2;++j,waitTime*=2){
       buf.Send(res()->ai_addr,res()->ai_addrlen);
+      ::pollfd pd{buf.sock_,POLLIN,0};
 #ifdef __linux__
       setNonblocking(pd.fd);
 #endif

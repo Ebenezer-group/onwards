@@ -89,7 +89,7 @@ struct cmwRequest{
     int8_t updatedFiles=0;
     ind=buf.ReserveBytes(sizeof(updatedFiles));
     FILE_wrapper f{middleFile,"r"};
-    while(char* line=f.fgets()){
+    while(auto line=f.fgets()){
       auto tok=::strtok(line,"\n ");
       if(!::strncmp(tok,"//",2)||!::strcmp(tok,"fixedMessageLengths")||
          !::strcmp(tok,"splitOutput"))continue;
@@ -168,11 +168,9 @@ bool cmwAmbassador::sendData (){
   if(::strcmp(field,::strtok(f.fgets()," ")))\
     throw failure("Expected ")<<field;
 
-cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000)
-{
+cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   FILE_wrapper f(configfile,"r");
-  while(char* line=f.fgets()){
-    auto tok=::strtok(line," ");
+  while(auto tok=::strtok(f.fgets()," ")){
     if(!::strcmp("Account-number",tok)){
       auto num=::strtol(::strtok(nullptr,"\n "),0,10);
       CHECK_FIELD_NAME("Password");

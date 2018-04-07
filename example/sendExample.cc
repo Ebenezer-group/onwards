@@ -72,7 +72,6 @@ int main()
       case messageid4:
       {
         ::plf::colony<::std::string> clny {"Beautiful words ", "wonderful words ", "of life"};
-        
 	::sendMessages::Marshal(buffer,messageid4,clny);
         break;
       }
