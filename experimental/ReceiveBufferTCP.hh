@@ -17,8 +17,7 @@ public:
 
 
   void BulkRead (){
-    if(0==bytesAvailable)
-      this->index=0;
+    if(0==bytesAvailable) this->index=0;
     bytesAvailable+=sockRead(sock_,this->buf+bytesAvailable
                              ,this->bufsize-bytesAvailable);
   }
@@ -43,7 +42,7 @@ public:
         initial=false;
       }
 
-      if(bytesAvailable < this->packetLength){
+      if(bytesAvailable<this->packetLength){
         if(this->index>static_cast<int32_t>(sizeof this->packetLength)){
           ::memmove(this->buf,this->buf+this->index,bytesAvailable);
           this->index=0;

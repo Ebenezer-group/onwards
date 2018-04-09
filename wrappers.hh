@@ -70,7 +70,7 @@ class getaddrinfoWrapper{
   getaddrinfoWrapper& operator= (getaddrinfoWrapper)=delete;
 };
 
-inline sockType connectWrapper(char const* node,char const* port){
+inline sockType connectWrapper (char const* node,char const* port){
   getaddrinfoWrapper res(node,port,SOCK_STREAM);
   auto s=res.getSock();
   if(0==::connect(s,res()->ai_addr,res()->ai_addrlen))return s;

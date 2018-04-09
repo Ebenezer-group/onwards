@@ -15,17 +15,17 @@
 #include<string.h>
 #include<sys/types.h>
 #include<sys/stat.h>
+#include<time.h>
 #include<netinet/in.h>//sockaddr_in6,socklen_t
 #include<unistd.h>//pread,close
 
-int32_t previous_updatedtime;
-int32_t current_updatedtime;
+::time_t previousTime;
 using namespace ::cmw;
 
 bool MarshalFile (char const* name,SendBuffer& buf){
   struct ::stat sb;
   if(::stat(name,&sb)<0)throw failure("MarshalFile stat ")<<name;
-  if(sb.st_mtime>previous_updatedtime){
+  if(sb.st_mtime>previousTime){
     if('.'==name[0]||name[0]=='/')Receive(buf,::strrchr(name,'/')+1);
     else Receive(buf,name);
     InsertNull(buf);
@@ -34,7 +34,6 @@ bool MarshalFile (char const* name,SendBuffer& buf){
     if(d<0)throw failure("MarshalFile open ")<<name<<" "<<errno;
     try{buf.ReceiveFile(d,sb.st_size);}catch(...){::close(d);throw;}
     ::close(d);
-    if(sb.st_mtime>current_updatedtime)current_updatedtime=sb.st_mtime;
     return true;
   }
   return false;
@@ -45,14 +44,15 @@ struct cmwRequest{
   ::socklen_t frontLen=sizeof(front);
   marshallingInt const accountNbr;
   fixedString120 path;
+  ::time_t currentTime;
   char const* middleFile;
   int fd;
-  ::int32_t latestUpdate;
 
   cmwRequest ()=default;
 
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):accountNbr(buf),path(buf){
+    currentTime=::time(nullptr);
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)throw failure("cmwRequest didn't find a /");
     *pos='\0';
@@ -61,9 +61,9 @@ struct cmwRequest{
     char lastrun[60];
     ::snprintf(lastrun,sizeof(lastrun),"%s.lastrun",middleFile);
     fd=::open(lastrun,O_RDWR);
-    previous_updatedtime=0;
+    previousTime=0;
     if(fd>=0){
-      if(::pread(fd,&previous_updatedtime,sizeof(previous_updatedtime),0)==-1){
+      if(::pread(fd,&previousTime,sizeof(previousTime),0)==-1){
         ::close(fd);
         throw failure("pread ")<<errno;
       }
@@ -71,10 +71,9 @@ struct cmwRequest{
       fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
       if(fd<0)throw failure("open ")<<lastrun<<" "<<errno;
     }
-    current_updatedtime=previous_updatedtime;
   }
 
-  void saveLastruntime ()const{Write(fd,&latestUpdate,sizeof(latestUpdate));}
+  void saveLastruntime ()const{Write(fd,&currentTime,sizeof(currentTime));}
 
   void Marshal (SendBuffer& buf)const{
     accountNbr.Marshal(buf);
@@ -253,7 +252,6 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
         gotAddr=localbuf.GetPacket((::sockaddr*)&req.front,&req.frontLen);
         new(&req)cmwRequest(localbuf);
         ::middleBack::Marshal(cmwBuf,Generate,req);
-        req.latestUpdate=current_updatedtime;
       }catch(::std::exception const& e){
         syslogWrapper(LOG_ERR,"Accept request: %s",e.what());
         if(gotAddr){
@@ -280,4 +278,3 @@ int main (int ac,char** av){
   }
   return EXIT_FAILURE;
 }
-
