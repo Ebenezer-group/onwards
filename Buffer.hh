@@ -354,7 +354,13 @@ template<class T,class R>
 T Give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
 
 template<class R>
-bool GiveBool (ReceiveBuffer<R>& buf){return buf.GiveOne()!=0;}
+bool GiveBool (ReceiveBuffer<R>& buf){
+  switch(buf.GiveOne()){
+    case 0:return false;
+    case 1:return true;
+    default:throw failure("GiveBool");
+  }
+}
 
 template<class R>
 ::std::string GiveString (ReceiveBuffer<R>& buf){

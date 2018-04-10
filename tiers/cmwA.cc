@@ -19,7 +19,7 @@
 #include<netinet/in.h>//sockaddr_in6,socklen_t
 #include<unistd.h>//pread,close
 
-::time_t previousTime;
+::int32_t previousTime;
 using namespace ::cmw;
 
 bool MarshalFile (char const* name,SendBuffer& buf){
@@ -44,7 +44,7 @@ struct cmwRequest{
   ::socklen_t frontLen=sizeof(front);
   marshallingInt const accountNbr;
   fixedString120 path;
-  ::time_t currentTime;
+  ::int32_t currentTime;
   char const* middleFile;
   int fd;
 
@@ -215,9 +215,9 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
             if(pendingRequests.front().get()){
               auto const& req=*pendingRequests.front();
               if(GiveBool(cmwBuf)){
+                req.saveLastruntime();
                 setDirectory(req.path.c_str());
                 GiveFiles(cmwBuf);
-                req.saveLastruntime();
                 ::middleFront::Marshal(localbuf,true);
               }else ::middleFront::Marshal(localbuf,false,
                                  {"CMW:",GiveStringView(cmwBuf)});
