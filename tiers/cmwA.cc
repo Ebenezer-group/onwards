@@ -30,10 +30,8 @@ bool MarshalFile (char const* name,SendBuffer& buf){
     else Receive(buf,name);
     InsertNull(buf);
 
-    int d=::open(name,O_RDONLY);
-    if(d<0)throw failure("MarshalFile open ")<<name<<" "<<errno;
-    try{buf.ReceiveFile(d,sb.st_size);}catch(...){::close(d);throw;}
-    ::close(d);
+    fileWrapper fl(name,O_RDONLY);
+    buf.ReceiveFile(fl.d,sb.st_size);
     return true;
   }
   return false;
@@ -44,15 +42,15 @@ struct cmwRequest{
   ::socklen_t frontLen=sizeof(front);
   marshallingInt const accountNbr;
   fixedString120 path;
-  ::int32_t currentTime;
+  ::int32_t now;
   char const* middleFile;
   int fd;
 
-  cmwRequest ()=default;
+  cmwRequest (){}
 
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):accountNbr(buf),path(buf){
-    currentTime=::time(nullptr);
+    now=::time(nullptr);
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)throw failure("cmwRequest didn't find a /");
     *pos='\0';
@@ -64,8 +62,9 @@ struct cmwRequest{
     previousTime=0;
     if(fd>=0){
       if(::pread(fd,&previousTime,sizeof(previousTime),0)==-1){
+        auto err=errno;
         ::close(fd);
-        throw failure("pread ")<<errno;
+        throw failure("pread ")<<err;
       }
     }else{
       fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
@@ -73,7 +72,7 @@ struct cmwRequest{
     }
   }
 
-  void saveLastruntime ()const{Write(fd,&currentTime,sizeof(currentTime));}
+  void saveLastruntime ()const{Write(fd,&now,sizeof(now));}
 
   void Marshal (SendBuffer& buf)const{
     accountNbr.Marshal(buf);

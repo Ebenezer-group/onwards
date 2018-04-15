@@ -1,4 +1,4 @@
-CXX=g++-7
+CXX=g++
 #CXX=clang++ -stdlib=libc++
 
 CXXFLAGS=-I. -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc

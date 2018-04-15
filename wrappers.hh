@@ -7,17 +7,29 @@
 #define LOG_INFO 0
 #define LOG_ERR 0
 #else
-#include<fcntl.h>
+#include<fcntl.h>//open
 #include<netdb.h>
 #include<sys/socket.h>
+#include<sys/stat.h>//open
 #include<sys/types.h>
-#include<unistd.h>//close,chdir
+#include<unistd.h>//close,chdir,read,write
 #include<poll.h>
 #include<stdarg.h>
 #include<syslog.h>
 #endif
 
 namespace cmw{
+struct fileWrapper{
+  int const d;
+
+  fileWrapper (char const* name,int flags,mode_t mode=0):
+	  d(0==mode?::open(name,flags): ::open(name,flags,mode)){
+    if(d<0)throw failure("fileWrapper ")<<name<<" "<<errno;
+  }
+
+  ~fileWrapper (){::close(d);}
+};
+
 struct FILE_wrapper{
   FILE* hndl;
   char line[120];
@@ -173,4 +185,54 @@ inline sockType udpServer (char const* port){
   closeSocket(s);
   throw failure("udpServer ")<<e;
 }
+
+inline int sockWrite (sockType s,void const* data,int len
+                      ,sockaddr* addr=nullptr,socklen_t toLen=0){
+  int rc=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);
+  if(rc>0)return rc;
+  auto err=GetError();
+  if(EAGAIN==err||EWOULDBLOCK==err)return 0;
+  throw failure("sockWrite:")<<s<<" "<<err;}
+
+inline int sockRead (sockType s,void* data,int len
+                     ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
+  int rc=::recvfrom(s,data,len,0,addr,fromLen);
+  if(rc>0)return rc;
+  if(rc==0)throw connectionLost("sockRead eof:")<<s<<" "<<len;
+  auto err=GetError();
+  if(ECONNRESET==err)throw connectionLost("sockRead-ECONNRESET");
+  if(EAGAIN==err||EWOULDBLOCK==err)return 0;
+  throw failure("sockRead:")<<s<<" "<<len<<" "<<err;
 }
+
+#ifdef CMW_WINDOWS
+inline DWORD Write (HANDLE h,void const* data,int len){
+  DWORD bytesWritten=0;
+  if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
+    throw failure("Write ")<<GetLastError();
+  return bytesWritten;
+}
+
+inline DWORD (HANDLE h,void* data,int len){
+  DWORD bytesRead=0;
+  if (!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
+    throw failure("Read ")<<GetLastError();
+  return bytesRead;
+}
+#else
+inline int Write (int fd,void const* data,int len){
+  int rc=::write(fd,data,len);
+  if(rc>=0)return rc;
+  throw failure("Write ")<<errno;
+}
+
+inline int Read (int fd,void* data,int len){
+  int rc=::read(fd,data,len);
+  if(rc>0)return rc;
+  if(rc==0)throw connectionLost("Read eof:")<<len;
+  if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
+  throw failure("Read:")<<len<<" "<<errno;
+}
+#endif
+}
+

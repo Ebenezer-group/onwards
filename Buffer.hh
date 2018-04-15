@@ -1,6 +1,7 @@
 #pragma once
 #include"ErrorWords.hh"
 #include"quicklz.h"
+#include"wrappers.hh"
 #include<array>
 #include<initializer_list>
 #include<limits>
@@ -13,17 +14,13 @@ static_assert(::std::numeric_limits<unsigned char>::digits==8,"");
 static_assert(::std::numeric_limits<float>::is_iec559
               ,"Only IEEE 754 supported");
 
-#include<assert.h>
 #include<stdint.h>
 #include<stdio.h>//snprintf
 #include<stdlib.h>//strtol
 #include<string.h>//memcpy,strlen
 #ifndef CMW_WINDOWS
-#include<fcntl.h>//open
 #include<sys/socket.h>
-#include<sys/stat.h>//open
 #include<sys/types.h>
-#include<unistd.h>//close,read,write
 #endif
 
 namespace cmw{
@@ -58,55 +55,6 @@ public:
 
 inline bool operator== (marshallingInt l,marshallingInt r){return l()==r();}
 inline bool operator== (marshallingInt l,int32_t r){return l()==r;}
-
-inline int sockWrite (sockType s,void const* data,int len
-                      ,sockaddr* addr=nullptr,socklen_t toLen=0){
-  int rc=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);
-  if(rc>0)return rc;
-  auto err=GetError();
-  if(EAGAIN==err||EWOULDBLOCK==err)return 0;
-  throw failure("sockWrite:")<<s<<" "<<err;}
-
-inline int sockRead (sockType s,void* data,int len
-                     ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
-  int rc=::recvfrom(s,data,len,0,addr,fromLen);
-  if(rc>0)return rc;
-  if(rc==0)throw connectionLost("sockRead eof:")<<s<<" "<<len;
-  auto err=GetError();
-  if(ECONNRESET==err)throw connectionLost("sockRead-ECONNRESET");
-  if(EAGAIN==err||EWOULDBLOCK==err)return 0;
-  throw failure("sockRead:")<<s<<" "<<len<<" "<<err;
-}
-
-#ifdef CMW_WINDOWS
-inline DWORD Write (HANDLE h,void const* data,int len){
-  DWORD bytesWritten=0;
-  if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
-    throw failure("Write ")<<GetLastError();
-  return bytesWritten;
-}
-
-inline DWORD (HANDLE h,void* data,int len){
-  DWORD bytesRead=0;
-  if (!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
-    throw failure("Read ")<<GetLastError();
-  return bytesRead;
-}
-#else
-inline int Write (int fd,void const* data,int len){
-  int rc=::write(fd,data,len);
-  if(rc>=0)return rc;
-  throw failure("Write ")<<errno;
-}
-
-inline int Read (int fd,void* data,int len){
-  int rc=::read(fd,data,len);
-  if(rc>0)return rc;
-  if(rc==0)throw connectionLost("Read eof:")<<len;
-  if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
-  throw failure("Read:")<<len<<" "<<errno;
-}
-#endif
 
 struct SameFormat{
   template<template<class> class B,class U>
@@ -700,11 +648,9 @@ public:
 
   template<class R>
   explicit File (ReceiveBuffer<R>& buf):name(GiveStringView_plus(buf)){
-    int d=::open(name.data(),O_WRONLY|O_CREAT|O_TRUNC
-                 ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-    if(d<0)throw failure("File open ")<<name.data()<<" "<<errno;
-    try{buf.GiveFile(d);}catch(...){::close(d);throw;}
-    ::close(d);
+    fileWrapper fl(name.data(),O_WRONLY|O_CREAT|O_TRUNC
+                   ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    buf.GiveFile(fl.d);
   }
 
   inline char const* Name ()const{return name.data();}
@@ -738,7 +684,8 @@ template<typename ...Ts,typename C>
 void MarshalCollection (C& c,SendBuffer& buf){
   auto const ind=buf.ReserveBytes(1);
   uint8_t segments=0;
-  assert(c.size()==MarshalSegments<Ts...>(c,buf,segments));
+  if(c.size()!=MarshalSegments<Ts...>(c,buf,segments))
+    throw failure("MarshalCollection");
   buf.Receive(ind,segments);
 }
 
