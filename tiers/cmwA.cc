@@ -163,16 +163,15 @@ bool cmwAmbassador::sendData (){
 }
 
 void checkField (char const* field,FILE_wrapper& f){
-  if(::strcmp(field,::strtok(f.fgets()," ")))
-    throw failure("Expected ")<<field;
+  if(::strcmp(field,::strtok(f.fgets()," ")))throw failure("Expected ")<<field;
 }
 
 cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
-  FILE_wrapper f(configfile,"r");
-  while(auto tok=::strtok(f.fgets()," ")){
+  FILE_wrapper cfg(configfile,"r");
+  while(auto tok=::strtok(cfg.fgets()," ")){
     if(!::strcmp("Account-number",tok)){
       auto num=::strtol(::strtok(nullptr,"\n "),0,10);
-      checkField("Password",f);
+      checkField("Password",cfg);
       accounts.emplace_back(num,::strtok(nullptr,"\n "));
     }else{
       if(accounts.empty())throw failure("An account number is required.");
@@ -185,9 +184,9 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   setNonblocking(fds[1].fd);
 #endif
 
-  checkField("Login-attempts-interval-in-milliseconds",f);
+  checkField("Login-attempts-interval-in-milliseconds",cfg);
   loginPause=::strtol(::strtok(nullptr,"\n "),0,10);
-  checkField("Keepalive-interval-in-milliseconds",f);
+  checkField("Keepalive-interval-in-milliseconds",cfg);
   int const keepaliveInterval=::strtol(::strtok(nullptr,"\n "),0,10);
 
   login();
