@@ -162,8 +162,8 @@ bool cmwAmbassador::sendData (){
   }
 }
 
-void checkField (char const* field,FILE_wrapper& f){
-  if(::strcmp(field,::strtok(f.fgets()," ")))throw failure("Expected ")<<field;
+void checkField (char const* fld,FILE_wrapper& f){
+  if(::strcmp(fld,::strtok(f.fgets()," ")))throw failure("Expected ")<<fld;
 }
 
 cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
@@ -206,40 +206,38 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
     }
 
     localbuf.Reset();
-    if(fds[0].revents&POLLIN){
-      try{
-        if(cmwBuf.GotPacket()){
-          do{
-            assert(!pendingRequests.empty());
-            if(pendingRequests.front().get()){
-              auto const& req=*pendingRequests.front();
-              if(GiveBool(cmwBuf)){
-                req.saveLastruntime();
-                setDirectory(req.path.c_str());
-                GiveFiles(cmwBuf);
-                ::middleFront::Marshal(localbuf,true);
-              }else ::middleFront::Marshal(localbuf,false,
-                                 {"CMW:",GiveStringView(cmwBuf)});
-              localbuf.Send((::sockaddr*)&req.front,req.frontLen);
-              localbuf.Reset();
-            }
-            pendingRequests.erase(::std::begin(pendingRequests));
-          }while(cmwBuf.NextMessage());
-        }
-      }catch(connectionLost const& e){
-        syslogWrapper(LOG_ERR,"Got end of stream notice: %s",e.what());
-        reset("CMW stopped before your request was processed");
-        continue;
-      }catch(::std::exception const& e){
-        syslogWrapper(LOG_ERR,"Problem handling reply from CMW %s",e.what());
-        assert(!pendingRequests.empty());
-        if(pendingRequests.front().get()){
-          auto const& req=*pendingRequests.front();
-          ::middleFront::Marshal(localbuf,false,{e.what()});
-          localbuf.Send((::sockaddr*)&req.front,req.frontLen);
-        }
-        pendingRequests.erase(::std::begin(pendingRequests));
+    try{
+      if(fds[0].revents&POLLIN&&cmwBuf.GotPacket()){
+        do{
+          assert(!pendingRequests.empty());
+          if(pendingRequests.front().get()){
+            auto const& req=*pendingRequests.front();
+            if(GiveBool(cmwBuf)){
+              req.saveLastruntime();
+              setDirectory(req.path.c_str());
+              GiveFiles(cmwBuf);
+              ::middleFront::Marshal(localbuf,true);
+            }else ::middleFront::Marshal(localbuf,false,
+                               {"CMW:",GiveStringView(cmwBuf)});
+            localbuf.Send((::sockaddr*)&req.front,req.frontLen);
+            localbuf.Reset();
+          }
+          pendingRequests.erase(::std::begin(pendingRequests));
+        }while(cmwBuf.NextMessage());
       }
+    }catch(connectionLost const& e){
+      syslogWrapper(LOG_ERR,"Got end of stream notice: %s",e.what());
+      reset("CMW stopped before your request was processed");
+      continue;
+    }catch(::std::exception const& e){
+      syslogWrapper(LOG_ERR,"Problem handling reply from CMW %s",e.what());
+      assert(!pendingRequests.empty());
+      if(pendingRequests.front().get()){
+        auto const& req=*pendingRequests.front();
+        ::middleFront::Marshal(localbuf,false,{e.what()});
+        localbuf.Send((::sockaddr*)&req.front,req.frontLen);
+      }
+      pendingRequests.erase(::std::begin(pendingRequests));
     }
 
     if(fds[0].revents&POLLOUT&&sendData())fds[0].events=POLLIN;
