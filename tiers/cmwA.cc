@@ -246,7 +246,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
       auto& req=*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
       bool gotAddr=false;
       try{
-        gotAddr=localbuf.GetPacket((::sockaddr*)&req.front,&req.frontLen);
+        localbuf.GetPacket((::sockaddr*)&req.front,&req.frontLen);
+        gotAddr=true;
         new(&req)cmwRequest(localbuf);
         ::middleBack::Marshal(cmwBuf,Generate,req);
       }catch(::std::exception const& e){

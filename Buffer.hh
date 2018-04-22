@@ -490,10 +490,9 @@ private:
 public:
   BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>((char*)ar,0){}
 
-  bool GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
+  void GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
     this->packetLength=sockRead(sock_,ar,N,addr,len);
     this->Update();
-    return true;
   }
 };
 
@@ -603,7 +602,7 @@ class fixedString{
   ::std::array<char,N> str;
 
  public:
-  fixedString ()=default;
+  fixedString (){}
 
   explicit fixedString (char const* s):len(::strlen(s)){
     if(len()>N-1)throw failure("fixedString ctor");
