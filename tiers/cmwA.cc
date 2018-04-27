@@ -116,51 +116,48 @@ class cmwAmbassador{
   ::pollfd fds[2];
   int loginPause;
 
-  void login ();
-  void reset (char const*);
-  bool sendData ();
-public:
-  cmwAmbassador (char*);
-};
-
-void cmwAmbassador::login (){
-  for(;;){
-    fds[0].fd=cmwBuf.sock_=connectWrapper("70.56.166.91",
+  void login (){
+    ::middleBack::Marshal(cmwBuf,Login,accounts);
+    for(;;){
+      fds[0].fd=cmwBuf.sock_=connectWrapper("70.56.166.91",
 #ifdef CMW_ENDIAN_BIG
                       "56790");
 #else
                       "56789");
 #endif
-    if(fds[0].fd!=-1)break;
-    ::printf("connectWrapper %d\n",errno);
-    pollWrapper(nullptr,0,loginPause);
+      if(fds[0].fd!=-1)break;
+      ::printf("connectWrapper %d\n",errno);
+      pollWrapper(nullptr,0,loginPause);
+    }
+
+    while(!cmwBuf.Flush());
+    while(!cmwBuf.GotPacket());
+    if(GiveBool(cmwBuf))setNonblocking(fds[0].fd);
+    else throw failure("Login:")<<GiveStringView(cmwBuf);
   }
 
-  ::middleBack::Marshal(cmwBuf,Login,accounts);
-  while(!cmwBuf.Flush());
-  while(!cmwBuf.GotPacket());
-  if(GiveBool(cmwBuf))setNonblocking(fds[0].fd);
-  else throw failure("Login:")<<GiveStringView(cmwBuf);
-}
-
-void cmwAmbassador::reset (char const* explanation){
-  ::middleFront::Marshal(localbuf,false,{explanation});
-  for(auto& r:pendingRequests){
-    if(r.get())localbuf.Send((::sockaddr*)&r->front,r->frontLen);
+  void reset (char const* reason){
+    ::middleFront::Marshal(localbuf,false,{reason});
+    for(auto& r:pendingRequests){
+      if(r.get())localbuf.Send((::sockaddr*)&r->front,r->frontLen);
+    }
+    pendingRequests.clear();
+    closeSocket(fds[0].fd);
+    cmwBuf.CompressedReset();
+    login();
   }
-  pendingRequests.clear();
-  closeSocket(cmwBuf.sock_);
-  cmwBuf.CompressedReset();
-  login();
-}
 
-bool cmwAmbassador::sendData (){
-  try{return cmwBuf.Flush();}catch(::std::exception const& e){
-    syslogWrapper(LOG_ERR,"Problem sending data to CMW: %s",e.what());
-    reset("Problem sending data to CMW");
-    return true;
+  bool sendData (){
+    try{return cmwBuf.Flush();}catch(::std::exception const& e){
+      syslogWrapper(LOG_ERR,"Problem sending data to CMW: %s",e.what());
+      reset("Problem sending data to CMW");
+      return true;
+    }
   }
-}
+
+public:
+  cmwAmbassador (char*);
+};
 
 void checkField (char const* fld,FILE_wrapper& f){
   if(::strcmp(fld,::strtok(f.fgets()," ")))throw failure("Expected ")<<fld;
@@ -226,7 +223,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
         }while(cmwBuf.NextMessage());
       }
     }catch(connectionLost const& e){
-      syslogWrapper(LOG_ERR,"Got end of stream notice: %s",e.what());
+      syslogWrapper(LOG_ERR,"Got end of stream: %s",e.what());
       reset("CMW stopped before your request was processed");
       continue;
     }catch(::std::exception const& e){
