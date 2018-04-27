@@ -136,7 +136,8 @@ class cmwAmbassador{
     else throw failure("Login:")<<GiveStringView(cmwBuf);
   }
 
-  void reset (char const* reason){
+  void reset (char const* reason,char const* detail){
+    syslogWrapper(LOG_ERR,"%s: %s",reason,detail);
     ::middleFront::Marshal(localbuf,false,{reason});
     for(auto& r:pendingRequests){
       if(r.get())localbuf.Send((::sockaddr*)&r->front,r->frontLen);
@@ -149,8 +150,7 @@ class cmwAmbassador{
 
   bool sendData (){
     try{return cmwBuf.Flush();}catch(::std::exception const& e){
-      syslogWrapper(LOG_ERR,"Problem sending data to CMW: %s",e.what());
-      reset("Problem sending data to CMW");
+      reset("sendData",e.what());
       return true;
     }
   }
@@ -196,8 +196,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
         fds[0].events|=POLLOUT;
         pendingRequests.push_back(nullptr);
       }catch(::std::exception const& e){
-        syslogWrapper(LOG_ERR,"Keepalive: %s",e.what());
-        reset("Keepalive problem");
+        reset("Keepalive",e.what());
       }
       continue;
     }
@@ -223,8 +222,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
         }while(cmwBuf.NextMessage());
       }
     }catch(connectionLost const& e){
-      syslogWrapper(LOG_ERR,"Got end of stream: %s",e.what());
-      reset("CMW stopped before your request was processed");
+      reset("Got end of stream",e.what());
       continue;
     }catch(::std::exception const& e){
       syslogWrapper(LOG_ERR,"Problem handling reply from CMW %s",e.what());
