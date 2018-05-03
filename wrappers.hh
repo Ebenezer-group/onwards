@@ -198,9 +198,9 @@ inline int sockRead (sockType s,void* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
   int rc=::recvfrom(s,data,len,0,addr,fromLen);
   if(rc>0)return rc;
-  if(rc==0)throw connectionLost("sockRead eof:")<<s<<" "<<len;
+  if(rc==0)throw fiasco("sockRead eof:")<<s<<" "<<len;
   auto err=GetError();
-  if(ECONNRESET==err)throw connectionLost("sockRead-ECONNRESET");
+  if(ECONNRESET==err)throw fiasco("sockRead-ECONNRESET");
   if(EAGAIN==err||EWOULDBLOCK==err)return 0;
   throw failure("sockRead:")<<s<<" "<<len<<" "<<err;
 }
@@ -229,7 +229,7 @@ inline int Write (int fd,void const* data,int len){
 inline int Read (int fd,void* data,int len){
   int rc=::read(fd,data,len);
   if(rc>0)return rc;
-  if(rc==0)throw connectionLost("Read eof:")<<len;
+  if(rc==0)throw fiasco("Read eof:")<<len;
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
   throw failure("Read:")<<len<<" "<<errno;
 }

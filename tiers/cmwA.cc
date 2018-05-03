@@ -117,7 +117,7 @@ class cmwAmbassador{
   int loginPause;
 
   void login (){
-    ::middleBack::Marshal(cmwBuf,Login,accounts);
+    ::middleBack::Marshal(cmwBuf,Login,accounts,cmwBuf.GetSize());
     for(;;){
       fds[0].fd=cmwBuf.sock_=connectWrapper("70.56.166.91",
 #ifdef CMW_ENDIAN_BIG
@@ -132,16 +132,17 @@ class cmwAmbassador{
 
     while(!cmwBuf.Flush());
     while(!cmwBuf.GotPacket());
-    if(GiveBool(cmwBuf))setNonblocking(fds[0].fd);
-    else throw failure("Login:")<<GiveStringView(cmwBuf);
+    if(GiveBool(cmwBuf)){
+      setNonblocking(fds[0].fd);
+      fds[0].events=POLLIN;
+    }else throw failure("Login:")<<GiveStringView(cmwBuf);
   }
 
-  void reset (char const* reason,char const* detail){
-    syslogWrapper(LOG_ERR,"%s: %s",reason,detail);
-    ::middleFront::Marshal(localbuf,false,{reason});
-    for(auto& r:pendingRequests){
+  void reset (char const* context,char const* detail){
+    syslogWrapper(LOG_ERR,"%s:%s",context,detail);
+    ::middleFront::Marshal(localbuf,false,{context,detail});
+    for(auto& r:pendingRequests)
       if(r.get())localbuf.Send((::sockaddr*)&r->front,r->frontLen);
-    }
     pendingRequests.clear();
     closeSocket(fds[0].fd);
     cmwBuf.CompressedReset();
@@ -150,7 +151,7 @@ class cmwAmbassador{
 
   bool sendData (){
     try{return cmwBuf.Flush();}catch(::std::exception const& e){
-      reset("sendData",e.what());
+      reset("sendData ",e.what());
       return true;
     }
   }
@@ -177,6 +178,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
     }
   }
   fds[1].fd=localbuf.sock_=udpServer(::strtok(nullptr,"\n "));
+  fds[1].events=POLLIN;
 #ifdef __linux__
   setNonblocking(fds[1].fd);
 #endif
@@ -187,7 +189,6 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   int const keepaliveInterval=::strtol(::strtok(nullptr,"\n "),0,10);
 
   login();
-  fds[0].events=fds[1].events=POLLIN;
   for(;;){
     if(0==pollWrapper(fds,2,keepaliveInterval)){
       try{
@@ -195,9 +196,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
         ::middleBack::Marshal(cmwBuf,Keepalive);
         fds[0].events|=POLLOUT;
         pendingRequests.push_back(nullptr);
-      }catch(::std::exception const& e){
-        reset("Keepalive",e.what());
-      }
+      }catch(::std::exception const& e){reset("Keepalive ",e.what());}
       continue;
     }
 
@@ -221,8 +220,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
           pendingRequests.erase(::std::begin(pendingRequests));
         }while(cmwBuf.NextMessage());
       }
-    }catch(connectionLost const& e){
-      reset("Got end of stream",e.what());
+    }catch(fiasco const& e){
+      reset("fiasco ",e.what());
       continue;
     }catch(::std::exception const& e){
       syslogWrapper(LOG_ERR,"Problem handling reply from CMW %s",e.what());

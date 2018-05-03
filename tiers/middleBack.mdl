@@ -2,7 +2,7 @@ account.hh
 --
 //Messages the middle tier either sends to or receives from the back tier.
 middleBack
-  -out -noInline (messageID_8,::std::vector<cmwAccount>)
+  -out -noInline (messageID_8,::std::vector<cmwAccount>,::int32_t)
   -out -maxLength=700000 (messageID_8,cmwRequest)
   -out (messageID_8)
 }

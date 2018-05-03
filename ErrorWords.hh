@@ -68,15 +68,16 @@ public:
   }
 };
 
-struct connectionLost:failure{
-  inline explicit connectionLost (char const* s):failure(s){}
+struct fiasco:failure{
+  inline explicit fiasco(char const* s):failure(s){}
 
   template<class T>
-  connectionLost& operator<< (T t){
+  fiasco& operator<< (T t){
     failure::operator<<(t);
     return *this;
   }
 };
+
 
 #ifdef CMW_WINDOWS
 using sockType=SOCKET;

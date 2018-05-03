@@ -415,6 +415,7 @@ public:
 
   inline unsigned char* data (){return buf;}
   inline int GetIndex (){return index;}
+  inline int GetSize (){return bufsize;}
 };
 
 inline void Receive (SendBuffer&b,bool bl){b.Receive(static_cast<unsigned char>(bl));}
@@ -565,33 +566,47 @@ public:
 
   using ReceiveBuffer<R>::rbuf;
   bool GotPacket (){
+    static bool kosher=true;
     try{
       static int compressedSize;
-      if(bytesRead<9){
-        bytesRead+=sockRead(sock_,rbuf+bytesRead,9-bytesRead);
-        if(bytesRead<9)return false;
+      if(kosher){
+        if(bytesRead<9){
+          bytesRead+=Read(sock_,rbuf+bytesRead,9-bytesRead);
+          if(bytesRead<9)return false;
+          if((compressedSize=::qlz_size_compressed(rbuf))>bufsize)
+            throw failure("GotPacket compressed size too big");
+          if((this->packetLength=::qlz_size_decompressed(rbuf))>bufsize)
+            throw failure("GotPacket decompressed size too big ")
+                           <<this->packetLength<<" "<<bufsize;
 
-        if((this->packetLength=::qlz_size_decompressed(rbuf))>bufsize)
-          throw failure("Decompress::GotPacket decompressed size too big ")
-                         <<this->packetLength<<" "<<bufsize;
+          compressedStart=rbuf+bufsize-compressedSize;
+          ::memmove(compressedStart,rbuf,9);
+        }
+        bytesRead+=Read(sock_,compressedStart+bytesRead,compressedSize-bytesRead);
+        if(bytesRead<compressedSize)return false;
 
-        if((compressedSize=::qlz_size_compressed(rbuf))>bufsize)
-          throw failure("Decompress::GotPacket compressed size too big");
-
-        compressedStart=rbuf+bufsize-compressedSize;
-        ::memmove(compressedStart,rbuf,9);
+        ::qlz_decompress(compressedStart,rbuf,decomp);
+        bytesRead=0;
+        this->Update();
+        return true;
+      }else{
+        bytesRead+=Read(sock_,rbuf,::std::min(bufsize,compressedSize-bytesRead));
+        if(bytesRead==compressedSize){
+          kosher=true;
+          bytesRead=0;
+        }
+        return false;
       }
-      bytesRead+=sockRead(sock_,compressedStart+bytesRead
-                          ,compressedSize-bytesRead);
-      if(bytesRead<compressedSize)return false;
-
-      ::qlz_decompress(compressedStart,rbuf,decomp);
-      bytesRead=0;
-      this->Update();
-      return true;
-    }catch(...){
-      bytesRead=0;
-      throw;
+    }catch(::std::exception const& e){
+      if(!kosher||bytesRead<9){
+	kosher=true;
+	auto b=bytesRead;
+	bytesRead=0;
+	throw fiasco("GotPacket:")<<b<<" "<<e.what();
+      }else{
+        kosher=false;
+        throw;
+      }
     }
   }
 };

@@ -7,11 +7,13 @@
 namespace middleBack{
 void Marshal (::cmw::SendBuffer& buf
          ,messageID_8 a
-         ,::std::vector<cmwAccount> const& b){
+         ,::std::vector<cmwAccount> const& b
+	 ,::int32_t c){
   try{
     buf.ReserveBytes(4);
     buf.Receive(a);
     ReceiveGroup(buf,b);
+    buf.Receive(c);
     buf.FillInSize(10000);
   }catch(...){buf.Rollback();throw;}
 }
