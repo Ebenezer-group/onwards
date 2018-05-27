@@ -35,7 +35,7 @@ public:
   inline explicit marshallingInt (char const* v):val(::strtol(v,0,10)){}
 
   //Reads a sequence of bytes in variable-length format and
-  //composes a 32 bit integer.
+  //builds a 32 bit integer.
   template<class R>
   explicit marshallingInt (ReceiveBuffer<R>& b):val(0){
     uint32_t shift=1;

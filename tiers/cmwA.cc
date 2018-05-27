@@ -72,7 +72,7 @@ struct cmwRequest{
     }
   }
 
-  void saveLastruntime ()const{Write(fd,&now,sizeof(now));}
+  void saveRuntime ()const{Write(fd,&now,sizeof(now));}
 
   void Marshal (SendBuffer& buf)const{
     accountNbr.Marshal(buf);
@@ -208,7 +208,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
           if(pendingRequests.front().get()){
             auto const& req=*pendingRequests.front();
             if(GiveBool(cmwBuf)){
-              req.saveLastruntime();
+              req.saveRuntime();
               setDirectory(req.path.c_str());
               GiveFiles(cmwBuf);
               ::middleFront::Marshal(localbuf,true);
