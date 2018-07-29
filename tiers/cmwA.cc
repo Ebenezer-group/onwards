@@ -11,7 +11,7 @@
 #include<fcntl.h>//open
 #include<stdint.h>
 #include<stdio.h>
-#include<stdlib.h>//strtol
+#include<stdlib.h>
 #include<string.h>
 #include<sys/types.h>
 #include<sys/stat.h>
@@ -168,7 +168,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   FILE_wrapper cfg(configfile,"r");
   while(char const* tok=::strtok(cfg.fgets()," ")){
     if(!::strcmp("Account-number",tok)){
-      auto num=::strtol(::strtok(nullptr,"\n "),0,10);
+      auto num=fromChars(::strtok(nullptr,"\n "));
       checkField("Password",cfg);
       accounts.emplace_back(num,::strtok(nullptr,"\n "));
     }else{
@@ -184,9 +184,9 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
 #endif
 
   checkField("Login-attempts-interval-in-milliseconds",cfg);
-  loginPause=::strtol(::strtok(nullptr,"\n "),0,10);
+  loginPause=fromChars(::strtok(nullptr,"\n "));
   checkField("Keepalive-interval-in-milliseconds",cfg);
-  int const keepaliveInterval=::strtol(::strtok(nullptr,"\n "),0,10);
+  int const keepaliveInterval=fromChars(::strtok(nullptr,"\n "));
 
   login();
   for(;;){

@@ -1,5 +1,10 @@
 #pragma once
 #include"ErrorWords.hh"
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
+#include<charconv>//from_chars
+#else
+#include<stdlib.h>//strtol
+#endif
 #include<stdio.h>
 
 #ifdef CMW_WINDOWS
@@ -19,6 +24,16 @@
 #endif
 
 namespace cmw{
+int fromChars (char const* p){
+  int res=0;
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
+  ::std::from_chars(p,p+::strlen(p),res);
+#else
+  res=::strtol(p,0,10);
+#endif
+  return res;
+}
+
 struct fileWrapper{
   int const d;
 
@@ -187,7 +202,7 @@ inline sockType udpServer (char const* port){
 }
 
 inline int sockWrite (sockType s,void const* data,int len
-                      ,sockaddr* addr=nullptr,socklen_t toLen=0){
+                      ,sockaddr const* addr=nullptr,socklen_t toLen=0){
   int rc=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);
   if(rc>0)return rc;
   auto err=GetError();
@@ -235,4 +250,3 @@ inline int Read (int fd,void* data,int len){
 }
 #endif
 }
-

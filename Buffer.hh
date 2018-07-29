@@ -16,7 +16,6 @@ static_assert(::std::numeric_limits<float>::is_iec559
 
 #include<stdint.h>
 #include<stdio.h>//snprintf
-#include<stdlib.h>//strtol
 #include<string.h>//memcpy,strlen
 #ifndef CMW_WINDOWS
 #include<sys/socket.h>
@@ -32,7 +31,7 @@ class marshallingInt{
 public:
   inline marshallingInt (){}
   inline explicit marshallingInt (int32_t v):val(v){}
-  inline explicit marshallingInt (char const* v):val(::strtol(v,0,10)){}
+  inline explicit marshallingInt (char const* v):val(fromChars(v)){}
 
   //Reads a sequence of bytes in variable-length format and
   //builds a 32 bit integer.
