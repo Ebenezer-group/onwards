@@ -237,20 +237,21 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
     if(fds[0].revents&POLLOUT&&sendData())fds[0].events=POLLIN;
 
     if(fds[1].revents&POLLIN){
-      auto& req=*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
+      cmwRequest* req=nullptr;
       bool gotAddr=false;
       try{
-        localbuf.GetPacket((::sockaddr*)&req.front,&req.frontLen);
+        req=&*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
+        localbuf.GetPacket((::sockaddr*)&req->front,&req->frontLen);
         gotAddr=true;
-        new(&req)cmwRequest(localbuf);
-        ::middleBack::Marshal(cmwBuf,Generate,req);
+        new(req)cmwRequest(localbuf);
+        ::middleBack::Marshal(cmwBuf,Generate,*req);
       }catch(::std::exception const& e){
         syslogWrapper(LOG_ERR,"Accept request: %s",e.what());
         if(gotAddr){
           ::middleFront::Marshal(localbuf,false,{e.what()});
-          localbuf.Send((::sockaddr*)&req.front,req.frontLen);
+          localbuf.Send((::sockaddr*)&req->front,req->frontLen);
         }
-        pendingRequests.pop_back();
+        if(req)pendingRequests.pop_back();
         continue;
       }
       if(!sendData())fds[0].events|=POLLOUT;
