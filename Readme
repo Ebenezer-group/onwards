@@ -1,5 +1,6 @@
-The C++ Middleware Writer (CMW) and the software found in
-this repository provide support for messaging and serialization.
+The C++ Middleware Writer (CMW) is an on-line code generator.
+The CMW and the software found in this repository provide
+support for messaging and serialization.
 
 License
 The software is under the BSD 2-clause license.  One of the
@@ -14,23 +15,24 @@ Microsoft compiler, you may want to rename makefile.vs to
 makefile.  If you're using a big-endian machine, add
 -DCMW_ENDIAN_BIG to the CXXFLAGS in the makefile.
 
-Two programs are built.  The programs are the middle and front
-tiers of the C++ Middleware Writer (CMW).  The middle tier is
-called the cmwA, which is short for CMW Ambassador.  The front
-tier is called "genz" and is a command line interface.  On
-Windows, only the front tier is built.  The middle tier is
-still needed for Windows users so it needs to be running on a
-BSD/Linux box or VM.
+Four programs are built.  Two of the programs are example
+programs.  The other two programs are the middle and front
+tiers of the C++ Middleware Writer.  The middle tier is called
+the cmwA, which is short for CMW Ambassador.  The front tier
+is called "genz" and is a command line interface.  On Windows,
+the middle tier isn't built.  The middle tier is still needed
+for Windows users so it needs to be running on a BSD/Linux box
+or VM.
 
-A C++ 2017 or newer compiler is required to build the middle
+A 2017 or newer C++ compiler is required to build the middle
 and front tiers of the CMW.  That doesn't mean your project
-has to use a C++ 2017 compiler.  A C++ 2011 or newer compiler
-is able to process output from the CMW.
+has to use 2017 C++.  A 2011 or newer C++ compiler is able to
+process output from the CMW.
 
 
 Accounts
 An account is needed to use the CMW.  Before running the
-programs, you have to get an account and modify your
+middle tier, you have to get an account and modify your
 cmwA.cfg file to include your account number(s) and
 password(s).  To get an account send an email to
 support@webEbenezer.net and include a password between 10
@@ -69,17 +71,17 @@ If genz fails with "No reply received.  Is the cmwA running?"
 make sure the middle tier is running.
 
 Another possible problem could be due to "breaking changes"
-between the back and middle tiers.  (We may have changed the
-protocol between these tiers and now older versions of the
-middle tier no longer work right.)  The thing to do in this
-case is to check our website for an announcement/email that
-you may have missed.  Probably you will have to clone/download
-the new version of the repository and then reinstall in order
-to fix the problem.
+between the back and middle tiers.  We may have changed the
+protocol between these tiers and now your version of the
+middle tier no longer works.  The thing to do in this case
+is to check our website for an announcement/email that you
+may have missed.  Probably you will have to clone/download
+the new version of the repo and then rebuild and reinstall
+in order to fix the problem.
 
-If you move/rename header files listed in your .mdl files,
-you should also touch those files so the changes will be
-"noticed" by the cmwA.
+If you have only moved/renamed header files listed in your
+.mdl files, you will need to touch those files (update
+timestamps) so the changes will be "noticed" by the cmwA.
 
 
 Thank you for using the software.

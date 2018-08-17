@@ -530,11 +530,9 @@ public:
               ,compress(::std::make_unique<::qlz_state_compress>())
 	      ,compSize(sz+(sz>>3)+400)
 	      ,compBuf(new char[compSize])
-              ,decomp(::std::make_unique<::qlz_state_decompress>()){ }
+              ,decomp(::std::make_unique<::qlz_state_decompress>()){}
 
-  ~BufferCompressed (){
-    delete[]this->rbuf;
-  }
+  ~BufferCompressed (){delete[]this->rbuf;}
 
   bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
     bool rc=true;
