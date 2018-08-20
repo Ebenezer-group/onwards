@@ -25,13 +25,13 @@
 
 namespace cmw{
 int fromChars (char const* p){
-  int res=0;
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
+  int res=0;
   ::std::from_chars(p,p+::strlen(p),res);
-#else
-  res=::strtol(p,0,10);
-#endif
   return res;
+#else
+  return ::strtol(p,0,10);
+#endif
 }
 
 struct fileWrapper{

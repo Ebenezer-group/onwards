@@ -15,14 +15,13 @@ Microsoft compiler, you may want to rename makefile.vs to
 makefile.  If you're using a big-endian machine, add
 -DCMW_ENDIAN_BIG to the CXXFLAGS in the makefile.
 
-Four programs are built.  Two of the programs are example
-programs.  The other two programs are the middle and front
-tiers of the C++ Middleware Writer.  The middle tier is called
-the cmwA, which is short for CMW Ambassador.  The front tier
-is called "genz" and is a command line interface.  On Windows,
-the middle tier isn't built.  The middle tier is still needed
-for Windows users so it needs to be running on a BSD/Linux box
-or VM.
+Four programs are built.  Two of the programs are the middle
+and front tiers of the C++ Middleware Writer.  The middle tier
+is called "cmwA", which is short for CMW Ambassador.  The
+front tier is called "genz" and is a command line interface.
+The middle tier isn't built on Windows.  The middle tier is
+still needed for Windows users so it has to be running on a
+BSD/Linux system.
 
 A 2017 or newer C++ compiler is required to build the middle
 and front tiers of the CMW.  That doesn't mean your project
