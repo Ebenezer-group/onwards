@@ -24,7 +24,7 @@
 #endif
 
 namespace cmw{
-int fromChars (char const* p){
+inline int fromChars (char const* p){
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
   int res=0;
   ::std::from_chars(p,p+::strlen(p),res);
@@ -37,12 +37,12 @@ int fromChars (char const* p){
 struct fileWrapper{
   int const d;
 
-  fileWrapper (char const* name,int flags,mode_t mode=0):
+  inline fileWrapper (char const* name,int flags,mode_t mode=0):
 	  d(0==mode?::open(name,flags): ::open(name,flags,mode)){
     if(d<0)throw failure("fileWrapper ")<<name<<" "<<errno;
   }
 
-  ~fileWrapper (){::close(d);}
+  inline ~fileWrapper (){::close(d);}
 };
 
 struct FILE_wrapper{
