@@ -1,6 +1,6 @@
-#include<Buffer.hh>
-#include<ErrorWords.hh>
-#include<wrappers.hh>
+#include<cmw/Buffer.hh>
+#include<cmw/ErrorWords.hh>
+#include<cmw/wrappers.hh>
 #include"zz.frontMiddle.hh"
 #include<stdio.h>
 #include<stdlib.h>//exit

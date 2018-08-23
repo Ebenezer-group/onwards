@@ -1,0 +1,12 @@
+account.hh
+--
+//Messages the middle tier either sends to or receives from the back tier.
+middleBack
+  (messageID_8,::std::vector<cmwAccount>) -out -noInline
+  (messageID_8,cmwRequest) -out -maxLength=700000
+  (messageID_8) -out
+}
+
+middleFront
+  -out -maxLength=cmw::udp_packet_max -noInline -yeaNay (bool,cmw::stringPlus)
+}

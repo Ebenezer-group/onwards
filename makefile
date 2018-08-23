@@ -3,7 +3,7 @@ CXX=g++
 
 CXXFLAGS=-Isrc/ -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
 
-TIERS:=src/tiers/genz src/tiers/cmwA
+TIERS:=src/cmw/tiers/genz src/cmw/tiers/cmwA
 EXAMPLES:=example/sendExample example/receiveExample
 all:$(TIERS) $(EXAMPLES)
 PHONY:all
@@ -11,11 +11,11 @@ PHONY:all
 #zz.middleBack.hh: account.hh middleBack.mdl
 #	genz 2 /home/brian/onwards/src/tiers/middleBack.mdl
 
-src/tiers/genz: src/tiers/genz.cc
+src/cmw/tiers/genz: src/cmw/tiers/genz.cc
 	$(CXX) -std=c++17 $(CXXFLAGS)
 	size $@
 
-src/tiers/cmwA: src/tiers/cmwA.cc
+src/cmw/tiers/cmwA: src/cmw/tiers/cmwA.cc
 	$(CXX) -std=c++17 $(CXXFLAGS)
 	size $@
 
@@ -32,7 +32,7 @@ clean:
 
 INSTALL_DIR=/usr/local
 install:
-	cp -f src/*.hh src/quicklz.h $(INSTALL_DIR)/include
+	cp -f src/cmw/*.hh src/cmw/quicklz.h $(INSTALL_DIR)/include
 	cp -f $(TIERS) $(INSTALL_DIR)/bin
 
 uninstall:
