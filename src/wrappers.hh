@@ -34,6 +34,7 @@ inline int fromChars (char const* p){
 #endif
 }
 
+#ifndef CMW_WINDOWS
 struct fileWrapper{
   int const d;
 
@@ -44,6 +45,7 @@ struct fileWrapper{
 
   inline ~fileWrapper (){::close(d);}
 };
+#endif
 
 struct FILE_wrapper{
   FILE* hndl;
@@ -211,7 +213,7 @@ inline int sockWrite (sockType s,void const* data,int len
 
 inline int sockRead (sockType s,void* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
-  int rc=::recvfrom(s,data,len,0,addr,fromLen);
+  int rc=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(rc>0)return rc;
   if(rc==0)throw fiasco("sockRead eof:")<<s<<" "<<len;
   auto err=GetError();
@@ -228,7 +230,7 @@ inline DWORD Write (HANDLE h,void const* data,int len){
   return bytesWritten;
 }
 
-inline DWORD (HANDLE h,void* data,int len){
+inline DWORD Read (HANDLE h,void* data,int len){
   DWORD bytesRead=0;
   if (!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
     throw failure("Read ")<<GetLastError();
