@@ -39,7 +39,7 @@ bool MarshalFile (char const* name,SendBuffer& buf){
 
 struct cmwRequest{
   ::sockaddr_in6 front;
-  ::socklen_t frontLen=sizeof(front);
+  ::socklen_t frontLen=sizeof front;
   marshallingInt const accountNbr;
   fixedString120 path;
   ::int32_t now;
@@ -57,11 +57,11 @@ struct cmwRequest{
     middleFile=pos+1;
     setDirectory(path());
     char lastrun[60];
-    ::snprintf(lastrun,sizeof(lastrun),"%s.lastrun",middleFile);
+    ::snprintf(lastrun,sizeof lastrun,"%s.lastrun",middleFile);
     fd=::open(lastrun,O_RDWR);
     previousTime=0;
     if(fd>=0){
-      if(::pread(fd,&previousTime,sizeof(previousTime),0)==-1){
+      if(::pread(fd,&previousTime,sizeof previousTime,0)==-1){
         auto err=errno;
         ::close(fd);
         throw failure("pread ")<<err;
@@ -72,7 +72,7 @@ struct cmwRequest{
     }
   }
 
-  void saveRuntime ()const{Write(fd,&now,sizeof(now));}
+  void saveRuntime ()const{Write(fd,&now,sizeof now);}
 
   void Marshal (SendBuffer& buf)const{
     accountNbr.Marshal(buf);
@@ -85,7 +85,7 @@ struct cmwRequest{
     }
 
     int8_t updatedFiles=0;
-    ind=buf.ReserveBytes(sizeof(updatedFiles));
+    ind=buf.ReserveBytes(sizeof updatedFiles);
     FILE_wrapper f{middleFile,"r"};
     while(auto line=f.fgets()){
       char const* tok=::strtok(line,"\n ");

@@ -24,14 +24,10 @@ int main (int ac,char** av){
     buf.sock_=res.getSock();
 
     ::frontMiddle::Marshal(buf,marshallingInt(av[1]),av[2]);
-    for(int waitTime=8000;waitTime<17000;waitTime*=2){
+    for(int waitTime=8;waitTime<17;waitTime*=2){
       buf.Send(res()->ai_addr,res()->ai_addrlen);
-      ::pollfd pd{buf.sock_,POLLIN,0};
-#ifdef __linux__
-      setNonblocking(pd.fd);
-#endif
-      if(pollWrapper(&pd,1,waitTime)>0){
-        buf.GetPacket();
+      setRcvTimeout(buf.sock_,waitTime);
+      if(buf.GetPacket()){
         if(GiveBool(buf))::exit(EXIT_SUCCESS);
         throw failure("cmwA:")<<GiveStringView(buf);
       }
@@ -43,6 +39,6 @@ int main (int ac,char** av){
     ::openlog(av[0],LOG_NDELAY,LOG_USER);
 #endif
     syslogWrapper(LOG_ERR,"%s",e.what());
+    ::exit(EXIT_FAILURE);
   }
-  ::exit(EXIT_FAILURE);
 }

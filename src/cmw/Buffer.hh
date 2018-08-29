@@ -99,14 +99,14 @@ struct LeastSignificantFirst{
   void Read (B<LeastSignificantFirst>& buf,float& f){
     uint32_t tmp;
     this->Read(buf,tmp);
-    ::memcpy(&f,&tmp,sizeof(f));
+    ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
   void Read (B<LeastSignificantFirst>& buf,double& d){
     uint64_t tmp;
     this->Read(buf,tmp);
-    ::memcpy(&d,&tmp,sizeof(d));
+    ::memcpy(&d,&tmp,sizeof d);
   }
 
   template<template<class> class B,class U>
@@ -164,14 +164,14 @@ struct MostSignificantFirst{
   void Read (B<MostSignificantFirst>& buf,float& f){
     uint32_t tmp;
     this->Read(buf,tmp);
-    ::memcpy(&f,&tmp,sizeof(f));
+    ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
   void Read (B<MostSignificantFirst>& buf,double& d){
     uint64_t tmp;
     this->Read(buf,tmp);
-    ::memcpy(&d,&tmp,sizeof(d));
+    ::memcpy(&d,&tmp,sizeof d);
   }
 
   template<template<class> class B,class U>
@@ -241,9 +241,9 @@ public:
     return false;
   }
 
-  void Update (){
+  bool Update (){
     msgLength=subTotal=0;
-    NextMessage();
+    return NextMessage();
   }
 
   template<class T>
@@ -490,9 +490,9 @@ private:
 public:
   BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>((char*)ar,0){}
 
-  void GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
+  bool GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
     this->packetLength=sockRead(sock_,ar,N,addr,len);
-    this->Update();
+    return this->Update();
   }
 };
 

@@ -56,7 +56,7 @@ struct FILE_wrapper{
       throw failure("FILE_wrapper ")<<fn<<" "<<mode<<" "<<GetError();
   }
 
-  inline char* fgets (){return ::fgets(line,sizeof(line),hndl);}
+  inline char* fgets (){return ::fgets(line,sizeof line,hndl);}
   inline ~FILE_wrapper (){::fclose(hndl);}
 };
 
@@ -137,6 +137,17 @@ inline void setDirectory (char const* d){
     throw failure("setDirectory ")<<d<<" "<<GetError();
 }
 
+inline void setRcvTimeout (sockType s,int timeInSeconds){
+#ifdef CMW_WINDOWS
+  DWORD time=timeInSeconds*1000;
+  if(::setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(const char*)&time,sizeof time)!=0)
+#else
+  struct timeval tv{timeInSeconds,0};
+  if(::setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,&tv,sizeof tv)!=0)
+#endif
+    throw failure("setRcvTimeout ")<<GetError();
+}
+
 inline sockType tcpServer (char const* port){
   getaddrinfoWrapper res(nullptr,port,SOCK_STREAM,AI_PASSIVE);
 #if 0
@@ -150,8 +161,7 @@ inline sockType tcpServer (char const* port){
     if(-1==s)continue;
 
     int on=1;
-    if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR
-                    ,(char const*)&on,sizeof(on))<0){
+    if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR,&on,sizeof on)<0){
       auto e=GetError();
       closeSocket(s);
       throw failure("tcpServer setsockopt ")<<e;
@@ -185,7 +195,7 @@ inline int acceptWrapper(sockType s){
 #if defined(__FreeBSD__)||defined(__linux__)
 inline int accept4Wrapper(sockType s,int flags){
   ::sockaddr amb;
-  ::socklen_t len=sizeof(amb);
+  ::socklen_t len=sizeof amb;
   int nu=::accept4(s,&amb,&len,flags);
   if(nu>=0)return nu;
 
