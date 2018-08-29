@@ -140,7 +140,7 @@ inline void setDirectory (char const* d){
 inline void setRcvTimeout (sockType s,int timeInSeconds){
 #ifdef CMW_WINDOWS
   DWORD time=timeInSeconds*1000;
-  if(::setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(const char*)&time,sizeof time)!=0)
+  if(::setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char const*)&time,sizeof time)!=0)
 #else
   struct timeval tv{timeInSeconds,0};
   if(::setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,&tv,sizeof tv)!=0)
@@ -161,7 +161,7 @@ inline sockType tcpServer (char const* port){
     if(-1==s)continue;
 
     int on=1;
-    if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR,&on,sizeof on)<0){
+    if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char const*)&on,sizeof on)<0){
       auto e=GetError();
       closeSocket(s);
       throw failure("tcpServer setsockopt ")<<e;
