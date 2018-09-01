@@ -261,9 +261,9 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
 
 int main (int ac,char** av){
   try{
-    ::openlog(*av,LOG_PID|LOG_NDELAY,LOG_USER);
-    if(ac!=2)throw failure("Usage: ")<<*av<<" config-file-name";
-    cmwAmbassador(*(av+1));
+    ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
+    if(ac!=2)throw failure("Usage: cmwA config-file-name");
+    cmwAmbassador{av[1]};
   }catch(::std::exception const& e){
     syslogWrapper(LOG_ERR,"Program ending: %s",e.what());
   }catch(...){
