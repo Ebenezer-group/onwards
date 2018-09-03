@@ -3,19 +3,20 @@ CXX=g++
 
 CXXFLAGS=-Isrc/ -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
 
-TIERS:=src/cmw/tiers/genz src/cmw/tiers/cmwA
+BASE:=src/cmw/tiers
+TIERS:=$(BASE)/genz $(BASE)/cmwA
 EXAMPLES:=example/sendExample example/receiveExample
 all:$(TIERS) $(EXAMPLES)
 PHONY:all
 
 #zz.middleBack.hh: account.hh middleBack.mdl
-#	genz 2 /home/brian/onwards/src/tiers/middleBack.mdl
+#	genz 2 /home/brian/onwards/src/cmw/tiers/middleBack.mdl
 
-src/cmw/tiers/genz: src/cmw/tiers/genz.cc
+$(BASE)/genz: $(BASE)/genz.cc
 	$(CXX) -std=c++17 $(CXXFLAGS)
 	size $@
 
-src/cmw/tiers/cmwA: src/cmw/tiers/cmwA.cc
+$(BASE)/cmwA: $(BASE)/cmwA.cc
 	$(CXX) -std=c++17 $(CXXFLAGS)
 	size $@
 

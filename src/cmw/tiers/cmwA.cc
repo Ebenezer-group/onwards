@@ -237,8 +237,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
     if(fds[0].revents&POLLOUT&&sendData())fds[0].events=POLLIN;
 
     if(fds[1].revents&POLLIN){
-      cmwRequest* req=nullptr;
       bool gotAddr=false;
+      cmwRequest* req=nullptr;
       try{
         req=&*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
         localbuf.GetPacket((::sockaddr*)&req->front,&req->frontLen);
@@ -264,10 +264,7 @@ int main (int ac,char** av){
     ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
     if(ac!=2)throw failure("Usage: cmwA config-file-name");
     cmwAmbassador{av[1]};
-  }catch(::std::exception const& e){
-    syslogWrapper(LOG_ERR,"Program ending: %s",e.what());
-  }catch(...){
-    syslogWrapper(LOG_ERR,"Unknown exception!");
-  }
+  }catch(::std::exception const& e){syslogWrapper(LOG_ERR,"Oops:%s",e.what());
+  }catch(...){syslogWrapper(LOG_ERR,"Unknown exception!");}
   return EXIT_FAILURE;
 }
