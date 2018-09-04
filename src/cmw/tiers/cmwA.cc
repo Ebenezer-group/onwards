@@ -246,7 +246,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
         new(req)cmwRequest(localbuf);
         ::middleBack::Marshal(cmwBuf,Generate,*req);
       }catch(::std::exception const& e){
-        syslogWrapper(LOG_ERR,"Accept request: %s",e.what());
+        syslogWrapper(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr){
           ::middleFront::Marshal(localbuf,false,{e.what()});
           localbuf.Send((::sockaddr*)&req->front,req->frontLen);

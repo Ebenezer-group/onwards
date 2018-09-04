@@ -509,8 +509,10 @@ struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 private:
   ::qlz_state_compress* compress;
   int const compSize;
+  int compPacketSize;
   int compIndex=0;
   char* compBuf;
+  bool kosher=true;
 
   ::qlz_state_decompress* decomp;
   int bytesRead=0;
@@ -565,32 +567,30 @@ public:
 
   using ReceiveBuffer<R>::rbuf;
   bool GotPacket (){
-    static bool kosher=true;
     try{
-      static int compressedSize;
       if(kosher){
         if(bytesRead<9){
           bytesRead+=Read(sock_,rbuf+bytesRead,9-bytesRead);
           if(bytesRead<9)return false;
-          if((compressedSize=::qlz_size_compressed(rbuf))>bufsize)
+          if((compPacketSize=::qlz_size_compressed(rbuf))>bufsize)
             throw failure("GotPacket compressed size too big");
           if((this->packetLength=::qlz_size_decompressed(rbuf))>bufsize)
             throw failure("GotPacket decompressed size too big ")
                            <<this->packetLength<<" "<<bufsize;
 
-          compressedStart=rbuf+bufsize-compressedSize;
+          compressedStart=rbuf+bufsize-compPacketSize;
           ::memmove(compressedStart,rbuf,9);
         }
-        bytesRead+=Read(sock_,compressedStart+bytesRead,compressedSize-bytesRead);
-        if(bytesRead<compressedSize)return false;
+        bytesRead+=Read(sock_,compressedStart+bytesRead,compPacketSize-bytesRead);
+        if(bytesRead<compPacketSize)return false;
 
         ::qlz_decompress(compressedStart,rbuf,decomp);
         bytesRead=0;
         this->Update();
         return true;
       }else{
-        bytesRead+=Read(sock_,rbuf,::std::min(bufsize,compressedSize-bytesRead));
-        if(bytesRead==compressedSize){
+        bytesRead+=Read(sock_,rbuf,::std::min(bufsize,compPacketSize-bytesRead));
+        if(bytesRead==compPacketSize){
           kosher=true;
           bytesRead=0;
         }
