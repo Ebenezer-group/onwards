@@ -6,7 +6,7 @@
 #include<stdlib.h>//exit
 using namespace ::cmw;
 
-void bail (char const* a,char const* b=nullptr){
+void bail (char const* a,char const* b=""){
   ::printf("%s%s\n",a,b);
 #ifndef CMW_WINDOWS
   ::openlog("genz",LOG_NDELAY,LOG_USER);
@@ -37,13 +37,11 @@ int main (int ac,char** av){
       setRcvTimeout(buf.sock_,waitTime);
       if(buf.GetPacket()){
         if(GiveBool(buf))::exit(EXIT_SUCCESS);
-	auto sv=GiveStringView(buf);
+        auto sv=GiveStringView(buf);
         *(const_cast<char*>(sv.data())+sv.length())='\0';
         bail("cmwA:",sv.data());
       }
     }
     bail("No reply received.  Is the cmwA running?");
-  }catch(::std::exception const& e){
-    bail(e.what());
-  }
+  }catch(::std::exception const& e){bail(e.what());}
 }
