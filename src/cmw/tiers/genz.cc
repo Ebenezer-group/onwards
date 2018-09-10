@@ -4,13 +4,21 @@
 #include"zz.frontMiddle.hh"
 #include<stdio.h>
 #include<stdlib.h>//exit
-
 using namespace ::cmw;
+
+void bail (char const* a,char const* b=nullptr){
+  ::printf("%s%s\n",a,b);
+#ifndef CMW_WINDOWS
+  ::openlog("genz",LOG_NDELAY,LOG_USER);
+#endif
+  syslogWrapper(LOG_ERR,"%s%s",a,b);
+  ::exit(EXIT_FAILURE);
+}
 
 int main (int ac,char** av){
   try{
     if(ac<3||ac>5)
-      throw failure("Usage: genz account-number .mdl-file-path [node] [port]");
+      bail("Usage: genz account-number .mdl-file-path [node] [port]");
 
     windowsStart();
     getaddrinfoWrapper res(ac<4?
@@ -29,16 +37,13 @@ int main (int ac,char** av){
       setRcvTimeout(buf.sock_,waitTime);
       if(buf.GetPacket()){
         if(GiveBool(buf))::exit(EXIT_SUCCESS);
-        throw failure("cmwA:")<<GiveStringView(buf);
+	auto sv=GiveStringView(buf);
+        *(const_cast<char*>(sv.data())+sv.length())='\0';
+        bail("cmwA:",sv.data());
       }
     }
-    throw failure("No reply received.  Is the cmwA running?");
+    bail("No reply received.  Is the cmwA running?");
   }catch(::std::exception const& e){
-    ::printf("%s: %s\n",av[0],e.what());
-#ifndef CMW_WINDOWS
-    ::openlog(av[0],LOG_NDELAY,LOG_USER);
-#endif
-    syslogWrapper(LOG_ERR,"%s",e.what());
-    ::exit(EXIT_FAILURE);
+    bail(e.what());
   }
 }
