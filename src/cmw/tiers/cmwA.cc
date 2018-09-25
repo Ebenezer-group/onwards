@@ -160,8 +160,13 @@ public:
   cmwAmbassador (char*);
 };
 
+void bail (char const* a,char const* b=""){
+  syslogWrapper(LOG_ERR,"%s%s",a,b);
+  ::exit(EXIT_FAILURE);
+}
+
 void checkField (char const* fld,FILE_wrapper& f){
-  if(::strcmp(fld,::strtok(f.fgets()," ")))throw failure("Expected ")<<fld;
+  if(::strcmp(fld,::strtok(f.fgets()," ")))bail("Expected ",fld);
 }
 
 cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
@@ -172,9 +177,9 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
       checkField("Password",cfg);
       accounts.emplace_back(num,::strtok(nullptr,"\n "));
     }else{
-      if(accounts.empty())throw failure("An account number is required.");
+      if(accounts.empty())bail("An account number is required.");
       if(!::strcmp("UDP-port-number",tok))break;
-      else throw failure("Expected UDP-port-number");
+      else bail("Expected UDP-port-number");
     }
   }
   fds[1].fd=localbuf.sock_=udpServer(::strtok(nullptr,"\n "));
@@ -262,7 +267,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
 int main (int ac,char** av){
   try{
     ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
-    if(ac!=2)throw failure("Usage: cmwA config-file-name");
+    if(ac!=2)bail("Usage: cmwA config-file-name");
     cmwAmbassador{av[1]};
   }catch(::std::exception const& e){syslogWrapper(LOG_ERR,"Oops:%s",e.what());
   }catch(...){syslogWrapper(LOG_ERR,"Unknown exception!");}
