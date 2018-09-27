@@ -196,12 +196,13 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   login();
   for(;;){
     if(0==pollWrapper(fds,2,keepaliveInterval)){
-      if(!pendingRequests.empty())reset("Keepalive","No reply from CMW");
-      try{
-        ::middleBack::Marshal(cmwBuf,Keepalive);
-        fds[0].events|=POLLOUT;
-        pendingRequests.push_back(nullptr);
-      }catch(::std::exception const& e){reset("Keepalive ",e.what());}
+      if(pendingRequests.empty())
+	try{
+          ::middleBack::Marshal(cmwBuf,Keepalive);
+          fds[0].events|=POLLOUT;
+          pendingRequests.push_back(nullptr);
+        }catch(::std::exception const& e){reset("Keepalive ",e.what());}
+      else reset("Keepalive","No reply from CMW");
       continue;
     }
 
