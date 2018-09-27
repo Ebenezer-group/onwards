@@ -196,8 +196,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   login();
   for(;;){
     if(0==pollWrapper(fds,2,keepaliveInterval)){
+      if(!pendingRequests.empty())reset("Keepalive","No reply from CMW");
       try{
-        if(!pendingRequests.empty())throw failure("No reply from CMW");
         ::middleBack::Marshal(cmwBuf,Keepalive);
         fds[0].events|=POLLOUT;
         pendingRequests.push_back(nullptr);
