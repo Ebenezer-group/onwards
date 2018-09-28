@@ -101,6 +101,11 @@ struct cmwRequest{
 };
 #include"zz.middleBack.hh"
 
+void bail (char const* a,char const* b=""){
+  syslogWrapper(LOG_ERR,"%s%s",a,b);
+  ::exit(EXIT_FAILURE);
+}
+
 class cmwAmbassador{
   BufferCompressed<
 #ifdef CMW_ENDIAN_BIG
@@ -135,7 +140,11 @@ class cmwAmbassador{
     if(GiveBool(cmwBuf)){
       setNonblocking(fds[0].fd);
       fds[0].events=POLLIN;
-    }else throw failure("Login:")<<GiveStringView(cmwBuf);
+    }else{
+      auto v=GiveStringView(cmwBuf);
+      *(const_cast<char*>(v.data())+v.length())='\0';
+      bail("Login:",v.data());
+    }
   }
 
   void reset (char const* context,char const* detail){
@@ -159,11 +168,6 @@ class cmwAmbassador{
 public:
   cmwAmbassador (char*);
 };
-
-void bail (char const* a,char const* b=""){
-  syslogWrapper(LOG_ERR,"%s%s",a,b);
-  ::exit(EXIT_FAILURE);
-}
 
 void checkField (char const* fld,FILE_wrapper& f){
   if(::strcmp(fld,::strtok(f.fgets()," ")))bail("Expected ",fld);
