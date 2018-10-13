@@ -17,7 +17,7 @@ using namespace ::cmw;
 int main()
 {
   try{
-    windowsStart();
+    winStart();
     BufferStack<SameFormat> buf;
     buf.sock_=udpServer("12345");
 

@@ -18,9 +18,9 @@ void bail (char const* a,char const* b=""){
 int main (int ac,char** av){
   try{
     if(ac<3||ac>5)
-      bail("Usage: genz account-number .mdl-file-path [node] [port]");
+      bail("Usage: genz account-num mdl-file-path [node] [port]");
 
-    windowsStart();
+    winStart();
     getaddrinfoWrapper res(ac<4?
 #ifdef __linux__
                            "127.0.0.1":av[3]

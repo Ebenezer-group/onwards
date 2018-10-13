@@ -30,7 +30,7 @@ using namespace ::cmw;
 int main()
 {
   try{
-    windowsStart();
+    winStart();
     BufferStack<SameFormat> buffer;
     getaddrinfoWrapper res(
 #ifdef __linux__

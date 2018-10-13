@@ -149,7 +149,7 @@ class cmwAmbassador{
 
   void reset (char const* context,char const* detail){
     syslogWrapper(LOG_ERR,"%s:%s",context,detail);
-    ::middleFront::Marshal(localbuf,false,{context,detail});
+    ::middleFront::Marshal(localbuf,false,{context," ",detail});
     for(auto& r:pendingRequests)
       if(r.get())localbuf.Send((::sockaddr*)&r->front,r->frontLen);
     pendingRequests.clear();
@@ -160,7 +160,7 @@ class cmwAmbassador{
 
   bool sendData (){
     try{return cmwBuf.Flush();}catch(::std::exception const& e){
-      reset("sendData ",e.what());
+      reset("sendData",e.what());
       return true;
     }
   }
@@ -201,11 +201,11 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   for(;;){
     if(0==pollWrapper(fds,2,keepaliveInterval)){
       if(pendingRequests.empty())
-	try{
+        try{
           ::middleBack::Marshal(cmwBuf,Keepalive);
           fds[0].events|=POLLOUT;
           pendingRequests.push_back(nullptr);
-        }catch(::std::exception const& e){reset("Keepalive ",e.what());}
+        }catch(::std::exception const& e){reset("Keepalive",e.what());}
       else reset("Keepalive","No reply from CMW");
       continue;
     }
@@ -231,7 +231,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
         }while(cmwBuf.NextMessage());
       }
     }catch(fiasco const& e){
-      reset("fiasco ",e.what());
+      reset("fiasco",e.what());
       continue;
     }catch(::std::exception const& e){
       syslogWrapper(LOG_ERR,"Problem handling reply from CMW %s",e.what());

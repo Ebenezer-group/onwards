@@ -83,7 +83,7 @@ struct fiasco:failure{
 using sockType=SOCKET;
 using fileType=HANDLE;
 inline int GetError (){return WSAGetLastError();}
-inline void windowsStart (){
+inline void winStart (){
   WSADATA w;
   int rc=WSAStartup(MAKEWORD(2,2),&w);
   if(0!=rc)throw failure("WSAStartup:")<<rc;
@@ -92,6 +92,6 @@ inline void windowsStart (){
 using sockType=int;
 using fileType=int;
 inline int GetError (){return errno;}
-inline void windowsStart (){}
+inline void winStart (){}
 #endif
 }
