@@ -6,7 +6,7 @@
 #include<stdlib.h>//exit
 using namespace ::cmw;
 
-void bail (char const* a,char const* b=""){
+void bail (char const* a,char const* b="")noexcept{
   ::printf("%s%s\n",a,b);
 #ifndef CMW_WINDOWS
   ::openlog("genz",LOG_NDELAY,LOG_USER);
@@ -16,10 +16,10 @@ void bail (char const* a,char const* b=""){
 }
 
 int main (int ac,char** av){
-  try{
-    if(ac<3||ac>5)
-      bail("Usage: genz account-num mdl-file-path [node] [port]");
+  if(ac<3||ac>5)
+    bail("Usage: genz account-num mdl-file-path [node] [port]");
 
+  try{
     winStart();
     getaddrinfoWrapper res(ac<4?
 #ifdef __linux__
