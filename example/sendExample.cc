@@ -31,7 +31,6 @@ int main()
 {
   try{
     winStart();
-    BufferStack<SameFormat> buffer;
     getaddrinfoWrapper res(
 #ifdef __linux__
 		    "127.0.0.1"
@@ -39,7 +38,7 @@ int main()
 		    "::1"
 #endif
 		    ,"12345",SOCK_DGRAM);
-    buffer.sock_=res.getSock();
+    BufferStack<SameFormat> buf(res.getSock());
 
     ::std::cout<<"Enter the ID of the message to send: 1, 2, 3 or 4."<<::std::endl;
     int messageID;
@@ -48,14 +47,14 @@ int main()
       case messageid1:
       {
         ::std::vector<int32_t> vec {100,97,94,91,88,85};
-        ::sendMessages::Marshal(buffer,messageid1,vec,"Proverbs 24:27");
+        ::sendMessages::Marshal(buf,messageid1,vec,"Proverbs 24:27");
         break;
       }
 
       case messageid2:
       {
         ::std::set<int32_t> iset {100,97,94,91,88,85};
-        ::sendMessages::Marshal(buffer,messageid2,iset);
+        ::sendMessages::Marshal(buf,messageid2,iset);
         break;
       }
 
@@ -65,21 +64,21 @@ int main()
                                                     ,{{3.3,4.4}}
                                                     ,{{5.5,6.6}}
                                                   }};
-        ::sendMessages::Marshal(buffer,messageid3,ar);
+        ::sendMessages::Marshal(buf,messageid3,ar);
         break;
       }
 
       case messageid4:
       {
         ::plf::colony<::std::string> clny {"Beautiful words ", "wonderful words ", "of life"};
-	::sendMessages::Marshal(buffer,messageid4,clny);
+	::sendMessages::Marshal(buf,messageid4,clny);
         break;
       }
 
       default:
         return 0;
     }
-    buffer.Send(res()->ai_addr, res()->ai_addrlen);
+    buf.Send(res()->ai_addr, res()->ai_addrlen);
     return 1;
   } catch(::std::exception const& ex){
     ::std::cout<<"failure: " << ex.what()<<::std::endl;

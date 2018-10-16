@@ -489,6 +489,7 @@ private:
 
 public:
   BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>((char*)ar,0){}
+  BufferStack (int s):BufferStack(){sock_=s;}
 
   bool GetPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
     this->packetLength=sockRead(sock_,ar,N,addr,len);

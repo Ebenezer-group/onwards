@@ -18,8 +18,7 @@ int main()
 {
   try{
     winStart();
-    BufferStack<SameFormat> buf;
-    buf.sock_=udpServer("12345");
+    BufferStack<SameFormat> buf(udpServer("12345"));
 
     for(;;){
       buf.GetPacket();

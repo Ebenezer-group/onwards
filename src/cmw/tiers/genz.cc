@@ -28,8 +28,7 @@ int main (int ac,char** av){
                            "::1":av[3]
 #endif
                            ,ac<5?"55555":av[4],SOCK_DGRAM);
-    BufferStack<SameFormat> buf;
-    buf.sock_=res.getSock();
+    BufferStack<SameFormat> buf(res.getSock());
 
     ::frontMiddle::Marshal(buf,marshallingInt(av[1]),av[2]);
     for(int waitTime=8;waitTime<17;waitTime*=2){
