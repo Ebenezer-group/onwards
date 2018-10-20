@@ -274,7 +274,6 @@ int main (int ac,char** av){
     ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
     if(ac!=2)bail("Usage: cmwA config-file-name");
     cmwAmbassador{av[1]};
-  }catch(::std::exception const& e){syslogWrapper(LOG_ERR,"Oops:%s",e.what());
-  }catch(...){syslogWrapper(LOG_ERR,"Unknown exception!");}
-  return EXIT_FAILURE;
+  }catch(::std::exception const& e){bail("Oops:",e.what());
+  }catch(...){bail("Unknown exception!");}
 }

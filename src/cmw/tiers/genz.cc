@@ -36,9 +36,9 @@ int main (int ac,char** av){
       setRcvTimeout(buf.sock_,tm);
       if(buf.GetPacket()){
         if(GiveBool(buf))::exit(EXIT_SUCCESS);
-        auto sv=GiveStringView(buf);
-        *(const_cast<char*>(sv.data())+sv.length())='\0';
-        bail("cmwA:",sv.data());
+        auto v=GiveStringView(buf);
+        *(const_cast<char*>(v.data())+v.length())='\0';
+        bail("cmwA:",v.data());
       }
     }
     bail("No reply received.  Is the cmwA running?");
