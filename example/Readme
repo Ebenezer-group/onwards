@@ -1,4 +1,4 @@
-These example programs don't require a C++ 2017 compiler.
+These example programs don't require a 2017 C++ compiler.
 They are built with -std=c++11.
 
 It helps to have two command prompts available to run the

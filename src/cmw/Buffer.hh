@@ -110,21 +110,18 @@ struct LeastSignificantFirst{
   }
 
   template<template<class> class B,class U>
-  void ReadBlock (B<LeastSignificantFirst>& buf
-                  ,U* data,int elements){
+  void ReadBlock (B<LeastSignificantFirst>& buf,U* data,int elements){
     for(int i=0;i<elements;++i){*(data+i)=buf.template Give<U>();}
   }
 
   //Overloads for uint8_t and int8_t
   template<template<class> class B>
-  void ReadBlock (B<LeastSignificantFirst>& buf
-                  ,uint8_t* data,int elements){
+  void ReadBlock (B<LeastSignificantFirst>& buf,uint8_t* data,int elements){
     buf.Give(data,elements);
   }
 
   template<template<class> class B>
-  void ReadBlock (B<LeastSignificantFirst>& buf
-                  ,int8_t* data,int elements){
+  void ReadBlock (B<LeastSignificantFirst>& buf,int8_t* data,int elements){
     buf.Give(data,elements);
   }
 };
@@ -175,20 +172,17 @@ struct MostSignificantFirst{
   }
 
   template<template<class> class B,class U>
-  void ReadBlock (B<MostSignificantFirst>& buf
-                  ,U* data,int elements){
+  void ReadBlock (B<MostSignificantFirst>& buf,U* data,int elements){
     for(int i=0;i<elements;++i){*(data+i)=buf.template Give<U>();}
   }
 
   template<template<class> class B>
-  void ReadBlock (B<MostSignificantFirst>& buf
-                  ,uint8_t* data,int elements){
+  void ReadBlock (B<MostSignificantFirst>& buf,uint8_t* data,int elements){
     buf.Give(data,elements);
   }
 
   template<template<class> class B>
-  void ReadBlock (B<MostSignificantFirst>& buf
-                  ,int8_t* data,int elements){
+  void ReadBlock (B<MostSignificantFirst>& buf,int8_t* data,int elements){
     buf.Give(data,elements);
   }
 };

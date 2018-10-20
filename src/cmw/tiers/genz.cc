@@ -31,9 +31,9 @@ int main (int ac,char** av){
     BufferStack<SameFormat> buf(res.getSock());
 
     ::frontMiddle::Marshal(buf,marshallingInt(av[1]),av[2]);
-    for(int waitTime=8;waitTime<17;waitTime*=2){
+    for(int tm=8;tm<17;tm+=8){
       buf.Send(res()->ai_addr,res()->ai_addrlen);
-      setRcvTimeout(buf.sock_,waitTime);
+      setRcvTimeout(buf.sock_,tm);
       if(buf.GetPacket()){
         if(GiveBool(buf))::exit(EXIT_SUCCESS);
         auto sv=GiveStringView(buf);
