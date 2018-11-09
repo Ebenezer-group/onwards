@@ -18,7 +18,7 @@ void Give (::cmw::ReceiveBuffer<R>& buf
     a.resize(a.size()+count[0]);
     buf.GiveBlock(&(*(a.end()-count[0])),count[0]);
   }
-  b=GiveString(buf);
+  b=giveString(buf);
 }
 
 template<class R>
@@ -45,7 +45,7 @@ void Give (::cmw::ReceiveBuffer<R>& buf
   count[0]=Give<uint32_t>(buf);
   a.reserve(a.size()+count[0]);
   for(;count[0]>0;--count[0]){
-    a.insert(GiveString(buf));
+    a.insert(giveString(buf));
   }
 }
 }

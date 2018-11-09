@@ -137,11 +137,11 @@ class cmwAmbassador{
 
     while(!cmwBuf.Flush());
     while(!cmwBuf.GotPacket());
-    if(GiveBool(cmwBuf)){
+    if(giveBool(cmwBuf)){
       setNonblocking(fds[0].fd);
       fds[0].events=POLLIN;
     }else{
-      auto v=GiveStringView(cmwBuf);
+      auto v=giveStringView(cmwBuf);
       *(const_cast<char*>(v.data())+v.length())='\0';
       bail("Login:",v.data());
     }
@@ -217,13 +217,13 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
           assert(!pendingRequests.empty());
           if(pendingRequests.front().get()){
             auto const& req=*pendingRequests.front();
-            if(GiveBool(cmwBuf)){
+            if(giveBool(cmwBuf)){
               req.saveRuntime();
               setDirectory(req.path.c_str());
-              GiveFiles(cmwBuf);
+              giveFiles(cmwBuf);
               ::middleFront::Marshal(localbuf,true);
             }else ::middleFront::Marshal(localbuf,false,
-                               {"CMW:",GiveStringView(cmwBuf)});
+                               {"CMW:",giveStringView(cmwBuf)});
             localbuf.Send((::sockaddr*)&req.front,req.frontLen);
             localbuf.Reset();
           }

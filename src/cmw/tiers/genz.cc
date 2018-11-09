@@ -35,8 +35,8 @@ int main (int ac,char** av){
       buf.Send(res()->ai_addr,res()->ai_addrlen);
       setRcvTimeout(buf.sock_,tm);
       if(buf.GetPacket()){
-        if(GiveBool(buf))::exit(EXIT_SUCCESS);
-        auto v=GiveStringView(buf);
+        if(giveBool(buf))::exit(EXIT_SUCCESS);
+        auto v=giveStringView(buf);
         *(const_cast<char*>(v.data())+v.length())='\0';
         bail("cmwA:",v.data());
       }

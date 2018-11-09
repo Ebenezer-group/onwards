@@ -295,28 +295,28 @@ template<class T,class R>
 T Give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
 
 template<class R>
-bool GiveBool (ReceiveBuffer<R>& buf){
+bool giveBool (ReceiveBuffer<R>& buf){
   switch(buf.GiveOne()){
     case 0:return false;
     case 1:return true;
-    default:throw failure("GiveBool");
+    default:throw failure("giveBool");
   }
 }
 
 template<class R>
-::std::string GiveString (ReceiveBuffer<R>& buf){
+::std::string giveString (ReceiveBuffer<R>& buf){
   return buf.template GiveStringy<::std::string>();
 }
 
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
 template<class R>
-auto GiveStringView (ReceiveBuffer<R>& buf){
+auto giveStringView (ReceiveBuffer<R>& buf){
   return buf.template GiveStringy<::std::string_view>();
 }
 
 template<class R>
-auto GiveStringView_plus (ReceiveBuffer<R>& buf){
-  auto v=GiveStringView(buf);
+auto giveStringView_plus (ReceiveBuffer<R>& buf){
+  auto v=giveStringView(buf);
   buf.GiveOne();
   return v;
 }
@@ -655,7 +655,7 @@ public:
   inline explicit File (::std::string_view n):name(n){}
 
   template<class R>
-  explicit File (ReceiveBuffer<R>& buf):name(GiveStringView_plus(buf)){
+  explicit File (ReceiveBuffer<R>& buf):name(giveStringView_plus(buf)){
     fileWrapper fl(name.data(),O_WRONLY|O_CREAT|O_TRUNC
                    ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     buf.GiveFile(fl.d);
@@ -665,7 +665,7 @@ public:
 };
 
 template<class R>
-void GiveFiles (ReceiveBuffer<R>& b){
+void giveFiles (ReceiveBuffer<R>& b){
   for(auto n=marshallingInt{b}();n>0;--n)File{b};
 }
 #endif
