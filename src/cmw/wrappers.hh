@@ -86,6 +86,7 @@ class getaddrinfoWrapper{
 
   inline ~getaddrinfoWrapper (){::freeaddrinfo(head);}
   inline ::addrinfo* operator() (){return addr;}
+  inline void inc (){if(addr!=nullptr)addr=addr->ai_next;}
   inline sockType getSock (){
     for(;addr!=nullptr;addr=addr->ai_next){
       auto s=::socket(addr->ai_family,addr->ai_socktype,0);
@@ -148,33 +149,28 @@ inline void setRcvTimeout (sockType s,int time){
 
 inline sockType tcpServer (char const* port){
   getaddrinfoWrapper res(nullptr,port,SOCK_STREAM,AI_PASSIVE);
-  auto r=res();
 #if 0
-  r=r->ai_next;
+  res.inc();
 #endif
-  for(;r!=nullptr;r=r->ai_next){
-    auto s=::socket(r->ai_family,r->ai_socktype,0);
-    if(-1==s)continue;
+  auto s=res.getSock();
 
-    int on=1;
-    if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char*)&on,sizeof on)<0){
-      auto e=GetError();
-      closeSocket(s);
-      throw failure("tcpServer setsockopt ")<<e;
-    }
-    if(::bind(s,r->ai_addr,r->ai_addrlen)<0){
-      auto e=GetError();
-      closeSocket(s);
-      throw failure("tcpServer bind ")<<e;
-    }
-    if(::listen(s,SOMAXCONN)<0){
-      auto e=GetError();
-      closeSocket(s);
-      throw failure("tcpServer listen ")<<e;
-    }
-    return s;
+  int on=1;
+  if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char*)&on,sizeof on)<0){
+    auto e=GetError();
+    closeSocket(s);
+    throw failure("tcpServer setsockopt ")<<e;
   }
-  throw failure("tcpServer");
+  if(::bind(s,res()->ai_addr,res()->ai_addrlen)<0){
+    auto e=GetError();
+    closeSocket(s);
+    throw failure("tcpServer bind ")<<e;
+  }
+  if(::listen(s,SOMAXCONN)<0){
+    auto e=GetError();
+    closeSocket(s);
+    throw failure("tcpServer listen ")<<e;
+  }
+  return s;
 }
 
 inline int acceptWrapper(sockType s){
