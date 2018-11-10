@@ -72,20 +72,21 @@ inline void closeSocket (sockType s){
 }
 
 class getaddrinfoWrapper{
+  ::addrinfo* head;
   ::addrinfo* addr;
 
  public:
   inline getaddrinfoWrapper (char const* node,char const* port
                              ,int socktype,int flags=0){
     ::addrinfo hints{flags,AF_UNSPEC,socktype,0,0,0,0,0};
-    int rc=::getaddrinfo(node,port,&hints,&addr);
+    int rc=::getaddrinfo(node,port,&hints,&head);
     if(rc!=0)throw failure("getaddrinfo ")<<gai_strerror(rc);
   }
 
-  inline ~getaddrinfoWrapper (){::freeaddrinfo(addr);}
+  inline ~getaddrinfoWrapper (){::freeaddrinfo(head);}
   inline ::addrinfo* operator() (){return addr;}
   inline sockType getSock (){
-    for(;addr!=nullptr;addr=addr->ai_next){
+    for(addr=head;addr!=nullptr;addr=addr->ai_next){
       auto s=::socket(addr->ai_family,addr->ai_socktype,0);
       if(-1!=s)return s;
     }
