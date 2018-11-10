@@ -77,7 +77,7 @@ class getaddrinfoWrapper{
  public:
   inline getaddrinfoWrapper (char const* node,char const* port
                              ,int socktype,int flags=0){
-    ::addrinfo hints={flags,AF_UNSPEC,socktype,0,0,0,0,0};
+    ::addrinfo hints{flags,AF_UNSPEC,socktype,0,0,0,0,0};
     int rc=::getaddrinfo(node,port,&hints,&addr);
     if(rc!=0)throw failure("getaddrinfo ")<<gai_strerror(rc);
   }
@@ -87,8 +87,7 @@ class getaddrinfoWrapper{
   inline sockType getSock (){
     for(;addr!=nullptr;addr=addr->ai_next){
       auto s=::socket(addr->ai_family,addr->ai_socktype,0);
-      if(-1==s)continue;
-      return s;
+      if(-1!=s)return s;
     }
     throw failure("getaddrinfo getSock");
   }
