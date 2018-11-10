@@ -12,19 +12,19 @@ PHONY:all
 #zz.middleBack.hh: account.hh middleBack.mdl
 #	genz 2 /home/brian/onwards/src/cmw/tiers/middleBack.mdl
 
-$(BASE)/genz: $(BASE)/genz.cc
+$(BASE)/genz:$(BASE)/genz.cc
 	$(CXX) -std=c++17 $(CXXFLAGS)
 	size $@
 
-$(BASE)/cmwA: $(BASE)/cmwA.cc
+$(BASE)/cmwA:$(BASE)/cmwA.cc
 	$(CXX) -std=c++17 $(CXXFLAGS)
 	size $@
 
 EXFLAGS:=-std=c++11 -Iexample
-example/sendExample: example/sendExample.cc
+example/sendExample:example/sendExample.cc
 	$(CXX) $(EXFLAGS) $(CXXFLAGS)
 	size $@
-example/receiveExample: example/receiveExample.cc
+example/receiveExample:example/receiveExample.cc
 	$(CXX) $(EXFLAGS) $(CXXFLAGS)
 	size $@
 

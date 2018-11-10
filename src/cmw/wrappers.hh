@@ -42,7 +42,6 @@ struct fileWrapper{
 	  d(0==mode?::open(name,flags): ::open(name,flags,mode)){
     if(d<0)throw failure("fileWrapper ")<<name<<" "<<errno;
   }
-
   inline ~fileWrapper (){::close(d);}
 };
 #endif
@@ -55,7 +54,6 @@ struct FILE_wrapper{
     if((hndl=::fopen(fn,mode))==nullptr)
       throw failure("FILE_wrapper ")<<fn<<" "<<mode<<" "<<GetError();
   }
-
   inline char* fgets (){return ::fgets(line,sizeof line,hndl);}
   inline ~FILE_wrapper (){::fclose(hndl);}
 };
@@ -137,14 +135,13 @@ inline void setDirectory (char const* d){
     throw failure("setDirectory ")<<d<<" "<<GetError();
 }
 
-inline void setRcvTimeout (sockType s,int timeInSeconds){
+inline void setRcvTimeout (sockType s,int time){
 #ifdef CMW_WINDOWS
-  DWORD time=timeInSeconds*1000;
-  if(::setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char const*)&time,sizeof time)!=0)
+  DWORD t=time*1000;
 #else
-  struct timeval tv{timeInSeconds,0};
-  if(::setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,&tv,sizeof tv)!=0)
+  struct timeval t{time,0};
 #endif
+  if(::setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&t,sizeof t)!=0)
     throw failure("setRcvTimeout ")<<GetError();
 }
 
@@ -161,24 +158,21 @@ inline sockType tcpServer (char const* port){
     if(-1==s)continue;
 
     int on=1;
-    if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char const*)&on,sizeof on)<0){
+    if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char*)&on,sizeof on)<0){
       auto e=GetError();
       closeSocket(s);
       throw failure("tcpServer setsockopt ")<<e;
     }
-
     if(::bind(s,r->ai_addr,r->ai_addrlen)<0){
       auto e=GetError();
       closeSocket(s);
       throw failure("tcpServer bind ")<<e;
     }
-
     if(::listen(s,SOMAXCONN)<0){
       auto e=GetError();
       closeSocket(s);
       throw failure("tcpServer listen ")<<e;
     }
-
     return s;
   }
   throw failure("tcpServer");
@@ -198,7 +192,6 @@ inline int accept4Wrapper(sockType s,int flags){
   ::socklen_t len=sizeof amb;
   int nu=::accept4(s,&amb,&len,flags);
   if(nu>=0)return nu;
-
   if(ECONNABORTED==GetError())return 0;
   throw failure("accept4Wrapper ")<<GetError();
 }
