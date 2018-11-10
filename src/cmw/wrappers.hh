@@ -81,12 +81,13 @@ class getaddrinfoWrapper{
     ::addrinfo hints{flags,AF_UNSPEC,socktype,0,0,0,0,0};
     int rc=::getaddrinfo(node,port,&hints,&head);
     if(rc!=0)throw failure("getaddrinfo ")<<gai_strerror(rc);
+    addr=head;
   }
 
   inline ~getaddrinfoWrapper (){::freeaddrinfo(head);}
   inline ::addrinfo* operator() (){return addr;}
   inline sockType getSock (){
-    for(addr=head;addr!=nullptr;addr=addr->ai_next){
+    for(;addr!=nullptr;addr=addr->ai_next){
       auto s=::socket(addr->ai_family,addr->ai_socktype,0);
       if(-1!=s)return s;
     }
@@ -147,13 +148,11 @@ inline void setRcvTimeout (sockType s,int time){
 
 inline sockType tcpServer (char const* port){
   getaddrinfoWrapper res(nullptr,port,SOCK_STREAM,AI_PASSIVE);
-#if 0
   auto r=res();
+#if 0
   r=r->ai_next;
-  for(;r!=nullptr;r=r->ai_next){
-#else
-  for(auto r=res();r!=nullptr;r=r->ai_next){
 #endif
+  for(;r!=nullptr;r=r->ai_next){
     auto s=::socket(r->ai_family,r->ai_socktype,0);
     if(-1==s)continue;
 
