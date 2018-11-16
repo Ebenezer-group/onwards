@@ -71,6 +71,12 @@ inline void closeSocket (sockType s){
   }
 }
 
+inline int preserveError (sockType s){
+  auto e=GetError();
+  closeSocket(s);
+  return e;
+}
+
 class getaddrinfoWrapper{
   ::addrinfo* head;
   ::addrinfo* addr;
@@ -80,7 +86,7 @@ class getaddrinfoWrapper{
                              ,int socktype,int flags=0){
     ::addrinfo hints{flags,AF_UNSPEC,socktype,0,0,0,0,0};
     int rc=::getaddrinfo(node,port,&hints,&head);
-    if(rc!=0)throw failure("getaddrinfo ")<<gai_strerror(rc);
+    if(rc!=0)throw failure("getaddrinfo ")<<::gai_strerror(rc);
     addr=head;
   }
 
@@ -103,9 +109,7 @@ inline sockType connectWrapper (char const* node,char const* port){
   getaddrinfoWrapper res(node,port,SOCK_STREAM);
   auto s=res.getSock();
   if(0==::connect(s,res()->ai_addr,res()->ai_addrlen))return s;
-  auto e=errno;
-  closeSocket(s);
-  errno=e;
+  errno=preserveError(s);
   return -1;
 }
 
@@ -156,18 +160,15 @@ inline sockType tcpServer (char const* port){
 
   int on=1;
   if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char*)&on,sizeof on)<0){
-    auto e=GetError();
-    closeSocket(s);
+    auto e=preserveError(s);
     throw failure("tcpServer setsockopt ")<<e;
   }
   if(::bind(s,res()->ai_addr,res()->ai_addrlen)<0){
-    auto e=GetError();
-    closeSocket(s);
+    auto e=preserveError(s);
     throw failure("tcpServer bind ")<<e;
   }
   if(::listen(s,SOMAXCONN)<0){
-    auto e=GetError();
-    closeSocket(s);
+    auto e=preserveError(s);
     throw failure("tcpServer listen ")<<e;
   }
   return s;
@@ -176,7 +177,6 @@ inline sockType tcpServer (char const* port){
 inline int acceptWrapper(sockType s){
   int nu=::accept(s,nullptr,nullptr);
   if(nu>=0)return nu;
-
   if(ECONNABORTED==GetError())return 0;
   throw failure("acceptWrapper ")<<GetError();
 }
@@ -196,8 +196,7 @@ inline sockType udpServer (char const* port){
   getaddrinfoWrapper res(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
   auto s=res.getSock();
   if(0==::bind(s,res()->ai_addr,res()->ai_addrlen))return s;
-  auto e=GetError();
-  closeSocket(s);
+  auto e=preserveError(s);
   throw failure("udpServer ")<<e;
 }
 

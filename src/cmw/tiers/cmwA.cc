@@ -142,7 +142,7 @@ class cmwAmbassador{
       fds[0].events=POLLIN;
     }else{
       auto v=giveStringView(cmwBuf);
-      *(const_cast<char*>(v.data())+v.length())='\0';
+      *(const_cast<char*>(v.data())+v.length())=0;
       bail("Login:",v.data());
     }
   }
