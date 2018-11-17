@@ -29,9 +29,9 @@ template<class R> class ReceiveBuffer;
 class marshallingInt{
   int32_t val;
 public:
-  inline marshallingInt (){}
-  inline explicit marshallingInt (int32_t v):val(v){}
-  inline explicit marshallingInt (char const* v):val(fromChars(v)){}
+  marshallingInt (){}
+  explicit marshallingInt (int32_t v):val(v){}
+  explicit marshallingInt (char const* v):val(fromChars(v)){}
 
   //Reads a sequence of bytes in variable-length format and
   //builds a 32 bit integer.
@@ -47,8 +47,8 @@ public:
     }
   }
 
-  inline void operator= (int32_t r){val=r;}
-  inline int32_t operator() ()const{return val;}
+  void operator= (int32_t r){val=r;}
+  int32_t operator() ()const{return val;}
   inline void Marshal (SendBuffer&)const;
 };
 
@@ -334,13 +334,13 @@ protected:
 public:
   sockType sock_=-1;
 
-  inline SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
+  SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
-  inline void checkSpace (int n){
+  void checkSpace (int n){
     if(n>bufsize-index)throw failure("SendBuffer checkSpace:")<<n<<" "<<index;
   }
 
-  inline void Receive (void const* data,int size){
+  void Receive (void const* data,int size){
     checkSpace(size);
     ::memcpy(buf+index,data,size);
     index+=size;
@@ -352,7 +352,7 @@ public:
     Receive(&t,sizeof(T));
   }
 
-  inline int ReserveBytes (int n){
+  int ReserveBytes (int n){
     checkSpace(n);
     auto i=index;
     index+=n;
@@ -365,7 +365,7 @@ public:
     ::memcpy(buf+where,&t,sizeof(T));
   }
 
-  inline void FillInSize (int32_t max){
+  void FillInSize (int32_t max){
     int32_t marshalledBytes=index-savedSize;
     if(marshalledBytes>max)
       throw failure("Size of marshalled data exceeds max ")<<max;
@@ -374,8 +374,8 @@ public:
     savedSize=index;
   }
 
-  inline void Reset (){savedSize=index=0;}
-  inline void Rollback (){index=savedSize;}
+  void Reset (){savedSize=index=0;}
+  void Rollback (){index=savedSize;}
 
   template<typename... T>
   void Receive_variadic (char const* format,T&&... t){
@@ -385,14 +385,14 @@ public:
     index+=size;
   }
 
-  inline void ReceiveFile (fileType d,int32_t sz){
+  void ReceiveFile (fileType d,int32_t sz){
     Receive(sz);
     checkSpace(sz);
     if(Read(d,buf+index,sz)!=sz)throw failure("SendBuffer ReceiveFile");
     index+=sz;
   }
 
-  inline bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
+  bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
     int const bytes=sockWrite(sock_,buf,index,addr,len);
     if(bytes==index){Reset();return true;}
 
@@ -403,12 +403,12 @@ public:
   }
 
   //UDP-friendly alternative to Flush
-  inline void Send (::sockaddr* addr=nullptr,::socklen_t len=0)
+  void Send (::sockaddr* addr=nullptr,::socklen_t len=0)
   {sockWrite(sock_,buf,index,addr,len);}
 
-  inline unsigned char* data (){return buf;}
-  inline int GetIndex (){return index;}
-  inline int GetSize (){return bufsize;}
+  unsigned char* data (){return buf;}
+  int GetIndex (){return index;}
+  int GetSize (){return bufsize;}
 };
 
 inline void Receive (SendBuffer&b,bool bl){b.Receive(static_cast<unsigned char>(bl));}
@@ -463,7 +463,7 @@ void ReceiveGroupPointer (SendBuffer& b,T const& grp){
 }
 
 //Encode integer into variable-length format.
-void marshallingInt::Marshal (SendBuffer& b)const{
+inline void marshallingInt::Marshal (SendBuffer& b)const{
   uint32_t n=val;
   for(;;){
     uint8_t a=n&127;
@@ -495,8 +495,8 @@ template<typename T>
 void reset (T* p){::memset(p,0,sizeof(T));}
 
 struct SendBufferHeap:SendBuffer{
-  inline SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
-  inline ~SendBufferHeap (){delete[]buf;}
+  SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
+  ~SendBufferHeap (){delete[]buf;}
 };
 
 template<typename R>
@@ -652,7 +652,7 @@ using fixedString120=fixedString<120>;
 class File{
   ::std::string_view name;
 public:
-  inline explicit File (::std::string_view n):name(n){}
+  explicit File (::std::string_view n):name(n){}
 
   template<class R>
   explicit File (ReceiveBuffer<R>& buf):name(giveStringView_plus(buf)){
@@ -661,7 +661,7 @@ public:
     buf.GiveFile(fl.d);
   }
 
-  inline char const* Name ()const{return name.data();}
+  char const* Name ()const{return name.data();}
 };
 
 template<class R>

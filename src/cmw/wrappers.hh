@@ -38,11 +38,11 @@ inline int fromChars (char const* p){
 struct fileWrapper{
   int const d;
 
-  inline fileWrapper (char const* name,int flags,mode_t mode=0):
+  fileWrapper (char const* name,int flags,mode_t mode=0):
 	  d(0==mode?::open(name,flags): ::open(name,flags,mode)){
     if(d<0)throw failure("fileWrapper ")<<name<<" "<<errno;
   }
-  inline ~fileWrapper (){::close(d);}
+  ~fileWrapper (){::close(d);}
 };
 #endif
 
@@ -50,13 +50,29 @@ struct FILE_wrapper{
   FILE* hndl;
   char line[120];
 
-  inline FILE_wrapper (char const* fn,char const* mode){
+  FILE_wrapper (char const* fn,char const* mode){
     if((hndl=::fopen(fn,mode))==nullptr)
       throw failure("FILE_wrapper ")<<fn<<" "<<mode<<" "<<GetError();
   }
-  inline char* fgets (){return ::fgets(line,sizeof line,hndl);}
-  inline ~FILE_wrapper (){::fclose(hndl);}
+  char* fgets (){return ::fgets(line,sizeof line,hndl);}
+  ~FILE_wrapper (){::fclose(hndl);}
 };
+
+template<typename... T>
+void syslogWrapper (int priority,char const* format,T... t){
+#ifndef CMW_WINDOWS
+  ::syslog(priority,format,t...);
+#endif
+}
+
+inline void setDirectory (char const* d){
+#ifdef CMW_WINDOWS
+  if(!SetCurrentDirectory(d))
+#else
+  if(::chdir(d)==-1)
+#endif
+    throw failure("setDirectory ")<<d<<" "<<GetError();
+}
 
 inline void closeSocket (sockType s){
 #ifdef CMW_WINDOWS
@@ -82,7 +98,7 @@ class getaddrinfoWrapper{
   ::addrinfo* addr;
 
  public:
-  inline getaddrinfoWrapper (char const* node,char const* port
+  getaddrinfoWrapper (char const* node,char const* port
                              ,int socktype,int flags=0){
     ::addrinfo hints{flags,AF_UNSPEC,socktype,0,0,0,0,0};
     int rc=::getaddrinfo(node,port,&hints,&head);
@@ -90,10 +106,10 @@ class getaddrinfoWrapper{
     addr=head;
   }
 
-  inline ~getaddrinfoWrapper (){::freeaddrinfo(head);}
-  inline ::addrinfo* operator() (){return addr;}
-  inline void inc (){if(addr!=nullptr)addr=addr->ai_next;}
-  inline sockType getSock (){
+  ~getaddrinfoWrapper (){::freeaddrinfo(head);}
+  ::addrinfo* operator() (){return addr;}
+  void inc (){if(addr!=nullptr)addr=addr->ai_next;}
+  sockType getSock (){
     for(;addr!=nullptr;addr=addr->ai_next){
       auto s=::socket(addr->ai_family,addr->ai_socktype,0);
       if(-1!=s)return s;
@@ -119,26 +135,10 @@ inline int pollWrapper (::pollfd* fds,int num,int timeout=-1){
   throw failure("poll ")<<GetError();
 }
 
-template<typename... T>
-void syslogWrapper (int priority,char const* format,T... t){
-#ifndef CMW_WINDOWS
-  ::syslog(priority,format,t...);
-#endif
-}
-
 inline void setNonblocking (sockType s){
 #ifndef CMW_WINDOWS
   if(::fcntl(s,F_SETFL,O_NONBLOCK)==-1)throw failure("setNonb:")<<errno;
 #endif
-}
-
-inline void setDirectory (char const* d){
-#ifdef CMW_WINDOWS
-  if(!SetCurrentDirectory(d))
-#else
-  if(::chdir(d)==-1)
-#endif
-    throw failure("setDirectory ")<<d<<" "<<GetError();
 }
 
 inline void setRcvTimeout (sockType s,int time){
@@ -149,6 +149,14 @@ inline void setRcvTimeout (sockType s,int time){
 #endif
   if(::setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&t,sizeof t)!=0)
     throw failure("setRcvTimeout ")<<GetError();
+}
+
+inline sockType udpServer (char const* port){
+  getaddrinfoWrapper res(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
+  auto s=res.getSock();
+  if(0==::bind(s,res()->ai_addr,res()->ai_addrlen))return s;
+  auto e=preserveError(s);
+  throw failure("udpServer ")<<e;
 }
 
 inline sockType tcpServer (char const* port){
@@ -191,14 +199,6 @@ inline int accept4Wrapper(sockType s,int flags){
   throw failure("accept4Wrapper ")<<GetError();
 }
 #endif
-
-inline sockType udpServer (char const* port){
-  getaddrinfoWrapper res(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
-  auto s=res.getSock();
-  if(0==::bind(s,res()->ai_addr,res()->ai_addrlen))return s;
-  auto e=preserveError(s);
-  throw failure("udpServer ")<<e;
-}
 
 inline int sockWrite (sockType s,void const* data,int len
                       ,sockaddr const* addr=nullptr,socklen_t toLen=0){

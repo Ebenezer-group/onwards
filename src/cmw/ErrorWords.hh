@@ -19,43 +19,43 @@ class failure:public ::std::exception{
   ::std::string str;
 
 public:
-  inline explicit failure (char const* s):str(s){}
+  explicit failure (char const* s):str(s){}
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
-  inline explicit failure (::std::string_view s):str(s){}
+  explicit failure (::std::string_view s):str(s){}
 #endif
 
-  inline failure (char const* s,int tot){
+  failure (char const* s,int tot){
     if(tot>0)str.reserve(tot);
     str=s;
   }
 
-  inline char const* what ()const noexcept{return str.c_str();}
+  char const* what ()const noexcept{return str.c_str();}
   //::std::string_view what_view ()const noexcept
   //{return ::std::string_view(str);}
 
-  inline failure& operator<< (::std::string const& s){
+  failure& operator<< (::std::string const& s){
     str.append(s);
     return *this;
   }
 
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
-  inline failure& operator<< (::std::string_view const& s){
+  failure& operator<< (::std::string_view const& s){
     str.append(s);
     return *this;
   }
 #endif
 
-  inline failure& operator<< (char* s){
+  failure& operator<< (char* s){
     str.append(s);
     return *this;
   }
 
-  inline failure& operator<< (char const* s){
+  failure& operator<< (char const* s){
     str.append(s);
     return *this;
   }
 
-  inline failure& operator<< (int i){
+  failure& operator<< (int i){
     char b[20];
     ::sprintf(b,"%d",i);
     return *this<<b;
@@ -69,7 +69,7 @@ public:
 };
 
 struct fiasco:failure{
-  inline explicit fiasco(char const* s):failure(s){}
+  explicit fiasco(char const* s):failure(s){}
 
   template<class T>
   fiasco& operator<< (T t){
