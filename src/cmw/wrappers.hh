@@ -76,15 +76,11 @@ inline void setDirectory (char const* d){
 
 inline void closeSocket (sockType s){
 #ifdef CMW_WINDOWS
-  if(::closesocket(s)==SOCKET_ERROR){
-    throw failure("closeSocket ")<<GetError();
+  if(::closesocket(s)==SOCKET_ERROR)
 #else
-  if(::close(s)==-1){
-    auto err=errno;
-    if(EINTR==err&&::close(s)==0)return;
-    throw failure("closeSocket")<<err;
+  if(::close(s)==-1)
 #endif
-  }
+    throw failure("closeSocket ")<<GetError();
 }
 
 inline int preserveError (sockType s){
