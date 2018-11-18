@@ -2,10 +2,9 @@
 #include"ErrorWords.hh"
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
 #include<charconv>//from_chars
-#else
-#include<stdlib.h>//strtol
 #endif
 #include<stdio.h>
+#include<stdlib.h>//strtol,exit
 
 #ifdef CMW_WINDOWS
 #define poll WSAPoll
@@ -63,6 +62,12 @@ void syslogWrapper (int priority,char const* format,T... t){
 #ifndef CMW_WINDOWS
   ::syslog(priority,format,t...);
 #endif
+}
+
+template<typename... T>
+void bail (char const* fmt,T... t)noexcept{
+  syslogWrapper(LOG_ERR,fmt,t...);
+  ::exit(EXIT_FAILURE);
 }
 
 inline void setDirectory (char const* d){
@@ -131,9 +136,9 @@ inline int pollWrapper (::pollfd* fds,int num,int timeout=-1){
   throw failure("poll ")<<GetError();
 }
 
-inline void setNonblocking (sockType s){
+inline int setNonblocking (sockType s){
 #ifndef CMW_WINDOWS
-  if(::fcntl(s,F_SETFL,O_NONBLOCK)==-1)throw failure("setNonb:")<<errno;
+  return ::fcntl(s,F_SETFL,O_NONBLOCK);
 #endif
 }
 

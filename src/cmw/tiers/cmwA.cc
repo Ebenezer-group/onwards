@@ -101,11 +101,6 @@ struct cmwRequest{
 };
 #include"zz.middleBack.hh"
 
-void bail (char const* a,char const* b=""){
-  syslogWrapper(LOG_ERR,"%s%s",a,b);
-  ::exit(EXIT_FAILURE);
-}
-
 class cmwAmbassador{
   BufferCompressed<
 #ifdef CMW_ENDIAN_BIG
@@ -138,12 +133,12 @@ class cmwAmbassador{
     while(!cmwBuf.Flush());
     while(!cmwBuf.GotPacket());
     if(giveBool(cmwBuf)){
-      setNonblocking(fds[0].fd);
+      if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",GetError());
       fds[0].events=POLLIN;
     }else{
       auto v=giveStringView(cmwBuf);
       *(const_cast<char*>(v.data())+v.length())=0;
-      bail("Login:",v.data());
+      bail("Login:%s",v.data());
     }
   }
 
@@ -170,7 +165,7 @@ public:
 };
 
 void checkField (char const* fld,FILE_wrapper& f){
-  if(::strcmp(fld,::strtok(f.fgets()," ")))bail("Expected ",fld);
+  if(::strcmp(fld,::strtok(f.fgets()," ")))bail("Expected %s",fld);
 }
 
 cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
@@ -189,7 +184,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   fds[1].fd=localbuf.sock_=udpServer(::strtok(nullptr,"\n "));
   fds[1].events=POLLIN;
 #ifdef __linux__
-  setNonblocking(fds[1].fd);
+  if(setNonblocking(fds[1].fd)==-1)bail("setNonb:%d",GetError());
 #endif
 
   checkField("Login-attempts-interval-in-milliseconds",cfg);
@@ -274,6 +269,6 @@ int main (int ac,char** av){
     ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
     if(ac!=2)bail("Usage: cmwA config-file-name");
     cmwAmbassador{av[1]};
-  }catch(::std::exception const& e){bail("Oops:",e.what());
+  }catch(::std::exception const& e){bail("Oops:%s",e.what());
   }catch(...){bail("Unknown exception!");}
 }

@@ -3,21 +3,19 @@
 #include<cmw/wrappers.hh>
 #include"zz.frontMiddle.hh"
 #include<stdio.h>
-#include<stdlib.h>//exit
 using namespace ::cmw;
 
-void bail (char const* a,char const* b="")noexcept{
+void leave (char const* a,char const* b="")noexcept{
   ::printf("%s%s\n",a,b);
 #ifndef CMW_WINDOWS
   ::openlog("genz",LOG_NDELAY,LOG_USER);
 #endif
-  syslogWrapper(LOG_ERR,"%s%s",a,b);
-  ::exit(EXIT_FAILURE);
+  bail("%s%s",a,b);
 }
 
 int main (int ac,char** av){
   if(ac<3||ac>5)
-    bail("Usage: genz account-num mdl-file-path [node] [port]");
+    leave("Usage: genz account-num mdl-file-path [node] [port]");
 
   try{
     winStart();
@@ -38,9 +36,9 @@ int main (int ac,char** av){
         if(giveBool(buf))::exit(EXIT_SUCCESS);
         auto v=giveStringView(buf);
         *(const_cast<char*>(v.data())+v.length())=0;
-        bail("cmwA:",v.data());
+        leave("cmwA:",v.data());
       }
     }
-    bail("No reply received.  Is the cmwA running?");
-  }catch(::std::exception const& e){bail(e.what());}
+    leave("No reply received.  Is the cmwA running?");
+  }catch(::std::exception const& e){leave(e.what());}
 }
