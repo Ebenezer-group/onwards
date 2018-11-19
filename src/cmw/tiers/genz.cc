@@ -3,6 +3,7 @@
 #include<cmw/wrappers.hh>
 #include"zz.frontMiddle.hh"
 #include<stdio.h>
+#include<stdlib.h>//exit
 using namespace ::cmw;
 
 void leave (char const* a,char const* b="")noexcept{

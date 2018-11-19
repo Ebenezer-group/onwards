@@ -130,16 +130,16 @@ inline sockType connectWrapper (char const* node,char const* port){
   return -1;
 }
 
-inline int pollWrapper (::pollfd* fds,int num,int timeout=-1){
-  int rc=::poll(fds,num,timeout);
-  if(rc>=0)return rc;
-  throw failure("poll ")<<GetError();
-}
-
 inline int setNonblocking (sockType s){
 #ifndef CMW_WINDOWS
   return ::fcntl(s,F_SETFL,O_NONBLOCK);
 #endif
+}
+
+inline int pollWrapper (::pollfd* fds,int num,int timeout=-1){
+  int rc=::poll(fds,num,timeout);
+  if(rc>=0)return rc;
+  throw failure("poll ")<<GetError();
 }
 
 inline void setRcvTimeout (sockType s,int time){

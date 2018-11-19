@@ -11,7 +11,6 @@
 #include<fcntl.h>//open
 #include<stdint.h>
 #include<stdio.h>
-#include<stdlib.h>
 #include<string.h>
 #include<sys/types.h>
 #include<sys/stat.h>
@@ -76,7 +75,7 @@ struct cmwRequest{
 
   void Marshal (SendBuffer& buf)const{
     accountNbr.Marshal(buf);
-    auto ind=buf.ReserveBytes(1);
+    auto const ind=buf.ReserveBytes(1);
     if(MarshalFile(middleFile,buf))buf.Receive(ind,true);
     else{
       buf.Receive(ind,false);
@@ -85,7 +84,7 @@ struct cmwRequest{
     }
 
     int8_t updatedFiles=0;
-    ind=buf.ReserveBytes(sizeof updatedFiles);
+    auto const ind2=buf.ReserveBytes(sizeof updatedFiles);
     FILE_wrapper f{middleFile,"r"};
     while(auto line=f.fgets()){
       char const* tok=::strtok(line,"\n ");
@@ -94,7 +93,7 @@ struct cmwRequest{
       if(!::strcmp(tok,"--"))break;
       if(MarshalFile(tok,buf))++updatedFiles;
     }
-    buf.Receive(ind,updatedFiles);
+    buf.Receive(ind2,updatedFiles);
   }
 
   ~cmwRequest (){::close(fd);}
@@ -169,7 +168,7 @@ void checkField (char const* fld,FILE_wrapper& f){
 }
 
 cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
-  FILE_wrapper cfg(configfile,"r");
+  FILE_wrapper cfg{configfile,"r"};
   while(char const* tok=::strtok(cfg.fgets()," ")){
     if(!::strcmp("Account-number",tok)){
       auto num=fromChars(::strtok(nullptr,"\n "));
