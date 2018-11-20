@@ -45,15 +45,12 @@ public:
   }
 #endif
 
-  failure& operator<< (char* s){
-    str.append(s);
-    return *this;
-  }
-
   failure& operator<< (char const* s){
     str.append(s);
     return *this;
   }
+
+  failure& operator<< (char* s){return *this<<static_cast<char const*>(s);}
 
   failure& operator<< (int i){
     char b[20];

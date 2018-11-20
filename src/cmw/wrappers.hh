@@ -100,7 +100,7 @@ class getaddrinfoWrapper{
 
  public:
   getaddrinfoWrapper (char const* node,char const* port
-                             ,int socktype,int flags=0){
+                      ,int socktype,int flags=0){
     ::addrinfo hints{flags,AF_UNSPEC,socktype,0,0,0,0,0};
     int rc=::getaddrinfo(node,port,&hints,&head);
     if(rc!=0)throw failure("getaddrinfo ")<<::gai_strerror(rc);

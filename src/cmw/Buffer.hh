@@ -49,7 +49,7 @@ public:
 
   void operator= (int32_t r){val=r;}
   int32_t operator() ()const{return val;}
-  inline void Marshal (SendBuffer&)const;
+  void Marshal (SendBuffer&)const;
 };
 
 inline bool operator== (marshallingInt l,marshallingInt r){return l()==r();}
