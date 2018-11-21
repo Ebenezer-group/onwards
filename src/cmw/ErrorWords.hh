@@ -19,26 +19,17 @@ class failure:public ::std::exception{
   ::std::string str;
 
 public:
-  explicit failure (char const* s):str(s){}
-#if __cplusplus>=201703L||_MSVC_LANG>=201403L
-  explicit failure (::std::string_view s):str(s){}
-#endif
+  char const* what ()const noexcept{return str.c_str();}
 
+  explicit failure (char const* s):str(s){}
   failure (char const* s,int tot){
     if(tot>0)str.reserve(tot);
     str=s;
   }
 
-  char const* what ()const noexcept{return str.c_str();}
-  //::std::string_view what_view ()const noexcept
-  //{return ::std::string_view(str);}
-
-  failure& operator<< (::std::string const& s){
-    str.append(s);
-    return *this;
-  }
-
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
+  explicit failure (::std::string_view s):str(s){}
+
   failure& operator<< (::std::string_view const& s){
     str.append(s);
     return *this;
@@ -53,8 +44,8 @@ public:
   failure& operator<< (char* s){return *this<<static_cast<char const*>(s);}
 
   failure& operator<< (int i){
-    char b[20];
-    ::sprintf(b,"%d",i);
+    char b[10];
+    ::snprintf(b,sizeof b,"%d",i);
     return *this<<b;
   }
 
@@ -74,7 +65,6 @@ struct fiasco:failure{
     return *this;
   }
 };
-
 
 #ifdef CMW_WINDOWS
 using sockType=SOCKET;
