@@ -123,9 +123,9 @@ class getaddrinfoWrapper{
 };
 
 inline sockType connectWrapper (char const* node,char const* port){
-  getaddrinfoWrapper res(node,port,SOCK_STREAM);
-  auto s=res.getSock();
-  if(0==::connect(s,res()->ai_addr,res()->ai_addrlen))return s;
+  getaddrinfoWrapper ai(node,port,SOCK_STREAM);
+  auto s=ai.getSock();
+  if(0==::connect(s,ai()->ai_addr,ai()->ai_addrlen))return s;
   errno=preserveError(s);
   return -1;
 }
@@ -153,34 +153,30 @@ inline void setRcvTimeout (sockType s,int time){
 }
 
 inline sockType udpServer (char const* port){
-  getaddrinfoWrapper res(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
-  auto s=res.getSock();
-  if(0==::bind(s,res()->ai_addr,res()->ai_addrlen))return s;
+  getaddrinfoWrapper ai(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
+  auto s=ai.getSock();
+  if(0==::bind(s,ai()->ai_addr,ai()->ai_addrlen))return s;
   auto e=preserveError(s);
   throw failure("udpServer ")<<e;
 }
 
 inline sockType tcpServer (char const* port){
-  getaddrinfoWrapper res(nullptr,port,SOCK_STREAM,AI_PASSIVE);
-#if 0
-  res.inc();
+  getaddrinfoWrapper ai(nullptr,port,SOCK_STREAM,AI_PASSIVE);
+#ifdef SKIP_FIRST
+  ai.inc();
 #endif
-  auto s=res.getSock();
+  auto s=ai.getSock();
 
   int on=1;
-  if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char*)&on,sizeof on)<0){
-    auto e=preserveError(s);
-    throw failure("tcpServer setsockopt ")<<e;
+  if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char*)&on,sizeof on)==0){
+    on=2;
+    if(::bind(s,ai()->ai_addr,ai()->ai_addrlen)==0){
+      on=3;
+      if(::listen(s,SOMAXCONN)==0)return s;
+    }
   }
-  if(::bind(s,res()->ai_addr,res()->ai_addrlen)<0){
-    auto e=preserveError(s);
-    throw failure("tcpServer bind ")<<e;
-  }
-  if(::listen(s,SOMAXCONN)<0){
-    auto e=preserveError(s);
-    throw failure("tcpServer listen ")<<e;
-  }
-  return s;
+  auto e=preserveError(s);
+  throw failure("tcpServer ")<<on<<" "<<e;
 }
 
 inline int acceptWrapper(sockType s){
@@ -205,19 +201,18 @@ inline int sockWrite (sockType s,void const* data,int len
                       ,sockaddr const* addr=nullptr,socklen_t toLen=0){
   int rc=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);
   if(rc>0)return rc;
-  auto err=GetError();
-  if(EAGAIN==err||EWOULDBLOCK==err)return 0;
-  throw failure("sockWrite:")<<s<<" "<<err;}
+  auto e=GetError();
+  if(EAGAIN==e||EWOULDBLOCK==e)return 0;
+  throw failure("sockWrite:")<<s<<" "<<e;}
 
 inline int sockRead (sockType s,void* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
   int rc=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(rc>0)return rc;
-  if(rc==0)throw fiasco("sockRead eof:")<<s<<" "<<len;
-  auto err=GetError();
-  if(ECONNRESET==err)throw fiasco("sockRead-ECONNRESET");
-  if(EAGAIN==err||EWOULDBLOCK==err)return 0;
-  throw failure("sockRead:")<<s<<" "<<len<<" "<<err;
+  auto e=GetError();
+  if(0==rc||ECONNRESET==e)throw fiasco("sockRead eof:")<<s<<" "<<len<<" "<<e;
+  if(EAGAIN==e||EWOULDBLOCK==e)return 0;
+  throw failure("sockRead:")<<s<<" "<<len<<" "<<e;
 }
 
 #ifdef CMW_WINDOWS
