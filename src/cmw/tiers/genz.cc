@@ -4,7 +4,6 @@
 #include"zz.frontMiddle.hh"
 #include<stdio.h>
 #include<stdlib.h>//exit
-#include<syslog.h>
 using namespace ::cmw;
 
 template<typename... T>
