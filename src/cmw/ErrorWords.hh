@@ -31,12 +31,14 @@ public:
   explicit failure (::std::string_view s):str(s){}
 
   failure& operator<< (::std::string_view const& s){
+    str.append(" ");
     str.append(s);
     return *this;
   }
 #endif
 
   failure& operator<< (char const* s){
+    str.append(" ");
     str.append(s);
     return *this;
   }
@@ -73,7 +75,7 @@ inline int GetError (){return WSAGetLastError();}
 inline void winStart (){
   WSADATA w;
   int rc=WSAStartup(MAKEWORD(2,2),&w);
-  if(0!=rc)throw failure("WSAStartup:")<<rc;
+  if(0!=rc)throw failure("WSAStartup")<<rc;
 }
 #else
 using sockType=int;

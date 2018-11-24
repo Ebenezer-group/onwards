@@ -23,7 +23,7 @@ using namespace ::cmw;
 
 bool MarshalFile (char const* name,SendBuffer& buf){
   struct ::stat sb;
-  if(::stat(name,&sb)<0)throw failure("MarshalFile stat ")<<name;
+  if(::stat(name,&sb)<0)throw failure("MarshalFile stat")<<name;
   if(sb.st_mtime>previousTime){
     if('.'==name[0]||name[0]=='/')Receive(buf,::strrchr(name,'/')+1);
     else Receive(buf,name);
@@ -61,13 +61,13 @@ struct cmwRequest{
     previousTime=0;
     if(fd>=0){
       if(::pread(fd,&previousTime,sizeof previousTime,0)==-1){
-        auto err=errno;
+        auto e=errno;
         ::close(fd);
-        throw failure("pread ")<<err;
+        throw failure("pread")<<e;
       }
     }else{
       fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-      if(fd<0)throw failure("open ")<<lastrun<<" "<<errno;
+      if(fd<0)throw failure("open")<<lastrun<<errno;
     }
   }
 

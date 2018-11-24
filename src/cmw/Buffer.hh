@@ -203,7 +203,7 @@ public:
 
   void checkData (int n){
     if(n>msgLength-rindex)throw
-      failure("ReceiveBuffer checkData:")<<n<<" "<<msgLength<<" "<<rindex;
+      failure("ReceiveBuffer checkData")<<n<<msgLength<<rindex;
   }
 
   void Give (void* address,int len){
@@ -337,7 +337,7 @@ public:
   SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
   void checkSpace (int n){
-    if(n>bufsize-index)throw failure("SendBuffer checkSpace:")<<n<<" "<<index;
+    if(n>bufsize-index)throw failure("SendBuffer checkSpace")<<n<<index;
   }
 
   void Receive (void const* data,int size){
@@ -368,7 +368,7 @@ public:
   void FillInSize (int32_t max){
     int32_t marshalledBytes=index-savedSize;
     if(marshalledBytes>max)
-      throw failure("Size of marshalled data exceeds max ")<<max;
+      throw failure("Size of marshalled data exceeds max")<<max;
 
     Receive(savedSize,marshalledBytes);
     savedSize=index;
@@ -570,8 +570,8 @@ public:
           if((compPacketSize=::qlz_size_compressed(rbuf))>bufsize)
             throw failure("GotPacket compressed size too big");
           if((this->packetLength=::qlz_size_decompressed(rbuf))>bufsize)
-            throw failure("GotPacket decompressed size too big ")
-                           <<this->packetLength<<" "<<bufsize;
+            throw failure("GotPacket decompressed size too big")
+                           <<this->packetLength<<bufsize;
 
           compressedStart=rbuf+bufsize-compPacketSize;
           ::memmove(compressedStart,rbuf,9);
@@ -596,7 +596,7 @@ public:
 	kosher=true;
 	auto b=bytesRead;
 	bytesRead=0;
-	throw fiasco("GotPacket:")<<b<<" "<<e.what();
+	throw fiasco("GotPacket")<<b<<e.what();
       }else{
         kosher=false;
         throw;

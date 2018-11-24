@@ -39,7 +39,7 @@ struct fileWrapper{
 
   fileWrapper (char const* name,int flags,mode_t mode=0):
 	  d(0==mode?::open(name,flags): ::open(name,flags,mode)){
-    if(d<0)throw failure("fileWrapper ")<<name<<" "<<errno;
+    if(d<0)throw failure("fileWrapper")<<name<<errno;
   }
   ~fileWrapper (){::close(d);}
 };
@@ -51,10 +51,36 @@ struct FILE_wrapper{
 
   FILE_wrapper (char const* fn,char const* mode){
     if((hndl=::fopen(fn,mode))==nullptr)
-      throw failure("FILE_wrapper ")<<fn<<" "<<mode<<" "<<GetError();
+      throw failure("FILE_wrapper")<<fn<<mode<<GetError();
   }
   char* fgets (){return ::fgets(line,sizeof line,hndl);}
   ~FILE_wrapper (){::fclose(hndl);}
+};
+
+class getaddrinfoWrapper{
+  ::addrinfo* head;
+  ::addrinfo* addr;
+
+ public:
+  getaddrinfoWrapper (char const* node,char const* port,int type,int flags=0){
+    ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
+    int rc=::getaddrinfo(node,port,&hints,&head);
+    if(rc!=0)throw failure("getaddrinfo")<<::gai_strerror(rc);
+    addr=head;
+  }
+
+  ~getaddrinfoWrapper (){::freeaddrinfo(head);}
+  ::addrinfo* operator() (){return addr;}
+  void inc (){if(addr!=nullptr)addr=addr->ai_next;}
+  sockType getSock (){
+    for(;addr!=nullptr;addr=addr->ai_next){
+      auto s=::socket(addr->ai_family,addr->ai_socktype,0);
+      if(-1!=s)return s;
+    }
+    throw failure("getaddrinfo getSock");
+  }
+  getaddrinfoWrapper (getaddrinfoWrapper const&)=delete;
+  getaddrinfoWrapper& operator= (getaddrinfoWrapper)=delete;
 };
 
 template<typename... T>
@@ -76,7 +102,28 @@ inline void setDirectory (char const* d){
 #else
   if(::chdir(d)==-1)
 #endif
-    throw failure("setDirectory ")<<d<<" "<<GetError();
+    throw failure("setDirectory")<<d<<GetError();
+}
+
+inline int pollWrapper (::pollfd* fds,int num,int timeout=-1){
+  int rc=::poll(fds,num,timeout);
+  if(rc>=0)return rc;
+  throw failure("poll")<<GetError();
+}
+
+template<typename T>
+int setsockWrapper (sockType s,int opt,T t){
+  return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
+}
+
+inline void setRcvTimeout (sockType s,int time){
+#ifdef CMW_WINDOWS
+  DWORD t=time*1000;
+#else
+  struct timeval t{time,0};
+#endif
+  if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)
+    throw failure("setRcvTimeout")<<GetError();
 }
 
 inline void closeSocket (sockType s){
@@ -85,7 +132,7 @@ inline void closeSocket (sockType s){
 #else
   if(::close(s)==-1)
 #endif
-    throw failure("closeSocket ")<<GetError();
+    throw failure("closeSocket")<<GetError();
 }
 
 inline int preserveError (sockType s){
@@ -93,34 +140,6 @@ inline int preserveError (sockType s){
   closeSocket(s);
   return e;
 }
-
-class getaddrinfoWrapper{
-  ::addrinfo* head;
-  ::addrinfo* addr;
-
- public:
-  getaddrinfoWrapper (char const* node,char const* port
-                      ,int socktype,int flags=0){
-    ::addrinfo hints{flags,AF_UNSPEC,socktype,0,0,0,0,0};
-    int rc=::getaddrinfo(node,port,&hints,&head);
-    if(rc!=0)throw failure("getaddrinfo ")<<::gai_strerror(rc);
-    addr=head;
-  }
-
-  ~getaddrinfoWrapper (){::freeaddrinfo(head);}
-  ::addrinfo* operator() (){return addr;}
-  void inc (){if(addr!=nullptr)addr=addr->ai_next;}
-  sockType getSock (){
-    for(;addr!=nullptr;addr=addr->ai_next){
-      auto s=::socket(addr->ai_family,addr->ai_socktype,0);
-      if(-1!=s)return s;
-    }
-    throw failure("getaddrinfo getSock");
-  }
-
-  getaddrinfoWrapper (getaddrinfoWrapper const&)=delete;
-  getaddrinfoWrapper& operator= (getaddrinfoWrapper)=delete;
-};
 
 inline sockType connectWrapper (char const* node,char const* port){
   getaddrinfoWrapper ai(node,port,SOCK_STREAM);
@@ -136,28 +155,12 @@ inline int setNonblocking (sockType s){
 #endif
 }
 
-inline int pollWrapper (::pollfd* fds,int num,int timeout=-1){
-  int rc=::poll(fds,num,timeout);
-  if(rc>=0)return rc;
-  throw failure("poll ")<<GetError();
-}
-
-inline void setRcvTimeout (sockType s,int time){
-#ifdef CMW_WINDOWS
-  DWORD t=time*1000;
-#else
-  struct timeval t{time,0};
-#endif
-  if(::setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&t,sizeof t)!=0)
-    throw failure("setRcvTimeout ")<<GetError();
-}
-
 inline sockType udpServer (char const* port){
   getaddrinfoWrapper ai(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
   auto s=ai.getSock();
   if(0==::bind(s,ai()->ai_addr,ai()->ai_addrlen))return s;
   auto e=preserveError(s);
-  throw failure("udpServer ")<<e;
+  throw failure("udpServer")<<e;
 }
 
 inline sockType tcpServer (char const* port){
@@ -168,7 +171,7 @@ inline sockType tcpServer (char const* port){
   auto s=ai.getSock();
 
   int on=1;
-  if(::setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char*)&on,sizeof on)==0){
+  if(setsockWrapper(s,SO_REUSEADDR,on)==0){
     on=2;
     if(::bind(s,ai()->ai_addr,ai()->ai_addrlen)==0){
       on=3;
@@ -176,14 +179,14 @@ inline sockType tcpServer (char const* port){
     }
   }
   auto e=preserveError(s);
-  throw failure("tcpServer ")<<on<<" "<<e;
+  throw failure("tcpServer")<<on<<e;
 }
 
 inline int acceptWrapper(sockType s){
   int nu=::accept(s,nullptr,nullptr);
   if(nu>=0)return nu;
   if(ECONNABORTED==GetError())return 0;
-  throw failure("acceptWrapper ")<<GetError();
+  throw failure("acceptWrapper")<<GetError();
 }
 
 #if defined(__FreeBSD__)||defined(__linux__)
@@ -193,7 +196,7 @@ inline int accept4Wrapper(sockType s,int flags){
   int nu=::accept4(s,&amb,&len,flags);
   if(nu>=0)return nu;
   if(ECONNABORTED==GetError())return 0;
-  throw failure("accept4Wrapper ")<<GetError();
+  throw failure("accept4Wrapper")<<GetError();
 }
 #endif
 
@@ -203,45 +206,45 @@ inline int sockWrite (sockType s,void const* data,int len
   if(rc>0)return rc;
   auto e=GetError();
   if(EAGAIN==e||EWOULDBLOCK==e)return 0;
-  throw failure("sockWrite:")<<s<<" "<<e;}
+  throw failure("sockWrite")<<s<<e;}
 
 inline int sockRead (sockType s,void* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
   int rc=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(rc>0)return rc;
   auto e=GetError();
-  if(0==rc||ECONNRESET==e)throw fiasco("sockRead eof:")<<s<<" "<<len<<" "<<e;
+  if(0==rc||ECONNRESET==e)throw fiasco("sockRead eof")<<s<<len<<e;
   if(EAGAIN==e||EWOULDBLOCK==e)return 0;
-  throw failure("sockRead:")<<s<<" "<<len<<" "<<e;
+  throw failure("sockRead")<<s<<len<<e;
 }
 
 #ifdef CMW_WINDOWS
 inline DWORD Write (HANDLE h,void const* data,int len){
   DWORD bytesWritten=0;
   if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
-    throw failure("Write ")<<GetLastError();
+    throw failure("Write")<<GetLastError();
   return bytesWritten;
 }
 
 inline DWORD Read (HANDLE h,void* data,int len){
   DWORD bytesRead=0;
   if (!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
-    throw failure("Read ")<<GetLastError();
+    throw failure("Read")<<GetLastError();
   return bytesRead;
 }
 #else
 inline int Write (int fd,void const* data,int len){
   int rc=::write(fd,data,len);
   if(rc>=0)return rc;
-  throw failure("Write ")<<errno;
+  throw failure("Write")<<errno;
 }
 
 inline int Read (int fd,void* data,int len){
   int rc=::read(fd,data,len);
   if(rc>0)return rc;
-  if(rc==0)throw fiasco("Read eof:")<<len;
+  if(rc==0)throw fiasco("Read eof")<<len;
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
-  throw failure("Read:")<<len<<" "<<errno;
+  throw failure("Read")<<len<<errno;
 }
 #endif
 }

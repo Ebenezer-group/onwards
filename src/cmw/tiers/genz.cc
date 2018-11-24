@@ -7,12 +7,13 @@
 #include<syslog.h>
 using namespace ::cmw;
 
-void leave (char const* a,char const* b="")noexcept{
-  ::printf("%s%s\n",a,b);
+template<typename... T>
+void leave (char const* format,T... t)noexcept{
+  ::printf(format,t...);
 #ifndef CMW_WINDOWS
   ::openlog("genz",LOG_NDELAY,LOG_USER);
 #endif
-  bail("%s%s",a,b);
+  bail(format,t...);
 }
 
 int main (int ac,char** av){
@@ -38,7 +39,7 @@ int main (int ac,char** av){
         if(giveBool(buf))::exit(EXIT_SUCCESS);
         auto v=giveStringView(buf);
         *(const_cast<char*>(v.data())+v.length())=0;
-        leave("cmwA:",v.data());
+        leave("cmwA:%s",v.data());
       }
     }
     leave("No reply received.  Is the cmwA running?");
