@@ -50,12 +50,6 @@ public:
     ::snprintf(b,sizeof b,"%d",i);
     return *this<<b;
   }
-
-  template<class T>
-  failure& operator<< (T t){
-    using ::std::to_string;
-    return *this<<to_string(t);
-  }
 };
 
 struct fiasco:failure{
