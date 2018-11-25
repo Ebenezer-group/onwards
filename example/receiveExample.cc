@@ -1,20 +1,18 @@
 //  This program receives messages sent by sendExample.
 
-#include <cmw/Buffer.hh>
-#include "messageIDs.hh"
-#include <plf_colony.h>
-#include "zz.receiveMessages.hh"
+#include"messageIDs.hh"
+#include<plf_colony.h>
+#include"zz.receiveMessages.hh"
+#include<cmw/Buffer.hh>
 
-#include <array>
-#include <iostream>
-#include <set>
-#include <string>
-#include <vector>
-
+#include<array>
+#include<iostream>
+#include<set>
+#include<string>
+#include<vector>
 using namespace ::cmw;
 
-int main()
-{
+int main (){
   try{
     winStart();
     BufferStack<SameFormat> buf(udpServer("12345"));
@@ -67,7 +65,7 @@ int main()
       ::std::cout<<::std::endl;
     }
     return 1;
-  } catch(std::exception const& ex){
+  }catch(std::exception const& ex){
     ::std::cout<<"failure: "<<ex.what()<<::std::endl;
   }
 }

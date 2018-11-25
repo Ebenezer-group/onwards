@@ -13,21 +13,19 @@
 //      -in                (::std::array<::std::array<float,2>, 3>)
 //   }
 
-#include<cmw/Buffer.hh>
 #include"messageIDs.hh"
 #include"plf_colony.h"
 #include"zz.sendMessages.hh"
+#include<cmw/Buffer.hh>
 
 #include<array>
 #include<iostream>
 #include<set>
 #include<string>
 #include<vector>
-
 using namespace ::cmw;
 
-int main()
-{
+int main (){
   try{
     winStart();
     getaddrinfoWrapper res(
@@ -39,7 +37,7 @@ int main()
 		    ,"12345",SOCK_DGRAM);
     BufferStack<SameFormat> buf(res.getSock());
 
-    ::std::cout<<"Enter the ID of the message to send: 1, 2, 3 or 4."<<::std::endl;
+    ::std::cout<<"Enter the ID of the message to send: 1,2,3 or 4."<<::std::endl;
     int messageID;
     ::std::cin>>messageID;
     switch(messageID){
@@ -77,9 +75,9 @@ int main()
       default:
         return 0;
     }
-    buf.Send(res()->ai_addr, res()->ai_addrlen);
+    buf.Send(res()->ai_addr,res()->ai_addrlen);
     return 1;
-  } catch(::std::exception const& ex){
+  }catch(::std::exception const& ex){
     ::std::cout<<"failure: " << ex.what()<<::std::endl;
   }
 }

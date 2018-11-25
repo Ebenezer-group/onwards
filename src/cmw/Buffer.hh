@@ -11,9 +11,9 @@ static_assert(::std::numeric_limits<float>::is_iec559
               ,"Only IEEE 754 supported");
 
 #include<stdint.h>
-#include<stdio.h>//sprintf
+#include<stdio.h>//snprintf
 #include<stdlib.h>//strtol,exit
-#include<string.h>//memcpy,strlen
+#include<string.h>//memcpy,memmove,strlen
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #include<winsock2.h>
 #include<ws2tcpip.h>
@@ -32,9 +32,8 @@ inline int GetError (){return WSAGetLastError();}
 #include<sys/socket.h>
 #include<sys/stat.h>//open
 #include<sys/types.h>
-#include<unistd.h>//close,chdir,read,write
-#include<stdarg.h>
 #include<syslog.h>
+#include<unistd.h>//close,chdir,read,write
 using sockType=int;
 using fileType=int;
 inline int GetError (){return errno;}

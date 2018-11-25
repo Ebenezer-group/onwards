@@ -1,5 +1,5 @@
-#include<cmw/Buffer.hh>
 #include"zz.frontMiddle.hh"
+#include<cmw/Buffer.hh>
 #include<stdio.h>
 #include<stdlib.h>//exit
 using namespace ::cmw;
