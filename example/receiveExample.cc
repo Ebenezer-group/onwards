@@ -3,7 +3,6 @@
 #include <cmw/Buffer.hh>
 #include "messageIDs.hh"
 #include <plf_colony.h>
-#include <cmw/wrappers.hh>
 #include "zz.receiveMessages.hh"
 
 #include <array>
