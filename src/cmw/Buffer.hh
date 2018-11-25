@@ -24,11 +24,6 @@ static_assert(::std::numeric_limits<float>::is_iec559
 using sockType=SOCKET;
 using fileType=HANDLE;
 inline int GetError (){return WSAGetLastError();}
-inline void winStart (){
-  WSADATA w;
-  int rc=WSAStartup(MAKEWORD(2,2),&w);
-  if(0!=rc)throw failure("WSAStartup")<<rc;
-}
 #else
 #include<errno.h>
 #include<fcntl.h>//open
@@ -43,7 +38,6 @@ inline void winStart (){
 using sockType=int;
 using fileType=int;
 inline int GetError (){return errno;}
-inline void winStart (){}
 #define _MSVC_LANG 0
 #endif
 
@@ -93,6 +87,14 @@ struct fiasco:failure{
     return *this;
   }
 };
+
+inline void winStart (){
+#ifdef CMW_WINDOWS
+  WSADATA w;
+  int rc=WSAStartup(MAKEWORD(2,2),&w);
+  if(0!=rc)throw failure("WSAStartup")<<rc;
+#endif
+}
 
 inline int fromChars (char const* p){
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
