@@ -1,8 +1,6 @@
-#include<boost/poly_collection/base_collection.hpp>
-#include<iostream>
 #include<testing.hh>
-#include<zz.testing.hh>
-#include<wrappers.hh>
+#include"zz.testing.hh"
+#include<boost/poly_collection/base_collection.hpp>
 
 int main (){
   using namespace ::cmw;
@@ -20,8 +18,7 @@ int main (){
                          "::1"
 #endif
                          ,"13579",SOCK_DGRAM);
-  BufferStack<SameFormat> buf;
-  buf.sock_=res.getSock();
+  BufferStack<SameFormat> buf(res.getSock());
   testing::Marshal(buf,c);
   buf.Send(res()->ai_addr,res()->ai_addrlen);
 }
