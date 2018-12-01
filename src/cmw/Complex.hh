@@ -1,5 +1,5 @@
 #pragma once
-#include<Buffer.hh>
+#include<cmw/Buffer.hh>
 #include<complex>
 
 namespace cmw{
@@ -10,7 +10,7 @@ void complexMarshal (B& buf,::std::complex<T> const& c){
 }
 
 template<class T,class B>
-auto complexGive (B& buf){
+::std::complex<T> complexGive (B& buf){
   //The following has an order of evaluation problem:
   //return ::std::complex<T>(Give<T>(buf),Give<T>(buf));
   T rl=Give<T>(buf);

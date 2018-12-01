@@ -30,11 +30,11 @@ int main (){
     winStart();
     getaddrinfoWrapper res(
 #ifdef __linux__
-		    "127.0.0.1"
+                    "127.0.0.1"
 #else
-		    "::1"
+                    "::1"
 #endif
-		    ,"12345",SOCK_DGRAM);
+                    ,"12345",SOCK_DGRAM);
     BufferStack<SameFormat> buf(res.getSock());
 
     ::std::cout<<"Enter the ID of the message to send: 1,2,3 or 4."<<::std::endl;
@@ -68,7 +68,7 @@ int main (){
       case messageid4:
       {
         ::plf::colony<::std::string> clny {"Beautiful words ", "wonderful words ", "of life"};
-	::sendMessages::Marshal(buf,messageid4,clny);
+        ::sendMessages::Marshal(buf,messageid4,clny);
         break;
       }
 

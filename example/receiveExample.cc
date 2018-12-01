@@ -64,8 +64,8 @@ int main (){
       }
       ::std::cout<<::std::endl;
     }
-    return 1;
   }catch(std::exception const& ex){
     ::std::cout<<"failure: "<<ex.what()<<::std::endl;
   }
+  return 1;
 }

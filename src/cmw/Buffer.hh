@@ -37,10 +37,9 @@ inline int GetError (){return WSAGetLastError();}
 using sockType=int;
 using fileType=int;
 inline int GetError (){return errno;}
-#define _MSVC_LANG 0
 #endif
 
-#if __cplusplus>=201703L||_MSVC_LANG>=201403L
+#if __cplusplus>=201703L
 #include<string_view>
 #include<charconv>//from_chars
 #endif
@@ -53,7 +52,7 @@ public:
   char const* what ()const noexcept{return str.c_str();}
 
   explicit failure (char const* s):str(s){}
-#if __cplusplus>=201703L||_MSVC_LANG>=201403L
+#if __cplusplus>=201703L
   explicit failure (::std::string_view s):str(s){}
 
   failure& operator<< (::std::string_view const& s){
@@ -96,7 +95,7 @@ inline void winStart (){
 }
 
 inline int fromChars (char const* p){
-#if __cplusplus>=201703L||_MSVC_LANG>=201403L
+#if __cplusplus>=201703L
   int res=0;
   ::std::from_chars(p,p+::strlen(p),res);
   return res;
@@ -110,7 +109,7 @@ struct fileWrapper{
   int const d;
 
   fileWrapper (char const* name,int flags,mode_t mode=0):
-	  d(0==mode?::open(name,flags): ::open(name,flags,mode)){
+          d(0==mode?::open(name,flags): ::open(name,flags,mode)){
     if(d<0)throw failure("fileWrapper")<<name<<errno;
   }
   ~fileWrapper (){::close(d);}
@@ -605,7 +604,7 @@ template<class R>
   return buf.template GiveStringy<::std::string>();
 }
 
-#if __cplusplus>=201703L||_MSVC_LANG>=201403L
+#if __cplusplus>=201703L
 template<class R>
 auto giveStringView (ReceiveBuffer<R>& buf){
   return buf.template GiveStringy<::std::string_view>();
@@ -722,7 +721,7 @@ inline void Receive (SendBuffer& b,::std::string const& s){
   b.Receive(s.data(),len());
 }
 
-#if __cplusplus>=201703L||_MSVC_LANG>=201403L
+#if __cplusplus>=201703L
 inline void Receive (SendBuffer& b,::std::string_view const& s){
   marshallingInt(s.size()).Marshal(b);
   b.Receive(s.data(),s.size());
@@ -890,10 +889,10 @@ public:
       }
     }catch(::std::exception const& e){
       if(!kosher||bytesRead<9){
-	kosher=true;
-	auto b=bytesRead;
-	bytesRead=0;
-	throw fiasco("GotPacket")<<b<<e.what();
+        kosher=true;
+        auto b=bytesRead;
+        bytesRead=0;
+        throw fiasco("GotPacket")<<b<<e.what();
       }else{
         kosher=false;
         throw;
@@ -915,7 +914,7 @@ class fixedString{
     ::strcpy(&str[0],s);
   }
 
-#if __cplusplus>=201703L||_MSVC_LANG>=201403L
+#if __cplusplus>=201703L
   explicit fixedString (::std::string_view s):len(s.length()){
     if(len()>N-1)throw failure("fixedString ctor");
     ::strncpy(&str[0],s.data(),len());
@@ -945,7 +944,7 @@ class fixedString{
 using fixedString60=fixedString<60>;
 using fixedString120=fixedString<120>;
 
-#if __cplusplus>=201703L||_MSVC_LANG>=201403L
+#if __cplusplus>=201703L
 class File{
   ::std::string_view name;
 public:
