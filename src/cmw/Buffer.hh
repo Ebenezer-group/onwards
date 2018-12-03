@@ -1,5 +1,9 @@
 #pragma once
 #include"quicklz.h"
+#if __cplusplus>=201703L
+#include<string_view>
+#include<charconv>//from_chars
+#endif
 #include<array>
 #include<exception>
 #include<initializer_list>
@@ -37,11 +41,6 @@ inline int GetError (){return WSAGetLastError();}
 using sockType=int;
 using fileType=int;
 inline int GetError (){return errno;}
-#endif
-
-#if __cplusplus>=201703L
-#include<string_view>
-#include<charconv>//from_chars
 #endif
 
 namespace cmw{
@@ -645,7 +644,7 @@ public:
   template<class T>
   void Receive (T t){
     static_assert(::std::is_arithmetic<T>::value,"");
-    Receive(&t,sizeof(T));
+    Receive(&t,sizeof t);
   }
 
   int ReserveBytes (int n){
@@ -658,7 +657,7 @@ public:
   template<class T>
   void Receive (int where,T t){
     static_assert(::std::is_arithmetic<T>::value,"");
-    ::memcpy(buf+where,&t,sizeof(T));
+    ::memcpy(buf+where,&t,sizeof t);
   }
 
   void FillInSize (int32_t max){

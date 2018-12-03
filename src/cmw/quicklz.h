@@ -139,18 +139,8 @@ inline int qlz_get_setting(int setting);
 }
 #endif
 
-// Fast data compression library
-// Copyright (C) 2006-2011 Lasse Mikkel Reinhold
-// lar@quicklz.com
-//
-// QuickLZ can be used for free under the GPL 1, 2 or 3 license (where anything
-// released into public must be open source) or under a commercial license if such
-// has been acquired (see http://www.quicklz.com/order.html). The commercial license
-// does not cover derived or ported versions created by third parties under GPL.
-
 // 1.5.0 final
 
-#include "quicklz.h"
 
 #if QLZ_VERSION_MAJOR != 1 || QLZ_VERSION_MINOR != 5 || QLZ_VERSION_REVISION != 0
 	#error quicklz.c and quicklz.h have different versions
@@ -986,5 +976,4 @@ size_t qlz_decompress(const char *source, void *destination, struct qlz_state_de
 #endif
 	return dsiz;
 }
-
 #endif
