@@ -808,8 +808,8 @@ private:
   int bytesRead=0;
   char* compressedStart;
 
-  bool doFlush (::sockaddr* addr,::socklen_t len){
-    int const bytes=sockWrite(sock_,compBuf,compIndex,addr,len);
+  bool doFlush (){
+    int const bytes=Write(sock_,compBuf,compIndex);
     if(bytes==compIndex){compIndex=0;return true;}
     compIndex-=bytes;
     ::memmove(compBuf,compBuf+bytes,compIndex);
@@ -834,16 +834,16 @@ public:
     delete decomp;
   }
 
-  bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
+  bool Flush (){
     bool rc=true;
-    if(compIndex>0)rc=doFlush(addr,len);
+    if(compIndex>0)rc=doFlush();
 
     if(index>0){
       if(index+(index>>3)+400>compSize-compIndex)
         throw failure("Not enough room in compressed buf");
       compIndex+=::qlz_compress(buf,compBuf+compIndex,index,compress);
       Reset();
-      if(rc)rc=doFlush(addr,len);
+      if(rc)rc=doFlush();
     }
     return rc;
   }
@@ -873,19 +873,17 @@ public:
         }
         bytesRead+=Read(sock_,compressedStart+bytesRead,compPacketSize-bytesRead);
         if(bytesRead<compPacketSize)return false;
-
         ::qlz_decompress(compressedStart,rbuf,decomp);
         bytesRead=0;
         this->Update();
         return true;
-      }else{
-        bytesRead+=Read(sock_,rbuf,::std::min(bufsize,compPacketSize-bytesRead));
-        if(bytesRead==compPacketSize){
-          kosher=true;
-          bytesRead=0;
-        }
-        return false;
       }
+      bytesRead+=Read(sock_,rbuf,::std::min(bufsize,compPacketSize-bytesRead));
+      if(bytesRead==compPacketSize){
+        kosher=true;
+        bytesRead=0;
+      }
+      return false;
     }catch(::std::exception const& e){
       if(!kosher||bytesRead<9){
         kosher=true;
