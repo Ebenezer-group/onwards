@@ -41,6 +41,7 @@ inline int GetError (){return WSAGetLastError();}
 using sockType=int;
 using fileType=int;
 inline int GetError (){return errno;}
+#define _MSVC_LANG 0
 #endif
 
 namespace cmw{
@@ -603,7 +604,7 @@ template<class R>
   return buf.template GiveStringy<::std::string>();
 }
 
-#if __cplusplus>=201703L
+#if __cplusplus>=201703L||_MSVC_LANG>=201403L
 template<class R>
 auto giveStringView (ReceiveBuffer<R>& buf){
   return buf.template GiveStringy<::std::string_view>();
@@ -828,7 +829,7 @@ public:
   }
 
   ~BufferCompressed (){
-    delete[]this->rbuf;
+    delete[]rbuf;
     delete compress;
     delete[]compBuf;
     delete decomp;
