@@ -20,12 +20,11 @@ $(BASE)/cmwA:$(BASE)/cmwA.cc
 	$(CXX) -std=c++17 $(CXXFLAGS)
 	size $@
 
-EXFLAGS:=-std=c++11 -Iexample
 example/sendExample:example/sendExample.cc
-	$(CXX) $(EXFLAGS) $(CXXFLAGS)
+	$(CXX) -std=c++11 $(CXXFLAGS)
 	size $@
 example/receiveExample:example/receiveExample.cc
-	$(CXX) $(EXFLAGS) $(CXXFLAGS)
+	$(CXX) -std=c++11 $(CXXFLAGS)
 	size $@
 
 clean:

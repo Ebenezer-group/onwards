@@ -15,7 +15,6 @@
 
 #include"messageIDs.hh"
 #include"plf_colony.h"
-#include"zz.sendMessages.hh"
 #include<cmw/Buffer.hh>
 
 #include<array>
@@ -23,6 +22,7 @@
 #include<set>
 #include<string>
 #include<vector>
+#include"zz.sendMessages.hh"
 using namespace ::cmw;
 
 int main (){

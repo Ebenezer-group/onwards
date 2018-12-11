@@ -1,8 +1,7 @@
 //  This program receives messages sent by sendExample.
 
 #include"messageIDs.hh"
-#include<plf_colony.h>
-#include"zz.receiveMessages.hh"
+#include"plf_colony.h"
 #include<cmw/Buffer.hh>
 
 #include<array>
@@ -10,6 +9,7 @@
 #include<set>
 #include<string>
 #include<vector>
+#include"zz.receiveMessages.hh"
 using namespace ::cmw;
 
 int main (){
