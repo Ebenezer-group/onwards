@@ -1,6 +1,6 @@
+#include<cmw/Buffer.hh>
 #include"account.hh"
 #include"messageIDs.hh"
-#include<cmw/Buffer.hh>
 
 #include<memory>//unique_ptr
 #include<vector>
@@ -15,7 +15,6 @@
 #include<time.h>
 #include<netinet/in.h>//sockaddr_in6,socklen_t
 #include<unistd.h>//pread,close
-
 ::int32_t previousTime;
 using namespace ::cmw;
 

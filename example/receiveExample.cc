@@ -1,8 +1,8 @@
 //  This program receives messages sent by sendExample.
 
+#include<cmw/Buffer.hh>
 #include"messageIDs.hh"
 #include"plf_colony.h"
-#include<cmw/Buffer.hh>
 
 #include<array>
 #include<iostream>

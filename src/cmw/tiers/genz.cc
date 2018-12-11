@@ -16,7 +16,6 @@ void leave (char const* format,T... t)noexcept{
 int main (int ac,char** av){
   if(ac<3||ac>5)
     leave("Usage: genz account-num mdl-file-path [node] [port]");
-
   try{
     winStart();
     getaddrinfoWrapper res(ac<4?

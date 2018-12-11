@@ -13,9 +13,9 @@
 //      -in                (::std::array<::std::array<float,2>, 3>)
 //   }
 
+#include<cmw/Buffer.hh>
 #include"messageIDs.hh"
 #include"plf_colony.h"
-#include<cmw/Buffer.hh>
 
 #include<array>
 #include<iostream>
