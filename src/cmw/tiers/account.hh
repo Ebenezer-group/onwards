@@ -1,4 +1,3 @@
-#pragma once
 #include<cmw/Buffer.hh>
 struct cmwAccount{
   ::cmw::marshallingInt number;

@@ -18,9 +18,9 @@
 ::int32_t previousTime;
 using namespace ::cmw;
 
-bool MarshalFile (char const* name,SendBuffer& buf){
+bool marshalFile (char const* name,SendBuffer& buf){
   struct ::stat sb;
-  if(::stat(name,&sb)<0)throw failure("MarshalFile stat")<<name;
+  if(::stat(name,&sb)<0)throw failure("marshalFile stat")<<name;
   if(sb.st_mtime>previousTime){
     if('.'==name[0]||name[0]=='/')Receive(buf,::strrchr(name,'/')+1);
     else Receive(buf,name);
@@ -58,8 +58,7 @@ struct cmwRequest{
     previousTime=0;
     if(fd>=0){
       if(::pread(fd,&previousTime,sizeof previousTime,0)==-1){
-        auto e=errno;
-        ::close(fd);
+        auto e=preserveError(fd);
         throw failure("pread")<<e;
       }
     }else{
@@ -73,7 +72,7 @@ struct cmwRequest{
   void Marshal (SendBuffer& buf)const{
     accountNbr.Marshal(buf);
     auto const ind=buf.ReserveBytes(1);
-    if(MarshalFile(middleFile,buf))buf.Receive(ind,true);
+    if(marshalFile(middleFile,buf))buf.Receive(ind,true);
     else{
       buf.Receive(ind,false);
       Receive(buf,middleFile);
@@ -88,7 +87,7 @@ struct cmwRequest{
       if(!::strncmp(tok,"//",2)||!::strcmp(tok,"fixedMessageLengths")||
          !::strcmp(tok,"splitOutput"))continue;
       if(!::strcmp(tok,"--"))break;
-      if(MarshalFile(tok,buf))++updatedFiles;
+      if(marshalFile(tok,buf))++updatedFiles;
     }
     buf.Receive(ind2,updatedFiles);
   }

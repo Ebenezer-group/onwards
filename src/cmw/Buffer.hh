@@ -79,8 +79,7 @@ public:
 struct fiasco:failure{
   explicit fiasco(char const* s):failure(s){}
 
-  template<class T>
-  fiasco& operator<< (T t){
+  template<class T> fiasco& operator<< (T t){
     failure::operator<<(t);
     return *this;
   }
@@ -484,8 +483,7 @@ struct MostSignificantFirst{
 };
 
 
-template<class R>
-class ReceiveBuffer{
+template<class R> class ReceiveBuffer{
   R reader;
   int msgLength=0;
   int subTotal=0;
@@ -513,8 +511,7 @@ public:
     return rbuf[subTotal+rindex++];
   }
 
-  template<class T>
-  T Give (){
+  template<class T> T Give (){
     T tmp;
     reader.Read(*this,tmp);
     return tmp;
@@ -536,8 +533,7 @@ public:
     return NextMessage();
   }
 
-  template<class T>
-  void GiveBlock (T* data,unsigned int elements)
+  template<class T> void GiveBlock (T* data,unsigned int elements)
   {reader.ReadBlock(*this,data,elements);}
 
   void GiveFile (fileType d){
@@ -550,8 +546,7 @@ public:
     }
   }
 
-  template<class T>
-  T GiveStringy (){
+  template<class T> T GiveStringy (){
     marshallingInt len(*this);
     checkData(len());
     T s(rbuf+subTotal+rindex,len());
@@ -560,8 +555,7 @@ public:
   }
 
 #ifndef CMW_WINDOWS
-  template<ssize_t N>
-  void CopyString (char (&dest)[N]){
+  template<ssize_t N> void CopyString (char (&dest)[N]){
     marshallingInt len(*this);
     if(len()+1>N)throw failure("ReceiveBuffer::CopyString");
     Give(dest,len());
@@ -569,14 +563,12 @@ public:
   }
 #endif
 
-  template<class T>
-  void Giveilist (T& lst){
+  template<class T> void Giveilist (T& lst){
     for(int count=Give<uint32_t>();count>0;--count)
       lst.push_back(*T::value_type::BuildPolyInstance(*this));
   }
 
-  template<class T>
-  void Giverbtree (T& rbt){
+  template<class T> void Giverbtree (T& rbt){
     auto endIt=rbt.end();
     for(int count=Give<uint32_t>();count>0;--count)
       rbt.insert_unique(endIt,*T::value_type::BuildPolyInstance(*this));
@@ -590,8 +582,7 @@ private:
 template<class T,class R>
 T Give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
 
-template<class R>
-bool giveBool (ReceiveBuffer<R>& buf){
+template<class R> bool giveBool (ReceiveBuffer<R>& buf){
   switch(buf.GiveOne()){
     case 0:return false;
     case 1:return true;
@@ -599,19 +590,16 @@ bool giveBool (ReceiveBuffer<R>& buf){
   }
 }
 
-template<class R>
-::std::string giveString (ReceiveBuffer<R>& buf){
+template<class R> ::std::string giveString (ReceiveBuffer<R>& buf){
   return buf.template GiveStringy<::std::string>();
 }
 
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
-template<class R>
-auto giveStringView (ReceiveBuffer<R>& buf){
+template<class R> auto giveStringView (ReceiveBuffer<R>& buf){
   return buf.template GiveStringy<::std::string_view>();
 }
 
-template<class R>
-auto giveStringView_plus (ReceiveBuffer<R>& buf){
+template<class R> auto giveStringView_plus (ReceiveBuffer<R>& buf){
   auto v=giveStringView(buf);
   buf.GiveOne();
   return v;
@@ -642,8 +630,7 @@ public:
     index+=size;
   }
 
-  template<class T>
-  void Receive (T t){
+  template<class T> void Receive (T t){
     static_assert(::std::is_arithmetic<T>::value,"");
     Receive(&t,sizeof t);
   }
@@ -655,8 +642,7 @@ public:
     return i;
   }
 
-  template<class T>
-  void Receive (int where,T t){
+  template<class T> void Receive (int where,T t){
     static_assert(::std::is_arithmetic<T>::value,"");
     ::memcpy(buf+where,&t,sizeof t);
   }
@@ -738,16 +724,14 @@ inline void Receive (SendBuffer& b,stringPlus lst){
 
 inline void InsertNull (SendBuffer& b){uint8_t z=0;b.Receive(z);}
 
-template<class T>
-void ReceiveBlock (SendBuffer& b,T const& grp){
+template<class T> void ReceiveBlock (SendBuffer& b,T const& grp){
   int32_t count=grp.size();
   b.Receive(count);
   if(count>0)
     b.Receive(&*grp.begin(),count*sizeof(typename T::value_type));
 }
 
-template<class T>
-void ReceiveGroup (SendBuffer& b,T const& grp){
+template<class T> void ReceiveGroup (SendBuffer& b,T const& grp){
   b.Receive(static_cast<int32_t>(grp.size()));
   for(auto const& e:grp)e.Marshal(b);
 }
@@ -787,8 +771,7 @@ public:
   }
 };
 
-template<typename T>
-void reset (T* p){::memset(p,0,sizeof(T));}
+template<typename T> void reset (T* p){::memset(p,0,sizeof(T));}
 
 struct SendBufferHeap:SendBuffer{
   SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
@@ -899,8 +882,7 @@ public:
   }
 };
 
-template<int N>
-class fixedString{
+template<int N> class fixedString{
   marshallingInt len;
   ::std::array<char,N> str;
 
@@ -958,8 +940,7 @@ public:
   char const* Name ()const{return name.data();}
 };
 
-template<class R>
-void giveFiles (ReceiveBuffer<R>& b){
+template<class R> void giveFiles (ReceiveBuffer<R>& b){
   for(auto n=marshallingInt{b}();n>0;--n)File{b};
 }
 #endif
