@@ -79,17 +79,29 @@ public:
 struct fiasco:failure{
   explicit fiasco(char const* s):failure(s){}
 
-  template<class T> fiasco& operator<< (T t){
+  template<class T>fiasco& operator<< (T t){
     failure::operator<<(t);
     return *this;
   }
 };
 
+inline void apps (failure& f){throw f;}
+template<typename T,typename... Ts>
+void apps (failure& f,T t,Ts... ts){
+  f<<t;
+  apps(f,ts...);
+}
+
+template<typename... T>void raise (char const* s,T... t){
+  failure f(s);
+  apps(f,t...);
+}
+
 inline void winStart (){
 #ifdef CMW_WINDOWS
   WSADATA w;
   int rc=WSAStartup(MAKEWORD(2,2),&w);
-  if(0!=rc)throw failure("WSAStartup")<<rc;
+  if(0!=rc)raise("WSAStartup",rc);
 #endif
 }
 
@@ -109,7 +121,7 @@ struct fileWrapper{
 
   fileWrapper (char const* name,int flags,mode_t mode=0):
           d(0==mode?::open(name,flags): ::open(name,flags,mode)){
-    if(d<0)throw failure("fileWrapper")<<name<<errno;
+    if(d<0)raise("fileWrapper",name,errno);
   }
   ~fileWrapper (){::close(d);}
 };
@@ -121,7 +133,7 @@ struct FILE_wrapper{
 
   FILE_wrapper (char const* fn,char const* mode){
     if((hndl=::fopen(fn,mode))==nullptr)
-      throw failure("FILE_wrapper")<<fn<<mode<<GetError();
+      raise("FILE_wrapper",fn,mode,GetError());
   }
   char* fgets (){return ::fgets(line,sizeof line,hndl);}
   ~FILE_wrapper (){::fclose(hndl);}
@@ -135,7 +147,7 @@ class getaddrinfoWrapper{
   getaddrinfoWrapper (char const* node,char const* port,int type,int flags=0){
     ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
     int rc=::getaddrinfo(node,port,&hints,&head);
-    if(rc!=0)throw failure("getaddrinfo")<<::gai_strerror(rc);
+    if(rc!=0)raise("getaddrinfo",::gai_strerror(rc));
     addr=head;
   }
 
@@ -147,7 +159,7 @@ class getaddrinfoWrapper{
       auto s=::socket(addr->ai_family,addr->ai_socktype,0);
       if(-1!=s)return s;
     }
-    throw failure("getaddrinfo getSock");
+    raise("getaddrinfo getSock");
   }
   getaddrinfoWrapper (getaddrinfoWrapper const&)=delete;
   getaddrinfoWrapper& operator= (getaddrinfoWrapper)=delete;
@@ -172,13 +184,13 @@ inline void setDirectory (char const* d){
 #else
   if(::chdir(d)==-1)
 #endif
-    throw failure("setDirectory")<<d<<GetError();
+    raise("setDirectory",d,GetError());
 }
 
 inline int pollWrapper (::pollfd* fds,int num,int timeout=-1){
   int rc=::poll(fds,num,timeout);
   if(rc>=0)return rc;
-  throw failure("poll")<<GetError();
+  raise("poll",GetError());
 }
 
 template<typename T>
@@ -192,8 +204,7 @@ inline void setRcvTimeout (sockType s,int time){
 #else
   struct timeval t{time,0};
 #endif
-  if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)
-    throw failure("setRcvTimeout")<<GetError();
+  if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",GetError());
 }
 
 inline void closeSocket (sockType s){
@@ -202,7 +213,7 @@ inline void closeSocket (sockType s){
 #else
   if(::close(s)==-1)
 #endif
-    throw failure("closeSocket")<<GetError();
+    raise("closeSocket",GetError());
 }
 
 inline int preserveError (sockType s){
@@ -229,8 +240,7 @@ inline sockType udpServer (char const* port){
   getaddrinfoWrapper ai(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
   auto s=ai.getSock();
   if(0==::bind(s,ai()->ai_addr,ai()->ai_addrlen))return s;
-  auto e=preserveError(s);
-  throw failure("udpServer")<<e;
+  raise("udpServer",preserveError(s));
 }
 
 inline sockType tcpServer (char const* port){
@@ -248,15 +258,14 @@ inline sockType tcpServer (char const* port){
       if(::listen(s,SOMAXCONN)==0)return s;
     }
   }
-  auto e=preserveError(s);
-  throw failure("tcpServer")<<on<<e;
+  raise("tcpServer",on,preserveError(s));
 }
 
 inline int acceptWrapper(sockType s){
   int nu=::accept(s,nullptr,nullptr);
   if(nu>=0)return nu;
   if(ECONNABORTED==GetError())return 0;
-  throw failure("acceptWrapper")<<GetError();
+  raise("acceptWrapper",GetError());
 }
 
 #if defined(__FreeBSD__)||defined(__linux__)
@@ -266,7 +275,7 @@ inline int accept4Wrapper(sockType s,int flags){
   int nu=::accept4(s,&amb,&len,flags);
   if(nu>=0)return nu;
   if(ECONNABORTED==GetError())return 0;
-  throw failure("accept4Wrapper")<<GetError();
+  raise("accept4Wrapper",GetError());
 }
 #endif
 
@@ -276,7 +285,7 @@ inline int sockWrite (sockType s,void const* data,int len
   if(rc>0)return rc;
   auto e=GetError();
   if(EAGAIN==e||EWOULDBLOCK==e)return 0;
-  throw failure("sockWrite")<<s<<e;}
+  raise("sockWrite",s,e);}
 
 inline int sockRead (sockType s,void* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
@@ -285,28 +294,28 @@ inline int sockRead (sockType s,void* data,int len
   auto e=GetError();
   if(0==rc||ECONNRESET==e)throw fiasco("sockRead eof")<<s<<len<<e;
   if(EAGAIN==e||EWOULDBLOCK==e)return 0;
-  throw failure("sockRead")<<s<<len<<e;
+  raise("sockRead",s,len,e);
 }
 
 #ifdef CMW_WINDOWS
 inline DWORD Write (HANDLE h,void const* data,int len){
   DWORD bytesWritten=0;
   if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
-    throw failure("Write")<<GetLastError();
+    raise("Write",GetLastError());
   return bytesWritten;
 }
 
 inline DWORD Read (HANDLE h,void* data,int len){
   DWORD bytesRead=0;
   if (!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
-    throw failure("Read")<<GetLastError();
+    raise("Read",GetLastError());
   return bytesRead;
 }
 #else
 inline int Write (int fd,void const* data,int len){
   int rc=::write(fd,data,len);
   if(rc>=0)return rc;
-  throw failure("Write")<<errno;
+  raise("Write",errno);
 }
 
 inline int Read (int fd,void* data,int len){
@@ -314,7 +323,7 @@ inline int Read (int fd,void* data,int len){
   if(rc>0)return rc;
   if(rc==0)throw fiasco("Read eof")<<len;
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
-  throw failure("Read")<<len<<errno;
+  raise("Read",len,errno);
 }
 #endif
 
@@ -496,8 +505,7 @@ public:
   ReceiveBuffer (char* addr,int bytes):packetLength(bytes),rbuf(addr){}
 
   void checkData (int n){
-    if(n>msgLength-rindex)throw
-      failure("ReceiveBuffer checkData")<<n<<msgLength<<rindex;
+    if(n>msgLength-rindex)raise("ReceiveBuffer checkData",n,msgLength,rindex);
   }
 
   void Give (void* address,int len){
@@ -511,7 +519,7 @@ public:
     return rbuf[subTotal+rindex++];
   }
 
-  template<class T> T Give (){
+  template<class T>T Give (){
     T tmp;
     reader.Read(*this,tmp);
     return tmp;
@@ -533,7 +541,7 @@ public:
     return NextMessage();
   }
 
-  template<class T> void GiveBlock (T* data,unsigned int elements)
+  template<class T>void GiveBlock (T* data,unsigned int elements)
   {reader.ReadBlock(*this,data,elements);}
 
   void GiveFile (fileType d){
@@ -546,7 +554,7 @@ public:
     }
   }
 
-  template<class T> T GiveStringy (){
+  template<class T>T GiveStringy (){
     marshallingInt len(*this);
     checkData(len());
     T s(rbuf+subTotal+rindex,len());
@@ -555,20 +563,20 @@ public:
   }
 
 #ifndef CMW_WINDOWS
-  template<ssize_t N> void CopyString (char (&dest)[N]){
+  template<ssize_t N>void CopyString (char(&dest)[N]){
     marshallingInt len(*this);
-    if(len()+1>N)throw failure("ReceiveBuffer::CopyString");
+    if(len()+1>N)raise("ReceiveBuffer CopyString");
     Give(dest,len());
     dest[len()]='\0';
   }
 #endif
 
-  template<class T> void Giveilist (T& lst){
+  template<class T>void Giveilist (T& lst){
     for(int count=Give<uint32_t>();count>0;--count)
       lst.push_back(*T::value_type::BuildPolyInstance(*this));
   }
 
-  template<class T> void Giverbtree (T& rbt){
+  template<class T>void Giverbtree (T& rbt){
     auto endIt=rbt.end();
     for(int count=Give<uint32_t>();count>0;--count)
       rbt.insert_unique(endIt,*T::value_type::BuildPolyInstance(*this));
@@ -582,11 +590,11 @@ private:
 template<class T,class R>
 T Give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
 
-template<class R> bool giveBool (ReceiveBuffer<R>& buf){
+template<class R>bool giveBool (ReceiveBuffer<R>& buf){
   switch(buf.GiveOne()){
     case 0:return false;
     case 1:return true;
-    default:throw failure("giveBool");
+    default:raise("giveBool");
   }
 }
 
@@ -595,11 +603,11 @@ template<class R> ::std::string giveString (ReceiveBuffer<R>& buf){
 }
 
 #if __cplusplus>=201703L||_MSVC_LANG>=201403L
-template<class R> auto giveStringView (ReceiveBuffer<R>& buf){
+template<class R>auto giveStringView (ReceiveBuffer<R>& buf){
   return buf.template GiveStringy<::std::string_view>();
 }
 
-template<class R> auto giveStringView_plus (ReceiveBuffer<R>& buf){
+template<class R>auto giveStringView_plus (ReceiveBuffer<R>& buf){
   auto v=giveStringView(buf);
   buf.GiveOne();
   return v;
@@ -621,7 +629,7 @@ public:
   SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
   void checkSpace (int n){
-    if(n>bufsize-index)throw failure("SendBuffer checkSpace")<<n<<index;
+    if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
   }
 
   void Receive (void const* data,int size){
@@ -630,7 +638,7 @@ public:
     index+=size;
   }
 
-  template<class T> void Receive (T t){
+  template<class T>void Receive (T t){
     static_assert(::std::is_arithmetic<T>::value,"");
     Receive(&t,sizeof t);
   }
@@ -642,7 +650,7 @@ public:
     return i;
   }
 
-  template<class T> void Receive (int where,T t){
+  template<class T>void Receive (int where,T t){
     static_assert(::std::is_arithmetic<T>::value,"");
     ::memcpy(buf+where,&t,sizeof t);
   }
@@ -650,7 +658,7 @@ public:
   void FillInSize (int32_t max){
     int32_t marshalledBytes=index-savedSize;
     if(marshalledBytes>max)
-      throw failure("Size of marshalled data exceeds max")<<max;
+      raise("Size of marshalled data exceeds max",max);
 
     Receive(savedSize,marshalledBytes);
     savedSize=index;
@@ -663,14 +671,14 @@ public:
   void Receive_variadic (char const* format,T&&... t){
     auto max=bufsize-index;
     auto size=::snprintf((char*)buf+index,max,format,t...);
-    if(size>max)throw failure("SendBuffer Receive_variadic");
+    if(size>max)raise("SendBuffer Receive_variadic");
     index+=size;
   }
 
   void ReceiveFile (fileType d,int32_t sz){
     Receive(sz);
     checkSpace(sz);
-    if(Read(d,buf+index,sz)!=sz)throw failure("SendBuffer ReceiveFile");
+    if(Read(d,buf+index,sz)!=sz)raise("SendBuffer ReceiveFile");
     index+=sz;
   }
 
@@ -724,14 +732,14 @@ inline void Receive (SendBuffer& b,stringPlus lst){
 
 inline void InsertNull (SendBuffer& b){uint8_t z=0;b.Receive(z);}
 
-template<class T> void ReceiveBlock (SendBuffer& b,T const& grp){
+template<class T>void ReceiveBlock (SendBuffer& b,T const& grp){
   int32_t count=grp.size();
   b.Receive(count);
   if(count>0)
     b.Receive(&*grp.begin(),count*sizeof(typename T::value_type));
 }
 
-template<class T> void ReceiveGroup (SendBuffer& b,T const& grp){
+template<class T>void ReceiveGroup (SendBuffer& b,T const& grp){
   b.Receive(static_cast<int32_t>(grp.size()));
   for(auto const& e:grp)e.Marshal(b);
 }
@@ -771,7 +779,7 @@ public:
   }
 };
 
-template<typename T> void reset (T* p){::memset(p,0,sizeof(T));}
+template<typename T>void reset (T* p){::memset(p,0,sizeof(T));}
 
 struct SendBufferHeap:SendBuffer{
   SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
@@ -824,7 +832,7 @@ public:
 
     if(index>0){
       if(index+(index>>3)+400>compSize-compIndex)
-        throw failure("Not enough room in compressed buf");
+        raise("Not enough room in compressed buf");
       compIndex+=::qlz_compress(buf,compBuf+compIndex,index,compress);
       Reset();
       if(rc)rc=doFlush();
@@ -847,10 +855,9 @@ public:
           bytesRead+=Read(sock_,rbuf+bytesRead,9-bytesRead);
           if(bytesRead<9)return false;
           if((compPacketSize=::qlz_size_compressed(rbuf))>bufsize)
-            throw failure("GotPacket compressed size too big");
+            raise("GotPacket compressed size too big");
           if((this->packetLength=::qlz_size_decompressed(rbuf))>bufsize)
-            throw failure("GotPacket decompressed size too big")
-                           <<this->packetLength<<bufsize;
+            raise("GotPacket decompressed size too big",this->packetLength,bufsize);
 
           compressedStart=rbuf+bufsize-compPacketSize;
           ::memmove(compressedStart,rbuf,9);
@@ -890,13 +897,13 @@ template<int N> class fixedString{
   fixedString (){}
 
   explicit fixedString (char const* s):len(::strlen(s)){
-    if(len()>N-1)throw failure("fixedString ctor");
+    if(len()>N-1)raise("fixedString ctor");
     ::strcpy(&str[0],s);
   }
 
 #if __cplusplus>=201703L
   explicit fixedString (::std::string_view s):len(s.length()){
-    if(len()>N-1)throw failure("fixedString ctor");
+    if(len()>N-1)raise("fixedString ctor");
     ::strncpy(&str[0],s.data(),len());
     str[len()]='\0';
   }
@@ -904,7 +911,7 @@ template<int N> class fixedString{
 
   template<class R>
   explicit fixedString (ReceiveBuffer<R>& b):len(b){
-    if(len()>N-1)throw failure("fixedString stream ctor");
+    if(len()>N-1)raise("fixedString stream ctor");
     b.Give(&str[0],len());
     str[len()]='\0';
   }
@@ -940,7 +947,7 @@ public:
   char const* Name ()const{return name.data();}
 };
 
-template<class R> void giveFiles (ReceiveBuffer<R>& b){
+template<class R>void giveFiles (ReceiveBuffer<R>& b){
   for(auto n=marshallingInt{b}();n>0;--n)File{b};
 }
 #endif
@@ -968,7 +975,7 @@ void MarshalCollection (C& c,SendBuffer& buf){
   auto const ind=buf.ReserveBytes(1);
   uint8_t segments=0;
   if(c.size()!=MarshalSegments<Ts...>(c,buf,segments))
-    throw failure("MarshalCollection");
+    raise("MarshalCollection");
   buf.Receive(ind,segments);
 }
 

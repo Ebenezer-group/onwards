@@ -1,7 +1,7 @@
 CXX=g++
 #CXX=clang++ -stdlib=libc++
 
-CXXFLAGS=-Isrc -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
+CXXFLAGS=-Isrc -Os -Wno-return-type -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
 
 BASE:=src/cmw/tiers
 TIERS:=$(BASE)/genz $(BASE)/cmwA

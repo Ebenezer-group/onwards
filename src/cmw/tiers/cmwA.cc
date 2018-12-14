@@ -20,7 +20,7 @@ using namespace ::cmw;
 
 bool marshalFile (char const* name,SendBuffer& buf){
   struct ::stat sb;
-  if(::stat(name,&sb)<0)throw failure("marshalFile stat")<<name;
+  if(::stat(name,&sb)<0)raise("marshalFile stat",name);
   if(sb.st_mtime>previousTime){
     if('.'==name[0]||name[0]=='/')Receive(buf,::strrchr(name,'/')+1);
     else Receive(buf,name);
@@ -48,7 +48,7 @@ struct cmwRequest{
   explicit cmwRequest (ReceiveBuffer<R>& buf):accountNbr(buf),path(buf){
     now=::time(nullptr);
     char* const pos=::strrchr(path(),'/');
-    if(nullptr==pos)throw failure("cmwRequest didn't find a /");
+    if(nullptr==pos)raise("cmwRequest didn't find a /");
     *pos='\0';
     middleFile=pos+1;
     setDirectory(path());
@@ -58,12 +58,11 @@ struct cmwRequest{
     previousTime=0;
     if(fd>=0){
       if(::pread(fd,&previousTime,sizeof previousTime,0)==-1){
-        auto e=preserveError(fd);
-        throw failure("pread")<<e;
+	raise("pread",preserveError(fd));
       }
     }else{
       fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-      if(fd<0)throw failure("open")<<lastrun<<errno;
+      if(fd<0)raise("open",lastrun,errno);
     }
   }
 
