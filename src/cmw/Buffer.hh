@@ -47,53 +47,40 @@ inline int GetError (){return errno;}
 namespace cmw{
 class failure:public ::std::exception{
   ::std::string str;
-
 public:
-  char const* what ()const noexcept{return str.c_str();}
-
   explicit failure (char const* s):str(s){}
 #if __cplusplus>=201703L
   explicit failure (::std::string_view s):str(s){}
-
-  failure& operator<< (::std::string_view const& s){
+  void operator<< (::std::string_view const& s){
     str.append(" ");
     str.append(s);
-    return *this;
   }
 #endif
-
-  failure& operator<< (char const* s){
+  void operator<< (char const* s){
     str.append(" ");
     str.append(s);
-    return *this;
   }
-  failure& operator<< (char* s){return *this<<static_cast<char const*>(s);}
-
-  failure& operator<< (int i){
+  void operator<< (int i){
     char b[12];
     ::snprintf(b,sizeof b,"%d",i);
-    return *this<<b;
+    *this<<b;
   }
+  char const* what ()const noexcept{return str.c_str();}
 };
+struct fiasco:failure{explicit fiasco(char const* s):failure(s){}};
 
-struct fiasco:failure{
-  explicit fiasco(char const* s):failure(s){}
-
-  template<class T>fiasco& operator<< (T t){
-    failure::operator<<(t);
-    return *this;
-  }
-};
-
-inline void apps (failure& f){throw f;}
-template<typename T,typename... Ts>
-void apps (failure& f,T t,Ts... ts){
-  f<<t;
-  apps(f,ts...);
+template<class E>void apps (E& e){throw e;}
+template<class E,class T,class...Ts>void apps (E& e,T t,Ts... ts){
+  e<<t;
+  apps(e,ts...);
 }
 
-template<typename... T>void raise (char const* s,T... t){
+template<class... T>void raise (char const* s,T... t){
   failure f(s);
+  apps(f,t...);
+}
+template<class... T>void raiseFiasco (char const* s,T... t){
+  fiasco f(s);
   apps(f,t...);
 }
 
@@ -292,7 +279,7 @@ inline int sockRead (sockType s,void* data,int len
   int rc=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(rc>0)return rc;
   auto e=GetError();
-  if(0==rc||ECONNRESET==e)throw fiasco("sockRead eof")<<s<<len<<e;
+  if(0==rc||ECONNRESET==e)raiseFiasco("sockRead eof",s,len,e);
   if(EAGAIN==e||EWOULDBLOCK==e)return 0;
   raise("sockRead",s,len,e);
 }
@@ -321,7 +308,7 @@ inline int Write (int fd,void const* data,int len){
 inline int Read (int fd,void* data,int len){
   int rc=::read(fd,data,len);
   if(rc>0)return rc;
-  if(rc==0)throw fiasco("Read eof")<<len;
+  if(rc==0)raiseFiasco("Read eof",len);
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
   raise("Read",len,errno);
 }
@@ -880,7 +867,7 @@ public:
         kosher=true;
         auto b=bytesRead;
         bytesRead=0;
-        throw fiasco("GotPacket")<<b<<e.what();
+        raiseFiasco("GotPacket",b,e.what());
       }else{
         kosher=false;
         throw;
