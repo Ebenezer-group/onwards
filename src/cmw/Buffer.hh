@@ -4,6 +4,7 @@
 #include<string_view>
 #include<charconv>//from_chars
 #endif
+#include<algorithm>//min
 #include<array>
 #include<exception>
 #include<initializer_list>
@@ -832,47 +833,37 @@ public:
     reset(compress);
     reset(decomp);
     compIndex=bytesRead=0;
+    kosher=true;
   }
 
   using ReceiveBuffer<R>::rbuf;
   bool GotPacket (){
-    try{
-      if(kosher){
-        if(bytesRead<9){
-          bytesRead+=Read(sock_,rbuf+bytesRead,9-bytesRead);
-          if(bytesRead<9)return false;
-          if((compPacketSize=::qlz_size_compressed(rbuf))>bufsize)
-            raise("GotPacket compressed size too big");
-          if((this->packetLength=::qlz_size_decompressed(rbuf))>bufsize)
-            raise("GotPacket decompressed size too big",this->packetLength,bufsize);
-
-          compressedStart=rbuf+bufsize-compPacketSize;
-          ::memmove(compressedStart,rbuf,9);
+    if(kosher){
+      if(bytesRead<9){
+        bytesRead+=Read(sock_,rbuf+bytesRead,9-bytesRead);
+        if(bytesRead<9)return false;
+        if((compPacketSize=::qlz_size_compressed(rbuf))>bufsize||
+           (this->packetLength=::qlz_size_decompressed(rbuf))>bufsize){
+          kosher=false;
+          raise("GotPacket size too big",compPacketSize,this->packetLength
+                ,bufsize);
         }
-        bytesRead+=Read(sock_,compressedStart+bytesRead,compPacketSize-bytesRead);
-        if(bytesRead<compPacketSize)return false;
-        ::qlz_decompress(compressedStart,rbuf,decomp);
-        bytesRead=0;
-        this->Update();
-        return true;
+        compressedStart=rbuf+bufsize-compPacketSize;
+        ::memmove(compressedStart,rbuf,9);
       }
-      bytesRead+=Read(sock_,rbuf,::std::min(bufsize,compPacketSize-bytesRead));
-      if(bytesRead==compPacketSize){
-        kosher=true;
-        bytesRead=0;
-      }
-      return false;
-    }catch(::std::exception const& e){
-      if(!kosher||bytesRead<9){
-        kosher=true;
-        auto b=bytesRead;
-        bytesRead=0;
-        raiseFiasco("GotPacket",b,e.what());
-      }else{
-        kosher=false;
-        throw;
-      }
+      bytesRead+=Read(sock_,compressedStart+bytesRead,compPacketSize-bytesRead);
+      if(bytesRead<compPacketSize)return false;
+      ::qlz_decompress(compressedStart,rbuf,decomp);
+      bytesRead=0;
+      this->Update();
+      return true;
     }
+    bytesRead+=Read(sock_,rbuf,::std::min(bufsize,compPacketSize-bytesRead));
+    if(bytesRead==compPacketSize){
+      kosher=true;
+      bytesRead=0;
+    }
+    return false;
   }
 };
 
