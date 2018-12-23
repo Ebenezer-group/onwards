@@ -1,16 +1,15 @@
 #include<cmw/Buffer.hh>
+using namespace ::cmw;
 #include"zz.frontMiddle.hh"
 #include<stdio.h>
 #include<stdlib.h>//exit
-using namespace ::cmw;
 
-template<typename... T>
-void leave (char const* format,T... t)noexcept{
-  ::printf(format,t...);
+template<class...T>void leave (char const* fmt,T...t)noexcept{
+  ::printf(fmt,t...);
 #ifndef CMW_WINDOWS
   ::openlog("genz",LOG_NDELAY,LOG_USER);
 #endif
-  bail(format,t...);
+  bail(fmt,t...);
 }
 
 int main (int ac,char** av){

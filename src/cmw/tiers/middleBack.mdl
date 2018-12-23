@@ -8,5 +8,5 @@ middleBack
 }
 
 middleFront
-  -out -maxLength=cmw::udp_packet_max -noInline -yeaNay (bool,cmw::stringPlus)
+  -out -maxLength=udp_packet_max -noInline -yeaNay (bool,stringPlus)
 }

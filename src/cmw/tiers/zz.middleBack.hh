@@ -45,14 +45,14 @@ cmwAccount::MarshalMemberData (::cmw::SendBuffer& buf)const{
 namespace middleFront{
 void Marshal (::cmw::SendBuffer& buf
          ,bool a
-         ,cmw::stringPlus const& b={}){
+         ,stringPlus const& b={}){
   try{
     buf.ReserveBytes(4);
     Receive(buf,a);
     if(!a){
       Receive(buf,b);
     }
-    buf.FillInSize(cmw::udp_packet_max);
+    buf.FillInSize(udp_packet_max);
   }catch(...){buf.Rollback();throw;}
 }
 }

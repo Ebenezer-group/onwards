@@ -8,7 +8,7 @@ GENZ:=$(BASE)\genz.exe
 all:$(GENZ) $(EXAMPLES)
 
 $(GENZ):$(BASE)\genz.cc
-	$(CC) -Fe:$@ -std:c++latest $(CFLAGS) $(BASE)\genz.cc $(LIBS)
+	$(CC) -Fe:$@ $(CFLAGS) -std:c++latest $(BASE)\genz.cc $(LIBS)
 
 example\sendExample.exe: example\sendExample.cc
 	$(CC) -Fe:$@ $(CFLAGS) example\sendExample.cc $(LIBS)

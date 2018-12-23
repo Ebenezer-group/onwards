@@ -1,11 +1,10 @@
-#include<cmw/Buffer.hh>
 struct cmwAccount{
-  ::cmw::marshallingInt number;
-  ::cmw::fixedString60 password;
+  marshallingInt number;
+  fixedString60 password;
 
   cmwAccount (int n,char* p):number(n),password(p){}
-  template<class R> explicit cmwAccount (::cmw::ReceiveBuffer<R>&);
+  template<class R> explicit cmwAccount (ReceiveBuffer<R>&);
 
-  void MarshalMemberData (::cmw::SendBuffer&)const;
-  void Marshal (::cmw::SendBuffer& b)const{MarshalMemberData(b);}
+  void MarshalMemberData (SendBuffer&)const;
+  void Marshal (SendBuffer& b)const{MarshalMemberData(b);}
 };

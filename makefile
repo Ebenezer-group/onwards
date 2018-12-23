@@ -1,30 +1,28 @@
 CXX=g++
-#CXX=clang++ -stdlib=libc++
+CXXFLAGS=$(CXX) -Isrc -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -Wno-return-type -o $@ $@.cc -std=c++
 
-CXXFLAGS=-Isrc -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -Wno-return-type -o $@ $@.cc
-
-BASE:=src/cmw/tiers
-TIERS:=$(BASE)/genz $(BASE)/cmwA
+BASE:=src/cmw/tiers/
+TIERS:=$(BASE)genz $(BASE)cmwA
 EXAMPLES:=example/sendExample example/receiveExample
 all:$(TIERS) $(EXAMPLES)
-PHONY:all
+.PHONY:all clean
 
-#zz.middleBack.hh: account.hh middleBack.mdl
-#	genz 2 /home/brian/onwards/src/cmw/tiers/middleBack.mdl
+#zz.middleBack.hh: account.hh $(BASE)middleBack.mdl
+#	genz 2 $(BASE)middleBack.mdl
 
-$(BASE)/genz:$(BASE)/genz.cc
-	$(CXX) -std=c++17 $(CXXFLAGS)
+$(BASE)genz:$(BASE)genz.cc
+	$(CXXFLAGS)17
 	size $@
 
-$(BASE)/cmwA:$(BASE)/cmwA.cc
-	$(CXX) -std=c++17 $(CXXFLAGS)
+$(BASE)cmwA:$(BASE)cmwA.cc
+	$(CXXFLAGS)17
 	size $@
 
 example/sendExample:example/sendExample.cc
-	$(CXX) -std=c++11 $(CXXFLAGS)
+	$(CXXFLAGS)11
 	size $@
 example/receiveExample:example/receiveExample.cc
-	$(CXX) -std=c++11 $(CXXFLAGS)
+	$(CXXFLAGS)11
 	size $@
 
 clean:
