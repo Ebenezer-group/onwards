@@ -643,8 +643,8 @@ public:
     index+=sz;
   }
 
-  bool Flush (::sockaddr* addr=nullptr,::socklen_t len=0){
-    int const bytes=sockWrite(sock_,buf,index,addr,len);
+  bool Flush (){
+    int const bytes=sockWrite(sock_,buf,index);
     if(bytes==index){Reset();return true;}
 
     index-=bytes;
