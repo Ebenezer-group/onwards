@@ -259,11 +259,9 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   }
 }
 
-int main (int ac,char** av){
-  try{
-    ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
-    if(ac!=2)bail("Usage: cmwA config-file-name");
-    cmwAmbassador{av[1]};
-  }catch(::std::exception const& e){bail("Oops:%s",e.what());
-  }catch(...){bail("Unknown exception!");}
-}
+int main (int ac,char** av)try{
+  ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
+  if(ac!=2)bail("Usage: cmwA config-file-name");
+  cmwAmbassador{av[1]};
+}catch(::std::exception const& e){bail("Oops:%s",e.what());
+}catch(...){bail("Unknown exception!");}
