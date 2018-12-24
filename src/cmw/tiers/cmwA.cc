@@ -149,11 +149,10 @@ class cmwAmbassador{
     login();
   }
 
-  bool sendData (){
-    try{return cmwBuf.Flush();}catch(::std::exception const& e){
-      reset("sendData",e.what());
-      return true;
-    }
+  bool sendData ()try{return cmwBuf.Flush();}
+  catch(::std::exception const& e){
+    reset("sendData",e.what());
+    return true;
   }
 
 public:
