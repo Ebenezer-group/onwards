@@ -894,26 +894,25 @@ template<class R>void giveFiles (ReceiveBuffer<R>& b){
 template<class C>int32_t MarshalSegments (C&,SendBuffer&,uint8_t){return 0;}
 
 template<class T,class... Ts,class C>
-int32_t MarshalSegments (C& c,SendBuffer& buf,uint8_t& segments){
+int32_t MarshalSegments (C& c,SendBuffer& buf,uint8_t& segs){
   int32_t n;
   if(c.template is_registered<T>()){
     n=c.template size<T>();
     if(n>0){
-      ++segments;
+      ++segs;
       buf.Receive(T::typeNum);
       buf.Receive(n);
       for(T const& t:c.template segment<T>()){t.Marshal(buf);}
     }
   }else n=0;
-  return n+MarshalSegments<Ts...>(c,buf,segments);
+  return n+MarshalSegments<Ts...>(c,buf,segs);
 }
 
 template<class...Ts,class C>void MarshalCollection (C& c,SendBuffer& buf){
   auto const ind=buf.ReserveBytes(1);
-  uint8_t segments=0;
-  if(c.size()!=MarshalSegments<Ts...>(c,buf,segments))
-    raise("MarshalCollection");
-  buf.Receive(ind,segments);
+  uint8_t segs=0;
+  if(c.size()!=MarshalSegments<Ts...>(c,buf,segs))raise("MarshalCollection");
+  buf.Receive(ind,segs);
 }
 
 template<class T,class C,class R>
