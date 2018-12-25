@@ -90,17 +90,6 @@ inline int fromChars (char const* p){
 #endif
 }
 
-#ifndef CMW_WINDOWS
-struct fileWrapper{
-  int const d;
-  fileWrapper (char const* name,int flags,mode_t mode=0):
-          d(0==mode?::open(name,flags): ::open(name,flags,mode)){
-    if(d<0)raise("fileWrapper",name,errno);
-  }
-  ~fileWrapper (){::close(d);}
-};
-#endif
-
 struct FILE_wrapper{
   FILE* hndl;
   char line[120];
@@ -871,6 +860,16 @@ template<int N>class fixedString{
 using fixedString60=fixedString<60>;
 using fixedString120=fixedString<120>;
 
+#ifndef CMW_WINDOWS
+struct fileWrapper{
+  int const d;
+  fileWrapper (char const* name,int flags,mode_t mode=0):
+          d(0==mode?::open(name,flags): ::open(name,flags,mode)){
+    if(d<0)raise("fileWrapper",name,errno);
+  }
+  ~fileWrapper (){::close(d);}
+};
+
 #if __cplusplus>=201703L
 class File{
   ::std::string_view name;
@@ -889,6 +888,7 @@ public:
 template<class R>void giveFiles (ReceiveBuffer<R>& b){
   for(auto n=marshallingInt{b}();n>0;--n)File{b};
 }
+#endif
 #endif
 
 template<class C>int32_t MarshalSegments (C&,SendBuffer&,uint8_t){return 0;}

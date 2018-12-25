@@ -5,11 +5,8 @@ using namespace ::cmw;
 #include<stdlib.h>//exit
 
 template<class...T>void leave (char const* fmt,T...t)noexcept{
-  ::printf(fmt,t...);
-#ifndef CMW_WINDOWS
-  ::openlog("genz",LOG_NDELAY,LOG_USER);
-#endif
-  bail(fmt,t...);
+  ::fprintf(stderr,fmt,t...);
+  ::exit(EXIT_FAILURE);
 }
 
 int main (int ac,char** av)try{
