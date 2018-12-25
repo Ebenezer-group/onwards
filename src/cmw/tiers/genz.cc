@@ -32,7 +32,7 @@ int main (int ac,char** av)try{
     if(buf.GetPacket()){
       if(giveBool(buf))::exit(EXIT_SUCCESS);
       auto v=giveStringView(buf);
-      *(const_cast<char*>(v.data())+v.length())=0;
+      *const_cast<char*>(v.data()+v.length())=0;
       leave("cmwA:%s",v.data());
     }
   }

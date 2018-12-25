@@ -1,5 +1,4 @@
 //  This program receives messages sent by sendExample.
-
 #include<cmw/Buffer.hh>
 #include"messageIDs.hh"
 #include"plf_colony.h"
@@ -26,8 +25,8 @@ int main ()try{
     {
       ::std::vector<int32_t> vec;
       ::std::string str;
-      receiveMessages::Give(buf,vec,str);
-      for(auto val:vec){::std::cout<<val<<" ";}
+      Give(buf,vec,str);
+      for(auto val:vec){::std::cout<<val<<' ';}
       ::std::cout<<'\n'<<str;
     }
     break;
@@ -36,17 +35,17 @@ int main ()try{
     {
       ::std::set<int32_t> iset;
       Give(buf,iset);
-      for(auto val:iset){::std::cout<<val<<" ";}
+      for(auto val:iset){::std::cout<<val<<' ';}
     }
     break;
 
     case messageid3:
     {
-      ::std::array<std::array<float,2>, 3> a;
+      ::std::array<std::array<float,2>,3> a;
       Give(buf,a);
       for(auto subarray:a){
-        for(auto val:subarray){::std::cout<<val<<" ";}
-        ::std::cout<<::std::endl;
+        for(auto val:subarray){::std::cout<<val<<' ';}
+        ::std::cout<<'\n';
       }
     }
     break;
@@ -55,7 +54,7 @@ int main ()try{
     {
       ::plf::colony<::std::string> clny;
       Give(buf,clny);
-      for(auto val:clny){::std::cout<<val<<" ";}
+      for(auto val:clny){::std::cout<<val<<' ';}
     }
     break;
 
@@ -65,6 +64,6 @@ int main ()try{
     ::std::cout<<::std::endl;
   }
 }catch(std::exception const& e){
-  ::std::cout<<"failure: "<<e.what()<<::std::endl;
+  ::std::cout<<"failure: "<<e.what()<<'\n';
   return 1;
 }

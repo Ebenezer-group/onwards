@@ -31,7 +31,7 @@ using fileType=HANDLE;
 inline int GetError (){return WSAGetLastError();}
 #else
 #include<errno.h>
-#include<fcntl.h>//open
+#include<fcntl.h>//fcntl,open
 #include<netdb.h>
 #include<poll.h>
 #include<sys/socket.h>

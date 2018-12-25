@@ -133,7 +133,7 @@ class cmwAmbassador{
       fds[0].events=POLLIN;
     }else{
       auto v=giveStringView(cmwBuf);
-      *(const_cast<char*>(v.data())+v.length())=0;
+      *const_cast<char*>(v.data()+v.length())=0;
       bail("Login:%s",v.data());
     }
   }
@@ -150,10 +150,7 @@ class cmwAmbassador{
   }
 
   bool sendData ()try{return cmwBuf.Flush();}
-  catch(::std::exception const& e){
-    reset("sendData",e.what());
-    return true;
-  }
+  catch(::std::exception const& e){reset("sendData",e.what());return true;}
 
 public:
   cmwAmbassador (char*);
