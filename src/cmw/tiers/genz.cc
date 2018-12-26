@@ -11,7 +11,7 @@ template<class...T>void leave (char const* fmt,T...t)noexcept{
 
 int main (int ac,char** av)try{
   if(ac<3||ac>5)
-    leave("Usage: genz account-num mdl-file-path [node] [port]");
+    leave("Usage: genz account-num mdl-file-path [node] [port]\n");
   winStart();
   getaddrinfoWrapper res(ac<4?
 #ifdef __linux__
@@ -28,10 +28,8 @@ int main (int ac,char** av)try{
     setRcvTimeout(buf.sock_,tm);
     if(buf.GetPacket()){
       if(giveBool(buf))::exit(EXIT_SUCCESS);
-      auto v=giveStringView(buf);
-      *const_cast<char*>(v.data()+v.length())=0;
-      leave("cmwA:%s",v.data());
+      leave("cmwA:%s\n",nullTerminate(giveStringView(buf)).data());
     }
   }
-  leave("No reply received.  Is the cmwA running?");
+  leave("No reply received.  Is the cmwA running?\n");
 }catch(::std::exception const& e){leave(e.what());}

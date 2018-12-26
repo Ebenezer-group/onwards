@@ -131,11 +131,7 @@ class cmwAmbassador{
     if(giveBool(cmwBuf)){
       if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",GetError());
       fds[0].events=POLLIN;
-    }else{
-      auto v=giveStringView(cmwBuf);
-      *const_cast<char*>(v.data()+v.length())=0;
-      bail("Login:%s",v.data());
-    }
+    }else bail("Login:%s",nullTerminate(giveStringView(cmwBuf)).data());
   }
 
   void reset (char const* context,char const* detail){

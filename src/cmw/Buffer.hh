@@ -566,6 +566,11 @@ template<class R>auto giveStringView_plus (ReceiveBuffer<R>& buf){
   buf.GiveOne();
   return v;
 }
+
+inline auto nullTerminate (::std::string_view v){
+  *const_cast<char*>(v.data()+v.length())=0;
+  return v;
+}
 #endif
 
 class SendBuffer{
