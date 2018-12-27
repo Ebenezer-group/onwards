@@ -11,8 +11,8 @@ using namespace ::cmw;
 #include<stdint.h>
 #include<stdio.h>
 #include<string.h>
-#include<sys/types.h>
 #include<sys/stat.h>
+#include<sys/types.h>
 #include<time.h>
 #include<netinet/in.h>//sockaddr_in6,socklen_t
 #include<unistd.h>//pread,close
@@ -106,7 +106,7 @@ class cmwAmbassador{
 #endif
   > cmwBuf;
 
-  BufferStack<SameFormat> localbuf;
+  BufferStack<SameFormat> frontBuf;
   ::std::vector<cmwAccount> accounts;
   ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
   ::pollfd fds[2];
@@ -136,9 +136,9 @@ class cmwAmbassador{
 
   void reset (char const* context,char const* detail){
     syslogWrapper(LOG_ERR,"%s:%s",context,detail);
-    Marshal(localbuf,false,{context," ",detail});
+    Marshal(frontBuf,false,{context," ",detail});
     for(auto& r:pendingRequests)
-      if(r.get())localbuf.Send((::sockaddr*)&r->front,r->frontLen);
+      if(r.get())frontBuf.Send((::sockaddr*)&r->front,r->frontLen);
     pendingRequests.clear();
     closeSocket(fds[0].fd);
     cmwBuf.CompressedReset();
@@ -169,7 +169,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
       else bail("Expected UDP-port-number");
     }
   }
-  fds[1].fd=localbuf.sock_=udpServer(::strtok(nullptr,"\n "));
+  fds[1].fd=frontBuf.sock_=udpServer(::strtok(nullptr,"\n "));
   fds[1].events=POLLIN;
 #ifdef __linux__
   if(setNonblocking(fds[1].fd)==-1)bail("setNonb:%d",GetError());
@@ -193,7 +193,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
       continue;
     }
 
-    localbuf.Reset();
+    frontBuf.Reset();
     try{
       if(fds[0].revents&POLLIN&&cmwBuf.GotPacket()){
         do{
@@ -204,10 +204,10 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
               req.saveRuntime();
               setDirectory(req.path.c_str());
               giveFiles(cmwBuf);
-              Marshal(localbuf,true);
-            }else Marshal(localbuf,false,{"CMW:",giveStringView(cmwBuf)});
-            localbuf.Send((::sockaddr*)&req.front,req.frontLen);
-            localbuf.Reset();
+              Marshal(frontBuf,true);
+            }else Marshal(frontBuf,false,{"CMW:",giveStringView(cmwBuf)});
+            frontBuf.Send((::sockaddr*)&req.front,req.frontLen);
+            frontBuf.Reset();
           }
           pendingRequests.erase(::std::begin(pendingRequests));
         }while(cmwBuf.NextMessage());
@@ -220,8 +220,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
       assert(!pendingRequests.empty());
       if(pendingRequests.front().get()){
         auto const& req=*pendingRequests.front();
-        Marshal(localbuf,false,{e.what()});
-        localbuf.Send((::sockaddr*)&req.front,req.frontLen);
+        Marshal(frontBuf,false,{e.what()});
+        frontBuf.Send((::sockaddr*)&req.front,req.frontLen);
       }
       pendingRequests.erase(::std::begin(pendingRequests));
     }
@@ -233,15 +233,15 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
       cmwRequest* req=nullptr;
       try{
         req=&*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
-        localbuf.GetPacket((::sockaddr*)&req->front,&req->frontLen);
+        frontBuf.GetPacket((::sockaddr*)&req->front,&req->frontLen);
         gotAddr=true;
-        new(req)cmwRequest(localbuf);
+        new(req)cmwRequest(frontBuf);
         Marshal(cmwBuf,Generate,*req);
       }catch(::std::exception const& e){
         syslogWrapper(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr){
-          Marshal(localbuf,false,{e.what()});
-          localbuf.Send((::sockaddr*)&req->front,req->frontLen);
+          Marshal(frontBuf,false,{e.what()});
+          frontBuf.Send((::sockaddr*)&req->front,req->frontLen);
         }
         if(req)pendingRequests.pop_back();
         continue;

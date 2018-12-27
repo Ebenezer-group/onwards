@@ -24,8 +24,6 @@ static_assert(::std::numeric_limits<float>::is_iec559
 #include<ws2tcpip.h>
 #define CMW_WINDOWS
 #define poll WSAPoll
-#define LOG_INFO 0
-#define LOG_ERR 0
 using sockType=SOCKET;
 using fileType=HANDLE;
 inline int GetError (){return WSAGetLastError();}
@@ -125,18 +123,6 @@ class getaddrinfoWrapper{
   getaddrinfoWrapper (getaddrinfoWrapper const&)=delete;
   getaddrinfoWrapper& operator= (getaddrinfoWrapper)=delete;
 };
-
-template<class... T>
-void syslogWrapper (int pri,char const* fmt,T... t){
-#ifndef CMW_WINDOWS
-  ::syslog(pri,fmt,t...);
-#endif
-}
-
-template<class... T>void bail (char const* fmt,T... t)noexcept{
-  syslogWrapper(LOG_ERR,fmt,t...);
-  ::exit(EXIT_FAILURE);
-}
 
 inline void setDirectory (char const* d){
 #ifdef CMW_WINDOWS
@@ -866,6 +852,15 @@ using fixedString60=fixedString<60>;
 using fixedString120=fixedString<120>;
 
 #ifndef CMW_WINDOWS
+template<class...T>void syslogWrapper (int pri,char const* fmt,T... t){
+  ::syslog(pri,fmt,t...);
+}
+
+template<class...T>void bail (char const* fmt,T... t)noexcept{
+  syslogWrapper(LOG_ERR,fmt,t...);
+  ::exit(EXIT_FAILURE);
+}
+
 struct fileWrapper{
   int const d;
   fileWrapper (char const* name,int flags,mode_t mode=0):
