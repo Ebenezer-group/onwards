@@ -12,8 +12,7 @@
 #include<string>
 #include<type_traits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8,"");
-static_assert(::std::numeric_limits<float>::is_iec559
-              ,"Only IEEE 754 supported");
+static_assert(::std::numeric_limits<float>::is_iec559,"Only IEEE754 supported");
 
 #include<stdint.h>
 #include<stdio.h>//snprintf
@@ -37,10 +36,10 @@ inline int GetError (){return WSAGetLastError();}
 #include<sys/types.h>
 #include<syslog.h>
 #include<unistd.h>//close,chdir,read,write
+#define _MSVC_LANG 0
 using sockType=int;
 using fileType=int;
 inline int GetError (){return errno;}
-#define _MSVC_LANG 0
 #endif
 
 namespace cmw{
@@ -73,7 +72,7 @@ template<class... T>void raiseFiasco (char const* s,T... t){
 inline void winStart (){
 #ifdef CMW_WINDOWS
   WSADATA w;
-  int rc=WSAStartup(MAKEWORD(2,2),&w);
+  auto rc=::WSAStartup(MAKEWORD(2,2),&w);
   if(0!=rc)raise("WSAStartup",rc);
 #endif
 }
@@ -926,7 +925,7 @@ template<class C,class R,class F>
 void BuildCollection (C& c,ReceiveBuffer<R>& buf,F f){
   for(auto segs=Give<uint8_t>(buf);segs>0;--segs){f(c,buf);}
 }
-}
 
 using messageID_8=uint8_t;
 using messageID_16=uint16_t;
+}

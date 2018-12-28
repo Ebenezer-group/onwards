@@ -14,6 +14,7 @@
 //   }
 
 #include<cmw/Buffer.hh>
+using namespace ::cmw;
 #include"messageIDs.hh"
 #include"plf_colony.h"
 
@@ -23,7 +24,6 @@
 #include<string>
 #include<vector>
 #include"zz.sendMessages.hh"
-using namespace ::cmw;
 using namespace ::sendMessages;
 
 int main ()try{
