@@ -608,12 +608,7 @@ public:
   void Reset (){savedSize=index=0;}
   void Rollback (){index=savedSize;}
 
-  template<class...T>void ReceiveMulti (char const* fmt,T&&...t){
-    auto max=bufsize-index;
-    auto n=::snprintf((char*)buf+index,max,fmt,t...);
-    if(n>max)raise("ReceiveMulti");
-    index+=n;
-  }
+  template<class...T>void ReceiveMulti (char const* fmt,T&&...t);
 
   void ReceiveFile (fileType d,int32_t sz){
     Receive(sz);
