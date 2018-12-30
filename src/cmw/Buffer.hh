@@ -582,7 +582,7 @@ public:
   }
 
   template<class T>void Receive (T t){
-    static_assert(::std::is_arithmetic<T>::value,"");
+    static_assert(::std::is_arithmetic<T>::value||::std::is_enum<T>::value,"");
     Receive(&t,sizeof t);
   }
 
@@ -925,7 +925,4 @@ template<class C,class R,class F>
 void BuildCollection (C& c,ReceiveBuffer<R>& buf,F f){
   for(auto segs=Give<uint8_t>(buf);segs>0;--segs){f(c,buf);}
 }
-
-using messageID_8=uint8_t;
-using messageID_16=uint16_t;
 }

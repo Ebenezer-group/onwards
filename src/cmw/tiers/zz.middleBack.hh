@@ -8,29 +8,29 @@ cmwAccount::MarshalMemberData (::cmw::SendBuffer& buf)const{
 
 namespace middleBack{
 void Marshal (::cmw::SendBuffer& buf
-         ,messageID_8 a
+         ,messageID a
          ,::std::vector<cmwAccount> const& b
          ,::int32_t c)try{
   buf.ReserveBytes(4);
-  buf.Receive(a);
+  buf.Receive(static_cast<uint8_t>(a));
   ReceiveGroup(buf,b);
   buf.Receive(c);
   buf.FillInSize(10000);
 }catch(...){buf.Rollback();throw;}
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,messageID_8 a
+         ,messageID a
          ,cmwRequest const& b)try{
   buf.ReserveBytes(4);
-  buf.Receive(a);
+  buf.Receive(static_cast<uint8_t>(a));
   b.Marshal(buf);
   buf.FillInSize(700000);
 }catch(...){buf.Rollback();throw;}
 
 inline void Marshal (::cmw::SendBuffer& buf
-         ,messageID_8 a)try{
+         ,messageID a)try{
   buf.ReserveBytes(4);
-  buf.Receive(a);
+  buf.Receive(static_cast<uint8_t>(a));
   buf.FillInSize(10000);
 }catch(...){buf.Rollback();throw;}
 }

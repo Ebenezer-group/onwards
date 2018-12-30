@@ -1,12 +1,11 @@
 #pragma once
 #include<stdint.h>
-#include<Buffer.hh>
+#include<cmw/Buffer.hh>
 
 namespace cmw{
 template<class R> class ReceiveBuffer;
 
-template<class T>
-class messageID{
+template<class T> class messageID{
   T const value;
 
 public:

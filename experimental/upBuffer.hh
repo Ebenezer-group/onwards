@@ -707,5 +707,3 @@ void BuildCollection (C& c,ReceiveBuffer<R>& buf,F f){
 }
 }
 
-using messageID_8=uint8_t;
-using messageID_16=uint16_t;

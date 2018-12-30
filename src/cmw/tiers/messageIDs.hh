@@ -1,3 +1,1 @@
-messageID_8 const Login=1;
-messageID_8 const Generate=2;
-messageID_8 const Keepalive=3;
+enum class messageID:uint8_t{Login,Generate,Keepalive};

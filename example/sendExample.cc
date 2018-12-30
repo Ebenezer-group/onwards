@@ -2,15 +2,15 @@
 //   Middleware Writer.
 //
 //   sendMessages
-//      -out (messageID_8, ::std::vector<int32_t>, ::std::string)
-//      -out (messageID_8, ::std::set<int32_t>)
-//      -out (messageID_8, ::std::array<::std::array<float,2>, 3>)
+//      -out (messageID, ::std::vector<int32_t>,::std::string)
+//      -out (messageID, ::std::set<int32_t>)
+//      -out (messageID, ::std::array<::std::array<float,2>, 3>)
 //   }
 //
 //   receiveMessages
-//      -in                (::std::vector<int32_t>, ::std::string)
-//      -in                (::std::set<int32_t>)
-//      -in                (::std::array<::std::array<float,2>, 3>)
+//      -in             (::std::vector<int32_t>,::std::string)
+//      -in             (::std::set<int32_t>)
+//      -in             (::std::array<::std::array<float,2>, 3>)
 //   }
 
 #include<cmw/Buffer.hh>
@@ -37,42 +37,43 @@ int main ()try{
                     ,"12345",SOCK_DGRAM);
   BufferStack<SameFormat> buf(ai.getSock());
 
-  ::std::cout<<"Enter the ID of the message to send: 1,2,3 or 4.\n";
-  int messageID;
-  ::std::cin>>messageID;
-  switch(messageID){
-    case messageid1:
+  ::std::cout<<"Enter the ID of the message to send: 0,1,2,or 3.\n";
+  int msgID;
+  ::std::cin>>msgID;
+  switch(msgID){
+    case messageID::id1:
     {
       ::std::vector<int32_t> vec {100,97,94,91,88,85};
-      Marshal(buf,messageid1,vec,"Proverbs 24:27");
+      Marshal(buf,messageID::id1,vec,"Proverbs 24:27");
     }
     break;
 
-    case messageid2:
+    case messageID::id2:
     {
       ::std::set<int32_t> iset {100,97,94,91,88,85};
-      Marshal(buf,messageid2,iset);
+      Marshal(buf,messageID::id2,iset);
     }
     break;
 
-    case messageid3:
+    case messageID::id3:
     {
       ::std::array<::std::array<float,2>, 3> ar {{ {{1.1f,2.2}}
                                                   ,{{3.3,4.4}}
                                                   ,{{5.5,6.6}}
                                                 }};
-      Marshal(buf,messageid3,ar);
+      Marshal(buf,messageID::id3,ar);
     }
     break;
 
-    case messageid4:
+    case messageID::id4:
     {
       ::plf::colony<::std::string> clny{"Beautiful words ","wonderful words ","of life"};
-      Marshal(buf,messageid4,clny);
+      Marshal(buf,messageID::id4,clny);
     }
     break;
 
     default:
+      std::cout<<"unknown message id\n";
       return 0;
   }
   buf.Send(ai()->ai_addr,ai()->ai_addrlen);

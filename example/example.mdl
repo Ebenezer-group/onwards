@@ -1,15 +1,16 @@
 splitOutput
+opaque.hh
 --
 sendMessages
-    -out (messageID_8, ::std::vector<int32_t>, ::std::string)
-    -out (messageID_8, ::std::set<int32_t>)
-    -out (messageID_8, ::std::array<::std::array<float,2>, 3>)
-    -out (messageID_8, ::plf::colony<::std::string>)
+    -out (messageID, ::std::vector<int32_t>,::std::string)
+    -out (messageID, ::std::set<int32_t>)
+    -out (messageID, ::std::array<::std::array<float,2>, 3>)
+    -out (messageID, ::plf::colony<::std::string>)
 }
 
 receiveMessages
-    -in                (::std::vector<int32_t>, ::std::string)
-    -in                (::std::set<int32_t>)
-    -in                (::std::array<::std::array<float,2>, 3>)
-    -in                (::plf::colony<::std::string>)
+    -in             (::std::vector<int32_t>,::std::string)
+    -in             (::std::set<int32_t>)
+    -in             (::std::array<::std::array<float,2>, 3>)
+    -in             (::plf::colony<::std::string>)
 }

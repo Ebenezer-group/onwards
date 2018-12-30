@@ -8,3 +8,5 @@ struct cmwAccount{
   void MarshalMemberData (SendBuffer&)const;
   void Marshal (SendBuffer& b)const{MarshalMemberData(b);}
 };
+
+enum class messageID:uint8_t;
