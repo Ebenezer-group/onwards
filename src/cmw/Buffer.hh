@@ -298,7 +298,6 @@ public:
   int32_t operator() ()const{return val;}
   void Marshal (SendBuffer&)const;
 };
-
 inline bool operator== (marshallingInt l,marshallingInt r){return l()==r();}
 inline bool operator== (marshallingInt l,int32_t r){return l()==r;}
 
@@ -522,9 +521,6 @@ public:
     for(int count=Give<uint32_t>();count>0;--count)
       rbt.insert_unique(endIt,*T::value_type::BuildPolyInstance(*this));
   }
-private:
-  ReceiveBuffer (ReceiveBuffer const&);
-  ReceiveBuffer& operator= (ReceiveBuffer);
 };
 
 template<class T,class R>
@@ -608,8 +604,6 @@ public:
   void Reset (){savedSize=index=0;}
   void Rollback (){index=savedSize;}
 
-  template<class...T>void ReceiveMulti (char const* fmt,T&&...t);
-
   void ReceiveFile (fileType d,int32_t sz){
     Receive(sz);
     checkSpace(sz);
@@ -634,6 +628,7 @@ public:
   unsigned char* data (){return buf;}
   int GetIndex (){return index;}
   int GetSize (){return bufsize;}
+  template<class...T>void ReceiveMulti (char const* fmt,T&&...t);
 };
 
 inline void Receive (SendBuffer&b,bool bl){b.Receive(static_cast<unsigned char>(bl));}

@@ -20,17 +20,16 @@ Functions are created within the namespace for each of the lines
 with matching parentheses.
 
 These are the available options:
- -out, -in, -noInline, -maxLength, -yeaNay
+ out, in, inLine, maxLength, yeaNay
 
 The out and in options are used to tailor the output.  If you
 specify only -out, only the message-building/sending function is
 generated.  If you specify only -in, only the message-parsing/
 receiving function gets generated.
 
-The noInline option indicates that a generated function should
-not be marked as inline.  If you only include a generated header
-in one translation unit, it's safe to use noInline.  This option
-may help reduce the size of your executables.
+The inLine option indicates that a generated function should
+be marked as inline.  This option may help reduce the size of 
+your executables.
 
 The maxLength option allows users to specify the maximum length
 for a message.  If the length of the message exceeds the value

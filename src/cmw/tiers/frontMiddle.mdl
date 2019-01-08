@@ -1,4 +1,4 @@
 --
 frontMiddle
-  -out -maxLength=udp_packet_max -noInline (marshallingInt,const char*)
+  -out -maxLength=udp_packet_max (marshallingInt,const char*)
 }

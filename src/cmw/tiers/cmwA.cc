@@ -113,7 +113,7 @@ class cmwAmbassador{
   int loginPause;
 
   void login (){
-    Marshal(cmwBuf,messageID::Login,accounts,cmwBuf.GetSize());
+    Marshal<messageID::Login>(cmwBuf,accounts,cmwBuf.GetSize());
     for(;;){
       fds[0].fd=cmwBuf.sock_=connectWrapper("70.56.166.91",
 #ifdef CMW_ENDIAN_BIG
@@ -185,7 +185,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
     if(0==pollWrapper(fds,2,keepaliveInterval)){
       if(pendingRequests.empty())
         try{
-          Marshal(cmwBuf,messageID::Keepalive);
+          Marshal<messageID::Keepalive>(cmwBuf);
           fds[0].events|=POLLOUT;
           pendingRequests.push_back(nullptr);
         }catch(::std::exception const& e){reset("Keepalive",e.what());}
@@ -236,7 +236,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
         frontBuf.GetPacket((::sockaddr*)&req->front,&req->frontLen);
         gotAddr=true;
         new(req)cmwRequest(frontBuf);
-        Marshal(cmwBuf,messageID::Generate,*req);
+        Marshal<messageID::Generate>(cmwBuf,*req);
       }catch(::std::exception const& e){
         syslogWrapper(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr){

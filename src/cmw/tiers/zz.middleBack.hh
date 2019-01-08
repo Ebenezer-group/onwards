@@ -7,30 +7,31 @@ cmwAccount::MarshalMemberData (::cmw::SendBuffer& buf)const{
 }
 
 namespace middleBack{
+template<auto id>
 void Marshal (::cmw::SendBuffer& buf
-         ,messageID a
-         ,::std::vector<cmwAccount> const& b
-         ,::int32_t c)try{
+         ,::std::vector<cmwAccount> const& a
+         ,::int32_t b)try{
   buf.ReserveBytes(4);
-  buf.Receive(static_cast<uint8_t>(a));
-  ReceiveGroup(buf,b);
-  buf.Receive(c);
+  buf.Receive(static_cast<uint8_t>(id));
+  ReceiveGroup(buf,a);
+  buf.Receive(b);
   buf.FillInSize(10000);
 }catch(...){buf.Rollback();throw;}
 
-inline void Marshal (::cmw::SendBuffer& buf
-         ,messageID a
-         ,cmwRequest const& b)try{
+template<auto id>
+void Marshal (::cmw::SendBuffer& buf
+         ,cmwRequest const& a)try{
   buf.ReserveBytes(4);
-  buf.Receive(static_cast<uint8_t>(a));
-  b.Marshal(buf);
+  buf.Receive(static_cast<uint8_t>(id));
+  a.Marshal(buf);
   buf.FillInSize(700000);
 }catch(...){buf.Rollback();throw;}
 
-inline void Marshal (::cmw::SendBuffer& buf
-         ,messageID a)try{
+template<auto id>
+void Marshal (::cmw::SendBuffer& buf
+         )try{
   buf.ReserveBytes(4);
-  buf.Receive(static_cast<uint8_t>(a));
+  buf.Receive(static_cast<uint8_t>(id));
   buf.FillInSize(10000);
 }catch(...){buf.Rollback();throw;}
 }
