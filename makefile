@@ -19,7 +19,7 @@ $(BASE)cmwA:$(BASE)cmwA.cc
 	size $@
 
 example/sendExample:example/sendExample.cc
-	$(CXXFLAGS)11
+	$(CXXFLAGS)17
 	size $@
 example/receiveExample:example/receiveExample.cc
 	$(CXXFLAGS)11

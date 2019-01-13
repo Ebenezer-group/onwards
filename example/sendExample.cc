@@ -44,14 +44,14 @@ int main ()try{
     case messageID::id1:
     {
       ::std::vector<int32_t> vec {100,97,94,91,88,85};
-      Marshal(buf,messageID::id1,vec,"Proverbs 24:27");
+      Marshal<messageID::id1>(buf,vec,"Proverbs 24:27");
     }
     break;
 
     case messageID::id2:
     {
       ::std::set<int32_t> iset {100,97,94,91,88,85};
-      Marshal(buf,messageID::id2,iset);
+      Marshal<messageID::id2>(buf,iset);
     }
     break;
 
@@ -61,14 +61,14 @@ int main ()try{
                                                   ,{3.3,4.4}
                                                   ,{5.5,6.6}
                                                 }};
-      Marshal(buf,messageID::id3,ar);
+      Marshal<messageID::id3>(buf,ar);
     }
     break;
 
     case messageID::id4:
     {
       ::plf::colony<::std::string> clny{"Beautiful words ","wonderful words ","of life"};
-      Marshal(buf,messageID::id4,clny);
+      Marshal<messageID::id4>(buf,clny);
     }
     break;
 
