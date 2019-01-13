@@ -65,5 +65,4 @@ int main ()try{
   }
 }catch(std::exception const& e){
   ::std::cout<<"failure: "<<e.what()<<'\n';
-  return 1;
 }

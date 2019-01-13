@@ -57,9 +57,9 @@ int main ()try{
 
     case messageID::id3:
     {
-      ::std::array<::std::array<float,2>, 3> ar {{ {{1.1f,2.2}}
-                                                  ,{{3.3,4.4}}
-                                                  ,{{5.5,6.6}}
+      ::std::array<::std::array<float,2>, 3> ar {{ {1.1f,2.2}
+                                                  ,{3.3,4.4}
+                                                  ,{5.5,6.6}
                                                 }};
       Marshal(buf,messageID::id3,ar);
     }
@@ -77,5 +77,4 @@ int main ()try{
       return 0;
   }
   buf.Send(ai()->ai_addr,ai()->ai_addrlen);
-  return 1;
 }catch(::std::exception const& e){::std::cout<<"failure: "<<e.what()<<"\n";}
