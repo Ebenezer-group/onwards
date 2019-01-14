@@ -11,7 +11,7 @@ $(GENZ):$(BASE)\genz.cc
 	$(CC) -Fe:$@ $(CFLAGS) -std:c++latest $(BASE)\genz.cc $(LIBS)
 
 example\sendExample.exe: example\sendExample.cc
-	$(CC) -Fe:$@ $(CFLAGS) example\sendExample.cc $(LIBS)
+	$(CC) -Fe:$@ $(CFLAGS) -std:c++latest example\sendExample.cc $(LIBS)
 
 example\receiveExample.exe: example\receiveExample.cc
 	$(CC) -Fe:$@ $(CFLAGS) example\receiveExample.cc $(LIBS)
@@ -25,5 +25,5 @@ install:
 	copy $(GENZ) $(INSTALL_DIR)\bin
 
 uninstall:
-	cd $(INSTALL_DIR)/include && del *.hh
+	cd $(INSTALL_DIR)\include && del *.hh
 
