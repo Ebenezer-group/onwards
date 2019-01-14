@@ -1,17 +1,12 @@
 //   The following Middle code was used as input to the C++
 //   Middleware Writer.
 //
-//   sendMessages
-//      -out (messageID, ::std::vector<int32_t>,::std::string)
-//      -out (messageID, ::std::set<int32_t>)
-//      -out (messageID, ::std::array<::std::array<float,2>, 3>)
+//   exampleMessages
+//      -out -in (::std::vector<int32_t>,::std::string)
+//      -out -in (::std::set<int32_t>)
+//      -out -in (::std::array<::std::array<float,2>, 3>)
 //   }
 //
-//   receiveMessages
-//      -in             (::std::vector<int32_t>,::std::string)
-//      -in             (::std::set<int32_t>)
-//      -in             (::std::array<::std::array<float,2>, 3>)
-//   }
 
 #include<cmw/Buffer.hh>
 using namespace ::cmw;
@@ -23,8 +18,8 @@ using namespace ::cmw;
 #include<set>
 #include<string>
 #include<vector>
-#include"zz.sendMessages.hh"
-using namespace ::sendMessages;
+#include"zz.exampleMessages.hh"
+using namespace ::exampleMessages;
 
 int main ()try{
   winStart();

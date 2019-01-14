@@ -9,8 +9,8 @@ using namespace ::cmw;
 #include<set>
 #include<string>
 #include<vector>
-#include"zz.receiveMessages.hh"
-using namespace ::receiveMessages;
+#include"zz.exampleMessages.hh"
+using namespace ::exampleMessages;
 
 int main ()try{
   winStart();

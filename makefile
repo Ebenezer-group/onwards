@@ -22,7 +22,7 @@ example/sendExample:example/sendExample.cc
 	$(CXXFLAGS)17
 	size $@
 example/receiveExample:example/receiveExample.cc
-	$(CXXFLAGS)11
+	$(CXXFLAGS)17
 	size $@
 
 clean:
