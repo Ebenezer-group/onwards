@@ -28,7 +28,7 @@ generated.  If you specify only -in, only the message-parsing/
 receiving function gets generated.
 
 The inLine option indicates that a generated function should
-be marked as inline.  This option may help reduce the size of 
+be marked as inline.  This option may help reduce the size of
 your executables.
 
 The maxLength option allows users to specify the maximum length

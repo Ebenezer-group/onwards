@@ -25,7 +25,7 @@ void Marshal (::cmw::SendBuffer& buf
 }catch(...){buf.Rollback();throw;}
 
 template<auto id>
-void Marshal (::cmw::SendBuffer& buf
+inline void Marshal (::cmw::SendBuffer& buf
          ,::std::array<::std::array<float, 2>, 3> const& a)try{
   buf.ReserveBytes(4);
   buf.Receive(id);

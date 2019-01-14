@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=$(CXX) -Isrc -Os -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -Wno-return-type -o $@ $@.cc -std=c++
+CXXFLAGS=$(CXX) -Isrc -Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -Wno-return-type -o $@ $@.cc -std=c++
 
 BASE:=src/cmw/tiers/
 TIERS:=$(BASE)genz $(BASE)cmwA

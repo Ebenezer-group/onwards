@@ -4,7 +4,7 @@ opaque.hh
 sendMessages <messageID_t=messageID>
         -out (::std::vector<int32_t>,::std::string)
         -out (::std::set<int32_t>)
--inLine -out (::std::array<::std::array<float,2>, 3>)
+        -out (::std::array<::std::array<float,2>, 3>)
         -out (::plf::colony<::std::string>)
 }
 
