@@ -1,3 +1,5 @@
+These example programs don't require a 2017 C++ compiler.
+They are built with -std=c++11.
 
 It helps to have two command prompts available to run the
 examples.  Start receiveExample prior to running sendExample.

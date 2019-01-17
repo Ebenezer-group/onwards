@@ -1,12 +1,11 @@
-//   The following Middle code was used as input to the C++
-//   Middleware Writer.
+//  The following Middle code was used as input to the C++
+//  Middleware Writer.
 //
-//   exampleMessages
-//      -out -in (::std::vector<int32_t>,::std::string)
-//      -out -in (::std::set<int32_t>)
-//      -out -in (::std::array<::std::array<float,2>, 3>)
-//   }
-//
+//  exampleMessages
+//     -out -in (::std::vector<int32_t>,::std::string)
+//     -out -in (::std::set<int32_t>)
+//     -out -in (::std::array<::std::array<float,2>, 3>)
+//  }
 
 #include<cmw/Buffer.hh>
 using namespace ::cmw;

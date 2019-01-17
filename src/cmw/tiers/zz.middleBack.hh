@@ -7,7 +7,7 @@ cmwAccount::MarshalMemberData (::cmw::SendBuffer& buf)const{
 }
 
 namespace middleBack{
-template<auto id>
+template<messageID id>
 void Marshal (::cmw::SendBuffer& buf
          ,::std::vector<cmwAccount> const& a
          ,::int32_t b)try{
@@ -18,7 +18,7 @@ void Marshal (::cmw::SendBuffer& buf
   buf.FillInSize(10000);
 }catch(...){buf.Rollback();throw;}
 
-template<auto id>
+template<messageID id>
 void Marshal (::cmw::SendBuffer& buf
          ,cmwRequest const& a)try{
   buf.ReserveBytes(4);
@@ -27,7 +27,7 @@ void Marshal (::cmw::SendBuffer& buf
   buf.FillInSize(700000);
 }catch(...){buf.Rollback();throw;}
 
-template<auto id>
+template<messageID id>
 void Marshal (::cmw::SendBuffer& buf
          )try{
   buf.ReserveBytes(4);
