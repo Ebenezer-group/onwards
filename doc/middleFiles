@@ -2,25 +2,38 @@ Middle files are used to specify what messaging and
 serialization code the C++ Middleware Writer should output.
 
 Lines like the following are the basis of Middle code:
-[ options ] (T1, T2, ...  Tn)
+[ options ] (T1, T2, ... Tn)
 
 Options start with a dash (-) symbol. After any options, a list of
 C++ types is enclosed in a pair of parentheses.  One or more of
 these lines are wrapped by a name and a closing brace like this:
 
-sendMessages
-    -out (message_id_8, ::std::vector<int32_t>, ::std::string)
-    -out (message_id_8, ::std::array<float,3>)
-    -out (message_id_8, ::plf::colony<::std::string>)
+exampleMessages
+    -out -in (messageId, ::std::vector<int32_t>, ::std::string)
+    -out -in (messageId, ::std::array<float,3>)
+    -out -in (messageId, ::plf::colony<::std::string>)
 }
 
-Based on that input, the C++ Middleware Writer (CMW) creates a
-sendMessages namespace in a file called zz.sendMessages.hh.
-Functions are created within the namespace for each of the lines
-with matching parentheses.
+Support for message Ids at a system level is now available.  
+Rather than repeating a message Id type for each message,
+you can write the above like this:
 
-These are the available options:
- out, in, inLine, maxLength, yeaNay
+exampleMessages <messageID_t=messageId>
+    -out -in (::std::vector<int32_t>, ::std::string)
+    -out -in (::std::array<float,3>)
+    -out -in (::plf::colony<::std::string>)
+}
+
+where "messageId" is the name of the type that you want to use 
+for message Ids.
+
+Based on that input, the C++ Middleware Writer (CMW) creates 
+an exampleMessages namespace in a file called
+zz.exampleMessages.hh.  One or more functions are created 
+within the namespace for each of the lines with matching 
+parentheses.
+
+The available options are: out, in, inLine, maxLength, yeaNay.
 
 The out and in options are used to tailor the output.  If you
 specify only -out, only the message-building/sending function is
@@ -31,18 +44,17 @@ The inLine option indicates that a generated function should
 be marked as inline.  This option may help reduce the size of
 your executables.
 
-The maxLength option allows users to specify the maximum length
+The maxLength option allows you to specify the maximum length
 for a message.  If the length of the message exceeds the value
 specified, an exception will be thrown. If this option isn't used,
 the CMW supplies a default value of 10,000.  Here's an example of
 how to use this option: -maxLength=cmw::udp_packet_max
 
-
 The yeaNay option is used to support a messaging idiom where
 a response to a request is a bool followed by optional data.
 Rather than having two messages like this:
-  -out (bool)
-  -out (bool,cmw::stringPlus)
+  -out (bool)                 //Only used when bool is true
+  -out (bool,cmw::stringPlus) //Only used when bool is false
 
 , the following can be used:
   -out -yeaNay (bool,cmw::stringPlus)
@@ -53,7 +65,7 @@ leads to less output from the CMW and smaller executable sizes.
 
 By convention, Middle files have a .mdl suffix.
 
-Don't be confused by the middle tier of the CMW. The middle, back and
+Don't be confused by the middle tier of the CMW. The back, middle and
 front tiers of the CMW use code that's been generated based on Middle files.
 
 Use // to comment out a line of Middle code.

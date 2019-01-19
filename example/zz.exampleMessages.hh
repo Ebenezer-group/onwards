@@ -58,7 +58,7 @@ void Marshal (::cmw::SendBuffer& buf
 template<class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::array<::std::array<float, 2>, 3>& a){
-  buf.GiveBlock(&a[0][0], sizeof a / sizeof(float));
+  buf.GiveBlock(&a[0][0], sizeof a/sizeof(float));
 }
 
 template<messageID id>
