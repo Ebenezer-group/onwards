@@ -136,7 +136,7 @@ class cmwAmbassador{
 
   void reset (char const* context,char const* detail){
     syslogWrapper(LOG_ERR,"%s:%s",context,detail);
-    Marshal(frontBuf,false,{context," ",detail});
+    Marshal<false>(frontBuf,{context," ",detail});
     for(auto& r:pendingRequests)
       if(r.get())frontBuf.Send((::sockaddr*)&r->front,r->frontLen);
     pendingRequests.clear();
@@ -204,8 +204,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
               req.saveRuntime();
               setDirectory(req.path.c_str());
               giveFiles(cmwBuf);
-              Marshal(frontBuf,true);
-            }else Marshal(frontBuf,false,{"CMW:",giveStringView(cmwBuf)});
+              Marshal<true>(frontBuf);
+            }else Marshal<false>(frontBuf,{"CMW:",giveStringView(cmwBuf)});
             frontBuf.Send((::sockaddr*)&req.front,req.frontLen);
             frontBuf.Reset();
           }
@@ -220,7 +220,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
       assert(!pendingRequests.empty());
       if(pendingRequests.front().get()){
         auto const& req=*pendingRequests.front();
-        Marshal(frontBuf,false,{e.what()});
+        Marshal<false>(frontBuf,{e.what()});
         frontBuf.Send((::sockaddr*)&req.front,req.frontLen);
       }
       pendingRequests.erase(::std::begin(pendingRequests));
@@ -240,7 +240,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
       }catch(::std::exception const& e){
         syslogWrapper(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr){
-          Marshal(frontBuf,false,{e.what()});
+          Marshal<false>(frontBuf,{e.what()});
           frontBuf.Send((::sockaddr*)&req->front,req->frontLen);
         }
         if(req)pendingRequests.pop_back();

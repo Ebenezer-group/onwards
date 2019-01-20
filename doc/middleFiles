@@ -53,15 +53,16 @@ how to use this option: -maxLength=cmw::udp_packet_max
 The yeaNay option is used to support a messaging idiom where
 a response to a request is a bool followed by optional data.
 Rather than having two messages like this:
-  -out (bool)                 //Only used when bool is true
-  -out (bool,cmw::stringPlus) //Only used when bool is false
+  -out (bool)                    //Only used when bool is true
+  -out (bool,::std::string_view) //Only used when bool is false
 
-, the following can be used:
-  -out -yeaNay (bool,cmw::stringPlus)
+, this can be used:
+  -out -yeaNay (::std::string_view)
 
-.  When yeaNay is used, the object(s) after the bool is only
-marshalled if the value of the bool is false.  This option
-leads to less output from the CMW and smaller executable sizes.
+.  When yeaNay is used, the bool value is expected as a 
+template argument and the remaining object(s) in the message 
+is only marshalled if the value of the bool is false.  This 
+option leads to less output from the CMW and smaller executable sizes.
 
 By convention, Middle files have a .mdl suffix.
 
