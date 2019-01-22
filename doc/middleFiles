@@ -14,7 +14,7 @@ exampleMessages
     -out -in (messageId, ::plf::colony<::std::string>)
 }
 
-Support for message Ids at a system level is now available.  
+Support for message Ids at a system level is now available.
 Rather than repeating a message Id type for each message,
 you can write the above like this:
 
@@ -24,13 +24,13 @@ exampleMessages <messageID_t=messageId>
     -out -in (::plf::colony<::std::string>)
 }
 
-where "messageId" is the name of the type that you want to use 
+where "messageId" is the name of the type that you want to use
 for message Ids.
 
-Based on that input, the C++ Middleware Writer (CMW) creates 
+Based on that input, the C++ Middleware Writer (CMW) creates
 an exampleMessages namespace in a file called
-zz.exampleMessages.hh.  One or more functions are created 
-within the namespace for each of the lines with matching 
+zz.exampleMessages.hh.  One or more functions are created
+within the namespace for each of the lines with matching
 parentheses.
 
 The available options are: out, in, inLine, maxLength, yeaNay.
@@ -59,10 +59,10 @@ Rather than having two messages like this:
 , this can be used:
   -out -yeaNay (::std::string_view)
 
-.  When yeaNay is used, the bool value is expected as a 
-template argument and the remaining object(s) in the message 
-is only marshalled if the value of the bool is false.  This 
-option leads to less output from the CMW and smaller executable sizes.
+.  When yeaNay is used, the bool is passed as a template
+argument and the remainder of the message is only marshalled if
+the value of the bool is false.  This option leads to less output
+from the CMW.
 
 By convention, Middle files have a .mdl suffix.
 

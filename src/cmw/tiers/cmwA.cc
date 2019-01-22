@@ -148,6 +148,11 @@ class cmwAmbassador{
   bool sendData ()try{return cmwBuf.Flush();}
   catch(::std::exception const& e){reset("sendData",e.what());return true;}
 
+  template<bool res,class...T>void outFront (cmwRequest const& req,T... t){
+    Marshal<res>(frontBuf,{t...});
+    frontBuf.Send((::sockaddr*)&req.front,req.frontLen);
+  }
+
 public:
   cmwAmbassador (char*);
 };
@@ -204,9 +209,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
               req.saveRuntime();
               setDirectory(req.path.c_str());
               giveFiles(cmwBuf);
-              Marshal<true>(frontBuf);
-            }else Marshal<false>(frontBuf,{"CMW:",giveStringView(cmwBuf)});
-            frontBuf.Send((::sockaddr*)&req.front,req.frontLen);
+	      outFront<true>(req);
+            }else outFront<false>(req,"CMW:",giveStringView(cmwBuf));
             frontBuf.Reset();
           }
           pendingRequests.erase(::std::begin(pendingRequests));
@@ -218,11 +222,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
     }catch(::std::exception const& e){
       syslogWrapper(LOG_ERR,"Problem handling reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
-      if(pendingRequests.front().get()){
-        auto const& req=*pendingRequests.front();
-        Marshal<false>(frontBuf,{e.what()});
-        frontBuf.Send((::sockaddr*)&req.front,req.frontLen);
-      }
+      if(pendingRequests.front().get())
+        outFront<false>(*pendingRequests.front(),e.what());
       pendingRequests.erase(::std::begin(pendingRequests));
     }
 
@@ -239,10 +240,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
         Marshal<messageID::Generate>(cmwBuf,*req);
       }catch(::std::exception const& e){
         syslogWrapper(LOG_ERR,"Accept request:%s",e.what());
-        if(gotAddr){
-          Marshal<false>(frontBuf,{e.what()});
-          frontBuf.Send((::sockaddr*)&req->front,req->frontLen);
-        }
+        if(gotAddr)outFront<false>(*req,e.what());
         if(req)pendingRequests.pop_back();
         continue;
       }
