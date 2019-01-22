@@ -45,8 +45,8 @@ struct cmwRequest{
   cmwRequest (){}
 
   template<class R>
-  explicit cmwRequest (ReceiveBuffer<R>& buf):accountNbr(buf),path(buf){
-    now=::time(nullptr);
+  explicit cmwRequest (ReceiveBuffer<R>& buf):accountNbr(buf),path(buf)
+                  ,now(::time(nullptr)){
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find a /");
     *pos='\0';
@@ -58,7 +58,7 @@ struct cmwRequest{
     previousTime=0;
     if(fd>=0){
       if(::pread(fd,&previousTime,sizeof previousTime,0)==-1){
-	raise("pread",preserveError(fd));
+        raise("pread",preserveError(fd));
       }
     }else{
       fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
@@ -136,6 +136,7 @@ class cmwAmbassador{
 
   void reset (char const* context,char const* detail){
     syslogWrapper(LOG_ERR,"%s:%s",context,detail);
+    frontBuf.Reset();
     Marshal<false>(frontBuf,{context," ",detail});
     for(auto& r:pendingRequests)
       if(r.get())frontBuf.Send((::sockaddr*)&r->front,r->frontLen);
@@ -149,6 +150,7 @@ class cmwAmbassador{
   catch(::std::exception const& e){reset("sendData",e.what());return true;}
 
   template<bool res,class...T>void outFront (cmwRequest const& req,T... t){
+    frontBuf.Reset();
     Marshal<res>(frontBuf,{t...});
     frontBuf.Send((::sockaddr*)&req.front,req.frontLen);
   }
@@ -198,7 +200,6 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
       continue;
     }
 
-    frontBuf.Reset();
     try{
       if(fds[0].revents&POLLIN&&cmwBuf.GotPacket()){
         do{
@@ -209,9 +210,8 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
               req.saveRuntime();
               setDirectory(req.path.c_str());
               giveFiles(cmwBuf);
-	      outFront<true>(req);
+              outFront<true>(req);
             }else outFront<false>(req,"CMW:",giveStringView(cmwBuf));
-            frontBuf.Reset();
           }
           pendingRequests.erase(::std::begin(pendingRequests));
         }while(cmwBuf.NextMessage());
