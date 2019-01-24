@@ -1,15 +1,13 @@
 #pragma once
 #include"quicklz.h"
-#if __cplusplus>=201703L
-#include<charconv>//from_chars
-#include<string_view>
-#endif
 #include<algorithm>//min
 #include<array>
+#include<charconv>//from_chars
 #include<exception>
 #include<initializer_list>
 #include<limits>
 #include<string>
+#include<string_view>
 #include<type_traits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8,"");
 static_assert(::std::numeric_limits<float>::is_iec559,"Only IEEE754 supported");
@@ -47,10 +45,8 @@ class failure:public ::std::exception{
   ::std::string str;
 public:
   explicit failure (char const* s):str(s){}
-#if __cplusplus>=201703L
   explicit failure (::std::string_view s):str(s){}
   void operator<< (::std::string_view const& s){str.append(" "); str.append(s);}
-#endif
   void operator<< (char const* s){str.append(" "); str.append(s);}
   void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
   char const* what ()const noexcept{return str.c_str();}
@@ -78,13 +74,9 @@ inline void winStart (){
 }
 
 inline int fromChars (char const* p){
-#if __cplusplus>=201703L
   int res=0;
   ::std::from_chars(p,p+::strlen(p),res);
   return res;
-#else
-  return ::strtol(p,0,10);
-#endif
 }
 
 struct FILE_wrapper{
@@ -538,7 +530,6 @@ template<class R> ::std::string giveString (ReceiveBuffer<R>& buf){
   return buf.template GiveStringy<::std::string>();
 }
 
-#if __cplusplus>=201703L||_MSVC_LANG>=201403L
 template<class R>auto giveStringView (ReceiveBuffer<R>& buf){
   return buf.template GiveStringy<::std::string_view>();
 }
@@ -552,7 +543,6 @@ inline auto nullTerminate (::std::string_view v){
   *const_cast<char*>(v.data()+v.length())=0;
   return v;
 }
-#endif
 
 class SendBuffer{
   SendBuffer (SendBuffer const&);
@@ -645,7 +635,6 @@ inline void Receive (SendBuffer& b,::std::string const& s){
   b.Receive(s.data(),len());
 }
 
-#if __cplusplus>=201703L
 inline void Receive (SendBuffer& b,::std::string_view const& s){
   marshallingInt(s.size()).Marshal(b);
   b.Receive(s.data(),s.size());
@@ -657,7 +646,6 @@ inline void Receive (SendBuffer& b,stringPlus lst){
   marshallingInt{t}.Marshal(b);
   for(auto s:lst)b.Receive(s.data(),s.size());//Use low-level Receive
 }
-#endif
 
 inline void InsertNull (SendBuffer& b){uint8_t z=0;b.Receive(z);}
 
@@ -812,13 +800,11 @@ template<int N>class fixedString{
     ::strcpy(&str[0],s);
   }
 
-#if __cplusplus>=201703L
   explicit fixedString (::std::string_view s):len(s.length()){
     if(len()>N-1)raise("fixedString ctor");
     ::strncpy(&str[0],s.data(),len());
     str[len()]='\0';
   }
-#endif
 
   template<class R>explicit fixedString (ReceiveBuffer<R>& b):len(b){
     if(len()>N-1)raise("fixedString stream ctor");
@@ -859,7 +845,6 @@ struct fileWrapper{
   ~fileWrapper (){::close(d);}
 };
 
-#if __cplusplus>=201703L
 class File{
   ::std::string_view name;
 public:
@@ -877,7 +862,6 @@ public:
 template<class R>void giveFiles (ReceiveBuffer<R>& b){
   for(auto n=marshallingInt{b}();n>0;--n)File{b};
 }
-#endif
 #endif
 
 template<class C>int32_t MarshalSegments (C&,SendBuffer&,uint8_t){return 0;}

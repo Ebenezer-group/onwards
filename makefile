@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=$(CXX) -Isrc -Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -Wno-return-type -o $@ $@.cc -std=c++
+CXXFLAGS=$(CXX) -std=c++17 -Isrc -Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -Wno-return-type -o $@ $@.cc
 
 BASE:=src/cmw/tiers/
 TIERS:=$(BASE)genz $(BASE)cmwA
@@ -11,18 +11,18 @@ all:$(TIERS) $(EXAMPLES)
 #	genz 2 $(BASE)middleBack.mdl
 
 $(BASE)genz:$(BASE)genz.cc
-	$(CXXFLAGS)17
+	$(CXXFLAGS)
 	size $@
 
 $(BASE)cmwA:$(BASE)cmwA.cc
-	$(CXXFLAGS)17
+	$(CXXFLAGS)
 	size $@
 
 example/sendExample:example/sendExample.cc
-	$(CXXFLAGS)11
+	$(CXXFLAGS)
 	size $@
 example/receiveExample:example/receiveExample.cc
-	$(CXXFLAGS)11
+	$(CXXFLAGS)
 	size $@
 
 clean:
