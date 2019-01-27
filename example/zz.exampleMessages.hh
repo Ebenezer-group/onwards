@@ -38,9 +38,9 @@ void Marshal (::cmw::SendBuffer& buf
 template<class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::set<int32_t>& a){
-  auto endIt1=a.end();
+  auto end3=a.end();
   for(int32_t ca=Give<uint32_t>(buf);ca>0;--ca){
-    a.emplace_hint(endIt1,Give<uint32_t>(buf));
+    a.emplace_hint(end3,Give<uint32_t>(buf));
   }
 }
 
@@ -56,7 +56,7 @@ void Marshal (::cmw::SendBuffer& buf
 template<class R>
 void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::array<::std::array<float, 2>, 3>& a){
-  buf.GiveBlock(&a[0][0], sizeof a/sizeof(float));
+  buf.GiveBlock(&a[0][0],sizeof a/sizeof(float));
 }
 
 template<messageID id>

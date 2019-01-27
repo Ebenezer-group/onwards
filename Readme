@@ -23,11 +23,7 @@ The middle tier isn't built on Windows.  The middle tier is
 still needed for Windows users so it has to be running on a
 BSD/Linux system.
 
-A 2017 or newer C++ compiler is required to build the middle
-and front tiers of the CMW.  That doesn't mean your project
-has to use 2017 C++.  A 2011 or newer C++ compiler is able to
-process output from the CMW.
-
+A compiler with 2017 C++ support is required to use the CMW.
 
 Accounts
 An account is needed to use the CMW.  Before running the

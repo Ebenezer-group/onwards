@@ -1,5 +1,6 @@
 #pragma once
 #include<cmw/Buffer.hh>
+#include<cmw/Complex.hh>
 
 struct base{
   base ()=default;

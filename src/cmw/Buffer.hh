@@ -863,40 +863,4 @@ template<class R>void giveFiles (ReceiveBuffer<R>& b){
   for(auto n=marshallingInt{b}();n>0;--n)File{b};
 }
 #endif
-
-template<class C>int32_t MarshalSegments (C&,SendBuffer&,uint8_t){return 0;}
-
-template<class T,class... Ts,class C>
-int32_t MarshalSegments (C& c,SendBuffer& buf,uint8_t& segs){
-  int32_t n;
-  if(c.template is_registered<T>()){
-    n=c.template size<T>();
-    if(n>0){
-      ++segs;
-      buf.Receive(T::typeNum);
-      buf.Receive(n);
-      for(T const& t:c.template segment<T>()){t.Marshal(buf);}
-    }
-  }else n=0;
-  return n+MarshalSegments<Ts...>(c,buf,segs);
-}
-
-template<class...Ts,class C>void MarshalCollection (C& c,SendBuffer& buf){
-  auto const ind=buf.ReserveBytes(1);
-  uint8_t segs=0;
-  if(c.size()!=MarshalSegments<Ts...>(c,buf,segs))raise("MarshalCollection");
-  buf.Receive(ind,segs);
-}
-
-template<class T,class C,class R>
-void BuildSegment (C& c,ReceiveBuffer<R>& buf){
-  int32_t n=Give<uint32_t>(buf);
-  c.template reserve<T>(n);
-  for(;n>0;--n){c.template emplace<T>(buf);}
-}
-
-template<class C,class R,class F>
-void BuildCollection (C& c,ReceiveBuffer<R>& buf,F f){
-  for(auto segs=Give<uint8_t>(buf);segs>0;--segs){f(c,buf);}
-}
 }
