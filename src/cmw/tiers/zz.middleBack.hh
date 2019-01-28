@@ -7,31 +7,29 @@ cmwAccount::MarshalMembers (::cmw::SendBuffer& buf)const{
 }
 
 namespace middleBack{
-template<messageID id>
-void Marshal (::cmw::SendBuffer& buf
+int32_t Mar (::cmw::SendBuffer& buf
          ,::std::vector<cmwAccount> const& a
-         ,::int32_t b)try{
-  buf.ReserveBytes(4);
-  buf.Receive(static_cast<uint8_t>(id));
+         ,::int32_t b){
   ReceiveGroup(buf,a);
   buf.Receive(b);
-  buf.FillInSize(10000);
-}catch(...){buf.Rollback();throw;}
+  return 10000;
+}
 
-template<messageID id>
-void Marshal (::cmw::SendBuffer& buf
-         ,cmwRequest const& a)try{
-  buf.ReserveBytes(4);
-  buf.Receive(static_cast<uint8_t>(id));
+int32_t Mar (::cmw::SendBuffer& buf
+         ,cmwRequest const& a){
   a.Marshal(buf);
-  buf.FillInSize(700000);
-}catch(...){buf.Rollback();throw;}
+  return 700000;
+}
 
-template<messageID id>
-void Marshal (::cmw::SendBuffer& buf)try{
+int32_t Mar (::cmw::SendBuffer& buf){
+  return 10000;
+}
+
+template<messageID id,class...T>
+void Marshal (::cmw::SendBuffer& buf,T&&...t)try{
   buf.ReserveBytes(4);
   buf.Receive(static_cast<uint8_t>(id));
-  buf.FillInSize(10000);
+  buf.FillInSize(Mar(buf,t...));
 }catch(...){buf.Rollback();throw;}
 }
 
