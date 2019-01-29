@@ -52,7 +52,7 @@ genz.exe 14 /Users/brian/onwards/example/example.mdl
 The path for a Middle file (.mdl) is next.  Zero or more header
 files are listed in a Middle file to specify a request.  There's
 more info on Middle files here --
-https://github.com/Ebenezer-group/onwards/blob/master/doc/Middle_files
+https://github.com/Ebenezer-group/onwards/blob/master/doc/middleFiles
 .
 
 Once you have built the software, I suggest copying example.mdl
