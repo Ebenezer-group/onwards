@@ -1,10 +1,10 @@
 CC=cl
 CFLAGS=-Fe:$@ -std:c++latest -Isrc -EHsc -O2 -nologo -D"NOMINMAX"
 
-LIBS:="\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib" "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
-EXAMPLES:=example\sendExample.exe example\receiveExample.exe
-BASE:=src\cmw\tiers
-GENZ:=$(BASE)\genz.exe
+LIBS="\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib" "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+EXAMPLES=example\sendExample.exe example\receiveExample.exe
+BASE=src\cmw\tiers
+GENZ=$(BASE)\genz.exe
 all:$(GENZ) $(EXAMPLES)
 
 $(GENZ):$(BASE)\genz.cc
