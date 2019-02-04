@@ -1,5 +1,5 @@
 CC=cl
-CFLAGS=-Fe:$@ -std:c++latest -Isrc -EHsc -O2 -nologo -D"NOMINMAX"
+CFLAGS=-std:c++latest -Isrc -EHsc -O2 -nologo -D"NOMINMAX"
 
 LIBS="\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib" "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 EXAMPLES=example\sendExample.exe example\receiveExample.exe
@@ -8,13 +8,13 @@ GENZ=$(BASE)\genz.exe
 all:$(GENZ) $(EXAMPLES)
 
 $(GENZ):$(BASE)\genz.cc
-	$(CC) $(CFLAGS) $(BASE)\genz.cc $(LIBS)
+	$(CC) -Fe:$@ $(CFLAGS) $(BASE)\genz.cc $(LIBS)
 
 example\sendExample.exe: example\sendExample.cc
-	$(CC) $(CFLAGS) example\sendExample.cc $(LIBS)
+	$(CC) -Fe:$@ $(CFLAGS) example\sendExample.cc $(LIBS)
 
 example\receiveExample.exe: example\receiveExample.cc
-	$(CC) $(CFLAGS) example\receiveExample.cc $(LIBS)
+	$(CC) -Fe:$@ $(CFLAGS) example\receiveExample.cc $(LIBS)
 
 clean:
 	del $(GENZ) $(EXAMPLES)
