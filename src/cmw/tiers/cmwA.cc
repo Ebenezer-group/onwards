@@ -130,7 +130,7 @@ class cmwAmbassador{
     while(!cmwBuf.Flush());
     while(!cmwBuf.GotPacket());
     if(giveBool(cmwBuf)){
-      if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",GetError());
+      if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
       fds[0].events=POLLIN;
     }else bail("Login:%s",nullTerminate(giveStringView(cmwBuf)).data());
   }
@@ -180,7 +180,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   fds[1].fd=frontBuf.sock_=udpServer(::strtok(nullptr,"\n "));
   fds[1].events=POLLIN;
 #ifdef __linux__
-  if(setNonblocking(fds[1].fd)==-1)bail("setNonb:%d",GetError());
+  if(setNonblocking(fds[1].fd)==-1)bail("setNonb:%d",errno);
 #endif
 
   checkField("Login-attempts-interval-in-milliseconds",cfg);
