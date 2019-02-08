@@ -22,17 +22,17 @@ template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
 int32_t Mar (::cmw::SendBuffer& buf
          ,::std::set<int32_t> const& a){
   buf.Receive(static_cast<int32_t>(a.size()));
-  for(auto const& i1:a){
-    buf.Receive(i1);
+  for(auto const& e1:a){
+    buf.Receive(e1);
   }
   return 10000;
 }
 
 template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
          ,::std::set<int32_t>& a){
-  auto end3=a.end();
+  auto z3=a.end();
   for(int32_t ca=Give<uint32_t>(buf);ca>0;--ca){
-    a.emplace_hint(end3,Give<uint32_t>(buf));
+    a.emplace_hint(z3,Give<uint32_t>(buf));
   }
 }
 
@@ -50,8 +50,8 @@ template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
 int32_t Mar (::cmw::SendBuffer& buf
          ,::plf::colony<::std::string> const& a){
   buf.Receive(static_cast<int32_t>(a.size()));
-  for(auto const& i3:a){
-    Receive(buf,i3);
+  for(auto const& e3:a){
+    Receive(buf,e3);
   }
   return 10000;
 }
