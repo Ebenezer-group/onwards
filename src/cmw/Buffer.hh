@@ -68,8 +68,8 @@ template<class... T>void raiseFiasco (char const* s,T... t){
 inline void winStart (){
 #ifdef CMW_WINDOWS
   WSADATA w;
-  auto rc=::WSAStartup(MAKEWORD(2,2),&w);
-  if(0!=rc)raise("WSAStartup",rc);
+  auto r=::WSAStartup(MAKEWORD(2,2),&w);
+  if(0!=r)raise("WSAStartup",r);
 #endif
 }
 
@@ -125,8 +125,8 @@ inline void setDirectory (char const* d){
 }
 
 inline int pollWrapper (::pollfd* fds,int n,int timeout=-1){
-  int rc=::poll(fds,n,timeout);
-  if(rc>=0)return rc;
+  int r=::poll(fds,n,timeout);
+  if(r>=0)return r;
   raise("poll",GetError());
 }
 
@@ -231,15 +231,15 @@ inline DWORD Read (HANDLE h,void* data,int len){
 }
 #else
 inline int Write (int fd,void const* data,int len){
-  int rc=::write(fd,data,len);
-  if(rc>=0)return rc;
+  int r=::write(fd,data,len);
+  if(r>=0)return r;
   raise("Write",errno);
 }
 
 inline int Read (int fd,void* data,int len){
-  int rc=::read(fd,data,len);
-  if(rc>0)return rc;
-  if(rc==0)raiseFiasco("Read eof",len);
+  int r=::read(fd,data,len);
+  if(r>0)return r;
+  if(r==0)raiseFiasco("Read eof",len);
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
   raise("Read",len,errno);
 }
@@ -247,18 +247,18 @@ inline int Read (int fd,void* data,int len){
 
 inline int sockWrite (sockType s,void const* data,int len
                       ,sockaddr const* addr=nullptr,socklen_t toLen=0){
-  int rc=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);
-  if(rc>0)return rc;
+  int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);
+  if(r>0)return r;
   auto e=GetError();
   if(EAGAIN==e||EWOULDBLOCK==e)return 0;
   raise("sockWrite",s,e);}
 
 inline int sockRead (sockType s,void* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
-  int rc=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
-  if(rc>0)return rc;
+  int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
+  if(r>0)return r;
   auto e=GetError();
-  if(0==rc||ECONNRESET==e)raiseFiasco("sockRead eof",s,len,e);
+  if(0==r||ECONNRESET==e)raiseFiasco("sockRead eof",s,len,e);
   if(EAGAIN==e||EWOULDBLOCK==e)return 0;
   raise("sockRead",s,len,e);
 }
