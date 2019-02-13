@@ -9,9 +9,9 @@ C++ types is enclosed in a pair of parentheses.  One or more of
 these lines are wrapped by a name and a closing brace like this:
 
 exampleMessages
-    -out -in (messageId, ::std::vector<int32_t>, ::std::string)
-    -out -in (messageId, ::std::array<float,3>)
-    -out -in (messageId, ::plf::colony<::std::string>)
+   -out (messageId, ::std::vector<int32_t>, ::std::string)
+   -out (messageId, ::std::array<float,3>)
+   -out (messageId, ::plf::colony<::std::string>)
 }
 
 Support for message Ids at a system level is now available.
@@ -19,9 +19,9 @@ Rather than repeating a message Id type for each message,
 you can write the above like this:
 
 exampleMessages <messageID_t=messageId>
-    -out -in (::std::vector<int32_t>, ::std::string)
-    -out -in (::std::array<float,3>)
-    -out -in (::plf::colony<::std::string>)
+   -out (::std::vector<int32_t>, ::std::string)
+   -out (::std::array<float,3>)
+   -out (::plf::colony<::std::string>)
 }
 
 where "messageId" is the name of the type that you want to use
@@ -66,7 +66,7 @@ from the CMW.
 
 By convention, Middle files have a .mdl suffix.
 
-Don't be confused by the middle tier of the CMW. The back, middle and
-front tiers of the CMW use code that's been generated based on Middle files.
+Don't be confused by the middle tier of the CMW. All of the tiers 
+of the CMW use code that's been generated based on Middle files.
 
 Use // to comment out a line of Middle code.

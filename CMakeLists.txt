@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.13)
+project(onwards)
+include_directories(src)
+add_definitions(-std=c++17 -Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -Wno-return-type)
+add_executable(genz src/cmw/tiers/genz.cc)
+if(NOT WIN32)
+	add_executable(cmwA src/cmw/tiers/cmwA.cc)
+endif()
+add_executable(sendExample example/sendExample.cc)
+add_executable(receiveExample example/receiveExample.cc)
+

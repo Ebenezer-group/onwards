@@ -18,7 +18,7 @@ int main ()try{
 
   for(;;){
     buf.GetPacket();
-    auto const msgid=Give<uint8_t>(buf);
+    auto const msgid=Give<messageID>(buf);
     ::std::cout<<"Message id: "<<static_cast<unsigned>(msgid)<<'\n';
     switch(msgid){
       case messageID::id1:

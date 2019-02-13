@@ -504,13 +504,13 @@ public:
 #endif
 
   template<class T>void Giveilist (T& lst){
-    for(int count=Give<uint32_t>();count>0;--count)
+    for(int c=Give<uint32_t>();c>0;--c)
       lst.push_back(*T::value_type::BuildPolyInstance(*this));
   }
 
   template<class T>void Giverbtree (T& rbt){
     auto endIt=rbt.end();
-    for(int count=Give<uint32_t>();count>0;--count)
+    for(int c=Give<uint32_t>();c>0;--c)
       rbt.insert_unique(endIt,*T::value_type::BuildPolyInstance(*this));
   }
 };
