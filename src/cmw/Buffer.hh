@@ -259,7 +259,11 @@ inline int sockRead (sockType s,void* data,int len
   if(r>0)return r;
   auto e=GetError();
   if(0==r||ECONNRESET==e)raiseFiasco("sockRead eof",s,len,e);
-  if(EAGAIN==e||EWOULDBLOCK==e)return 0;
+  if(EAGAIN==e||EWOULDBLOCK==e
+#ifdef CMW_WINDOWS
+     ||WSAETIMEDOUT==e
+#endif
+  )return 0;
   raise("sockRead",s,len,e);
 }
 
