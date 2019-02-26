@@ -85,7 +85,7 @@ struct FILE_wrapper{
 
   FILE_wrapper (char const* fn,char const* mode){
     if((hndl=::fopen(fn,mode))==nullptr)
-      raise("FILE_wrapper",fn,mode,GetError());
+      raise("FILE_wrapper",fn,mode,errno);
   }
   char* fgets (){return ::fgets(line,sizeof line,hndl);}
   ~FILE_wrapper (){::fclose(hndl);}
@@ -200,8 +200,9 @@ inline sockType tcpServer (char const* port){
 inline int acceptWrapper(sockType s){
   int nu=::accept(s,nullptr,nullptr);
   if(nu>=0)return nu;
-  if(ECONNABORTED==GetError())return 0;
-  raise("acceptWrapper",GetError());
+  auto e=GetError();
+  if(ECONNABORTED==e)return 0;
+  raise("acceptWrapper",e);
 }
 
 #if defined(__FreeBSD__)||defined(__linux__)
@@ -210,8 +211,9 @@ inline int accept4Wrapper(sockType s,int flags){
   ::socklen_t len=sizeof amb;
   int nu=::accept4(s,&amb,&len,flags);
   if(nu>=0)return nu;
-  if(ECONNABORTED==GetError())return 0;
-  raise("accept4Wrapper",GetError());
+  auto e=GetError();
+  if(ECONNABORTED==e)return 0;
+  raise("accept4Wrapper",e);
 }
 #endif
 
