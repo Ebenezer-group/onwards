@@ -84,8 +84,7 @@ struct FILE_wrapper{
   char line[120];
 
   FILE_wrapper (char const* fn,char const* mode){
-    if((hndl=::fopen(fn,mode))==nullptr)
-      raise("FILE_wrapper",fn,mode,errno);
+    if((hndl=::fopen(fn,mode))==nullptr)raise("FILE_wrapper",fn,mode,errno);
   }
   char* fgets (){return ::fgets(line,sizeof line,hndl);}
   ~FILE_wrapper (){::fclose(hndl);}
