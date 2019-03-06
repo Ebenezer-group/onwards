@@ -116,7 +116,7 @@ class cmwAmbassador{
   void login (){
     Marshal<messageID::Login>(cmwBuf,accounts,cmwBuf.GetSize());
     for(;;){
-      fds[0].fd=cmwBuf.sock_=connectWrapper("70.56.166.91",
+      fds[0].fd=cmwBuf.sock_=connectWrapper("97.116.189.144",
 #ifdef CMW_ENDIAN_BIG
                       "56790");
 #else
