@@ -84,8 +84,7 @@ struct cmwRequest{
     FILE_wrapper f{middleFile,"r"};
     while(auto line=f.fgets()){
       char const* tok=::strtok(line,"\n ");
-      if(!::strncmp(tok,"//",2)||!::strcmp(tok,"fixedMessageLengths")||
-         !::strcmp(tok,"splitOutput"))continue;
+      if(!::strncmp(tok,"//",2)||!::strcmp(tok,"fixedMessageLengths"))continue;
       if(!::strcmp(tok,"--"))break;
       if(marshalFile(tok,buf))++updatedFiles;
     }
