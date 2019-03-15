@@ -36,7 +36,7 @@ void Marshal (::cmw::SendBuffer& buf,T&&...t)try{
 namespace middleFront{
 template<bool res>
 void Marshal (::cmw::SendBuffer& buf
-         ,stringPlus const& a={})try{
+         ,::cmw::stringPlus const& a={})try{
   buf.ReserveBytes(4);
   Receive(buf,res);
   if(!res){

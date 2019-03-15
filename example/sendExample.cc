@@ -8,7 +8,6 @@
 //  }
 
 #include<cmw/Buffer.hh>
-using namespace ::cmw;
 #include"messageIDs.hh"
 #include"plf_colony.h"
 
@@ -18,22 +17,22 @@ using namespace ::cmw;
 #include<string>
 #include<vector>
 #include"zz.exampleMessages.hh"
-using namespace ::exampleMessages;
 
 int main ()try{
-  winStart();
-  getaddrinfoWrapper ai(
+  ::cmw::winStart();
+  ::cmw::getaddrinfoWrapper ai(
 #ifdef __linux__
                     "127.0.0.1"
 #else
                     "::1"
 #endif
                     ,"12345",SOCK_DGRAM);
-  BufferStack<SameFormat> buf(ai.getSock());
+  ::cmw::BufferStack<::cmw::SameFormat> buf(ai.getSock());
 
   ::std::cout<<"Enter the ID of the message to send: 0,1,2,or 3.\n";
   int msgID;
   ::std::cin>>msgID;
+  using namespace ::exampleMessages;
   switch(msgID){
     case messageID::id1:
     {

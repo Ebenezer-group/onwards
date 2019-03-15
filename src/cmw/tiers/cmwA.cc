@@ -1,5 +1,4 @@
 #include<cmw/Buffer.hh>
-using namespace ::cmw;
 #include"account.hh"
 #include"messageIDs.hh"
 
@@ -17,6 +16,7 @@ using namespace ::cmw;
 #include<netinet/in.h>//sockaddr_in6,socklen_t
 #include<unistd.h>//pread,close
 ::int32_t previousTime;
+using namespace ::cmw;
 
 bool marshalFile (char const* name,SendBuffer& buf){
   struct ::stat sb;
