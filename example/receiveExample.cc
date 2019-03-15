@@ -1,6 +1,5 @@
 //  This program receives messages sent by sendExample.
 #include<cmw/Buffer.hh>
-using namespace ::cmw;
 #include"messageIDs.hh"
 #include"plf_colony.h"
 
@@ -10,12 +9,12 @@ using namespace ::cmw;
 #include<string>
 #include<vector>
 #include"zz.exampleMessages.hh"
-using namespace ::exampleMessages;
 
 int main ()try{
-  winStart();
-  BufferStack<SameFormat> buf(udpServer("12345"));
+  ::cmw::winStart();
+  ::cmw::BufferStack<::cmw::SameFormat> buf(::cmw::udpServer("12345"));
 
+  using namespace ::exampleMessages;
   for(;;){
     buf.GetPacket();
     auto const msgid=Give<messageID>(buf);

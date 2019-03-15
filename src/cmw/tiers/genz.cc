@@ -1,5 +1,4 @@
 #include<cmw/Buffer.hh>
-using namespace ::cmw;
 #include"zz.frontMiddle.hh"
 #include<stdio.h>
 #include<stdlib.h>//exit
@@ -10,6 +9,7 @@ template<class...T>void leave (char const* fmt,T...t)noexcept{
 }
 
 int main (int ac,char** av)try{
+  using namespace ::cmw;
   if(ac<3||ac>5)
     leave("Usage: genz account-num mdl-file-path [node] [port]\n");
   winStart();
