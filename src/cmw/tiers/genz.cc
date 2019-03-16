@@ -13,13 +13,7 @@ int main (int ac,char** av)try{
   if(ac<3||ac>5)
     leave("Usage: genz account-num mdl-file-path [node] [port]\n");
   winStart();
-  getaddrinfoWrapper res(ac<4?
-#ifdef __linux__
-                         "127.0.0.1":av[3]
-#else
-                         "::1":av[3]
-#endif
-                         ,ac<5?"55555":av[4],SOCK_DGRAM);
+  getaddrinfoWrapper res(ac<4?"127.0.0.1":av[3],ac<5?"55555":av[4],SOCK_DGRAM);
   BufferStack<SameFormat> buf(res.getSock());
 
   ::frontMiddle::Marshal(buf,marshallingInt(av[1]),av[2]);
