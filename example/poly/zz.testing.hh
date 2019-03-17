@@ -8,7 +8,7 @@ template<class R>
 base::base (::cmw::ReceiveBuffer<R>& buf)
 {}
 
-template<typename C,typename R>
+template<class C,class R>
 void baseSwitch(C& c,::cmw::ReceiveBuffer<R>& buf){
   switch(auto typeNum=::cmw::Give<uint8_t>(buf);typeNum){
   case base::typeNum:
@@ -73,8 +73,7 @@ inline void Marshal (::cmw::SendBuffer& buf
   buf.FillInSize(10000);
 }catch(...){buf.Rollback();throw;}
 
-template<class R>
-void Give (::cmw::ReceiveBuffer<R>& buf
+template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
          ,::boost::base_collection<base>& a){
   BuildCollection(a,buf,[](auto& a,auto& buf){baseSwitch(a,buf);});
 }

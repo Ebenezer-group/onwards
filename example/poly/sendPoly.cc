@@ -1,9 +1,9 @@
 #include<testing.hh>
 #include<boost/poly_collection/base_collection.hpp>
 #include"zz.testing.hh"
-using namespace ::cmw;
 
 int main (){
+  using namespace ::cmw;
   ::boost::base_collection<base> c;
 
   derived1 d1;
