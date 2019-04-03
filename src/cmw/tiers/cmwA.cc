@@ -67,8 +67,6 @@ struct cmwRequest{
     }
   }
 
-  void saveRuntime ()const{Write(fd,&now,sizeof now);}
-
   void Marshal (SendBuffer& buf)const{
     accountNbr.Marshal(buf);
     auto const ind=buf.ReserveBytes(1);
@@ -91,6 +89,7 @@ struct cmwRequest{
     buf.Receive(ind2,updatedFiles);
   }
 
+  void saveRuntime ()const{Write(fd,&now,sizeof now);}
   ~cmwRequest (){::close(fd);}
 };
 #include"zz.middleBack.hh"

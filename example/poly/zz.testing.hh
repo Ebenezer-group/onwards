@@ -9,7 +9,7 @@ base::base (::cmw::ReceiveBuffer<R>& buf)
 {}
 
 template<class C,class R>
-void baseSwitch(C& c,::cmw::ReceiveBuffer<R>& buf){
+void baseSwitch (C& c,::cmw::ReceiveBuffer<R>& buf){
   switch(auto typeNum=::cmw::Give<uint8_t>(buf);typeNum){
   case base::typeNum:
     ::cmw::BuildSegment<base>(c,buf);break;
