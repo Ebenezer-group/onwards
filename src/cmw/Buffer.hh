@@ -216,36 +216,6 @@ inline int accept4Wrapper(sockType s,int flags){
 }
 #endif
 
-#ifdef CMW_WINDOWS
-inline DWORD Write (HANDLE h,void const* data,int len){
-  DWORD bytesWritten=0;
-  if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
-    raise("Write",GetLastError());
-  return bytesWritten;
-}
-
-inline DWORD Read (HANDLE h,void* data,int len){
-  DWORD bytesRead=0;
-  if (!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
-    raise("Read",GetLastError());
-  return bytesRead;
-}
-#else
-inline int Write (int fd,void const* data,int len){
-  int r=::write(fd,data,len);
-  if(r>=0)return r;
-  raise("Write",errno);
-}
-
-inline int Read (int fd,void* data,int len){
-  int r=::read(fd,data,len);
-  if(r>0)return r;
-  if(r==0)raiseFiasco("Read eof",len);
-  if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
-  raise("Read",len,errno);
-}
-#endif
-
 inline int sockWrite (sockType s,void const* data,int len
                       ,sockaddr const* addr=nullptr,socklen_t toLen=0){
   int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);
@@ -297,6 +267,72 @@ public:
 };
 inline bool operator== (marshallingInt l,marshallingInt r){return l()==r();}
 inline bool operator== (marshallingInt l,int32_t r){return l()==r;}
+
+#ifdef CMW_WINDOWS
+inline DWORD Write (HANDLE h,void const* data,int len){
+  DWORD bytesWritten=0;
+  if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
+    raise("Write",GetLastError());
+  return bytesWritten;
+}
+
+inline DWORD Read (HANDLE h,void* data,int len){
+  DWORD bytesRead=0;
+  if (!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
+    raise("Read",GetLastError());
+  return bytesRead;
+}
+#else
+inline int Write (int fd,void const* data,int len){
+  int r=::write(fd,data,len);
+  if(r>=0)return r;
+  raise("Write",errno);
+}
+
+inline int Read (int fd,void* data,int len){
+  int r=::read(fd,data,len);
+  if(r>0)return r;
+  if(r==0)raiseFiasco("Read eof",len);
+  if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
+  raise("Read",len,errno);
+}
+
+template<class...T>void syslogWrapper (int pri,char const* fmt,T... t){
+  ::syslog(pri,fmt,t...);
+}
+
+template<class...T>void bail (char const* fmt,T... t)noexcept{
+  syslogWrapper(LOG_ERR,fmt,t...);
+  ::exit(EXIT_FAILURE);
+}
+
+struct fileWrapper{
+  int const d;
+  fileWrapper (char const* name,int flags,mode_t mode=0):
+          d(0==mode?::open(name,flags): ::open(name,flags,mode)){
+    if(d<0)raise("fileWrapper",name,errno);
+  }
+  ~fileWrapper (){::close(d);}
+};
+
+class File{
+  ::std::string_view name;
+public:
+  explicit File (::std::string_view n):name(n){}
+
+  template<class R>
+  explicit File (ReceiveBuffer<R>& buf):name(giveStringView_plus(buf)){
+    fileWrapper fl(name.data(),O_WRONLY|O_CREAT|O_TRUNC
+                   ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    buf.GiveFile(fl.d);
+  }
+
+  char const* Name ()const{return name.data();}
+};
+template<class R>void giveFiles (ReceiveBuffer<R>& b){
+  for(auto n=marshallingInt{b}();n>0;--n)File{b};
+}
+#endif
 
 struct SameFormat{
   template<template<class> class B,class U>
@@ -830,42 +866,4 @@ template<int N>class fixedString{
 };
 using fixedString60=fixedString<60>;
 using fixedString120=fixedString<120>;
-
-#ifndef CMW_WINDOWS
-template<class...T>void syslogWrapper (int pri,char const* fmt,T... t){
-  ::syslog(pri,fmt,t...);
-}
-
-template<class...T>void bail (char const* fmt,T... t)noexcept{
-  syslogWrapper(LOG_ERR,fmt,t...);
-  ::exit(EXIT_FAILURE);
-}
-
-struct fileWrapper{
-  int const d;
-  fileWrapper (char const* name,int flags,mode_t mode=0):
-          d(0==mode?::open(name,flags): ::open(name,flags,mode)){
-    if(d<0)raise("fileWrapper",name,errno);
-  }
-  ~fileWrapper (){::close(d);}
-};
-
-class File{
-  ::std::string_view name;
-public:
-  explicit File (::std::string_view n):name(n){}
-
-  template<class R>
-  explicit File (ReceiveBuffer<R>& buf):name(giveStringView_plus(buf)){
-    fileWrapper fl(name.data(),O_WRONLY|O_CREAT|O_TRUNC
-                   ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-    buf.GiveFile(fl.d);
-  }
-
-  char const* Name ()const{return name.data();}
-};
-template<class R>void giveFiles (ReceiveBuffer<R>& b){
-  for(auto n=marshallingInt{b}();n>0;--n)File{b};
-}
-#endif
 }
