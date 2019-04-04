@@ -54,8 +54,8 @@ struct cmwRequest{
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find a /");
     *pos='\0';
-    middleFile=pos+1;
     setDirectory(path());
+    middleFile=pos+1;
     char lastrun[60];
     ::snprintf(lastrun,sizeof lastrun,"%s.lastrun",middleFile);
     fd=::open(lastrun,O_RDWR);
