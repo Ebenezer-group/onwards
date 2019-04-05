@@ -33,10 +33,6 @@ bool marshalFile (char const* name,SendBuffer& buf){
   return false;
 }
 
-template<class T>void preadW(int fd,T* t){
-  if(::pread(fd,t,sizeof(T),0)==-1)raise("preadW",preserveError(fd));
-}
-
 struct cmwRequest{
   ::sockaddr_in6 front;
   ::socklen_t frontLen=sizeof front;
@@ -50,7 +46,7 @@ struct cmwRequest{
 
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):accountNbr(buf),path(buf)
-                  ,now(::time(nullptr)){
+                     ,now(::time(nullptr)){
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find a /");
     *pos='\0';
@@ -58,10 +54,11 @@ struct cmwRequest{
     middleFile=pos+1;
     char lastrun[60];
     ::snprintf(lastrun,sizeof lastrun,"%s.lastrun",middleFile);
-    fd=::open(lastrun,O_RDWR);
     previousTime=0;
-    if(fd>=0)preadW(fd,&previousTime);
-    else{
+    if((fd=::open(lastrun,O_RDWR))>=0){
+      if(::pread(fd,&previousTime,sizeof previousTime,0)==-1)
+        raise("pread",preserveError(fd));
+    }else{
       fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
       if(fd<0)raise("open",lastrun,errno);
     }
