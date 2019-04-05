@@ -659,7 +659,7 @@ public:
   unsigned char* data (){return buf;}
   int GetIndex (){return index;}
   int GetSize (){return bufsize;}
-  template<class...T>void ReceiveMulti (char const* fmt,T&&...t);
+  template<class...T>void ReceiveMulti (char const*,T&&...);
 };
 
 inline void Receive (SendBuffer&b,bool bl){b.Receive(static_cast<unsigned char>(bl));}
