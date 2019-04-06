@@ -54,14 +54,14 @@ public:
 struct fiasco:failure{explicit fiasco(char const* s):failure(s){}};
 
 template<class E>void apps (E& e){throw e;}
-template<class E,class T,class...Ts>void apps (E& e,T t,Ts... ts){
+template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
   e<<t; apps(e,ts...);
 }
 
-template<class... T>void raise (char const* s,T... t){
+template<class...T>void raise (char const* s,T...t){
   failure f(s); apps(f,t...);
 }
-template<class... T>void raiseFiasco (char const* s,T... t){
+template<class...T>void raiseFiasco (char const* s,T...t){
   fiasco f(s); apps(f,t...);
 }
 
@@ -239,7 +239,7 @@ inline int sockRead (sockType s,void* data,int len
 }
 
 class SendBuffer;
-template<class R> class ReceiveBuffer;
+template<class R>class ReceiveBuffer;
 class marshallingInt{
   int32_t val;
 public:

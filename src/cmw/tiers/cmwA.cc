@@ -48,19 +48,19 @@ struct cmwRequest{
   explicit cmwRequest (ReceiveBuffer<R>& buf):accountNbr(buf),path(buf)
                      ,now(::time(nullptr)){
     char* const pos=::strrchr(path(),'/');
-    if(nullptr==pos)raise("cmwRequest didn't find a /");
+    if(nullptr==pos)raise("cmwRequest didn't find /");
     *pos='\0';
     setDirectory(path());
     middleFile=pos+1;
     char lastrun[60];
     ::snprintf(lastrun,sizeof lastrun,"%s.lastrun",middleFile);
-    previousTime=0;
     if((fd=::open(lastrun,O_RDWR))>=0){
       if(::pread(fd,&previousTime,sizeof previousTime,0)==-1)
         raise("pread",preserveError(fd));
     }else{
       fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
       if(fd<0)raise("open",lastrun,errno);
+      previousTime=0;
     }
   }
 
@@ -145,7 +145,7 @@ class cmwAmbassador{
   bool sendData ()try{return cmwBuf.Flush();}
   catch(::std::exception const& e){reset("sendData",e.what());return true;}
 
-  template<bool res,class...T>void outFront (cmwRequest const& req,T... t){
+  template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
     frontBuf.Reset();
     Marshal<res>(frontBuf,{t...});
     frontBuf.Send((::sockaddr*)&req.front,req.frontLen);
