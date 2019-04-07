@@ -54,13 +54,12 @@ struct cmwRequest{
     middleFile=pos+1;
     char lastrun[60];
     ::snprintf(lastrun,sizeof lastrun,"%s.lastrun",middleFile);
-    if((fd=::open(lastrun,O_RDWR))>=0){
-      if(::pread(fd,&previousTime,sizeof previousTime,0)==-1)
-        raise("pread",preserveError(fd));
-    }else{
-      fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-      if(fd<0)raise("open",lastrun,errno);
-      previousTime=0;
+    fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    if(fd<0)raise("open",lastrun,errno);
+    switch(auto r=::pread(fd,&previousTime,sizeof previousTime,0);r){
+      default:break;
+      case 0:previousTime=0;break;
+      case -1:raise("pread",preserveError(fd));
     }
   }
 

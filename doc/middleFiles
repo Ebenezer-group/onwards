@@ -66,7 +66,7 @@ from the CMW.
 
 By convention, Middle files have a .mdl suffix.
 
-Don't be confused by the middle tier of the CMW. All of the tiers 
+Don't be confused by the middle tier of the CMW. All of the tiers
 of the CMW use code that's been generated based on Middle files.
 
 Use // to comment out a line of Middle code.
