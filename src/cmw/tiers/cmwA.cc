@@ -56,7 +56,7 @@ struct cmwRequest{
     ::snprintf(lastrun,sizeof lastrun,"%s.lastrun",middleFile);
     fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     if(fd<0)raise("open",lastrun,errno);
-    switch(auto r=::pread(fd,&previousTime,sizeof previousTime,0);r){
+    switch(::pread(fd,&previousTime,sizeof previousTime,0)){
       default:break;
       case 0:previousTime=0;break;
       case -1:raise("pread",preserveError(fd));
@@ -77,7 +77,7 @@ struct cmwRequest{
     auto const ind2=buf.ReserveBytes(sizeof updatedFiles);
     FILE_wrapper f{middleFile,"r"};
     while(auto line=f.fgets()){
-      char const* tok=::strtok(line,"\n ");
+      char const* tok=::strtok(line,"\n \r");
       if(!::strncmp(tok,"//",2)||!::strcmp(tok,"fixedMessageLengths"))continue;
       if(!::strcmp(tok,"--"))break;
       if(marshalFile(tok,buf))++updatedFiles;
@@ -162,25 +162,25 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   FILE_wrapper cfg{configfile,"r"};
   while(char const* tok=::strtok(cfg.fgets()," ")){
     if(!::strcmp("Account-number",tok)){
-      auto num=fromChars(::strtok(nullptr,"\n "));
+      auto num=fromChars(::strtok(nullptr,"\n \r"));
       checkField("Password",cfg);
-      accounts.emplace_back(num,::strtok(nullptr,"\n "));
+      accounts.emplace_back(num,::strtok(nullptr,"\n \r"));
     }else{
       if(accounts.empty())bail("An account number is required.");
       if(!::strcmp("UDP-port-number",tok))break;
       else bail("Expected UDP-port-number");
     }
   }
-  fds[1].fd=frontBuf.sock_=udpServer(::strtok(nullptr,"\n "));
+  fds[1].fd=frontBuf.sock_=udpServer(::strtok(nullptr,"\n \r"));
   fds[1].events=POLLIN;
 #ifdef __linux__
   if(setNonblocking(fds[1].fd)==-1)bail("setNonb:%d",errno);
 #endif
 
   checkField("Login-attempts-interval-in-milliseconds",cfg);
-  loginPause=fromChars(::strtok(nullptr,"\n "));
+  loginPause=fromChars(::strtok(nullptr,"\n \r"));
   checkField("Keepalive-interval-in-milliseconds",cfg);
-  int const keepaliveInterval=fromChars(::strtok(nullptr,"\n "));
+  int const keepaliveInterval=fromChars(::strtok(nullptr,"\n \r"));
 
   login();
   for(;;){
