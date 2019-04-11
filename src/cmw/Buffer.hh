@@ -308,8 +308,9 @@ template<class...T>void bail (char const* fmt,T... t)noexcept{
 
 struct fileWrapper{
   int const d;
+  fileWrapper ():d(-2){}
   fileWrapper (char const* name,int flags,mode_t mode=0):
-          d(0==mode?::open(name,flags): ::open(name,flags,mode)){
+          d(::open(name,flags,mode)){
     if(d<0)raise("fileWrapper",name,errno);
   }
   ~fileWrapper (){::close(d);}
