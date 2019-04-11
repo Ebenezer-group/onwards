@@ -40,7 +40,7 @@ struct cmwRequest{
   fixedString120 path;
   ::int32_t now;
   char const* middleFile;
-  int fd;
+  fileWrapper fl;
 
   cmwRequest (){}
 
@@ -54,12 +54,11 @@ struct cmwRequest{
     middleFile=pos+1;
     char lastrun[60];
     ::snprintf(lastrun,sizeof lastrun,"%s.lastrun",middleFile);
-    fd=::open(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-    if(fd<0)raise("open",lastrun,errno);
-    switch(::pread(fd,&previousTime,sizeof previousTime,0)){
+    new(&fl)fileWrapper(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    switch(::pread(fl.d,&previousTime,sizeof previousTime,0)){
       default:break;
       case 0:previousTime=0;break;
-      case -1:raise("pread",preserveError(fd));
+      case -1:raise("pread",errno);
     }
   }
 
@@ -85,8 +84,7 @@ struct cmwRequest{
     buf.Receive(ind2,updatedFiles);
   }
 
-  void saveRuntime ()const{Write(fd,&now,sizeof now);}
-  ~cmwRequest (){::close(fd);}
+  void saveRuntime ()const{Write(fl.d,&now,sizeof now);}
 };
 #include"zz.middleBack.hh"
 using namespace ::middleBack;
