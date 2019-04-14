@@ -6,21 +6,19 @@
 #include<vector>
 #include<assert.h>
 #include<errno.h>
-#include<fcntl.h>//open
 #include<stdint.h>
 #include<stdio.h>
 #include<string.h>
 #include<sys/stat.h>
-#include<sys/types.h>
 #include<time.h>
+#include<unistd.h>//pread
 #include<netinet/in.h>//sockaddr_in6,socklen_t
-#include<unistd.h>//pread,close
 ::int32_t previousTime;
 using namespace ::cmw;
 
 bool marshalFile (char const* name,SendBuffer& buf){
   struct ::stat sb;
-  if(::stat(name,&sb)<0)raise("marshalFile stat",name);
+  if(::stat(name,&sb)<0)raise("stat",name,errno);
   if(sb.st_mtime>previousTime){
     if('.'==name[0]||name[0]=='/')Receive(buf,::strrchr(name,'/')+1);
     else Receive(buf,name);
@@ -158,17 +156,14 @@ void checkField (char const* fld,FILE_wrapper& f){
 
 cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   FILE_wrapper cfg{configfile,"r"};
-  while(char const* tok=::strtok(cfg.fgets()," ")){
-    if(!::strcmp("Account-number",tok)){
-      auto num=fromChars(::strtok(nullptr,"\n \r"));
-      checkField("Password",cfg);
-      accounts.emplace_back(num,::strtok(nullptr,"\n \r"));
-    }else{
-      if(accounts.empty())bail("An account number is required.");
-      if(!::strcmp("UDP-port-number",tok))break;
-      else bail("Expected UDP-port-number");
-    }
+  char const* tok;
+  while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
+    auto num=fromChars(::strtok(nullptr,"\n \r"));
+    checkField("Password",cfg);
+    accounts.emplace_back(num,::strtok(nullptr,"\n \r"));
   }
+  if(accounts.empty())bail("An account number is required.");
+  if(::strcmp("UDP-port-number",tok))bail("Expected UDP-port-number");
   fds[1].fd=frontBuf.sock_=udpServer(::strtok(nullptr,"\n \r"));
   fds[1].events=POLLIN;
 #ifdef __linux__
