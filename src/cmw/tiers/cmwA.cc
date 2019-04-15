@@ -105,14 +105,12 @@ class cmwAmbassador{
 
   void login (){
     Marshal<messageID::login>(cmwBuf,accounts,cmwBuf.GetSize());
-    for(;;){
-      fds[0].fd=cmwBuf.sock_=connectWrapper("97.116.189.144",
+    while(-1==(fds[0].fd=cmwBuf.sock_=connectWrapper("97.116.189.144",
 #ifdef CMW_ENDIAN_BIG
-                      "56790");
+                      "56790"))){
 #else
-                      "56789");
+                      "56789"))){
 #endif
-      if(fds[0].fd!=-1)break;
       ::printf("connectWrapper %d\n",errno);
       pollWrapper(nullptr,0,loginPause);
     }
