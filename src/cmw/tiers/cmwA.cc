@@ -81,8 +81,6 @@ struct cmwRequest{
     }
     buf.Receive(ind2,updatedFiles);
   }
-
-  void saveRuntime ()const{Write(fl.d,&now,sizeof now);}
 };
 #include"zz.middleBack.hh"
 using namespace ::middleBack;
@@ -193,7 +191,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
           if(pendingRequests.front().get()){
             auto const& req=*pendingRequests.front();
             if(giveBool(cmwBuf)){
-              req.saveRuntime();
+              Write(req.fl.d,&req.now,sizeof req.now);
               setDirectory(req.path.c_str());
               giveFiles(cmwBuf);
               outFront<true>(req);
