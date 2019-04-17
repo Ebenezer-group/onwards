@@ -68,8 +68,7 @@ template<class...T>void raiseFiasco (char const* s,T...t){
 inline void winStart (){
 #ifdef CMW_WINDOWS
   WSADATA w;
-  auto r=::WSAStartup(MAKEWORD(2,2),&w);
-  if(0!=r)raise("WSAStartup",r);
+  if(auto r=::WSAStartup(MAKEWORD(2,2),&w);0!=r)raise("WSAStartup",r);
 #endif
 }
 
@@ -80,7 +79,7 @@ inline int fromChars (char const* p){
 }
 
 struct FILE_wrapper{
-  FILE* hndl;
+  ::FILE* hndl;
   char line[120];
 
   FILE_wrapper (char const* fn,char const* mode){
@@ -105,8 +104,7 @@ class getaddrinfoWrapper{
   void inc (){if(addr!=nullptr)addr=addr->ai_next;}
   sockType getSock (){
     for(;addr!=nullptr;addr=addr->ai_next){
-      auto s=::socket(addr->ai_family,addr->ai_socktype,0);
-      if(-1!=s)return s;
+      if(auto s=::socket(addr->ai_family,addr->ai_socktype,0);-1!=s)return s;
     }
     raise("getaddrinfo getSock");
   }
@@ -116,7 +114,7 @@ class getaddrinfoWrapper{
 
 inline void setDirectory (char const* d){
 #ifdef CMW_WINDOWS
-  if(!SetCurrentDirectory(d))
+  if(!::SetCurrentDirectory(d))
 #else
   if(::chdir(d)==-1)
 #endif
@@ -124,8 +122,7 @@ inline void setDirectory (char const* d){
 }
 
 inline int pollWrapper (::pollfd* fds,int n,int timeout=-1){
-  int r=::poll(fds,n,timeout);
-  if(r>=0)return r;
+  if(int r=::poll(fds,n,timeout);r>=0)return r;
   raise("poll",GetError());
 }
 
@@ -197,8 +194,7 @@ inline sockType tcpServer (char const* port){
 }
 
 inline int acceptWrapper(sockType s){
-  int nu=::accept(s,nullptr,nullptr);
-  if(nu>=0)return nu;
+  if(int nu=::accept(s,nullptr,nullptr);nu>=0)return nu;
   auto e=GetError();
   if(ECONNABORTED==e)return 0;
   raise("acceptWrapper",e);
@@ -208,8 +204,7 @@ inline int acceptWrapper(sockType s){
 inline int accept4Wrapper(sockType s,int flags){
   ::sockaddr amb;
   ::socklen_t len=sizeof amb;
-  int nu=::accept4(s,&amb,&len,flags);
-  if(nu>=0)return nu;
+  if(int nu=::accept4(s,&amb,&len,flags);nu>=0)return nu;
   auto e=GetError();
   if(ECONNABORTED==e)return 0;
   raise("accept4Wrapper",e);
@@ -278,14 +273,13 @@ inline DWORD Write (HANDLE h,void const* data,int len){
 
 inline DWORD Read (HANDLE h,void* data,int len){
   DWORD bytesRead=0;
-  if (!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
+  if(!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
     raise("Read",GetLastError());
   return bytesRead;
 }
 #else
 inline int Write (int fd,void const* data,int len){
-  int r=::write(fd,data,len);
-  if(r>=0)return r;
+  if(int r=::write(fd,data,len);r>=0)return r;
   raise("Write",errno);
 }
 
