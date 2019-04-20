@@ -615,9 +615,10 @@ public:
     return i;
   }
 
-  template<class T>void Receive (int where,T t){
+  template<class T>T Receive (int where,T t){
     static_assert(::std::is_arithmetic<T>::value,"");
     ::memcpy(buf+where,&t,sizeof t);
+    return t;
   }
 
   void FillInSize (int32_t max){

@@ -62,16 +62,14 @@ struct cmwRequest{
 
   void Marshal (SendBuffer& buf)const{
     accountNbr.Marshal(buf);
-    auto const ind=buf.ReserveBytes(1);
-    if(marshalFile(middleFile,buf))buf.Receive(ind,true);
-    else{
-      buf.Receive(ind,false);
+    if(auto ind=buf.ReserveBytes(1);
+         !buf.Receive(ind,marshalFile(middleFile,buf))){
       Receive(buf,middleFile);
       InsertNull(buf);
     }
 
     int8_t updatedFiles=0;
-    auto const ind2=buf.ReserveBytes(sizeof updatedFiles);
+    auto const idx=buf.ReserveBytes(sizeof updatedFiles);
     FILE_wrapper f{middleFile,"r"};
     while(auto line=f.fgets()){
       char const* tok=::strtok(line,"\n \r");
@@ -79,7 +77,7 @@ struct cmwRequest{
       if(!::strcmp(tok,"--"))break;
       if(marshalFile(tok,buf))++updatedFiles;
     }
-    buf.Receive(ind2,updatedFiles);
+    buf.Receive(idx,updatedFiles);
   }
 };
 #include"zz.middleBack.hh"
