@@ -50,9 +50,9 @@ struct cmwRequest{
     *pos='\0';
     setDirectory(path());
     middleFile=pos+1;
-    char lastrun[60];
-    ::snprintf(lastrun,sizeof lastrun,"%s.lastrun",middleFile);
-    new(&fl)fileWrapper(lastrun,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    char last[60];
+    ::snprintf(last,sizeof last,"%s.lastrun",middleFile);
+    ::new(&fl)fileWrapper(last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     switch(::pread(fl.d,&previousTime,sizeof previousTime,0)){
       default:break;
       case 0:previousTime=0;break;
@@ -144,9 +144,9 @@ public:
   cmwAmbassador (char*);
 };
 
-cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
-  FILE_wrapper cfg{configfile,"r"};
-  auto checkField=[&cfg](char const* fld){
+cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
+  FILE_wrapper cfg{config,"r"};
+  auto checkField=[&](char const* fld){
     if(::strcmp(fld,::strtok(cfg.fgets()," ")))bail("Expected %s",fld);
   };
   char const* tok;
@@ -158,10 +158,10 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
   if(accounts.empty())bail("An account number is required.");
   if(::strcmp("UDP-port-number",tok))bail("Expected UDP-port-number");
   fds[1].fd=frontBuf.sock_=udpServer(::strtok(nullptr,"\n \r"));
-  fds[1].events=POLLIN;
 #ifdef __linux__
   if(setNonblocking(fds[1].fd)==-1)bail("setNonb:%d",errno);
 #endif
+  fds[1].events=POLLIN;
 
   checkField("Login-attempts-interval-in-milliseconds");
   loginPause=fromChars(::strtok(nullptr,"\n \r"));
@@ -217,7 +217,7 @@ cmwAmbassador::cmwAmbassador (char* configfile):cmwBuf(1100000){
         req=&*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
         frontBuf.GetPacket((::sockaddr*)&req->front,&req->frontLen);
         gotAddr=true;
-        new(req)cmwRequest(frontBuf);
+        ::new(req)cmwRequest(frontBuf);
         Marshal<messageID::generate>(cmwBuf,*req);
       }catch(::std::exception const& e){
         syslogWrapper(LOG_ERR,"Accept request:%s",e.what());
