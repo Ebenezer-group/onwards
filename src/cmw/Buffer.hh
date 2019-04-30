@@ -23,7 +23,6 @@ static_assert(::std::numeric_limits<float>::is_iec559,"Only IEEE754 supported");
 #define poll WSAPoll
 using sockType=SOCKET;
 using fileType=HANDLE;
-inline int GetError (){return WSAGetLastError();}
 #else
 #include<errno.h>
 #include<fcntl.h>//fcntl,open
@@ -37,10 +36,17 @@ inline int GetError (){return WSAGetLastError();}
 #define _MSVC_LANG 0
 using sockType=int;
 using fileType=int;
-inline int GetError (){return errno;}
 #endif
 
 namespace cmw{
+inline int getError (){
+#ifdef CMW_WINDOWS
+  return WSAGetLastError();
+#else
+  return errno;
+#endif
+}
+
 class failure:public ::std::exception{
   ::std::string str;
 public:
@@ -118,12 +124,12 @@ inline void setDirectory (char const* d){
 #else
   if(::chdir(d)==-1)
 #endif
-    raise("setDirectory",d,GetError());
+    raise("setDirectory",d,getError());
 }
 
 inline int pollWrapper (::pollfd* fds,int n,int timeout=-1){
   if(int r=::poll(fds,n,timeout);r>=0)return r;
-  raise("poll",GetError());
+  raise("poll",getError());
 }
 
 template<class T>int setsockWrapper (sockType s,int opt,T t){
@@ -136,7 +142,7 @@ inline void setRcvTimeout (sockType s,int time){
 #else
   timeval t{time,0};
 #endif
-  if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",GetError());
+  if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
 }
 
 inline void closeSocket (sockType s){
@@ -145,11 +151,11 @@ inline void closeSocket (sockType s){
 #else
   if(::close(s)==-1)
 #endif
-    raise("closeSocket",GetError());
+    raise("closeSocket",getError());
 }
 
 inline int preserveError (sockType s){
-  auto e=GetError();
+  auto e=getError();
   closeSocket(s);
   return e;
 }
@@ -195,7 +201,7 @@ inline sockType tcpServer (char const* port){
 
 inline int acceptWrapper(sockType s){
   if(int nu=::accept(s,nullptr,nullptr);nu>=0)return nu;
-  auto e=GetError();
+  auto e=getError();
   if(ECONNABORTED==e)return 0;
   raise("acceptWrapper",e);
 }
@@ -205,7 +211,7 @@ inline int accept4Wrapper(sockType s,int flags){
   ::sockaddr amb;
   ::socklen_t len=sizeof amb;
   if(int nu=::accept4(s,&amb,&len,flags);nu>=0)return nu;
-  auto e=GetError();
+  auto e=getError();
   if(ECONNABORTED==e)return 0;
   raise("accept4Wrapper",e);
 }
@@ -215,7 +221,7 @@ inline int sockWrite (sockType s,void const* data,int len
                       ,sockaddr const* addr=nullptr,socklen_t toLen=0){
   int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);
   if(r>0)return r;
-  auto e=GetError();
+  auto e=getError();
   if(EAGAIN==e||EWOULDBLOCK==e)return 0;
   raise("sockWrite",s,e);}
 
@@ -223,7 +229,7 @@ inline int sockRead (sockType s,void* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
   int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(r>0)return r;
-  auto e=GetError();
+  auto e=getError();
   if(0==r||ECONNRESET==e)raiseFiasco("sockRead eof",s,len,e);
   if(EAGAIN==e||EWOULDBLOCK==e
 #ifdef CMW_WINDOWS
