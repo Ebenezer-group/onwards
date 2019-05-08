@@ -568,7 +568,7 @@ template<class R>bool giveBool (ReceiveBuffer<R>& buf){
   }
 }
 
-template<class R> ::std::string giveString (ReceiveBuffer<R>& buf){
+template<class R>auto giveString (ReceiveBuffer<R>& buf){
   return buf.template GiveStringy<::std::string>();
 }
 

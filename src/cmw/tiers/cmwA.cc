@@ -198,10 +198,10 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
         }while(cmwBuf.NextMessage());
       }
     }catch(fiasco const& e){
-      reset("fiasco",e.what());
+      reset("Fiasco",e.what());
       continue;
     }catch(::std::exception const& e){
-      syslogWrapper(LOG_ERR,"Problem handling reply from CMW %s",e.what());
+      syslogWrapper(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
       if(pendingRequests.front().get())
         outFront<false>(*pendingRequests.front(),e.what());
@@ -232,7 +232,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
 
 int main (int ac,char** av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
-  if(ac!=2)bail("Usage: cmwA config-file-name");
+  if(ac!=2)bail("Usage: cmwA config-file");
   cmwAmbassador{av[1]};
 }catch(::std::exception const& e){bail("Oops:%s",e.what());
 }catch(...){bail("Unknown exception!");}
