@@ -36,11 +36,13 @@ void Marshal (::cmw::SendBuffer& buf,T&&...t)try{
 namespace middleFront{
 template<bool res>
 void Marshal (::cmw::SendBuffer& buf
-         ,::cmw::stringPlus const& a={})try{
+         ,::cmw::stringPlus const& a={}
+         ,::int8_t b={})try{
   buf.ReserveBytes(4);
   Receive(buf,res);
   if(!res){
     Receive(buf,a);
+    buf.Receive(b);
   }
   buf.FillInSize(udp_packet_max);
 }catch(...){buf.Rollback();throw;}

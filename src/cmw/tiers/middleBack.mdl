@@ -8,5 +8,5 @@ middleBack <messageID_t=messageID>
 }
 
 middleFront
-  -out -maxLength=udp_packet_max -yeaNay (::cmw::stringPlus)
+  -out -maxLength=udp_packet_max -yeaNay (::cmw::stringPlus,::int8_t)
 }
