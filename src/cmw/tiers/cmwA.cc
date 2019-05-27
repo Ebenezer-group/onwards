@@ -114,8 +114,7 @@ class cmwAmbassador{
     while(!cmwBuf.Flush());
     fds[0].events=POLLIN;
     while(!cmwBuf.GotPacket());
-    if(!giveBool(cmwBuf))
-      bail("Login:%s",nullTerminate(giveStringView(cmwBuf)).data());
+    if(!giveBool(cmwBuf))bail("Login:%s",giveStringView(cmwBuf).data());
     if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
   }
 
