@@ -581,11 +581,6 @@ template<class R>auto giveStringView_plus (ReceiveBuffer<R>& buf){
   return v;
 }
 
-inline auto nullTerminate (::std::string_view v){
-  *const_cast<char*>(v.data()+v.length())=0;
-  return v;
-}
-
 class SendBuffer{
   SendBuffer (SendBuffer const&);
   SendBuffer& operator= (SendBuffer);
@@ -720,7 +715,7 @@ inline void marshallingInt::Marshal (SendBuffer& b)const{
   }
 }
 
-auto const udp_packet_max=1280;
+auto constexpr udp_packet_max=1280;
 template<class R,int N=udp_packet_max>
 struct BufferStack:SendBuffer,ReceiveBuffer<R>{
 private:
