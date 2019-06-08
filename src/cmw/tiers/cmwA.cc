@@ -101,11 +101,11 @@ class cmwAmbassador{
 
   void login (){
     Marshal<messageID::login>(cmwBuf,accounts,cmwBuf.GetSize());
-    while(-1==(fds[0].fd=cmwBuf.sock_=connectWrapper("97.116.189.144",
+    while(-1==(fds[0].fd=cmwBuf.sock_=connectWrapper("1.tcp.ngrok.io",
 #ifdef CMW_ENDIAN_BIG
-                      "56790"))){
+                      "28911"))){
 #else
-                      "56789"))){
+                      "26898"))){
 #endif
       ::printf("connectWrapper %d\n",errno);
       pollWrapper(nullptr,0,loginPause);
