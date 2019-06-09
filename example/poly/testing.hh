@@ -1,4 +1,5 @@
-#pragma once
+#ifndef testing_hh
+#define testing_hh 1
 #include<cmw/Buffer.hh>
 #include<cmw/Complex.hh>
 
@@ -52,4 +53,4 @@ public:
   void Marshal (::cmw::SendBuffer& b)const{MarshalMembers(b);}
   static uint8_t const typeNum=3;
 };
-
+#endif

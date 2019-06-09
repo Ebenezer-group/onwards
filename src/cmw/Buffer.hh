@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CMW_Buffer_hh
+#define CMW_Buffer_hh 1
 #include"quicklz.h"
 #include<algorithm>//min
 #include<array>
@@ -864,3 +865,4 @@ template<int N>class fixedString{
 using fixedString60=fixedString<60>;
 using fixedString120=fixedString<120>;
 }
+#endif

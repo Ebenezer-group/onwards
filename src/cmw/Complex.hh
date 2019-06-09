@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CMW_Complex_hh
+#define CMW_Complex_hh 1
 #include<cmw/Buffer.hh>
 #include<complex>
 
@@ -70,3 +71,4 @@ void valarrayReceive (B& buf,::std::valarray<T>& va){
 }
 #endif
 }
+#endif
