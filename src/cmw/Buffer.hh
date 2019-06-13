@@ -202,17 +202,6 @@ inline int acceptWrapper(sockType s){
   raise("acceptWrapper",e);
 }
 
-#if defined(__FreeBSD__)||defined(__linux__)
-inline int accept4Wrapper(sockType s,int flags){
-  ::sockaddr amb;
-  ::socklen_t len=sizeof amb;
-  if(int n=::accept4(s,&amb,&len,flags);n>=0)return n;
-  auto e=getError();
-  if(ECONNABORTED==e)return 0;
-  raise("accept4Wrapper",e);
-}
-#endif
-
 inline int sockWrite (sockType s,void const* data,int len
                       ,sockaddr const* addr=nullptr,socklen_t toLen=0){
   int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);
