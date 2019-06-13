@@ -189,19 +189,14 @@ inline sockType tcpServer (char const* port){
 #endif
   auto s=ai.getSock();
 
-  int on=1;
-  if(setsockWrapper(s,SO_REUSEADDR,on)==0){
-    on=2;
-    if(::bind(s,ai()->ai_addr,ai()->ai_addrlen)==0){
-      on=3;
-      if(::listen(s,SOMAXCONN)==0)return s;
-    }
-  }
-  raise("tcpServer",on,preserveError(s));
+  if(int on=1;setsockWrapper(s,SO_REUSEADDR,on)==0
+    &&::bind(s,ai()->ai_addr,ai()->ai_addrlen)==0
+    &&::listen(s,SOMAXCONN)==0)return s;
+  raise("tcpServer",preserveError(s));
 }
 
 inline int acceptWrapper(sockType s){
-  if(int nu=::accept(s,nullptr,nullptr);nu>=0)return nu;
+  if(int n=::accept(s,nullptr,nullptr);n>=0)return n;
   auto e=getError();
   if(ECONNABORTED==e)return 0;
   raise("acceptWrapper",e);
@@ -211,7 +206,7 @@ inline int acceptWrapper(sockType s){
 inline int accept4Wrapper(sockType s,int flags){
   ::sockaddr amb;
   ::socklen_t len=sizeof amb;
-  if(int nu=::accept4(s,&amb,&len,flags);nu>=0)return nu;
+  if(int n=::accept4(s,&amb,&len,flags);n>=0)return n;
   auto e=getError();
   if(ECONNABORTED==e)return 0;
   raise("accept4Wrapper",e);
