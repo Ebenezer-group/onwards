@@ -208,7 +208,8 @@ inline int sockWrite (sockType s,void const* data,int len
   if(r>0)return r;
   auto e=getError();
   if(EAGAIN==e||EWOULDBLOCK==e)return 0;
-  raise("sockWrite",s,e);}
+  raise("sockWrite",s,e);
+}
 
 inline int sockRead (sockType s,void* data,int len
                      ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
@@ -521,14 +522,12 @@ public:
     return s;
   }
 
-#ifndef CMW_WINDOWS
-  template<ssize_t N>void CopyString (char(&dest)[N]){
+  template<int N>void CopyString (char(&dest)[N]){
     marshallingInt len(*this);
     if(len()+1>N)raise("ReceiveBuffer CopyString");
     Give(dest,len());
     dest[len()]='\0';
   }
-#endif
 
   template<class T>void Giveilist (T& lst){
     for(int c=Give<uint32_t>();c>0;--c)

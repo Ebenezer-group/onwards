@@ -18,16 +18,16 @@ int genzMain (int ac,char** av)try{
   BufferStack<SameFormat> buf(res.getSock());
 
   ::frontMiddle::Marshal(buf,marshallingInt(av[1]),av[2]);
-  for(int tm=8;tm<17;tm+=8){
+  for(int tm=8;tm<13;tm+=4){
     buf.Send(res()->ai_addr,res()->ai_addrlen);
     setRcvTimeout(buf.sock_,tm);
     if(buf.GetPacket()){
       if(giveBool(buf))::exit(EXIT_SUCCESS);
-      leave("cmwA:%s\n",nullTerminate(giveStringView(buf)).data());
+      leave("cmwA:%s\n",giveStringView(buf).data());
     }
   }
   leave("No reply received.  Is the cmwA running?\n");
-}catch(::std::exception const& e){leave(e.what());}
+}catch(::std::exception const& e){leave("%s\n",e.what());}
 
 JNIEXPORT void JNICALL Java_jniGenz_wrap (JNIEnv *env,jobject obj,jobjectArray args){
   auto argc=env->GetArrayLength(args);
