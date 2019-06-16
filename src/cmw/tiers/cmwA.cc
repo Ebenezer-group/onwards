@@ -32,9 +32,9 @@ bool marshalFile (char const* name,SendBuffer& buf){
 }
 
 struct cmwRequest{
-  ::sockaddr_in6 front;
-  ::socklen_t frontLen=sizeof front;
-  marshallingInt const accountNbr;
+  ::sockaddr_in6 frnt;
+  ::socklen_t frntLn=sizeof frnt;
+  marshallingInt const acctNbr;
   fixedString120 path;
   ::int32_t now;
   char const* middleFile;
@@ -43,7 +43,7 @@ struct cmwRequest{
   cmwRequest (){}
 
   template<class R>
-  explicit cmwRequest (ReceiveBuffer<R>& buf):accountNbr(buf),path(buf)
+  explicit cmwRequest (ReceiveBuffer<R>& buf):acctNbr(buf),path(buf)
                      ,now(::time(nullptr)){
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
@@ -61,7 +61,7 @@ struct cmwRequest{
   }
 
   void Marshal (SendBuffer& buf)const{
-    accountNbr.Marshal(buf);
+    acctNbr.Marshal(buf);
     if(auto ind=buf.ReserveBytes(1);
          !buf.Receive(ind,marshalFile(middleFile,buf))){
       Receive(buf,middleFile);
@@ -80,9 +80,8 @@ struct cmwRequest{
     buf.Receive(idx,updatedFiles);
   }
 };
-#include"zz.middleBack.hh"
-using namespace ::middleBack;
-using namespace ::middleFront;
+#include"zz.mddlBck.hh"
+using namespace ::mddlBck;
 
 class cmwAmbassador{
   BufferCompressed<
@@ -93,7 +92,7 @@ class cmwAmbassador{
 #endif
   > cmwBuf;
 
-  BufferStack<SameFormat> frontBuf;
+  BufferStack<SameFormat> frntBuf;
   ::std::vector<cmwAccount> accounts;
   ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
   ::pollfd fds[2];
@@ -120,10 +119,10 @@ class cmwAmbassador{
 
   void reset (char const* context,char const* detail){
     syslogWrapper(LOG_ERR,"%s:%s",context,detail);
-    frontBuf.Reset();
-    Marshal<false>(frontBuf,{context," ",detail});
+    frntBuf.Reset();
+    ::mddlFrnt::Marshal<false>(frntBuf,{context," ",detail});
     for(auto& r:pendingRequests)
-      if(r.get())frontBuf.Send((::sockaddr*)&r->front,r->frontLen);
+      if(r.get())frntBuf.Send((::sockaddr*)&r->frnt,r->frntLn);
     pendingRequests.clear();
     closeSocket(fds[0].fd);
     cmwBuf.CompressedReset();
@@ -134,9 +133,9 @@ class cmwAmbassador{
   catch(::std::exception const& e){reset("sendData",e.what());return true;}
 
   template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
-    frontBuf.Reset();
-    Marshal<res>(frontBuf,{t...});
-    frontBuf.Send((::sockaddr*)&req.front,req.frontLen);
+    frntBuf.Reset();
+    ::mddlFrnt::Marshal<res>(frntBuf,{t...});
+    frntBuf.Send((::sockaddr*)&req.frnt,req.frntLn);
   }
 
 public:
@@ -156,7 +155,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
   }
   if(accounts.empty())bail("An account number is required.");
   if(::strcmp("UDP-port-number",tok))bail("Expected UDP-port-number");
-  fds[1].fd=frontBuf.sock_=udpServer(::strtok(nullptr,"\n \r"));
+  fds[1].fd=frntBuf.sock_=udpServer(::strtok(nullptr,"\n \r"));
 #ifdef __linux__
   if(setNonblocking(fds[1].fd)==-1)bail("setNonb:%d",errno);
 #endif
@@ -214,9 +213,9 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
       cmwRequest* req=nullptr;
       try{
         req=&*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
-        frontBuf.GetPacket((::sockaddr*)&req->front,&req->frontLen);
+        frntBuf.GetPacket((::sockaddr*)&req->frnt,&req->frntLn);
         gotAddr=true;
-        ::new(req)cmwRequest(frontBuf);
+        ::new(req)cmwRequest(frntBuf);
         Marshal<messageID::generate>(cmwBuf,*req);
       }catch(::std::exception const& e){
         syslogWrapper(LOG_ERR,"Accept request:%s",e.what());
