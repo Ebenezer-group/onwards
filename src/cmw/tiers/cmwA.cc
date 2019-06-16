@@ -37,7 +37,7 @@ struct cmwRequest{
   marshallingInt const acctNbr;
   fixedString120 path;
   ::int32_t now;
-  char const* middleFile;
+  char const* mdlFile;
   fileWrapper fl;
 
   cmwRequest (){}
@@ -49,9 +49,9 @@ struct cmwRequest{
     if(nullptr==pos)raise("cmwRequest didn't find /");
     *pos='\0';
     setDirectory(path());
-    middleFile=pos+1;
+    mdlFile=pos+1;
     char last[60];
-    ::snprintf(last,sizeof last,"%s.lastrun",middleFile);
+    ::snprintf(last,sizeof last,"%s.lastrun",mdlFile);
     ::new(&fl)fileWrapper(last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     switch(::pread(fl.d,&previousTime,sizeof previousTime,0)){
       default:break;
@@ -63,14 +63,14 @@ struct cmwRequest{
   void Marshal (SendBuffer& buf)const{
     acctNbr.Marshal(buf);
     if(auto ind=buf.ReserveBytes(1);
-         !buf.Receive(ind,marshalFile(middleFile,buf))){
-      Receive(buf,middleFile);
+         !buf.Receive(ind,marshalFile(mdlFile,buf))){
+      Receive(buf,mdlFile);
       InsertNull(buf);
     }
 
     int8_t updatedFiles=0;
     auto const idx=buf.ReserveBytes(sizeof updatedFiles);
-    FILE_wrapper f{middleFile,"r"};
+    FILE_wrapper f{mdlFile,"r"};
     while(auto line=f.fgets()){
       char const* tok=::strtok(line,"\n \r");
       if(!::strncmp(tok,"//",2)||!::strcmp(tok,"fixedMessageLengths"))continue;
