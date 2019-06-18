@@ -184,9 +184,6 @@ inline sockType udpServer (char const* port){
 
 inline sockType tcpServer (char const* port){
   getaddrinfoWrapper ai(nullptr,port,SOCK_STREAM,AI_PASSIVE);
-#ifdef SKIP_FIRST
-  ai.inc();
-#endif
   auto s=ai.getSock();
 
   if(int on=1;setsockWrapper(s,SO_REUSEADDR,on)==0
