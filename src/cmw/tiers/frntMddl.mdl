@@ -1,4 +1,4 @@
 --
 frntMddl
-  -out -maxLength=::cmw::udp_packet_max (::cmw::marshallingInt,const char*)
+  -out -maxLength=::cmw::udp_packet_max (::cmw::marshallingInt,char const*)
 }

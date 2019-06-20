@@ -4,7 +4,7 @@
 namespace frntMddl{
 void Marshal (::cmw::SendBuffer& buf
          ,::cmw::marshallingInt const& a
-         , const char* b)try{
+         ,char const* b)try{
   buf.ReserveBytes(4);
   a.Marshal(buf);
   Receive(buf,b);
