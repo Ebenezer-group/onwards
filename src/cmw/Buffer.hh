@@ -772,8 +772,8 @@ public:
 
   void compressedReset (){
     reset();
-    reset(compress);
-    reset(decomp);
+    ::cmw::reset(compress);
+    ::cmw::reset(decomp);
     compIndex=bytesRead=0;
     kosher=true;
   }
