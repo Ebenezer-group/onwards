@@ -631,7 +631,7 @@ public:
   }
 
   //UDP-friendly alternative to flush
-  void Send (::sockaddr* addr=nullptr,::socklen_t len=0)
+  void send (::sockaddr* addr=nullptr,::socklen_t len=0)
   {sockWrite(sock_,buf,index,addr,len);}
 
   unsigned char* data (){return buf;}

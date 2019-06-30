@@ -122,7 +122,7 @@ class cmwAmbassador{
     frntBuf.reset();
     ::mddlFrnt::Marshal<false>(frntBuf,{context," ",detail});
     for(auto& r:pendingRequests)
-      if(r.get())frntBuf.Send((::sockaddr*)&r->frnt,r->frntLn);
+      if(r.get())frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
     pendingRequests.clear();
     closeSocket(fds[0].fd);
     cmwBuf.compressedReset();
@@ -135,7 +135,7 @@ class cmwAmbassador{
   template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
     frntBuf.reset();
     ::mddlFrnt::Marshal<res>(frntBuf,{t...});
-    frntBuf.Send((::sockaddr*)&req.frnt,req.frntLn);
+    frntBuf.send((::sockaddr*)&req.frnt,req.frntLn);
   }
 
 public:

@@ -20,5 +20,5 @@ int main (){
                          ,"13579",SOCK_DGRAM);
   BufferStack<SameFormat> buf(res.getSock());
   testing::Marshal(buf,c);
-  buf.Send(res()->ai_addr,res()->ai_addrlen);
+  buf.send(res()->ai_addr,res()->ai_addrlen);
 }
