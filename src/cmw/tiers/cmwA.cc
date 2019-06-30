@@ -119,7 +119,7 @@ class cmwAmbassador{
 
   void reset (char const* context,char const* detail){
     syslogWrapper(LOG_ERR,"%s:%s",context,detail);
-    frntBuf.Reset();
+    frntBuf.reset();
     ::mddlFrnt::Marshal<false>(frntBuf,{context," ",detail});
     for(auto& r:pendingRequests)
       if(r.get())frntBuf.Send((::sockaddr*)&r->frnt,r->frntLn);
@@ -133,7 +133,7 @@ class cmwAmbassador{
   catch(::std::exception const& e){reset("sendData",e.what());return true;}
 
   template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
-    frntBuf.Reset();
+    frntBuf.reset();
     ::mddlFrnt::Marshal<res>(frntBuf,{t...});
     frntBuf.Send((::sockaddr*)&req.frnt,req.frntLn);
   }

@@ -610,7 +610,7 @@ public:
     savedSize=index;
   }
 
-  void Reset (){savedSize=index=0;}
+  void reset (){savedSize=index=0;}
   void Rollback (){index=savedSize;}
 
   void ReceiveFile (fileType d,int32_t sz){
@@ -622,7 +622,7 @@ public:
 
   bool flush (){
     int const bytes=sockWrite(sock_,buf,index);
-    if(bytes==index){Reset();return true;}
+    if(bytes==index){reset();return true;}
 
     index-=bytes;
     savedSize=index;
@@ -764,14 +764,14 @@ public:
       if(index+(index>>3)+400>compSize-compIndex)
         raise("Not enough room in compressed buf");
       compIndex+=::qlz_compress(buf,compBuf+compIndex,index,compress);
-      Reset();
+      reset();
       if(rc)rc=doFlush();
     }
     return rc;
   }
 
   void compressedReset (){
-    Reset();
+    reset();
     reset(compress);
     reset(decomp);
     compIndex=bytesRead=0;
