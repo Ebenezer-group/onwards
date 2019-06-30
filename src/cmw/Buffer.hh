@@ -519,7 +519,7 @@ public:
     return s;
   }
 
-  template<int N>void CopyString (char(&dest)[N]){
+  template<::std::size_t N>void CopyString (char(&dest)[N]){
     marshallingInt len(*this);
     if(len()+1>N)raise("ReceiveBuffer CopyString");
     Give(dest,len());

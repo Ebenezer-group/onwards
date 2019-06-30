@@ -156,9 +156,6 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
   if(accounts.empty())bail("An account number is required.");
   if(::strcmp("UDP-port-number",tok))bail("Expected UDP-port-number");
   fds[1].fd=frntBuf.sock_=udpServer(::strtok(nullptr,"\n \r"));
-#ifdef __linux__
-  if(setNonblocking(fds[1].fd)==-1)bail("setNonb:%d",errno);
-#endif
   fds[1].events=POLLIN;
 
   checkField("Login-attempts-interval-in-milliseconds");
