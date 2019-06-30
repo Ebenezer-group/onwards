@@ -620,7 +620,7 @@ public:
     index+=sz;
   }
 
-  bool Flush (){
+  bool flush (){
     int const bytes=sockWrite(sock_,buf,index);
     if(bytes==index){Reset();return true;}
 
@@ -630,7 +630,7 @@ public:
     return false;
   }
 
-  //UDP-friendly alternative to Flush
+  //UDP-friendly alternative to flush
   void Send (::sockaddr* addr=nullptr,::socklen_t len=0)
   {sockWrite(sock_,buf,index,addr,len);}
 
@@ -756,7 +756,7 @@ public:
     delete decomp;
   }
 
-  bool Flush (){
+  bool flush (){
     bool rc=true;
     if(compIndex>0)rc=doFlush();
 
@@ -770,7 +770,7 @@ public:
     return rc;
   }
 
-  void CompressedReset (){
+  void compressedReset (){
     Reset();
     reset(compress);
     reset(decomp);

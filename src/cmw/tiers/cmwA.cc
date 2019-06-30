@@ -110,7 +110,7 @@ class cmwAmbassador{
       pollWrapper(nullptr,0,loginPause);
     }
 
-    while(!cmwBuf.Flush());
+    while(!cmwBuf.flush());
     fds[0].events=POLLIN;
     while(!cmwBuf.GotPacket());
     if(!giveBool(cmwBuf))bail("Login:%s",giveStringView(cmwBuf).data());
@@ -125,11 +125,11 @@ class cmwAmbassador{
       if(r.get())frntBuf.Send((::sockaddr*)&r->frnt,r->frntLn);
     pendingRequests.clear();
     closeSocket(fds[0].fd);
-    cmwBuf.CompressedReset();
+    cmwBuf.compressedReset();
     login();
   }
 
-  bool sendData ()try{return cmwBuf.Flush();}
+  bool sendData ()try{return cmwBuf.flush();}
   catch(::std::exception const& e){reset("sendData",e.what());return true;}
 
   template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
