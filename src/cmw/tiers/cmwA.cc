@@ -99,7 +99,7 @@ class cmwAmbassador{
   int loginPause;
 
   void login (){
-    Marshal<messageID::login>(cmwBuf,accounts,cmwBuf.GetSize());
+    Marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
     while(-1==(fds[0].fd=cmwBuf.sock_=connectWrapper("1.tcp.ngrok.io",
 #ifdef CMW_ENDIAN_BIG
                       "28911"))){

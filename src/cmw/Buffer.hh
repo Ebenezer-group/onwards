@@ -635,8 +635,8 @@ public:
   {sockWrite(sock_,buf,index,addr,len);}
 
   unsigned char* data (){return buf;}
-  int GetIndex (){return index;}
-  int GetSize (){return bufsize;}
+  int getIndex (){return index;}
+  int getSize (){return bufsize;}
   template<class...T>void ReceiveMulti (char const*,T&&...);
 };
 
