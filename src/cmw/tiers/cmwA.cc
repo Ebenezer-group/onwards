@@ -22,7 +22,7 @@ bool marshalFile (char const* name,SendBuffer& buf){
   if(sb.st_mtime<=previousTime)return false;
   if('.'==name[0]||name[0]=='/')Receive(buf,::strrchr(name,'/')+1);
   else Receive(buf,name);
-  InsertNull(buf);
+  insertNull(buf);
 
   fileWrapper fl(name,O_RDONLY);
   buf.ReceiveFile(fl.d,sb.st_size);
@@ -63,7 +63,7 @@ struct cmwRequest{
     if(auto ind=buf.reserveBytes(1);
          !buf.Receive(ind,marshalFile(mdlFile,buf))){
       Receive(buf,mdlFile);
-      InsertNull(buf);
+      insertNull(buf);
     }
 
     int8_t updatedFiles=0;

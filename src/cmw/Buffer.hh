@@ -666,7 +666,7 @@ inline void Receive (SendBuffer& b,stringPlus lst){
   for(auto s:lst)b.Receive(s.data(),s.size());//Use low-level Receive
 }
 
-inline void InsertNull (SendBuffer& b){uint8_t z=0;b.Receive(z);}
+inline void insertNull (SendBuffer& b){uint8_t z=0;b.Receive(z);}
 
 template<class T>void ReceiveBlock (SendBuffer& b,T const& grp){
   int32_t count=grp.size();
