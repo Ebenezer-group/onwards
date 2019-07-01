@@ -5,10 +5,10 @@ namespace frntMddl{
 void Marshal (::cmw::SendBuffer& buf
          ,::cmw::marshallingInt const& a
          ,char const* b)try{
-  buf.ReserveBytes(4);
+  buf.reserveBytes(4);
   a.Marshal(buf);
   Receive(buf,b);
-  buf.FillInSize(::cmw::udp_packet_max);
-}catch(...){buf.Rollback();throw;}
+  buf.fillInSize(::cmw::udp_packet_max);
+}catch(...){buf.rollback();throw;}
 }
 #endif

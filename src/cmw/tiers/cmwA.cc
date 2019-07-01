@@ -60,14 +60,14 @@ struct cmwRequest{
 
   void Marshal (SendBuffer& buf)const{
     acctNbr.Marshal(buf);
-    if(auto ind=buf.ReserveBytes(1);
+    if(auto ind=buf.reserveBytes(1);
          !buf.Receive(ind,marshalFile(mdlFile,buf))){
       Receive(buf,mdlFile);
       InsertNull(buf);
     }
 
     int8_t updatedFiles=0;
-    auto const idx=buf.ReserveBytes(sizeof updatedFiles);
+    auto const idx=buf.reserveBytes(sizeof updatedFiles);
     FILE_wrapper f{mdlFile,"r"};
     while(auto line=f.fgets()){
       char const* tok=::strtok(line,"\n \r");

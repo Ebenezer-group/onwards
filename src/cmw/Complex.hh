@@ -36,7 +36,7 @@ int32_t MarshalSegments (C& c,SendBuffer& buf,uint8_t& segs){
 }
 
 template<class...Ts,class C>void MarshalCollection (C& c,SendBuffer& buf){
-  auto const ind=buf.ReserveBytes(1);
+  auto const ind=buf.reserveBytes(1);
   uint8_t segs=0;
   if(c.size()!=MarshalSegments<Ts...>(c,buf,segs))raise("MarshalCollection");
   buf.Receive(ind,segs);

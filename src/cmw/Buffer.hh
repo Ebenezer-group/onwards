@@ -590,7 +590,7 @@ public:
     Receive(&t,sizeof t);
   }
 
-  int ReserveBytes (int n){
+  int reserveBytes (int n){
     checkSpace(n);
     auto i=index;
     index+=n;
@@ -603,15 +603,15 @@ public:
     return t;
   }
 
-  void FillInSize (int32_t max){
+  void fillInSize (int32_t max){
     int32_t marshalledBytes=index-savedSize;
-    if(marshalledBytes>max)raise("FillInSize",max);
+    if(marshalledBytes>max)raise("fillInSize",max);
     Receive(savedSize,marshalledBytes);
     savedSize=index;
   }
 
   void reset (){savedSize=index=0;}
-  void Rollback (){index=savedSize;}
+  void rollback (){index=savedSize;}
 
   void ReceiveFile (fileType d,int32_t sz){
     Receive(sz);

@@ -61,10 +61,10 @@ derived3::derived3 (::cmw::ReceiveBuffer<R>& buf):
 namespace testing{
 inline void Marshal (::cmw::SendBuffer& buf
          ,::boost::base_collection<base> const& a)try{
-  buf.ReserveBytes(4);
+  buf.reserveBytes(4);
   ::cmw::MarshalCollection<base,derived1,derived3,derived2>(a,buf);
-  buf.FillInSize(10000);
-}catch(...){buf.Rollback();throw;}
+  buf.fillInSize(10000);
+}catch(...){buf.rollback();throw;}
 
 template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
          ,::boost::base_collection<base>& a){
