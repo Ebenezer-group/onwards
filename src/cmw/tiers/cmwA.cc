@@ -128,7 +128,7 @@ class cmwAmbassador{
   }
 
   bool sendData ()try{return cmwBuf.flush();}
-  catch(::std::exception const& e){reset("sendData",e.what());return true;}
+  catch(::std::exception& e){reset("sendData",e.what());return true;}
 
   template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
     frntBuf.reset();
@@ -169,7 +169,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
           Marshal<messageID::keepalive>(cmwBuf);
           fds[0].events|=POLLOUT;
           pendingRequests.push_back(nullptr);
-        }catch(::std::exception const& e){reset("Keepalive",e.what());}
+        }catch(::std::exception& e){reset("Keepalive",e.what());}
       else reset("Keepalive","No reply from CMW");
       continue;
     }
@@ -190,10 +190,10 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
           pendingRequests.erase(::std::begin(pendingRequests));
         }while(cmwBuf.NextMessage());
       }
-    }catch(fiasco const& e){
+    }catch(fiasco& e){
       reset("Fiasco",e.what());
       continue;
-    }catch(::std::exception const& e){
+    }catch(::std::exception& e){
       syslogWrapper(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
       if(pendingRequests.front().get())
@@ -212,7 +212,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
         gotAddr=true;
         ::new(req)cmwRequest(frntBuf);
         Marshal<messageID::generate>(cmwBuf,*req);
-      }catch(::std::exception const& e){
+      }catch(::std::exception& e){
         syslogWrapper(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)outFront<false>(*req,e.what());
         if(req)pendingRequests.pop_back();
@@ -227,5 +227,5 @@ int main (int ac,char** av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac!=2)bail("Usage: cmwA config-file");
   cmwAmbassador{av[1]};
-}catch(::std::exception const& e){bail("Oops:%s",e.what());
+}catch(::std::exception& e){bail("Oops:%s",e.what());
 }catch(...){bail("Unknown exception!");}

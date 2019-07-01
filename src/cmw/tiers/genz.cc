@@ -26,4 +26,4 @@ int main (int ac,char** av)try{
     }
   }
   leave("No reply received.  Is the cmwA running?\n");
-}catch(::std::exception const& e){leave("%s\n",e.what());}
+}catch(::std::exception& e){leave("%s\n",e.what());}

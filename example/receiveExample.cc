@@ -62,6 +62,6 @@ int main ()try{
     }
     ::std::cout<<::std::endl;
   }
-}catch(std::exception const& e){
+}catch(std::exception& e){
   ::std::cout<<"failure: "<<e.what()<<'\n';
 }
