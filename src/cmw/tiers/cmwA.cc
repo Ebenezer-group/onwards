@@ -19,16 +19,14 @@ using namespace ::cmw;
 bool marshalFile (char const* name,SendBuffer& buf){
   struct ::stat sb;
   if(::stat(name,&sb)<0)raise("stat",name,errno);
-  if(sb.st_mtime>previousTime){
-    if('.'==name[0]||name[0]=='/')Receive(buf,::strrchr(name,'/')+1);
-    else Receive(buf,name);
-    InsertNull(buf);
+  if(sb.st_mtime<=previousTime)return false;
+  if('.'==name[0]||name[0]=='/')Receive(buf,::strrchr(name,'/')+1);
+  else Receive(buf,name);
+  InsertNull(buf);
 
-    fileWrapper fl(name,O_RDONLY);
-    buf.ReceiveFile(fl.d,sb.st_size);
-    return true;
-  }
-  return false;
+  fileWrapper fl(name,O_RDONLY);
+  buf.ReceiveFile(fl.d,sb.st_size);
+  return true;
 }
 
 struct cmwRequest{
