@@ -12,7 +12,7 @@ int32_t Mar (::cmw::SendBuffer& buf
          ,::std::vector<cmwAccount> const& a
          ,::int32_t b){
   receiveGroup(buf,a);
-  buf.Receive(b);
+  buf.receive(b);
   return 10000;
 }
 
