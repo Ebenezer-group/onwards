@@ -2,7 +2,7 @@
 #ifndef zz_testing_hh
 #define zz_testing_hh 1
 inline void
-base::MarshalMembers (::cmw::SendBuffer& buf)const{
+base::marshalMembers (::cmw::SendBuffer& buf)const{
 }
 
 template<class R>
@@ -26,8 +26,8 @@ void baseSwitch (C& c,::cmw::ReceiveBuffer<R>& buf){
 }
 
 inline void
-derived1::MarshalMembers (::cmw::SendBuffer& buf)const{
-  base::MarshalMembers(buf);
+derived1::marshalMembers (::cmw::SendBuffer& buf)const{
+  base::marshalMembers(buf);
   buf.Receive(a);
 }
 
@@ -37,8 +37,8 @@ derived1::derived1 (::cmw::ReceiveBuffer<R>& buf):
 {}
 
 inline void
-derived2::MarshalMembers (::cmw::SendBuffer& buf)const{
-  base::MarshalMembers(buf);
+derived2::marshalMembers (::cmw::SendBuffer& buf)const{
+  base::marshalMembers(buf);
   buf.Receive(b);
 }
 
@@ -48,8 +48,8 @@ derived2::derived2 (::cmw::ReceiveBuffer<R>& buf):
 {}
 
 inline void
-derived3::MarshalMembers (::cmw::SendBuffer& buf)const{
-  derived1::MarshalMembers(buf);
+derived3::marshalMembers (::cmw::SendBuffer& buf)const{
+  derived1::marshalMembers(buf);
   buf.Receive(c);
 }
 
@@ -59,10 +59,10 @@ derived3::derived3 (::cmw::ReceiveBuffer<R>& buf):
 {}
 
 namespace testing{
-inline void Marshal (::cmw::SendBuffer& buf
+inline void marshal (::cmw::SendBuffer& buf
          ,::boost::base_collection<base> const& a)try{
   buf.reserveBytes(4);
-  ::cmw::MarshalCollection<base,derived1,derived3,derived2>(a,buf);
+  ::cmw::marshalCollection<base,derived1,derived3,derived2>(a,buf);
   buf.fillInSize(10000);
 }catch(...){buf.rollback();throw;}
 

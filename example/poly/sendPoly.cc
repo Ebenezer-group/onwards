@@ -19,6 +19,6 @@ int main (){
 #endif
                          ,"13579",SOCK_DGRAM);
   BufferStack<SameFormat> buf(res.getSock());
-  testing::Marshal(buf,c);
+  testing::marshal(buf,c);
   buf.send(res()->ai_addr,res()->ai_addrlen);
 }

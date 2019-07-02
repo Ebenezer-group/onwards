@@ -18,10 +18,10 @@ template<class T,class B>
   return ::std::complex<T>(rl,Give<T>(buf));
 }
 
-template<class C>int32_t MarshalSegments (C&,SendBuffer&,uint8_t){return 0;}
+template<class C>int32_t marshalSegments (C&,SendBuffer&,uint8_t){return 0;}
 
 template<class T,class... Ts,class C>
-int32_t MarshalSegments (C& c,SendBuffer& buf,uint8_t& segs){
+int32_t marshalSegments (C& c,SendBuffer& buf,uint8_t& segs){
   int32_t n;
   if(c.template is_registered<T>()){
     n=c.template size<T>();
@@ -29,16 +29,16 @@ int32_t MarshalSegments (C& c,SendBuffer& buf,uint8_t& segs){
       ++segs;
       buf.Receive(T::typeNum);
       buf.Receive(n);
-      for(T const& t:c.template segment<T>()){t.Marshal(buf);}
+      for(T const& t:c.template segment<T>()){t.marshal(buf);}
     }
   }else n=0;
-  return n+MarshalSegments<Ts...>(c,buf,segs);
+  return n+marshalSegments<Ts...>(c,buf,segs);
 }
 
-template<class...Ts,class C>void MarshalCollection (C& c,SendBuffer& buf){
+template<class...Ts,class C>void marshalCollection (C& c,SendBuffer& buf){
   auto const ind=buf.reserveBytes(1);
   uint8_t segs=0;
-  if(c.size()!=MarshalSegments<Ts...>(c,buf,segs))raise("MarshalCollection");
+  if(c.size()!=marshalSegments<Ts...>(c,buf,segs))raise("marshalCollection");
   buf.Receive(ind,segs);
 }
 

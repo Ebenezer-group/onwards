@@ -247,7 +247,7 @@ public:
 
   void operator= (int32_t r){val=r;}
   int32_t operator() ()const{return val;}
-  void Marshal (SendBuffer&)const;
+  void marshal (SendBuffer&)const;
 };
 inline bool operator== (marshallingInt l,marshallingInt r){return l()==r();}
 inline bool operator== (marshallingInt l,int32_t r){return l()==r;}
@@ -644,25 +644,25 @@ inline void Receive (SendBuffer&b,bool bl){b.Receive(static_cast<unsigned char>(
 
 inline void Receive (SendBuffer& b,char const* s){
   marshallingInt len(::strlen(s));
-  len.Marshal(b);
+  len.marshal(b);
   b.Receive(s,len());
 }
 
 inline void Receive (SendBuffer& b,::std::string const& s){
   marshallingInt len(s.size());
-  len.Marshal(b);
+  len.marshal(b);
   b.Receive(s.data(),len());
 }
 
 inline void Receive (SendBuffer& b,::std::string_view const& s){
-  marshallingInt(s.size()).Marshal(b);
+  marshallingInt(s.size()).marshal(b);
   b.Receive(s.data(),s.size());
 }
 using stringPlus=::std::initializer_list<::std::string_view>;
 inline void Receive (SendBuffer& b,stringPlus lst){
   int32_t t=0;
   for(auto s:lst)t+=s.size();
-  marshallingInt{t}.Marshal(b);
+  marshallingInt{t}.marshal(b);
   for(auto s:lst)b.Receive(s.data(),s.size());//Use low-level Receive
 }
 
@@ -677,15 +677,15 @@ template<class T>void receiveBlock (SendBuffer& b,T const& grp){
 
 template<class T>void receiveGroup (SendBuffer& b,T const& grp){
   b.Receive(static_cast<int32_t>(grp.size()));
-  for(auto const& e:grp)e.Marshal(b);
+  for(auto const& e:grp)e.marshal(b);
 }
 template<class T>void receiveGroupPointer (SendBuffer& b,T const& grp){
   b.Receive(static_cast<int32_t>(grp.size()));
-  for(auto p:grp)p->Marshal(b);
+  for(auto p:grp)p->marshal(b);
 }
 
 //Encode integer into variable-length format.
-inline void marshallingInt::Marshal (SendBuffer& b)const{
+inline void marshallingInt::marshal (SendBuffer& b)const{
   uint32_t n=val;
   for(;;){
     uint8_t a=n&127;
@@ -831,8 +831,8 @@ template<int N>class fixedString{
     str[len()]='\0';
   }
 
-  void Marshal (SendBuffer& b)const{
-    len.Marshal(b);
+  void marshal (SendBuffer& b)const{
+    len.marshal(b);
     b.Receive(&str[0],len());
   }
 

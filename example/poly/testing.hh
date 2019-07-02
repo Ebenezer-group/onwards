@@ -10,8 +10,8 @@ struct base{
   template<class R>
   explicit base (::cmw::ReceiveBuffer<R>&);
 
-  void MarshalMembers (::cmw::SendBuffer&)const;
-  void Marshal (::cmw::SendBuffer& b)const{MarshalMembers(b);}
+  void marshalMembers (::cmw::SendBuffer&)const;
+  void marshal (::cmw::SendBuffer& b)const{marshalMembers(b);}
   static uint8_t const typeNum=0;
 };
 
@@ -23,8 +23,8 @@ public:
   template<class R>
   explicit derived1 (::cmw::ReceiveBuffer<R>&);
 
-  void MarshalMembers (::cmw::SendBuffer&)const;
-  void Marshal (::cmw::SendBuffer& b)const{MarshalMembers(b);}
+  void marshalMembers (::cmw::SendBuffer&)const;
+  void marshal (::cmw::SendBuffer& b)const{marshalMembers(b);}
   static uint8_t const typeNum=1;
 };
 
@@ -36,8 +36,8 @@ public:
   template<class R>
   explicit derived2 (::cmw::ReceiveBuffer<R>&);
 
-  void MarshalMembers (::cmw::SendBuffer&)const;
-  void Marshal (::cmw::SendBuffer& b)const{MarshalMembers(b);}
+  void marshalMembers (::cmw::SendBuffer&)const;
+  void marshal (::cmw::SendBuffer& b)const{marshalMembers(b);}
   static uint8_t const typeNum=2;
 };
 
@@ -49,8 +49,8 @@ public:
   template<class R>
   explicit derived3 (::cmw::ReceiveBuffer<R>&);
 
-  void MarshalMembers (::cmw::SendBuffer&)const;
-  void Marshal (::cmw::SendBuffer& b)const{MarshalMembers(b);}
+  void marshalMembers (::cmw::SendBuffer&)const;
+  void marshal (::cmw::SendBuffer& b)const{marshalMembers(b);}
   static uint8_t const typeNum=3;
 };
 #endif

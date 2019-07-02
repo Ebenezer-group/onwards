@@ -58,8 +58,8 @@ struct cmwRequest{
     }
   }
 
-  void Marshal (SendBuffer& buf)const{
-    acctNbr.Marshal(buf);
+  void marshal (SendBuffer& buf)const{
+    acctNbr.marshal(buf);
     if(auto ind=buf.reserveBytes(1);
          !buf.Receive(ind,marshalFile(mdlFile,buf))){
       Receive(buf,mdlFile);
@@ -97,7 +97,7 @@ class cmwAmbassador{
   int loginPause;
 
   void login (){
-    Marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
+    marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
     while(-1==(fds[0].fd=cmwBuf.sock_=connectWrapper("1.tcp.ngrok.io",
 #ifdef CMW_ENDIAN_BIG
                       "28911"))){
@@ -118,7 +118,7 @@ class cmwAmbassador{
   void reset (char const* context,char const* detail){
     syslogWrapper(LOG_ERR,"%s:%s",context,detail);
     frntBuf.reset();
-    ::mddlFrnt::Marshal<false>(frntBuf,{context," ",detail});
+    ::mddlFrnt::marshal<false>(frntBuf,{context," ",detail});
     for(auto& r:pendingRequests)
       if(r.get())frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
     pendingRequests.clear();
@@ -132,7 +132,7 @@ class cmwAmbassador{
 
   template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
     frntBuf.reset();
-    ::mddlFrnt::Marshal<res>(frntBuf,{t...});
+    ::mddlFrnt::marshal<res>(frntBuf,{t...});
     frntBuf.send((::sockaddr*)&req.frnt,req.frntLn);
   }
 
@@ -166,7 +166,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
     if(0==pollWrapper(fds,2,keepaliveInterval)){
       if(pendingRequests.empty())
         try{
-          Marshal<messageID::keepalive>(cmwBuf);
+          marshal<messageID::keepalive>(cmwBuf);
           fds[0].events|=POLLOUT;
           pendingRequests.push_back(nullptr);
         }catch(::std::exception& e){reset("Keepalive",e.what());}
@@ -211,7 +211,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
         frntBuf.GetPacket((::sockaddr*)&req->frnt,&req->frntLn);
         gotAddr=true;
         ::new(req)cmwRequest(frntBuf);
-        Marshal<messageID::generate>(cmwBuf,*req);
+        marshal<messageID::generate>(cmwBuf,*req);
       }catch(::std::exception& e){
         syslogWrapper(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)outFront<false>(*req,e.what());

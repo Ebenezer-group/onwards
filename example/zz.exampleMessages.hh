@@ -67,7 +67,7 @@ template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
 }
 
 template<messageID id,class...T>
-void Marshal (::cmw::SendBuffer& buf,T&&...t)try{
+void marshal (::cmw::SendBuffer& buf,T&&...t)try{
   buf.reserveBytes(4);
   buf.Receive(id);
   buf.fillInSize(Mar(buf,t...));

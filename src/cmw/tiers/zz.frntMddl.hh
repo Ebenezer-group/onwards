@@ -2,11 +2,11 @@
 #ifndef zz_frntMddl_hh
 #define zz_frntMddl_hh 1
 namespace frntMddl{
-void Marshal (::cmw::SendBuffer& buf
+void marshal (::cmw::SendBuffer& buf
          ,::cmw::marshallingInt const& a
          ,char const* b)try{
   buf.reserveBytes(4);
-  a.Marshal(buf);
+  a.marshal(buf);
   Receive(buf,b);
   buf.fillInSize(::cmw::udp_packet_max);
 }catch(...){buf.rollback();throw;}

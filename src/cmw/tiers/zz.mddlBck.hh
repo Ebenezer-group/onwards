@@ -2,9 +2,9 @@
 #ifndef zz_mddlBck_hh
 #define zz_mddlBck_hh 1
 inline void
-cmwAccount::MarshalMembers (::cmw::SendBuffer& buf)const{
-  number.Marshal(buf);
-  password.Marshal(buf);
+cmwAccount::marshalMembers (::cmw::SendBuffer& buf)const{
+  number.marshal(buf);
+  password.marshal(buf);
 }
 
 namespace mddlBck{
@@ -18,7 +18,7 @@ int32_t Mar (::cmw::SendBuffer& buf
 
 int32_t Mar (::cmw::SendBuffer& buf
          ,cmwRequest const& a){
-  a.Marshal(buf);
+  a.marshal(buf);
   return 700000;
 }
 
@@ -27,7 +27,7 @@ int32_t Mar (::cmw::SendBuffer& buf){
 }
 
 template<messageID id,class...T>
-void Marshal (::cmw::SendBuffer& buf,T&&...t)try{
+void marshal (::cmw::SendBuffer& buf,T&&...t)try{
   buf.reserveBytes(4);
   buf.Receive(static_cast<uint8_t>(id));
   buf.fillInSize(Mar(buf,t...));
@@ -36,7 +36,7 @@ void Marshal (::cmw::SendBuffer& buf,T&&...t)try{
 
 namespace mddlFrnt{
 template<bool res>
-void Marshal (::cmw::SendBuffer& buf
+void marshal (::cmw::SendBuffer& buf
          ,::cmw::stringPlus const& a={}
          ,::int8_t b={})try{
   buf.reserveBytes(4);
