@@ -6,7 +6,7 @@ int32_t Mar (::cmw::SendBuffer& buf
          ,::std::vector<int32_t> const& a
          ,::std::string const& b){
   receiveBlock(buf,a);
-  Receive(buf,b);
+  receive(buf,b);
   return 10000;
 }
 
@@ -22,9 +22,9 @@ template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
 
 int32_t Mar (::cmw::SendBuffer& buf
          ,::std::set<int32_t> const& a){
-  buf.Receive(static_cast<int32_t>(a.size()));
+  buf.receive(static_cast<int32_t>(a.size()));
   for(auto const& e1:a){
-    buf.Receive(e1);
+    buf.receive(e1);
   }
   return 10000;
 }
@@ -39,7 +39,7 @@ template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
 
 int32_t Mar (::cmw::SendBuffer& buf
          ,::std::array<::std::array<float, 2>, 3> const& a){
-  buf.Receive(&a,sizeof a);
+  buf.receive(&a,sizeof a);
   return 10000;
 }
 
@@ -50,9 +50,9 @@ template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
 
 int32_t Mar (::cmw::SendBuffer& buf
          ,::plf::colony<::std::string> const& a){
-  buf.Receive(static_cast<int32_t>(a.size()));
+  buf.receive(static_cast<int32_t>(a.size()));
   for(auto const& e3:a){
-    Receive(buf,e3);
+    receive(buf,e3);
   }
   return 10000;
 }
@@ -69,7 +69,7 @@ template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
 template<messageID id,class...T>
 void marshal (::cmw::SendBuffer& buf,T&&...t)try{
   buf.reserveBytes(4);
-  buf.Receive(id);
+  buf.receive(id);
   buf.fillInSize(Mar(buf,t...));
 }catch(...){buf.rollback();throw;}
 }

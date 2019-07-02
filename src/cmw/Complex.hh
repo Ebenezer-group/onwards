@@ -6,8 +6,8 @@
 namespace cmw{
 template<class T,class B>
 void complexMarshal (B& buf,::std::complex<T> const& c){
-  buf.Receive(c.real());
-  buf.Receive(c.imag());
+  buf.receive(c.real());
+  buf.receive(c.imag());
 }
 
 template<class T,class B>
@@ -27,8 +27,8 @@ int32_t marshalSegments (C& c,SendBuffer& buf,uint8_t& segs){
     n=c.template size<T>();
     if(n>0){
       ++segs;
-      buf.Receive(T::typeNum);
-      buf.Receive(n);
+      buf.receive(T::typeNum);
+      buf.receive(n);
       for(T const& t:c.template segment<T>()){t.marshal(buf);}
     }
   }else n=0;
@@ -39,7 +39,7 @@ template<class...Ts,class C>void marshalCollection (C& c,SendBuffer& buf){
   auto const ind=buf.reserveBytes(1);
   uint8_t segs=0;
   if(c.size()!=marshalSegments<Ts...>(c,buf,segs))raise("marshalCollection");
-  buf.Receive(ind,segs);
+  buf.receive(ind,segs);
 }
 
 template<class T,class C,class R>
@@ -59,8 +59,8 @@ void BuildCollection (C& c,ReceiveBuffer<R>& buf,F f){
 template<class B, class T>
 void valarrayMarshal (B& buf,::std::valarray<T> const& va){
   int32_t count=va.size();
-  buf.Receive(count);
-  buf->Receive(&va[0],count*sizeof(T));
+  buf.receive(count);
+  buf->receive(&va[0],count*sizeof(T));
 }
 
 template<class B,class T>

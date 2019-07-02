@@ -29,7 +29,7 @@ int32_t Mar (::cmw::SendBuffer& buf){
 template<messageID id,class...T>
 void marshal (::cmw::SendBuffer& buf,T&&...t)try{
   buf.reserveBytes(4);
-  buf.Receive(static_cast<uint8_t>(id));
+  buf.receive(static_cast<uint8_t>(id));
   buf.fillInSize(Mar(buf,t...));
 }catch(...){buf.rollback();throw;}
 }
@@ -40,10 +40,10 @@ void marshal (::cmw::SendBuffer& buf
          ,::cmw::stringPlus const& a={}
          ,::int8_t b={})try{
   buf.reserveBytes(4);
-  Receive(buf,res);
+  receive(buf,res);
   if(!res){
-    Receive(buf,a);
-    buf.Receive(b);
+    receive(buf,a);
+    buf.receive(b);
   }
   buf.fillInSize(udp_packet_max);
 }catch(...){buf.rollback();throw;}

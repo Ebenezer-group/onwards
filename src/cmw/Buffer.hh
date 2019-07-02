@@ -579,15 +579,15 @@ public:
     if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
   }
 
-  void Receive (void const* data,int size){
+  void receive (void const* data,int size){
     checkSpace(size);
     ::memcpy(buf+index,data,size);
     index+=size;
   }
 
-  template<class T>void Receive (T t){
+  template<class T>void receive (T t){
     static_assert(::std::is_arithmetic<T>::value||::std::is_enum<T>::value,"");
-    Receive(&t,sizeof t);
+    receive(&t,sizeof t);
   }
 
   int reserveBytes (int n){
@@ -597,7 +597,7 @@ public:
     return i;
   }
 
-  template<class T>T Receive (int where,T t){
+  template<class T>T receive (int where,T t){
     static_assert(::std::is_arithmetic<T>::value,"");
     ::memcpy(buf+where,&t,sizeof t);
     return t;
@@ -606,7 +606,7 @@ public:
   void fillInSize (int32_t max){
     int32_t marshalledBytes=index-savedSize;
     if(marshalledBytes>max)raise("fillInSize",max);
-    Receive(savedSize,marshalledBytes);
+    receive(savedSize,marshalledBytes);
     savedSize=index;
   }
 
@@ -614,7 +614,7 @@ public:
   void rollback (){index=savedSize;}
 
   void receiveFile (fileType d,int32_t sz){
-    Receive(sz);
+    receive(sz);
     checkSpace(sz);
     if(Read(d,buf+index,sz)!=sz)raise("SendBuffer receiveFile");
     index+=sz;
@@ -637,50 +637,50 @@ public:
   unsigned char* data (){return buf;}
   int getIndex (){return index;}
   int getSize (){return bufsize;}
-  template<class...T>void ReceiveMulti (char const*,T&&...);
+  template<class...T>void receiveMulti (char const*,T&&...);
 };
 
-inline void Receive (SendBuffer&b,bool bl){b.Receive(static_cast<unsigned char>(bl));}
+inline void receive (SendBuffer&b,bool bl){b.receive(static_cast<unsigned char>(bl));}
 
-inline void Receive (SendBuffer& b,char const* s){
+inline void receive (SendBuffer& b,char const* s){
   marshallingInt len(::strlen(s));
   len.marshal(b);
-  b.Receive(s,len());
+  b.receive(s,len());
 }
 
-inline void Receive (SendBuffer& b,::std::string const& s){
+inline void receive (SendBuffer& b,::std::string const& s){
   marshallingInt len(s.size());
   len.marshal(b);
-  b.Receive(s.data(),len());
+  b.receive(s.data(),len());
 }
 
-inline void Receive (SendBuffer& b,::std::string_view const& s){
+inline void receive (SendBuffer& b,::std::string_view const& s){
   marshallingInt(s.size()).marshal(b);
-  b.Receive(s.data(),s.size());
+  b.receive(s.data(),s.size());
 }
 using stringPlus=::std::initializer_list<::std::string_view>;
-inline void Receive (SendBuffer& b,stringPlus lst){
+inline void receive (SendBuffer& b,stringPlus lst){
   int32_t t=0;
   for(auto s:lst)t+=s.size();
   marshallingInt{t}.marshal(b);
-  for(auto s:lst)b.Receive(s.data(),s.size());//Use low-level Receive
+  for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
 }
 
-inline void insertNull (SendBuffer& b){uint8_t z=0;b.Receive(z);}
+inline void insertNull (SendBuffer& b){uint8_t z=0;b.receive(z);}
 
 template<class T>void receiveBlock (SendBuffer& b,T const& grp){
   int32_t count=grp.size();
-  b.Receive(count);
+  b.receive(count);
   if(count>0)
-    b.Receive(&*grp.begin(),count*sizeof(typename T::value_type));
+    b.receive(&*grp.begin(),count*sizeof(typename T::value_type));
 }
 
 template<class T>void receiveGroup (SendBuffer& b,T const& grp){
-  b.Receive(static_cast<int32_t>(grp.size()));
+  b.receive(static_cast<int32_t>(grp.size()));
   for(auto const& e:grp)e.marshal(b);
 }
 template<class T>void receiveGroupPointer (SendBuffer& b,T const& grp){
-  b.Receive(static_cast<int32_t>(grp.size()));
+  b.receive(static_cast<int32_t>(grp.size()));
   for(auto p:grp)p->marshal(b);
 }
 
@@ -690,8 +690,8 @@ inline void marshallingInt::marshal (SendBuffer& b)const{
   for(;;){
     uint8_t a=n&127;
     n>>=7;
-    if(0==n){b.Receive(a);return;}
-    b.Receive(a|=128);
+    if(0==n){b.receive(a);return;}
+    b.receive(a|=128);
     --n;
   }
 }
@@ -833,7 +833,7 @@ template<int N>class fixedString{
 
   void marshal (SendBuffer& b)const{
     len.marshal(b);
-    b.Receive(&str[0],len());
+    b.receive(&str[0],len());
   }
 
   int bytesAvailable (){return N-(len()+1);}

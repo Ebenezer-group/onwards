@@ -7,7 +7,7 @@ void marshal (::cmw::SendBuffer& buf
          ,char const* b)try{
   buf.reserveBytes(4);
   a.marshal(buf);
-  Receive(buf,b);
+  receive(buf,b);
   buf.fillInSize(::cmw::udp_packet_max);
 }catch(...){buf.rollback();throw;}
 }
