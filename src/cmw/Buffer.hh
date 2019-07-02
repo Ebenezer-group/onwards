@@ -613,10 +613,10 @@ public:
   void reset (){savedSize=index=0;}
   void rollback (){index=savedSize;}
 
-  void ReceiveFile (fileType d,int32_t sz){
+  void receiveFile (fileType d,int32_t sz){
     Receive(sz);
     checkSpace(sz);
-    if(Read(d,buf+index,sz)!=sz)raise("SendBuffer ReceiveFile");
+    if(Read(d,buf+index,sz)!=sz)raise("SendBuffer receiveFile");
     index+=sz;
   }
 
@@ -668,18 +668,18 @@ inline void Receive (SendBuffer& b,stringPlus lst){
 
 inline void insertNull (SendBuffer& b){uint8_t z=0;b.Receive(z);}
 
-template<class T>void ReceiveBlock (SendBuffer& b,T const& grp){
+template<class T>void receiveBlock (SendBuffer& b,T const& grp){
   int32_t count=grp.size();
   b.Receive(count);
   if(count>0)
     b.Receive(&*grp.begin(),count*sizeof(typename T::value_type));
 }
 
-template<class T>void ReceiveGroup (SendBuffer& b,T const& grp){
+template<class T>void receiveGroup (SendBuffer& b,T const& grp){
   b.Receive(static_cast<int32_t>(grp.size()));
   for(auto const& e:grp)e.Marshal(b);
 }
-template<class T>void ReceiveGroupPointer (SendBuffer& b,T const& grp){
+template<class T>void receiveGroupPointer (SendBuffer& b,T const& grp){
   b.Receive(static_cast<int32_t>(grp.size()));
   for(auto p:grp)p->Marshal(b);
 }

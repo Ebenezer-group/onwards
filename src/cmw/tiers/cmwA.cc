@@ -25,7 +25,7 @@ bool marshalFile (char const* name,SendBuffer& buf){
   insertNull(buf);
 
   fileWrapper fl(name,O_RDONLY);
-  buf.ReceiveFile(fl.d,sb.st_size);
+  buf.receiveFile(fl.d,sb.st_size);
   return true;
 }
 

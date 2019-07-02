@@ -5,7 +5,7 @@ namespace exampleMessages{
 int32_t Mar (::cmw::SendBuffer& buf
          ,::std::vector<int32_t> const& a
          ,::std::string const& b){
-  ReceiveBlock(buf,a);
+  receiveBlock(buf,a);
   Receive(buf,b);
   return 10000;
 }
