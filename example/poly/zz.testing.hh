@@ -28,7 +28,7 @@ void baseSwitch (C& c,::cmw::ReceiveBuffer<R>& buf){
 inline void
 derived1::marshalMembers (::cmw::SendBuffer& buf)const{
   base::marshalMembers(buf);
-  buf.Receive(a);
+  buf.receive(a);
 }
 
 template<class R>
@@ -39,7 +39,7 @@ derived1::derived1 (::cmw::ReceiveBuffer<R>& buf):
 inline void
 derived2::marshalMembers (::cmw::SendBuffer& buf)const{
   base::marshalMembers(buf);
-  buf.Receive(b);
+  buf.receive(b);
 }
 
 template<class R>
@@ -50,7 +50,7 @@ derived2::derived2 (::cmw::ReceiveBuffer<R>& buf):
 inline void
 derived3::marshalMembers (::cmw::SendBuffer& buf)const{
   derived1::marshalMembers(buf);
-  buf.Receive(c);
+  buf.receive(c);
 }
 
 template<class R>
