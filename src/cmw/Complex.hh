@@ -13,9 +13,9 @@ void complexMarshal (B& buf,::std::complex<T> const& c){
 template<class T,class B>
 ::std::complex<T> complexGive (B& buf){
   //The following has an order of evaluation problem:
-  //return ::std::complex<T>(Give<T>(buf),Give<T>(buf));
-  T rl=Give<T>(buf);
-  return ::std::complex<T>(rl,Give<T>(buf));
+  //return ::std::complex<T>(give<T>(buf),give<T>(buf));
+  T rl=give<T>(buf);
+  return ::std::complex<T>(rl,give<T>(buf));
 }
 
 template<class C>int32_t marshalSegments (C&,SendBuffer&,uint8_t){return 0;}
@@ -44,14 +44,14 @@ template<class...Ts,class C>void marshalCollection (C& c,SendBuffer& buf){
 
 template<class T,class C,class R>
 void BuildSegment (C& c,ReceiveBuffer<R>& buf){
-  int32_t n=Give<uint32_t>(buf);
+  int32_t n=give<uint32_t>(buf);
   c.template reserve<T>(n);
   for(;n>0;--n){c.template emplace<T>(buf);}
 }
 
 template<class C,class R,class F>
 void BuildCollection (C& c,ReceiveBuffer<R>& buf,F f){
-  for(auto segs=Give<uint8_t>(buf);segs>0;--segs){f(c,buf);}
+  for(auto segs=give<uint8_t>(buf);segs>0;--segs){f(c,buf);}
 }
 
 #ifdef CMW_VALARRAY_MARSHALLING
@@ -65,7 +65,7 @@ void valarrayMarshal (B& buf,::std::valarray<T> const& va){
 
 template<class B,class T>
 void valarrayReceive (B& buf,::std::valarray<T>& va){
-  int32_t count=Give<uint32_t>(buf);
+  int32_t count=give<uint32_t>(buf);
   va.resize(count);
   buf.Give(&va,count*sizeof(T));
 }

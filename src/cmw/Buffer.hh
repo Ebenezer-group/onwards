@@ -237,7 +237,7 @@ public:
   explicit marshallingInt (ReceiveBuffer<R>& b):val(0){
     uint32_t shift=1;
     for(;;){
-      uint8_t a=b.GiveOne();
+      uint8_t a=b.giveOne();
       val+=(a&127)*shift;
       if((a&128)==0)return;
       shift<<=7;
@@ -330,32 +330,32 @@ struct SameFormat{
 struct LeastSignificantFirst{
   template<template<class> class B>
   void Read (B<LeastSignificantFirst>& buf,uint8_t& val)
-  {val=buf.GiveOne();}
+  {val=buf.giveOne();}
 
   template<template<class> class B>
   void Read (B<LeastSignificantFirst>& buf,uint16_t& val){
-    val=buf.GiveOne();
-    val|=buf.GiveOne()<<8;
+    val=buf.giveOne();
+    val|=buf.giveOne()<<8;
   }
 
   template<template<class> class B>
   void Read (B<LeastSignificantFirst>& buf,uint32_t& val){
-    val=buf.GiveOne();
-    val|=buf.GiveOne()<<8;
-    val|=buf.GiveOne()<<16;
-    val|=buf.GiveOne()<<24;
+    val=buf.giveOne();
+    val|=buf.giveOne()<<8;
+    val|=buf.giveOne()<<16;
+    val|=buf.giveOne()<<24;
   }
 
   template<template<class> class B>
   void Read (B<LeastSignificantFirst>& buf,uint64_t& val){
-    val=buf.GiveOne();
-    val|=buf.GiveOne()<<8;
-    val|=buf.GiveOne()<<16;
-    val|=buf.GiveOne()<<24;
-    val|=(uint64_t)buf.GiveOne()<<32;
-    val|=(uint64_t)buf.GiveOne()<<40;
-    val|=(uint64_t)buf.GiveOne()<<48;
-    val|=(uint64_t)buf.GiveOne()<<56;
+    val=buf.giveOne();
+    val|=buf.giveOne()<<8;
+    val|=buf.giveOne()<<16;
+    val|=buf.giveOne()<<24;
+    val|=(uint64_t)buf.giveOne()<<32;
+    val|=(uint64_t)buf.giveOne()<<40;
+    val|=(uint64_t)buf.giveOne()<<48;
+    val|=(uint64_t)buf.giveOne()<<56;
   }
 
   template<template<class> class B>
@@ -392,32 +392,32 @@ struct LeastSignificantFirst{
 struct MostSignificantFirst{
   template<template<class> class B>
   void Read (B<MostSignificantFirst>& buf,uint8_t& val)
-  {val=buf.GiveOne();}
+  {val=buf.giveOne();}
 
   template<template<class> class B>
   void Read (B<MostSignificantFirst>& buf,uint16_t& val){
-    val=buf.GiveOne()<<8;
-    val|=buf.GiveOne();
+    val=buf.giveOne()<<8;
+    val|=buf.giveOne();
   }
 
   template<template<class> class B>
   void Read (B<MostSignificantFirst>& buf,uint32_t& val){
-    val=buf.GiveOne()<<24;
-    val|=buf.GiveOne()<<16;
-    val|=buf.GiveOne()<<8;
-    val|=buf.GiveOne();
+    val=buf.giveOne()<<24;
+    val|=buf.giveOne()<<16;
+    val|=buf.giveOne()<<8;
+    val|=buf.giveOne();
   }
 
   template<template<class> class B>
   void Read (B<MostSignificantFirst>& buf,uint64_t& val){
-    val=(uint64_t)buf.GiveOne()<<56;
-    val|=(uint64_t)buf.GiveOne()<<48;
-    val|=(uint64_t)buf.GiveOne()<<40;
-    val|=(uint64_t)buf.GiveOne()<<32;
-    val|=buf.GiveOne()<<24;
-    val|=buf.GiveOne()<<16;
-    val|=buf.GiveOne()<<8;
-    val|=buf.GiveOne();
+    val=(uint64_t)buf.giveOne()<<56;
+    val|=(uint64_t)buf.giveOne()<<48;
+    val|=(uint64_t)buf.giveOne()<<40;
+    val|=(uint64_t)buf.giveOne()<<32;
+    val|=buf.giveOne()<<24;
+    val|=buf.giveOne()<<16;
+    val|=buf.giveOne()<<8;
+    val|=buf.giveOne();
   }
 
   template<template<class> class B>
@@ -471,7 +471,7 @@ public:
     rindex+=len;
   }
 
-  char GiveOne (){
+  char giveOne (){
     checkData(1);
     return rbuf[subTotal+rindex++];
   }
@@ -542,7 +542,7 @@ template<class T,class R>
 T give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
 
 template<class R>bool giveBool (ReceiveBuffer<R>& buf){
-  switch(buf.GiveOne()){
+  switch(buf.giveOne()){
     case 0:return false;
     case 1:return true;
     default:raise("giveBool");
@@ -558,7 +558,7 @@ template<class R>auto giveStringView (ReceiveBuffer<R>& buf){
 }
 template<class R>auto giveStringView_plus (ReceiveBuffer<R>& buf){
   auto v=giveStringView(buf);
-  buf.GiveOne();
+  buf.giveOne();
   return v;
 }
 
