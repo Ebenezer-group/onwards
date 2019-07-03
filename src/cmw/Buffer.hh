@@ -498,7 +498,7 @@ public:
     return NextMessage();
   }
 
-  template<class T>void GiveBlock (T* data,unsigned int elements)
+  template<class T>void giveBlock (T* data,unsigned int elements)
   {reader.ReadBlock(*this,data,elements);}
 
   void GiveFile (fileType d){
@@ -511,7 +511,7 @@ public:
     }
   }
 
-  template<class T>T GiveStringy (){
+  template<class T>T giveStringy (){
     marshallingInt len(*this);
     checkData(len());
     T s(rbuf+subTotal+rindex,len());
@@ -519,9 +519,9 @@ public:
     return s;
   }
 
-  template<::std::size_t N>void CopyString (char(&dest)[N]){
+  template<::std::size_t N>void copyString (char(&dest)[N]){
     marshallingInt len(*this);
-    if(len()+1>N)raise("ReceiveBuffer CopyString");
+    if(len()+1>N)raise("ReceiveBuffer copyString");
     Give(dest,len());
     dest[len()]='\0';
   }
@@ -539,7 +539,7 @@ public:
 };
 
 template<class T,class R>
-T Give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
+T give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
 
 template<class R>bool giveBool (ReceiveBuffer<R>& buf){
   switch(buf.GiveOne()){
@@ -550,11 +550,11 @@ template<class R>bool giveBool (ReceiveBuffer<R>& buf){
 }
 
 template<class R>auto giveString (ReceiveBuffer<R>& buf){
-  return buf.template GiveStringy<::std::string>();
+  return buf.template giveStringy<::std::string>();
 }
 
 template<class R>auto giveStringView (ReceiveBuffer<R>& buf){
-  return buf.template GiveStringy<::std::string_view>();
+  return buf.template giveStringy<::std::string_view>();
 }
 template<class R>auto giveStringView_plus (ReceiveBuffer<R>& buf){
   auto v=giveStringView(buf);

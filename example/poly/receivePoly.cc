@@ -11,7 +11,7 @@ int main ()try{
   for(;;){
     buffer.getPacket();
     ::boost::base_collection<base> b;
-    testing::Give(buffer,b);
+    testing::give(buffer,b);
     ::std::cout<<"size is "<<b.size()<<::std::endl;
     ::std::cout<<"size of der1is "<<b.size<derived1>()<<::std::endl;
     ::std::cout<<"size of der3is "<<b.size<derived3>()<<::std::endl;

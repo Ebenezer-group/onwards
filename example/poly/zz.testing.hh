@@ -11,7 +11,7 @@ base::base (::cmw::ReceiveBuffer<R>& buf)
 
 template<class C,class R>
 void baseSwitch (C& c,::cmw::ReceiveBuffer<R>& buf){
-  switch(auto typeNum=::cmw::Give<uint8_t>(buf);typeNum){
+  switch(auto typeNum=::cmw::give<uint8_t>(buf);typeNum){
   case base::typeNum:
     ::cmw::BuildSegment<base>(c,buf);break;
   case derived1::typeNum:
@@ -33,7 +33,7 @@ derived1::marshalMembers (::cmw::SendBuffer& buf)const{
 
 template<class R>
 derived1::derived1 (::cmw::ReceiveBuffer<R>& buf):
-   base(buf),a(::cmw::Give<uint32_t>(buf))
+   base(buf),a(::cmw::give<uint32_t>(buf))
 {}
 
 inline void
@@ -44,7 +44,7 @@ derived2::marshalMembers (::cmw::SendBuffer& buf)const{
 
 template<class R>
 derived2::derived2 (::cmw::ReceiveBuffer<R>& buf):
-   base(buf),b(::cmw::Give<uint32_t>(buf))
+   base(buf),b(::cmw::give<uint32_t>(buf))
 {}
 
 inline void
@@ -55,7 +55,7 @@ derived3::marshalMembers (::cmw::SendBuffer& buf)const{
 
 template<class R>
 derived3::derived3 (::cmw::ReceiveBuffer<R>& buf):
-   derived1(buf),c(::cmw::Give<double>(buf))
+   derived1(buf),c(::cmw::give<double>(buf))
 {}
 
 namespace testing{
@@ -66,7 +66,7 @@ inline void marshal (::cmw::SendBuffer& buf
   buf.fillInSize(10000);
 }catch(...){buf.rollback();throw;}
 
-template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
+template<class R>void give (::cmw::ReceiveBuffer<R>& buf
          ,::boost::base_collection<base>& a){
   BuildCollection(a,buf,[](auto& a,auto& buf){baseSwitch(a,buf);});
 }

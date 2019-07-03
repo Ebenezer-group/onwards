@@ -10,12 +10,12 @@ int32_t Mar (::cmw::SendBuffer& buf
   return 10000;
 }
 
-template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
+template<class R>void give (::cmw::ReceiveBuffer<R>& buf
          ,::std::vector<int32_t>& a
          ,::std::string& b){
-  if(int32_t ca=Give<uint32_t>(buf);ca>0){
+  if(int32_t ca=give<uint32_t>(buf);ca>0){
     a.resize(a.size()+ca);
-    buf.GiveBlock(&(*(a.end()-ca)),ca);
+    buf.giveBlock(&(*(a.end()-ca)),ca);
   }
   b=giveString(buf);
 }
@@ -29,11 +29,11 @@ int32_t Mar (::cmw::SendBuffer& buf
   return 10000;
 }
 
-template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
+template<class R>void give (::cmw::ReceiveBuffer<R>& buf
          ,::std::set<int32_t>& a){
   auto z3=a.end();
-  for(int32_t ca=Give<uint32_t>(buf);ca>0;--ca){
-    a.emplace_hint(z3,Give<uint32_t>(buf));
+  for(int32_t ca=give<uint32_t>(buf);ca>0;--ca){
+    a.emplace_hint(z3,give<uint32_t>(buf));
   }
 }
 
@@ -43,9 +43,9 @@ int32_t Mar (::cmw::SendBuffer& buf
   return 10000;
 }
 
-template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
+template<class R>void give (::cmw::ReceiveBuffer<R>& buf
          ,::std::array<::std::array<float, 2>, 3>& a){
-  buf.GiveBlock(&a[0][0],sizeof a/sizeof(float));
+  buf.giveBlock(&a[0][0],sizeof a/sizeof(float));
 }
 
 int32_t Mar (::cmw::SendBuffer& buf
@@ -57,9 +57,9 @@ int32_t Mar (::cmw::SendBuffer& buf
   return 10000;
 }
 
-template<class R>void Give (::cmw::ReceiveBuffer<R>& buf
+template<class R>void give (::cmw::ReceiveBuffer<R>& buf
          ,::plf::colony<::std::string>& a){
-  int32_t ca=Give<uint32_t>(buf);
+  int32_t ca=give<uint32_t>(buf);
   a.reserve(a.size()+ca);
   for(;ca>0;--ca){
     a.insert(giveString(buf));
