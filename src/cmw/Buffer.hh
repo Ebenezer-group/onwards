@@ -320,11 +320,11 @@ template<class R>void giveFiles (ReceiveBuffer<R>& b){
 
 struct SameFormat{
   template<template<class> class B,class U>
-  void Read (B<SameFormat>& buf,U& data){buf.Give(&data,sizeof(U));}
+  void Read (B<SameFormat>& buf,U& data){buf.give(&data,sizeof(U));}
 
   template<template<class> class B,class U>
   void ReadBlock (B<SameFormat>& buf,U* data,int elements)
-  {buf.Give(data,elements*sizeof(U));}
+  {buf.give(data,elements*sizeof(U));}
 };
 
 struct LeastSignificantFirst{
@@ -380,12 +380,12 @@ struct LeastSignificantFirst{
   //Overloads for uint8_t and int8_t
   template<template<class> class B>
   void ReadBlock (B<LeastSignificantFirst>& buf,uint8_t* data,int elements){
-    buf.Give(data,elements);
+    buf.give(data,elements);
   }
 
   template<template<class> class B>
   void ReadBlock (B<LeastSignificantFirst>& buf,int8_t* data,int elements){
-    buf.Give(data,elements);
+    buf.give(data,elements);
   }
 };
 
@@ -441,12 +441,12 @@ struct MostSignificantFirst{
 
   template<template<class> class B>
   void ReadBlock (B<MostSignificantFirst>& buf,uint8_t* data,int elements){
-    buf.Give(data,elements);
+    buf.give(data,elements);
   }
 
   template<template<class> class B>
   void ReadBlock (B<MostSignificantFirst>& buf,int8_t* data,int elements){
-    buf.Give(data,elements);
+    buf.give(data,elements);
   }
 };
 
@@ -465,7 +465,7 @@ public:
     if(n>msgLength-rindex)raise("ReceiveBuffer checkData",n,msgLength,rindex);
   }
 
-  void Give (void* address,int len){
+  void give (void* address,int len){
     checkData(len);
     ::memcpy(address,rbuf+subTotal+rindex,len);
     rindex+=len;
@@ -522,7 +522,7 @@ public:
   template<::std::size_t N>void copyString (char(&dest)[N]){
     MarshallingInt len(*this);
     if(len()+1>N)raise("ReceiveBuffer copyString");
-    Give(dest,len());
+    give(dest,len());
     dest[len()]='\0';
   }
 
@@ -827,7 +827,7 @@ template<int N>class FixedString{
 
   template<class R>explicit FixedString (ReceiveBuffer<R>& b):len(b){
     if(len()>N-1)raise("FixedString stream ctor");
-    b.Give(&str[0],len());
+    b.give(&str[0],len());
     str[len()]='\0';
   }
 

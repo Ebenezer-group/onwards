@@ -67,7 +67,7 @@ template<class B,class T>
 void valarrayReceive (B& buf,::std::valarray<T>& va){
   int32_t count=give<uint32_t>(buf);
   va.resize(count);
-  buf.Give(&va,count*sizeof(T));
+  buf.give(&va,count*sizeof(T));
 }
 #endif
 }
