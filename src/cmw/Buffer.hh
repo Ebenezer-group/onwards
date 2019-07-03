@@ -779,7 +779,7 @@ public:
   }
 
   using ReceiveBuffer<R>::rbuf;
-  bool GotPacket (){
+  bool gotPacket (){
     if(kosher){
       if(bytesRead<9){
         bytesRead+=Read(sock_,rbuf+bytesRead,9-bytesRead);
@@ -787,7 +787,7 @@ public:
         if((compPacketSize=::qlz_size_compressed(rbuf))>bufsize||
            (this->packetLength=::qlz_size_decompressed(rbuf))>bufsize){
           kosher=false;
-          raise("GotPacket too big",compPacketSize,this->packetLength,bufsize);
+          raise("gotPacket too big",compPacketSize,this->packetLength,bufsize);
         }
         compressedStart=rbuf+bufsize-compPacketSize;
         ::memmove(compressedStart,rbuf,9);

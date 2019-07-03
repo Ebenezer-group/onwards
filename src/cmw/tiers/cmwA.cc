@@ -110,7 +110,7 @@ class cmwAmbassador{
 
     while(!cmwBuf.flush());
     fds[0].events=POLLIN;
-    while(!cmwBuf.GotPacket());
+    while(!cmwBuf.gotPacket());
     if(!giveBool(cmwBuf))bail("Login:%s",giveStringView(cmwBuf).data());
     if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
   }
@@ -175,7 +175,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
     }
 
     try{
-      if(fds[0].revents&POLLIN&&cmwBuf.GotPacket()){
+      if(fds[0].revents&POLLIN&&cmwBuf.gotPacket()){
         do{
           assert(!pendingRequests.empty());
           if(pendingRequests.front().get()){
