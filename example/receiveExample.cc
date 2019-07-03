@@ -16,7 +16,7 @@ int main ()try{
 
   using namespace ::exampleMessages;
   for(;;){
-    buf.GetPacket();
+    buf.getPacket();
     auto const msgid=Give<messageID>(buf);
     ::std::cout<<"Message id: "<<static_cast<unsigned>(msgid)<<'\n';
     switch(msgid){

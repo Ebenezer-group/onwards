@@ -20,7 +20,7 @@ int main (int ac,char** av)try{
   for(int tm=8;tm<13;tm+=4){
     buf.send(res()->ai_addr,res()->ai_addrlen);
     setRcvTimeout(buf.sock_,tm);
-    if(buf.GetPacket()){
+    if(buf.getPacket()){
       if(giveBool(buf))::exit(EXIT_SUCCESS);
       leave("cmwA:%s\n",giveStringView(buf).data());
     }

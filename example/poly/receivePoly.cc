@@ -9,7 +9,7 @@ int main ()try{
   BufferStack<SameFormat> buffer(udpServer("13579"));
 
   for(;;){
-    buffer.GetPacket();
+    buffer.getPacket();
     ::boost::base_collection<base> b;
     testing::Give(buffer,b);
     ::std::cout<<"size is "<<b.size()<<::std::endl;

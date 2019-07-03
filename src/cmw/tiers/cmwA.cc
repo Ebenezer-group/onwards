@@ -208,7 +208,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
       cmwRequest* req=nullptr;
       try{
         req=&*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
-        frntBuf.GetPacket((::sockaddr*)&req->frnt,&req->frntLn);
+        frntBuf.getPacket((::sockaddr*)&req->frnt,&req->frntLn);
         gotAddr=true;
         ::new(req)cmwRequest(frntBuf);
         marshal<messageID::generate>(cmwBuf,*req);
