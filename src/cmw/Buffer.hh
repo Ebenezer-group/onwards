@@ -308,7 +308,7 @@ public:
   explicit File (ReceiveBuffer<R>& buf):name(giveStringView_plus(buf)){
     fileWrapper fl(name.data(),O_WRONLY|O_CREAT|O_TRUNC
                    ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-    buf.GiveFile(fl.d);
+    buf.giveFile(fl.d);
   }
 
   char const* Name ()const{return name.data();}
@@ -374,7 +374,7 @@ struct LeastSignificantFirst{
 
   template<template<class> class B,class U>
   void ReadBlock (B<LeastSignificantFirst>& buf,U* data,int elements){
-    for(int i=0;i<elements;++i){*(data+i)=buf.template Give<U>();}
+    for(int i=0;i<elements;++i){*(data+i)=buf.template give<U>();}
   }
 
   //Overloads for uint8_t and int8_t
@@ -436,7 +436,7 @@ struct MostSignificantFirst{
 
   template<template<class> class B,class U>
   void ReadBlock (B<MostSignificantFirst>& buf,U* data,int elements){
-    for(int i=0;i<elements;++i){*(data+i)=buf.template Give<U>();}
+    for(int i=0;i<elements;++i){*(data+i)=buf.template give<U>();}
   }
 
   template<template<class> class B>
@@ -476,7 +476,7 @@ public:
     return rbuf[subTotal+rindex++];
   }
 
-  template<class T>T Give (){
+  template<class T>T give (){
     T tmp;
     reader.Read(*this,tmp);
     return tmp;
@@ -487,7 +487,7 @@ public:
     if(subTotal<packetLength){
       rindex=0;
       msgLength=sizeof(int32_t);
-      msgLength=Give<uint32_t>();
+      msgLength=give<uint32_t>();
       return true;
     }
     return false;
@@ -501,8 +501,8 @@ public:
   template<class T>void giveBlock (T* data,unsigned int elements)
   {reader.ReadBlock(*this,data,elements);}
 
-  void GiveFile (fileType d){
-    int sz=Give<uint32_t>();
+  void giveFile (fileType d){
+    int sz=give<uint32_t>();
     checkData(sz);
     while(sz>0){
       int rc=Write(d,rbuf+subTotal+rindex,sz);
@@ -527,19 +527,19 @@ public:
   }
 
   template<class T>void Giveilist (T& lst){
-    for(int c=Give<uint32_t>();c>0;--c)
+    for(int c=give<uint32_t>();c>0;--c)
       lst.push_back(*T::value_type::BuildPolyInstance(*this));
   }
 
   template<class T>void Giverbtree (T& rbt){
     auto endIt=rbt.end();
-    for(int c=Give<uint32_t>();c>0;--c)
+    for(int c=give<uint32_t>();c>0;--c)
       rbt.insert_unique(endIt,*T::value_type::BuildPolyInstance(*this));
   }
 };
 
 template<class T,class R>
-T give (ReceiveBuffer<R>& buf){return buf.template Give<T>();}
+T give (ReceiveBuffer<R>& buf){return buf.template give<T>();}
 
 template<class R>bool giveBool (ReceiveBuffer<R>& buf){
   switch(buf.giveOne()){
