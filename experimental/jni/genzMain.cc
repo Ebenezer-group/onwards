@@ -17,7 +17,7 @@ int genzMain (int ac,char** av)try{
   getaddrinfoWrapper res(ac<4?"127.0.0.1":av[3],ac<5?"55555":av[4],SOCK_DGRAM);
   BufferStack<SameFormat> buf(res.getSock());
 
-  ::frntMddl::marshal(buf,marshallingInt(av[1]),av[2]);
+  ::frntMddl::marshal(buf,MarshallingInt(av[1]),av[2]);
   for(int tm=8;tm<13;tm+=4){
     buf.Send(res()->ai_addr,res()->ai_addrlen);
     setRcvTimeout(buf.sock_,tm);

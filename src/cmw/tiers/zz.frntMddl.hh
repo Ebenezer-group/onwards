@@ -3,7 +3,7 @@
 #define zz_frntMddl_hh 1
 namespace frntMddl{
 void marshal (::cmw::SendBuffer& buf
-         ,::cmw::marshallingInt const& a
+         ,::cmw::MarshallingInt const& a
          ,char const* b)try{
   buf.reserveBytes(4);
   a.marshal(buf);

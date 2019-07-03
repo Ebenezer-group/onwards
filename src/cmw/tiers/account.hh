@@ -1,6 +1,6 @@
 struct cmwAccount{
-  ::cmw::marshallingInt number;
-  ::cmw::fixedString60 password;
+  ::cmw::MarshallingInt number;
+  ::cmw::FixedString60 password;
 
   cmwAccount (int n,char const* p):number(n),password(p){}
   template<class R>explicit cmwAccount (::cmw::ReceiveBuffer<R>&);

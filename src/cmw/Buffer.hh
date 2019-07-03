@@ -224,17 +224,17 @@ inline int sockRead (sockType s,void* data,int len
 
 class SendBuffer;
 template<class R>class ReceiveBuffer;
-class marshallingInt{
+class MarshallingInt{
   int32_t val;
 public:
-  marshallingInt (){}
-  explicit marshallingInt (int32_t v):val(v){}
-  explicit marshallingInt (char const* v):val(fromChars(v)){}
+  MarshallingInt (){}
+  explicit MarshallingInt (int32_t v):val(v){}
+  explicit MarshallingInt (char const* v):val(fromChars(v)){}
 
   //Reads a sequence of bytes in variable-length format and
   //builds a 32 bit integer.
   template<class R>
-  explicit marshallingInt (ReceiveBuffer<R>& b):val(0){
+  explicit MarshallingInt (ReceiveBuffer<R>& b):val(0){
     uint32_t shift=1;
     for(;;){
       uint8_t a=b.giveOne();
@@ -249,8 +249,8 @@ public:
   int32_t operator() ()const{return val;}
   void marshal (SendBuffer&)const;
 };
-inline bool operator== (marshallingInt l,marshallingInt r){return l()==r();}
-inline bool operator== (marshallingInt l,int32_t r){return l()==r;}
+inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
+inline bool operator== (MarshallingInt l,int32_t r){return l()==r;}
 
 #ifdef CMW_WINDOWS
 inline DWORD Write (HANDLE h,void const* data,int len){
@@ -314,7 +314,7 @@ public:
   char const* Name ()const{return name.data();}
 };
 template<class R>void giveFiles (ReceiveBuffer<R>& b){
-  for(auto n=marshallingInt{b}();n>0;--n)File{b};
+  for(auto n=MarshallingInt{b}();n>0;--n)File{b};
 }
 #endif
 
@@ -512,7 +512,7 @@ public:
   }
 
   template<class T>T giveStringy (){
-    marshallingInt len(*this);
+    MarshallingInt len(*this);
     checkData(len());
     T s(rbuf+subTotal+rindex,len());
     rindex+=len();
@@ -520,18 +520,18 @@ public:
   }
 
   template<::std::size_t N>void copyString (char(&dest)[N]){
-    marshallingInt len(*this);
+    MarshallingInt len(*this);
     if(len()+1>N)raise("ReceiveBuffer copyString");
     Give(dest,len());
     dest[len()]='\0';
   }
 
-  template<class T>void Giveilist (T& lst){
+  template<class T>void giveIlist (T& lst){
     for(int c=give<uint32_t>();c>0;--c)
       lst.push_back(*T::value_type::BuildPolyInstance(*this));
   }
 
-  template<class T>void Giverbtree (T& rbt){
+  template<class T>void giveRbtree (T& rbt){
     auto endIt=rbt.end();
     for(int c=give<uint32_t>();c>0;--c)
       rbt.insert_unique(endIt,*T::value_type::BuildPolyInstance(*this));
@@ -643,26 +643,26 @@ public:
 inline void receive (SendBuffer&b,bool bl){b.receive(static_cast<unsigned char>(bl));}
 
 inline void receive (SendBuffer& b,char const* s){
-  marshallingInt len(::strlen(s));
+  MarshallingInt len(::strlen(s));
   len.marshal(b);
   b.receive(s,len());
 }
 
 inline void receive (SendBuffer& b,::std::string const& s){
-  marshallingInt len(s.size());
+  MarshallingInt len(s.size());
   len.marshal(b);
   b.receive(s.data(),len());
 }
 
 inline void receive (SendBuffer& b,::std::string_view const& s){
-  marshallingInt(s.size()).marshal(b);
+  MarshallingInt(s.size()).marshal(b);
   b.receive(s.data(),s.size());
 }
 using stringPlus=::std::initializer_list<::std::string_view>;
 inline void receive (SendBuffer& b,stringPlus lst){
   int32_t t=0;
   for(auto s:lst)t+=s.size();
-  marshallingInt{t}.marshal(b);
+  MarshallingInt{t}.marshal(b);
   for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
 }
 
@@ -685,7 +685,7 @@ template<class T>void receiveGroupPointer (SendBuffer& b,T const& grp){
 }
 
 //Encode integer into variable-length format.
-inline void marshallingInt::marshal (SendBuffer& b)const{
+inline void MarshallingInt::marshal (SendBuffer& b)const{
   uint32_t n=val;
   for(;;){
     uint8_t a=n&127;
@@ -808,25 +808,25 @@ public:
   }
 };
 
-template<int N>class fixedString{
-  marshallingInt len;
+template<int N>class FixedString{
+  MarshallingInt len;
   ::std::array<char,N> str;
  public:
-  fixedString (){}
+  FixedString (){}
 
-  explicit fixedString (char const* s):len(::strlen(s)){
-    if(len()>N-1)raise("fixedString ctor");
+  explicit FixedString (char const* s):len(::strlen(s)){
+    if(len()>N-1)raise("FixedString ctor");
     ::strcpy(&str[0],s);
   }
 
-  explicit fixedString (::std::string_view s):len(s.length()){
-    if(len()>N-1)raise("fixedString ctor");
+  explicit FixedString (::std::string_view s):len(s.length()){
+    if(len()>N-1)raise("FixedString ctor");
     ::strncpy(&str[0],s.data(),len());
     str[len()]='\0';
   }
 
-  template<class R>explicit fixedString (ReceiveBuffer<R>& b):len(b){
-    if(len()>N-1)raise("fixedString stream ctor");
+  template<class R>explicit FixedString (ReceiveBuffer<R>& b):len(b){
+    if(len()>N-1)raise("FixedString stream ctor");
     b.Give(&str[0],len());
     str[len()]='\0';
   }
@@ -842,7 +842,7 @@ template<int N>class fixedString{
   char const* c_str ()const{return &str[0];}
   char operator[] (int i)const{return str[i];}
 };
-using fixedString60=fixedString<60>;
-using fixedString120=fixedString<120>;
+using FixedString60=FixedString<60>;
+using FixedString120=FixedString<120>;
 }
 #endif

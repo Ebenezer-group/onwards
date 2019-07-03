@@ -32,8 +32,8 @@ bool marshalFile (char const* name,SendBuffer& buf){
 struct cmwRequest{
   ::sockaddr_in6 frnt;
   ::socklen_t frntLn=sizeof frnt;
-  marshallingInt const acctNbr;
-  fixedString120 path;
+  MarshallingInt const acctNbr;
+  FixedString120 path;
   ::int32_t now;
   char const* mdlFile;
   fileWrapper fl;
