@@ -482,7 +482,7 @@ public:
     return tmp;
   }
 
-  bool NextMessage (){
+  bool nextMessage (){
     subTotal+=msgLength;
     if(subTotal<packetLength){
       rindex=0;
@@ -493,9 +493,9 @@ public:
     return false;
   }
 
-  bool Update (){
+  bool update (){
     msgLength=subTotal=0;
-    return NextMessage();
+    return nextMessage();
   }
 
   template<class T>void giveBlock (T* data,unsigned int elements)
@@ -707,7 +707,7 @@ public:
 
   bool getPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
     this->packetLength=sockRead(sock_,ar,N,addr,len);
-    return this->Update();
+    return this->update();
   }
 };
 
@@ -796,7 +796,7 @@ public:
       if(bytesRead<compPacketSize)return false;
       ::qlz_decompress(compressedStart,rbuf,decomp);
       bytesRead=0;
-      this->Update();
+      this->update();
       return true;
     }
     bytesRead+=Read(sock_,rbuf,::std::min(bufsize,compPacketSize-bytesRead));

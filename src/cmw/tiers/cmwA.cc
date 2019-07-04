@@ -188,7 +188,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
             }else outFront<false>(req,"CMW:",giveStringView(cmwBuf));
           }
           pendingRequests.erase(::std::begin(pendingRequests));
-        }while(cmwBuf.NextMessage());
+        }while(cmwBuf.nextMessage());
       }
     }catch(fiasco& e){
       reset("Fiasco",e.what());
