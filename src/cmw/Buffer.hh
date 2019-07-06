@@ -320,26 +320,26 @@ template<class R>void giveFiles (ReceiveBuffer<R>& b){
 
 struct SameFormat{
   template<template<class> class B,class U>
-  void Read (B<SameFormat>& buf,U& data){buf.give(&data,sizeof(U));}
+  void read (B<SameFormat>& buf,U& data){buf.give(&data,sizeof(U));}
 
   template<template<class> class B,class U>
-  void ReadBlock (B<SameFormat>& buf,U* data,int elements)
+  void readBlock (B<SameFormat>& buf,U* data,int elements)
   {buf.give(data,elements*sizeof(U));}
 };
 
 struct LeastSignificantFirst{
   template<template<class> class B>
-  void Read (B<LeastSignificantFirst>& buf,uint8_t& val)
+  void read (B<LeastSignificantFirst>& buf,uint8_t& val)
   {val=buf.giveOne();}
 
   template<template<class> class B>
-  void Read (B<LeastSignificantFirst>& buf,uint16_t& val){
+  void read (B<LeastSignificantFirst>& buf,uint16_t& val){
     val=buf.giveOne();
     val|=buf.giveOne()<<8;
   }
 
   template<template<class> class B>
-  void Read (B<LeastSignificantFirst>& buf,uint32_t& val){
+  void read (B<LeastSignificantFirst>& buf,uint32_t& val){
     val=buf.giveOne();
     val|=buf.giveOne()<<8;
     val|=buf.giveOne()<<16;
@@ -347,7 +347,7 @@ struct LeastSignificantFirst{
   }
 
   template<template<class> class B>
-  void Read (B<LeastSignificantFirst>& buf,uint64_t& val){
+  void read (B<LeastSignificantFirst>& buf,uint64_t& val){
     val=buf.giveOne();
     val|=buf.giveOne()<<8;
     val|=buf.giveOne()<<16;
@@ -359,49 +359,49 @@ struct LeastSignificantFirst{
   }
 
   template<template<class> class B>
-  void Read (B<LeastSignificantFirst>& buf,float& f){
+  void read (B<LeastSignificantFirst>& buf,float& f){
     uint32_t tmp;
-    this->Read(buf,tmp);
+    this->read(buf,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
-  void Read (B<LeastSignificantFirst>& buf,double& d){
+  void read (B<LeastSignificantFirst>& buf,double& d){
     uint64_t tmp;
-    this->Read(buf,tmp);
+    this->read(buf,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
 
   template<template<class> class B,class U>
-  void ReadBlock (B<LeastSignificantFirst>& buf,U* data,int elements){
+  void readBlock (B<LeastSignificantFirst>& buf,U* data,int elements){
     for(int i=0;i<elements;++i){*(data+i)=buf.template give<U>();}
   }
 
   //Overloads for uint8_t and int8_t
   template<template<class> class B>
-  void ReadBlock (B<LeastSignificantFirst>& buf,uint8_t* data,int elements){
+  void readBlock (B<LeastSignificantFirst>& buf,uint8_t* data,int elements){
     buf.give(data,elements);
   }
 
   template<template<class> class B>
-  void ReadBlock (B<LeastSignificantFirst>& buf,int8_t* data,int elements){
+  void readBlock (B<LeastSignificantFirst>& buf,int8_t* data,int elements){
     buf.give(data,elements);
   }
 };
 
 struct MostSignificantFirst{
   template<template<class> class B>
-  void Read (B<MostSignificantFirst>& buf,uint8_t& val)
+  void read (B<MostSignificantFirst>& buf,uint8_t& val)
   {val=buf.giveOne();}
 
   template<template<class> class B>
-  void Read (B<MostSignificantFirst>& buf,uint16_t& val){
+  void read (B<MostSignificantFirst>& buf,uint16_t& val){
     val=buf.giveOne()<<8;
     val|=buf.giveOne();
   }
 
   template<template<class> class B>
-  void Read (B<MostSignificantFirst>& buf,uint32_t& val){
+  void read (B<MostSignificantFirst>& buf,uint32_t& val){
     val=buf.giveOne()<<24;
     val|=buf.giveOne()<<16;
     val|=buf.giveOne()<<8;
@@ -409,7 +409,7 @@ struct MostSignificantFirst{
   }
 
   template<template<class> class B>
-  void Read (B<MostSignificantFirst>& buf,uint64_t& val){
+  void read (B<MostSignificantFirst>& buf,uint64_t& val){
     val=(uint64_t)buf.giveOne()<<56;
     val|=(uint64_t)buf.giveOne()<<48;
     val|=(uint64_t)buf.giveOne()<<40;
@@ -421,31 +421,31 @@ struct MostSignificantFirst{
   }
 
   template<template<class> class B>
-  void Read (B<MostSignificantFirst>& buf,float& f){
+  void read (B<MostSignificantFirst>& buf,float& f){
     uint32_t tmp;
-    this->Read(buf,tmp);
+    this->read(buf,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
-  void Read (B<MostSignificantFirst>& buf,double& d){
+  void read (B<MostSignificantFirst>& buf,double& d){
     uint64_t tmp;
-    this->Read(buf,tmp);
+    this->read(buf,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
 
   template<template<class> class B,class U>
-  void ReadBlock (B<MostSignificantFirst>& buf,U* data,int elements){
+  void readBlock (B<MostSignificantFirst>& buf,U* data,int elements){
     for(int i=0;i<elements;++i){*(data+i)=buf.template give<U>();}
   }
 
   template<template<class> class B>
-  void ReadBlock (B<MostSignificantFirst>& buf,uint8_t* data,int elements){
+  void readBlock (B<MostSignificantFirst>& buf,uint8_t* data,int elements){
     buf.give(data,elements);
   }
 
   template<template<class> class B>
-  void ReadBlock (B<MostSignificantFirst>& buf,int8_t* data,int elements){
+  void readBlock (B<MostSignificantFirst>& buf,int8_t* data,int elements){
     buf.give(data,elements);
   }
 };
@@ -478,7 +478,7 @@ public:
 
   template<class T>T give (){
     T tmp;
-    reader.Read(*this,tmp);
+    reader.read(*this,tmp);
     return tmp;
   }
 
@@ -499,7 +499,7 @@ public:
   }
 
   template<class T>void giveBlock (T* data,unsigned int elements)
-  {reader.ReadBlock(*this,data,elements);}
+  {reader.readBlock(*this,data,elements);}
 
   void giveFile (fileType d){
     int sz=give<uint32_t>();
