@@ -49,14 +49,14 @@ inline int getError (){
 }
 
 class failure:public ::std::exception{
-  ::std::string str;
+  ::std::string s;
 public:
-  explicit failure (char const* s):str(s){}
-  explicit failure (::std::string_view s):str(s){}
-  void operator<< (::std::string_view const& s){str.append(" "); str.append(s);}
-  void operator<< (char const* s){str.append(" "); str.append(s);}
+  explicit failure (char const* s):s(s){}
+  explicit failure (::std::string_view s):s(s){}
+  void operator<< (::std::string_view st){s.append(" "); s.append(st);}
+  void operator<< (char const* st){s.append(" "); s.append(st);}
   void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
-  char const* what ()const noexcept{return str.c_str();}
+  char const* what ()const noexcept{return s.c_str();}
 };
 struct fiasco:failure{explicit fiasco(char const* s):failure(s){}};
 

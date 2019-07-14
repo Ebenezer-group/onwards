@@ -14,11 +14,11 @@ int main ()try{
   ::cmw::winStart();
   ::cmw::BufferStack<::cmw::SameFormat> buf(::cmw::udpServer("12345"));
 
-  using namespace ::exampleMessages;
   for(;;){
     buf.getPacket();
     auto const msgid=::cmw::give<messageID>(buf);
     ::std::cout<<"Message id: "<<static_cast<unsigned>(msgid)<<'\n';
+    using namespace ::exampleMessages;
     switch(msgid){
       case messageID::id1:
       {
