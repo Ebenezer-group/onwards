@@ -1,12 +1,13 @@
 Middle files are used to specify what messaging and
 serialization code the C++ Middleware Writer should output.
 
-Lines like the following are the basis of Middle code:
+Lines like this:
 [ options ] (T1, T2, ... Tn)
 
-Options start with a dash (-) symbol. After any options, a list of
-C++ types is enclosed in a pair of parentheses.  One or more of
-these lines are wrapped by a name and a closing brace like this:
+are the basis of Middle Code.  Options start with a dash (-) symbol.
+After any options, a list of C++ types is enclosed in a pair of
+parentheses.  One or more of these lines are wrapped by a name and
+a closing brace like this:
 
 exampleMessages
    -out (messageId, ::std::vector<int32_t>, ::std::string)
@@ -14,9 +15,8 @@ exampleMessages
    -out (messageId, ::plf::colony<::std::string>)
 }
 
-Support for message Ids at a system level is now available.
 Rather than repeating a message Id type for each message,
-you can write the above like this:
+you can rewrite the above like this:
 
 exampleMessages <messageID_t=messageId>
    -out (::std::vector<int32_t>, ::std::string)
@@ -33,10 +33,10 @@ zz.exampleMessages.hh.  One or more functions are created
 within the namespace for each of the lines with matching
 parentheses.
 
-The available options are: out, in, inLine, maxLength, yeaNay.
+The available options are: out, in, inLine, maxLength and yeaNay.
 
 The out and in options are used to tailor the output.  If you
-specify only -out, only the message-building/sending function is
+specify only -out, only a message-building/sending function is
 generated.  If you specify only -in, only the message-parsing/
 receiving function gets generated.
 
@@ -48,7 +48,7 @@ The maxLength option allows you to specify the maximum length
 for a message.  If the length of the message exceeds the value
 specified, an exception will be thrown. If this option isn't used,
 the CMW supplies a default value of 10,000.  Here's an example of
-how to use this option: -maxLength=cmw::udp_packet_max
+how to use this option: -maxLength=::cmw::udp_packet_max
 
 The yeaNay option is used to support a messaging idiom where
 a response to a request is a bool followed by optional data.
