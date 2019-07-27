@@ -85,40 +85,6 @@ inline int fromChars (char const* p){
   return res;
 }
 
-struct FILE_wrapper{
-  ::FILE* hndl;
-  char line[120];
-
-  FILE_wrapper (char const* fn,char const* mode){
-    if((hndl=::fopen(fn,mode))==nullptr)raise("FILE_wrapper",fn,mode,errno);
-  }
-  char* fgets (){return ::fgets(line,sizeof line,hndl);}
-  ~FILE_wrapper (){::fclose(hndl);}
-};
-
-class getaddrinfoWrapper{
-  ::addrinfo* head,*addr;
- public:
-  getaddrinfoWrapper (char const* node,char const* port,int type,int flags=0){
-    ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
-    int rc=::getaddrinfo(node,port,&hints,&head);
-    if(rc!=0)raise("getaddrinfo",::gai_strerror(rc));
-    addr=head;
-  }
-
-  ~getaddrinfoWrapper (){::freeaddrinfo(head);}
-  ::addrinfo* operator() (){return addr;}
-  void inc (){if(addr!=nullptr)addr=addr->ai_next;}
-  sockType getSock (){
-    for(;addr!=nullptr;addr=addr->ai_next){
-      if(auto s=::socket(addr->ai_family,addr->ai_socktype,0);-1!=s)return s;
-    }
-    raise("getaddrinfo getSock");
-  }
-  getaddrinfoWrapper (getaddrinfoWrapper const&)=delete;
-  getaddrinfoWrapper& operator= (getaddrinfoWrapper)=delete;
-};
-
 inline void setDirectory (char const* d){
 #ifdef CMW_WINDOWS
   if(!::SetCurrentDirectory(d))
@@ -146,6 +112,12 @@ inline void setRcvTimeout (sockType s,int time){
   if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
 }
 
+inline int setNonblocking (sockType s){
+#ifndef CMW_WINDOWS
+  return ::fcntl(s,F_SETFL,O_NONBLOCK);
+#endif
+}
+
 inline void closeSocket (sockType s){
 #ifdef CMW_WINDOWS
   if(::closesocket(s)==SOCKET_ERROR)
@@ -161,29 +133,46 @@ inline int preserveError (sockType s){
   return e;
 }
 
+class GetaddrinfoWrapper{
+  ::addrinfo* head,*addr;
+ public:
+  GetaddrinfoWrapper (char const* node,char const* port,int type,int flags=0){
+    ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
+    int rc=::getaddrinfo(node,port,&hints,&head);
+    if(rc!=0)raise("getaddrinfo",::gai_strerror(rc));
+    addr=head;
+  }
+
+  ~GetaddrinfoWrapper (){::freeaddrinfo(head);}
+  ::addrinfo* operator() (){return addr;}
+  void inc (){if(addr!=nullptr)addr=addr->ai_next;}
+  sockType getSock (){
+    for(;addr!=nullptr;addr=addr->ai_next){
+      if(auto s=::socket(addr->ai_family,addr->ai_socktype,0);-1!=s)return s;
+    }
+    raise("getaddrinfo getSock");
+  }
+  GetaddrinfoWrapper (GetaddrinfoWrapper const&)=delete;
+  GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
+};
+
 inline sockType connectWrapper (char const* node,char const* port){
-  getaddrinfoWrapper ai(node,port,SOCK_STREAM);
+  GetaddrinfoWrapper ai(node,port,SOCK_STREAM);
   auto s=ai.getSock();
   if(0==::connect(s,ai()->ai_addr,ai()->ai_addrlen))return s;
   errno=preserveError(s);
   return -1;
 }
 
-inline int setNonblocking (sockType s){
-#ifndef CMW_WINDOWS
-  return ::fcntl(s,F_SETFL,O_NONBLOCK);
-#endif
-}
-
 inline sockType udpServer (char const* port){
-  getaddrinfoWrapper ai(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
+  GetaddrinfoWrapper ai(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
   auto s=ai.getSock();
   if(0==::bind(s,ai()->ai_addr,ai()->ai_addrlen))return s;
   raise("udpServer",preserveError(s));
 }
 
 inline sockType tcpServer (char const* port){
-  getaddrinfoWrapper ai(nullptr,port,SOCK_STREAM,AI_PASSIVE);
+  GetaddrinfoWrapper ai(nullptr,port,SOCK_STREAM,AI_PASSIVE);
   auto s=ai.getSock();
 
   if(int on=1;setsockWrapper(s,SO_REUSEADDR,on)==0
@@ -844,5 +833,16 @@ template<int N>class FixedString{
 };
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
+
+struct FILE_wrapper{
+  ::FILE* hndl;
+  char line[120];
+
+  FILE_wrapper (char const* fn,char const* mode){
+    if((hndl=::fopen(fn,mode))==nullptr)raise("FILE_wrapper",fn,mode,errno);
+  }
+  char* fgets (){return ::fgets(line,sizeof line,hndl);}
+  ~FILE_wrapper (){::fclose(hndl);}
+};
 }
 #endif

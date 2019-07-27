@@ -37,8 +37,8 @@ The available options are: out, in, inLine, maxLength and yeaNay.
 
 The out and in options are used to tailor the output.  If you
 specify only -out, only a message-building/sending function is
-generated.  If you specify only -in, only the message-parsing/
-receiving function gets generated.
+generated.  If you specify only -in, only a message-parsing/
+receiving function is output.
 
 The inLine option indicates that a generated function should
 be marked as inline.  This option may help reduce the size of

@@ -11,13 +11,7 @@ int main (){
   c.insert(d1);
   c.insert(d3);
 
-  getaddrinfoWrapper res(
-#ifdef __linux__
-                         "127.0.0.1"
-#else
-                         "::1"
-#endif
-                         ,"13579",SOCK_DGRAM);
+  GetaddrinfoWrapper res("127.0.0.1" ,"13579",SOCK_DGRAM); //may need ::1
   BufferStack<SameFormat> buf(res.getSock());
   testing::marshal(buf,c);
   buf.send(res()->ai_addr,res()->ai_addrlen);

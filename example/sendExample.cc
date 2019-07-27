@@ -13,7 +13,7 @@
 
 int main ()try{
   ::cmw::winStart();
-  ::cmw::getaddrinfoWrapper ai(
+  ::cmw::GetaddrinfoWrapper ai(
 #ifdef __linux__
                     "127.0.0.1"
 #else

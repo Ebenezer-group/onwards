@@ -13,7 +13,7 @@ int main (int ac,char** av)try{
   if(ac<3||ac>5)
     leave("Usage: genz account-num mdl-file-path [node] [port]\n");
   winStart();
-  getaddrinfoWrapper res(ac<4?"127.0.0.1":av[3],ac<5?"55555":av[4],SOCK_DGRAM);
+  GetaddrinfoWrapper res(ac<4?"127.0.0.1":av[3],ac<5?"55555":av[4],SOCK_DGRAM);
   BufferStack<SameFormat> buf(res.getSock());
 
   ::frntMddl::marshal(buf,MarshallingInt(av[1]),av[2]);
