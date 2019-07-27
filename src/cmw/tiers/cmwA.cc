@@ -68,7 +68,7 @@ struct cmwRequest{
 
     int8_t updatedFiles=0;
     auto const idx=buf.reserveBytes(sizeof updatedFiles);
-    FILE_wrapper f{mdlFile,"r"};
+    FILEwrapper f{mdlFile,"r"};
     while(auto line=f.fgets()){
       char const* tok=::strtok(line,"\n \r");
       if(!::strncmp(tok,"//",2)||!::strcmp(tok,"fixedMessageLengths"))continue;
@@ -141,7 +141,7 @@ public:
 };
 
 cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
-  FILE_wrapper cfg{config,"r"};
+  FILEwrapper cfg{config,"r"};
   auto checkField=[&](char const* fld){
     if(::strcmp(fld,::strtok(cfg.fgets()," ")))bail("Expected %s",fld);
   };

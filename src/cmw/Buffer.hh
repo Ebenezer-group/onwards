@@ -834,15 +834,15 @@ template<int N>class FixedString{
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
 
-struct FILE_wrapper{
+struct FILEwrapper{
   ::FILE* hndl;
   char line[120];
 
-  FILE_wrapper (char const* fn,char const* mode){
-    if((hndl=::fopen(fn,mode))==nullptr)raise("FILE_wrapper",fn,mode,errno);
+  FILEwrapper (char const* fn,char const* mode){
+    if((hndl=::fopen(fn,mode))==nullptr)raise("FILEwrapper",fn,mode,errno);
   }
   char* fgets (){return ::fgets(line,sizeof line,hndl);}
-  ~FILE_wrapper (){::fclose(hndl);}
+  ~FILEwrapper (){::fclose(hndl);}
 };
 }
 #endif
