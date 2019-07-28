@@ -14,7 +14,7 @@ static_assert(::std::numeric_limits<unsigned char>::digits==8,"");
 static_assert(::std::numeric_limits<float>::is_iec559,"Only IEEE754 supported");
 
 #include<stdint.h>
-#include<stdio.h>//snprintf
+#include<stdio.h>//fopen,snprintf
 #include<stdlib.h>//strtol,exit
 #include<string.h>//memcpy,memmove,strlen
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
@@ -510,9 +510,9 @@ public:
 
   template<::std::size_t N>void copyString (char(&dest)[N]){
     MarshallingInt len(*this);
-    if(len()+1>N)raise("ReceiveBuffer copyString");
+    if(len()>N-1)raise("ReceiveBuffer copyString");
     give(dest,len());
-    dest[len()]='\0';
+    dest[len()]=0;
   }
 
   template<class T>void giveIlist (T& lst){
@@ -803,21 +803,16 @@ template<int N>class FixedString{
  public:
   FixedString (){}
 
-  explicit FixedString (char const* s):len(::strlen(s)){
-    if(len()>N-1)raise("FixedString ctor");
-    ::strcpy(&str[0],s);
-  }
-
   explicit FixedString (::std::string_view s):len(s.length()){
     if(len()>N-1)raise("FixedString ctor");
     ::strncpy(&str[0],s.data(),len());
-    str[len()]='\0';
+    str[len()]=0;
   }
 
   template<class R>explicit FixedString (ReceiveBuffer<R>& b):len(b){
     if(len()>N-1)raise("FixedString stream ctor");
     b.give(&str[0],len());
-    str[len()]='\0';
+    str[len()]=0;
   }
 
   void marshal (SendBuffer& b)const{

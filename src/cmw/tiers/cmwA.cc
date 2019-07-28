@@ -45,7 +45,7 @@ struct cmwRequest{
                      ,now(::time(nullptr)){
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
-    *pos='\0';
+    *pos=0;
     setDirectory(path());
     mdlFile=pos+1;
     char last[60];
