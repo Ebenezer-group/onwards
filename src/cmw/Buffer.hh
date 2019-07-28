@@ -294,7 +294,7 @@ public:
   explicit File (::std::string_view n):name(n){}
 
   template<class R>
-  explicit File (ReceiveBuffer<R>& buf):name(giveStringView_plus(buf)){
+  explicit File (ReceiveBuffer<R>& buf):name(giveStringView(buf)){
     fileWrapper fl(name.data(),O_WRONLY|O_CREAT|O_TRUNC
                    ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     buf.giveFile(fl.d);
@@ -510,7 +510,7 @@ public:
 
   template<::std::size_t N>void copyString (char(&dest)[N]){
     MarshallingInt len(*this);
-    if(len()>N-1)raise("ReceiveBuffer copyString");
+    if(len()>=N)raise("ReceiveBuffer copyString");
     give(dest,len());
     dest[len()]=0;
   }
@@ -544,11 +544,6 @@ template<class R>auto giveString (ReceiveBuffer<R>& buf){
 
 template<class R>auto giveStringView (ReceiveBuffer<R>& buf){
   return buf.template giveStringy<::std::string_view>();
-}
-template<class R>auto giveStringView_plus (ReceiveBuffer<R>& buf){
-  auto v=giveStringView(buf);
-  buf.giveOne();
-  return v;
 }
 
 class SendBuffer{
@@ -629,12 +624,19 @@ public:
   template<class...T>void receiveMulti (char const*,T&&...);
 };
 
-inline void receive (SendBuffer&b,bool bl){b.receive(static_cast<unsigned char>(bl));}
+inline void receive (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
 
 inline void receive (SendBuffer& b,char const* s){
   MarshallingInt len(::strlen(s));
   len.marshal(b);
   b.receive(s,len());
+}
+
+inline void receivePlus (SendBuffer& b,char const* s){
+  MarshallingInt len(::strlen(s)+1);
+  len.marshal(b);
+  b.receive(s,len());
+  b.receive<::uint8_t>(0);
 }
 
 inline void receive (SendBuffer& b,::std::string const& s){
@@ -655,8 +657,6 @@ inline void receive (SendBuffer& b,stringPlus lst){
   for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
 }
 
-inline void insertNull (SendBuffer& b){uint8_t z=0;b.receive(z);}
-
 template<class T>void receiveBlock (SendBuffer& b,T const& grp){
   int32_t count=grp.size();
   b.receive(count);
@@ -665,11 +665,11 @@ template<class T>void receiveBlock (SendBuffer& b,T const& grp){
 }
 
 template<class T>void receiveGroup (SendBuffer& b,T const& grp){
-  b.receive(static_cast<int32_t>(grp.size()));
+  b.receive<::int32_t>(grp.size());
   for(auto const& e:grp)e.marshal(b);
 }
 template<class T>void receiveGroupPointer (SendBuffer& b,T const& grp){
-  b.receive(static_cast<int32_t>(grp.size()));
+  b.receive<::int32_t>(grp.size());
   for(auto p:grp)p->marshal(b);
 }
 
@@ -804,13 +804,13 @@ template<int N>class FixedString{
   FixedString (){}
 
   explicit FixedString (::std::string_view s):len(s.length()){
-    if(len()>N-1)raise("FixedString ctor");
+    if(len()>=N)raise("FixedString ctor");
     ::strncpy(&str[0],s.data(),len());
     str[len()]=0;
   }
 
   template<class R>explicit FixedString (ReceiveBuffer<R>& b):len(b){
-    if(len()>N-1)raise("FixedString stream ctor");
+    if(len()>=N)raise("FixedString stream ctor");
     b.give(&str[0],len());
     str[len()]=0;
   }
