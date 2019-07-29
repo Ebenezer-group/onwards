@@ -29,7 +29,7 @@ int32_t Mar (::cmw::SendBuffer& buf){
 template<messageID id,class...T>
 void marshal (::cmw::SendBuffer& buf,T&&...t)try{
   buf.reserveBytes(4);
-  buf.receive(static_cast<uint8_t>(id));
+  buf.receive<messageID>(id);
   buf.fillInSize(Mar(buf,t...));
 }catch(...){buf.rollback();throw;}
 }

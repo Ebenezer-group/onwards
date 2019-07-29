@@ -224,9 +224,9 @@ public:
   //builds a 32 bit integer.
   template<class R>
   explicit MarshallingInt (ReceiveBuffer<R>& b):val(0){
-    uint32_t shift=1;
+    ::uint32_t shift=1;
     for(;;){
-      uint8_t a=b.giveOne();
+      ::uint8_t a=b.giveOne();
       val+=(a&127)*shift;
       if((a&128)==0)return;
       shift<<=7;
@@ -318,17 +318,17 @@ struct SameFormat{
 
 struct LeastSignificantFirst{
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& buf,uint8_t& val)
+  void read (B<LeastSignificantFirst>& buf,::uint8_t& val)
   {val=buf.giveOne();}
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& buf,uint16_t& val){
+  void read (B<LeastSignificantFirst>& buf,::uint16_t& val){
     val=buf.giveOne();
     val|=buf.giveOne()<<8;
   }
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& buf,uint32_t& val){
+  void read (B<LeastSignificantFirst>& buf,::uint32_t& val){
     val=buf.giveOne();
     val|=buf.giveOne()<<8;
     val|=buf.giveOne()<<16;
@@ -336,27 +336,27 @@ struct LeastSignificantFirst{
   }
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& buf,uint64_t& val){
+  void read (B<LeastSignificantFirst>& buf,::uint64_t& val){
     val=buf.giveOne();
     val|=buf.giveOne()<<8;
     val|=buf.giveOne()<<16;
     val|=buf.giveOne()<<24;
-    val|=(uint64_t)buf.giveOne()<<32;
-    val|=(uint64_t)buf.giveOne()<<40;
-    val|=(uint64_t)buf.giveOne()<<48;
-    val|=(uint64_t)buf.giveOne()<<56;
+    val|=(::uint64_t)buf.giveOne()<<32;
+    val|=(::uint64_t)buf.giveOne()<<40;
+    val|=(::uint64_t)buf.giveOne()<<48;
+    val|=(::uint64_t)buf.giveOne()<<56;
   }
 
   template<template<class> class B>
   void read (B<LeastSignificantFirst>& buf,float& f){
-    uint32_t tmp;
+    ::uint32_t tmp;
     this->read(buf,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
   void read (B<LeastSignificantFirst>& buf,double& d){
-    uint64_t tmp;
+    ::uint64_t tmp;
     this->read(buf,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
@@ -368,7 +368,7 @@ struct LeastSignificantFirst{
 
   //Overloads for uint8_t and int8_t
   template<template<class> class B>
-  void readBlock (B<LeastSignificantFirst>& buf,uint8_t* data,int elements){
+  void readBlock (B<LeastSignificantFirst>& buf,::uint8_t* data,int elements){
     buf.give(data,elements);
   }
 
@@ -380,17 +380,17 @@ struct LeastSignificantFirst{
 
 struct MostSignificantFirst{
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& buf,uint8_t& val)
+  void read (B<MostSignificantFirst>& buf,::uint8_t& val)
   {val=buf.giveOne();}
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& buf,uint16_t& val){
+  void read (B<MostSignificantFirst>& buf,::uint16_t& val){
     val=buf.giveOne()<<8;
     val|=buf.giveOne();
   }
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& buf,uint32_t& val){
+  void read (B<MostSignificantFirst>& buf,::uint32_t& val){
     val=buf.giveOne()<<24;
     val|=buf.giveOne()<<16;
     val|=buf.giveOne()<<8;
@@ -398,11 +398,11 @@ struct MostSignificantFirst{
   }
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& buf,uint64_t& val){
-    val=(uint64_t)buf.giveOne()<<56;
-    val|=(uint64_t)buf.giveOne()<<48;
-    val|=(uint64_t)buf.giveOne()<<40;
-    val|=(uint64_t)buf.giveOne()<<32;
+  void read (B<MostSignificantFirst>& buf,::uint64_t& val){
+    val=(::uint64_t)buf.giveOne()<<56;
+    val|=(::uint64_t)buf.giveOne()<<48;
+    val|=(::uint64_t)buf.giveOne()<<40;
+    val|=(::uint64_t)buf.giveOne()<<32;
     val|=buf.giveOne()<<24;
     val|=buf.giveOne()<<16;
     val|=buf.giveOne()<<8;
@@ -411,14 +411,14 @@ struct MostSignificantFirst{
 
   template<template<class> class B>
   void read (B<MostSignificantFirst>& buf,float& f){
-    uint32_t tmp;
+    ::uint32_t tmp;
     this->read(buf,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
   void read (B<MostSignificantFirst>& buf,double& d){
-    uint64_t tmp;
+    ::uint64_t tmp;
     this->read(buf,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
@@ -429,7 +429,7 @@ struct MostSignificantFirst{
   }
 
   template<template<class> class B>
-  void readBlock (B<MostSignificantFirst>& buf,uint8_t* data,int elements){
+  void readBlock (B<MostSignificantFirst>& buf,::uint8_t* data,int elements){
     buf.give(data,elements);
   }
 
@@ -475,8 +475,8 @@ public:
     subTotal+=msgLength;
     if(subTotal<packetLength){
       rindex=0;
-      msgLength=sizeof(int32_t);
-      msgLength=give<uint32_t>();
+      msgLength=sizeof(::int32_t);
+      msgLength=give<::uint32_t>();
       return true;
     }
     return false;
@@ -491,7 +491,7 @@ public:
   {reader.readBlock(*this,data,elements);}
 
   void giveFile (fileType d){
-    int sz=give<uint32_t>();
+    int sz=give<::uint32_t>();
     checkData(sz);
     while(sz>0){
       int rc=Write(d,rbuf+subTotal+rindex,sz);
@@ -516,13 +516,13 @@ public:
   }
 
   template<class T>void giveIlist (T& lst){
-    for(int c=give<uint32_t>();c>0;--c)
+    for(int c=give<::uint32_t>();c>0;--c)
       lst.push_back(*T::value_type::BuildPolyInstance(*this));
   }
 
   template<class T>void giveRbtree (T& rbt){
     auto endIt=rbt.end();
-    for(int c=give<uint32_t>();c>0;--c)
+    for(int c=give<::uint32_t>();c>0;--c)
       rbt.insert_unique(endIt,*T::value_type::BuildPolyInstance(*this));
   }
 };
@@ -626,17 +626,10 @@ public:
 
 inline void receive (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
 
-inline void receive (SendBuffer& b,char const* s){
-  MarshallingInt len(::strlen(s));
+inline void receive (SendBuffer& b,char const* s,int add=0){
+  MarshallingInt len(::strlen(s)+add);
   len.marshal(b);
   b.receive(s,len());
-}
-
-inline void receivePlus (SendBuffer& b,char const* s){
-  MarshallingInt len(::strlen(s)+1);
-  len.marshal(b);
-  b.receive(s,len());
-  b.receive<::uint8_t>(0);
 }
 
 inline void receive (SendBuffer& b,::std::string const& s){
@@ -651,14 +644,14 @@ inline void receive (SendBuffer& b,::std::string_view const& s){
 }
 using stringPlus=::std::initializer_list<::std::string_view>;
 inline void receive (SendBuffer& b,stringPlus lst){
-  int32_t t=0;
+  ::int32_t t=0;
   for(auto s:lst)t+=s.size();
   MarshallingInt{t}.marshal(b);
   for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
 }
 
 template<class T>void receiveBlock (SendBuffer& b,T const& grp){
-  int32_t count=grp.size();
+  ::int32_t count=grp.size();
   b.receive(count);
   if(count>0)
     b.receive(&*grp.begin(),count*sizeof(typename T::value_type));
@@ -675,9 +668,9 @@ template<class T>void receiveGroupPointer (SendBuffer& b,T const& grp){
 
 //Encode integer into variable-length format.
 inline void MarshallingInt::marshal (SendBuffer& b)const{
-  uint32_t n=val;
+  ::uint32_t n=val;
   for(;;){
-    uint8_t a=n&127;
+    ::uint8_t a=n&127;
     n>>=7;
     if(0==n){b.receive(a);return;}
     b.receive(a|=128);
