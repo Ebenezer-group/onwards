@@ -15,7 +15,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"Only IEEE754 supported");
 
 #include<stdint.h>
 #include<stdio.h>//fopen,snprintf
-#include<stdlib.h>//strtol,exit
+#include<stdlib.h>//exit
 #include<string.h>//memcpy,memmove,strlen
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #include<winsock2.h>
@@ -64,9 +64,7 @@ template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
   e<<t; apps(e,ts...);
 }
 
-template<class...T>void raise (char const* s,T...t){
-  failure f(s); apps(f,t...);
-}
+template<class...T>void raise (char const* s,T...t){failure f(s); apps(f,t...);}
 template<class...T>void raiseFiasco (char const* s,T...t){
   fiasco f(s); apps(f,t...);
 }
@@ -294,9 +292,9 @@ public:
 
   template<class R>
   explicit File (ReceiveBuffer<R>& buf):name(giveStringView(buf)){
-    fileWrapper fl(name.data(),O_WRONLY|O_CREAT|O_TRUNC
+    fileWrapper f(name.data(),O_WRONLY|O_CREAT|O_TRUNC
                    ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-    buf.giveFile(fl.d);
+    buf.giveFile(f.d);
   }
 
   char const* Name ()const{return name.data();}

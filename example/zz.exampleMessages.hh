@@ -2,8 +2,8 @@
 #ifndef zz_exampleMessages_hh
 #define zz_exampleMessages_hh 1
 namespace exampleMessages{
-int32_t Mar (::cmw::SendBuffer& buf
-         ,::std::vector<int32_t> const& a
+::int32_t Mar (::cmw::SendBuffer& buf
+         ,::std::vector<::int32_t> const& a
          ,::std::string const& b){
   receiveBlock(buf,a);
   receive(buf,b);
@@ -11,7 +11,7 @@ int32_t Mar (::cmw::SendBuffer& buf
 }
 
 template<class R>void give (::cmw::ReceiveBuffer<R>& buf
-         ,::std::vector<int32_t>& a
+         ,::std::vector<::int32_t>& a
          ,::std::string& b){
   if(int32_t ca=give<uint32_t>(buf);ca>0){
     a.resize(a.size()+ca);
@@ -20,9 +20,9 @@ template<class R>void give (::cmw::ReceiveBuffer<R>& buf
   b=giveString(buf);
 }
 
-int32_t Mar (::cmw::SendBuffer& buf
-         ,::std::set<int32_t> const& a){
-  buf.receive(static_cast<int32_t>(a.size()));
+::int32_t Mar (::cmw::SendBuffer& buf
+         ,::std::set<::int32_t> const& a){
+  buf.receive<int32_t>(a.size());
   for(auto const& e1:a){
     buf.receive(e1);
   }
@@ -30,14 +30,14 @@ int32_t Mar (::cmw::SendBuffer& buf
 }
 
 template<class R>void give (::cmw::ReceiveBuffer<R>& buf
-         ,::std::set<int32_t>& a){
+         ,::std::set<::int32_t>& a){
   auto z3=a.end();
   for(int32_t ca=give<uint32_t>(buf);ca>0;--ca){
     a.emplace_hint(z3,give<uint32_t>(buf));
   }
 }
 
-int32_t Mar (::cmw::SendBuffer& buf
+::int32_t Mar (::cmw::SendBuffer& buf
          ,::std::array<::std::array<float, 2>, 3> const& a){
   buf.receive(&a,sizeof a);
   return 10000;
@@ -46,24 +46,6 @@ int32_t Mar (::cmw::SendBuffer& buf
 template<class R>void give (::cmw::ReceiveBuffer<R>& buf
          ,::std::array<::std::array<float, 2>, 3>& a){
   buf.giveBlock(&a[0][0],sizeof a/sizeof(float));
-}
-
-int32_t Mar (::cmw::SendBuffer& buf
-         ,::plf::colony<::std::string> const& a){
-  buf.receive(static_cast<int32_t>(a.size()));
-  for(auto const& e3:a){
-    receive(buf,e3);
-  }
-  return 10000;
-}
-
-template<class R>void give (::cmw::ReceiveBuffer<R>& buf
-         ,::plf::colony<::std::string>& a){
-  int32_t ca=give<uint32_t>(buf);
-  a.reserve(a.size()+ca);
-  for(;ca>0;--ca){
-    a.insert(giveString(buf));
-  }
 }
 
 template<messageID id,class...T>

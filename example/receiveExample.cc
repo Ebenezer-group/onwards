@@ -1,7 +1,6 @@
 //  This program receives messages sent by sendExample.
 #include<cmw/Buffer.hh>
 #include"messageIDs.hh"
-#include"plf_colony.h"
 
 #include<array>
 #include<iostream>
@@ -46,14 +45,6 @@ int main ()try{
           for(auto val:subarray){::std::cout<<val<<' ';}
           ::std::cout<<'\n';
         }
-      }
-      break;
-
-      case messageID::id4:
-      {
-        ::plf::colony<::std::string> clny;
-        give(buf,clny);
-        for(auto val:clny){::std::cout<<val<<' ';}
       }
       break;
 

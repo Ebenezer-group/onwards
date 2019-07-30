@@ -2,7 +2,6 @@
 
 #include<cmw/Buffer.hh>
 #include"messageIDs.hh"
-#include"plf_colony.h"
 
 #include<array>
 #include<iostream>
@@ -22,7 +21,7 @@ int main ()try{
                     ,"12345",SOCK_DGRAM);
   ::cmw::BufferStack<::cmw::SameFormat> buf(ai.getSock());
 
-  ::std::cout<<"Enter the ID of the message to send: 0,1,2,or 3.\n";
+  ::std::cout<<"Enter the ID of the message to send: 0,1 or 2.\n";
   int msgID;
   ::std::cin>>msgID;
   using namespace ::exampleMessages;
@@ -48,13 +47,6 @@ int main ()try{
                                                   ,{5.5,6.6}
                                                 }};
       marshal<messageID::id3>(buf,ar);
-    }
-    break;
-
-    case messageID::id4:
-    {
-      ::plf::colony<::std::string> clny{"Beautiful words ","wonderful words ","of life"};
-      marshal<messageID::id4>(buf,clny);
     }
     break;
 
