@@ -626,15 +626,9 @@ public:
 
 inline void receive (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
 
-inline void receive (SendBuffer& b,char const* s,int add=0){
-  MarshallingInt len(::strlen(s)+add);
-  len.marshal(b);
-  b.receive(s,len());
-}
-
-inline void receive (SendBuffer& b,::std::string_view s){
-  MarshallingInt(s.size()).marshal(b);
-  b.receive(s.data(),s.size());
+inline void receive (SendBuffer& b,::std::string_view s,int a=0){
+  MarshallingInt(s.size()+a).marshal(b);
+  b.receive(s.data(),s.size()+a);
 }
 
 using stringPlus=::std::initializer_list<::std::string_view>;
