@@ -52,7 +52,6 @@ class failure:public ::std::exception{
   ::std::string s;
 public:
   explicit failure (char const* s):s(s){}
-  explicit failure (::std::string_view s):s(s){}
   void operator<< (::std::string_view st){s.append(" "); s.append(st);}
   void operator<< (char const* st){s.append(" "); s.append(st);}
   void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
@@ -214,10 +213,10 @@ inline int sockRead (sockType s,void* data,int len
 class SendBuffer;
 template<class R>class ReceiveBuffer;
 class MarshallingInt{
-  int32_t val;
+  ::int32_t val;
 public:
   MarshallingInt (){}
-  explicit MarshallingInt (int32_t v):val(v){}
+  explicit MarshallingInt (::int32_t v):val(v){}
   explicit MarshallingInt (char const* v):val(fromChars(v)){}
 
   //Reads a sequence of bytes in variable-length format and
@@ -234,8 +233,8 @@ public:
     }
   }
 
-  void operator= (int32_t r){val=r;}
-  int32_t operator() ()const{return val;}
+  void operator= (::int32_t r){val=r;}
+  ::int32_t operator() ()const{return val;}
   void marshal (SendBuffer&)const;
 };
 inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
@@ -624,7 +623,7 @@ public:
   template<class...T>void receiveMulti (char const*,T&&...);
 };
 
-inline void receive (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
+inline void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
 
 inline void receive (SendBuffer& b,::std::string_view s,int a=0){
   MarshallingInt(s.size()+a).marshal(b);

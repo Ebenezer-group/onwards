@@ -8,7 +8,7 @@ cmwAccount::marshalMembers (::cmw::SendBuffer& buf)const{
 }
 
 namespace mddlBck{
-int32_t Mar (::cmw::SendBuffer& buf
+::int32_t Mar (::cmw::SendBuffer& buf
          ,::std::vector<cmwAccount> const& a
          ,::int32_t b){
   receiveGroup(buf,a);
@@ -16,13 +16,13 @@ int32_t Mar (::cmw::SendBuffer& buf
   return 10000;
 }
 
-int32_t Mar (::cmw::SendBuffer& buf
+::int32_t Mar (::cmw::SendBuffer& buf
          ,cmwRequest const& a){
   a.marshal(buf);
   return 700000;
 }
 
-int32_t Mar (::cmw::SendBuffer& buf){
+::int32_t Mar (::cmw::SendBuffer& buf){
   return 10000;
 }
 
@@ -40,7 +40,7 @@ void marshal (::cmw::SendBuffer& buf
          ,::cmw::stringPlus const& a={}
          ,::int8_t b={})try{
   buf.reserveBytes(4);
-  receive(buf,res);
+  receiveBool(buf,res);
   if(!res){
     receive(buf,a);
     buf.receive(b);
