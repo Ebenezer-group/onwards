@@ -7,7 +7,6 @@
 #include<exception>
 #include<initializer_list>
 #include<limits>
-#include<string>
 #include<string_view>
 #include<type_traits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8,"");
@@ -16,7 +15,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"Only IEEE754 supported");
 #include<stdint.h>
 #include<stdio.h>//fopen,snprintf
 #include<stdlib.h>//exit
-#include<string.h>//memcpy,memmove,strlen
+#include<string.h>//memcpy,memmove
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #include<winsock2.h>
 #include<ws2tcpip.h>
@@ -64,9 +63,8 @@ template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
   e<<t; apps(e,ts...);
 }
 
-template<class...T>void raise (char const* s,T...t){failure f(s); apps(f,t...);}
-template<class...T>void raiseFiasco (char const* s,T...t){
-  fiasco f(s); apps(f,t...);
+template<class F=failure,class...T>void raise (char const* s,T...t){
+  F f{s}; apps(f,t...);
 }
 
 inline void winStart (){
@@ -76,9 +74,9 @@ inline void winStart (){
 #endif
 }
 
-inline int fromChars (char const* p){
+inline int fromChars (::std::string_view s){
   int res=0;
-  ::std::from_chars(p,p+::strlen(p),res);
+  ::std::from_chars(s.data(),s.data()+s.size(),res);
   return res;
 }
 
@@ -154,7 +152,7 @@ class GetaddrinfoWrapper{
 };
 
 inline sockType connectWrapper (char const* node,char const* port){
-  GetaddrinfoWrapper ai(node,port,SOCK_STREAM);
+  GetaddrinfoWrapper ai{node,port,SOCK_STREAM};
   auto s=ai.getSock();
   if(0==::connect(s,ai()->ai_addr,ai()->ai_addrlen))return s;
   errno=preserveError(s);
@@ -162,14 +160,14 @@ inline sockType connectWrapper (char const* node,char const* port){
 }
 
 inline sockType udpServer (char const* port){
-  GetaddrinfoWrapper ai(nullptr,port,SOCK_DGRAM,AI_PASSIVE);
+  GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
   auto s=ai.getSock();
   if(0==::bind(s,ai()->ai_addr,ai()->ai_addrlen))return s;
   raise("udpServer",preserveError(s));
 }
 
 inline sockType tcpServer (char const* port){
-  GetaddrinfoWrapper ai(nullptr,port,SOCK_STREAM,AI_PASSIVE);
+  GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
   auto s=ai.getSock();
 
   if(int on=1;setsockWrapper(s,SO_REUSEADDR,on)==0
@@ -187,8 +185,8 @@ inline int acceptWrapper(sockType s){
 
 inline int sockWrite (sockType s,void const* data,int len
                       ,sockaddr const* addr=nullptr,socklen_t toLen=0){
-  int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);
-  if(r>0)return r;
+  if(int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);r>0)
+    return r;
   auto e=getError();
   if(EAGAIN==e||EWOULDBLOCK==e)return 0;
   raise("sockWrite",s,e);
@@ -199,7 +197,7 @@ inline int sockRead (sockType s,void* data,int len
   int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(r>0)return r;
   auto e=getError();
-  if(0==r||ECONNRESET==e)raiseFiasco("sockRead eof",s,len,e);
+  if(0==r||ECONNRESET==e)raise<fiasco>("sockRead eof",s,len,e);
   if(EAGAIN==e||EWOULDBLOCK==e
 #ifdef CMW_WINDOWS
      ||WSAETIMEDOUT==e
@@ -215,7 +213,7 @@ class MarshallingInt{
 public:
   MarshallingInt (){}
   explicit MarshallingInt (::int32_t v):val(v){}
-  explicit MarshallingInt (char const* v):val(fromChars(v)){}
+  explicit MarshallingInt (::std::string_view v):val(fromChars(v)){}
 
   //Reads a sequence of bytes in variable-length format and
   //builds a 32 bit integer.
@@ -261,7 +259,7 @@ inline int Write (int fd,void const* data,int len){
 inline int Read (int fd,void* data,int len){
   int r=::read(fd,data,len);
   if(r>0)return r;
-  if(r==0)raiseFiasco("Read eof",len);
+  if(r==0)raise<fiasco>("Read eof",len);
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
   raise("Read",len,errno);
 }
@@ -292,8 +290,8 @@ public:
 
   template<class R>
   explicit File (ReceiveBuffer<R>& buf):name(giveStringView(buf)){
-    fileWrapper f(name.data(),O_WRONLY|O_CREAT|O_TRUNC
-                   ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    fileWrapper f{name.data(),O_WRONLY|O_CREAT|O_TRUNC
+                  ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH};
     buf.giveFile(f.d);
   }
 
