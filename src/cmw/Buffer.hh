@@ -6,6 +6,7 @@
 #include<exception>
 #include<initializer_list>
 #include<limits>
+#include<string>
 #include<string_view>
 #include<type_traits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8);
