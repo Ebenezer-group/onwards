@@ -9,7 +9,7 @@
 #include<limits>
 #include<string_view>
 #include<type_traits>
-static_assert(::std::numeric_limits<unsigned char>::digits==8,"");
+static_assert(::std::numeric_limits<unsigned char>::digits==8);
 static_assert(::std::numeric_limits<float>::is_iec559,"Only IEEE754 supported");
 
 #include<stdint.h>
@@ -234,7 +234,7 @@ public:
   void marshal (SendBuffer&)const;
 };
 inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
-inline bool operator== (MarshallingInt l,int32_t r){return l()==r;}
+inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
 
 #ifdef CMW_WINDOWS
 inline DWORD Write (HANDLE h,void const* data,int len){
@@ -289,10 +289,10 @@ public:
   explicit File (::std::string_view n):name(n){}
 
   template<class R>
-  explicit File (ReceiveBuffer<R>& buf):name(giveStringView(buf)){
+  explicit File (ReceiveBuffer<R>& b):name(giveStringView(b)){
     fileWrapper f{name.data(),O_WRONLY|O_CREAT|O_TRUNC
                   ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH};
-    buf.giveFile(f.d);
+    b.giveFile(f.d);
   }
 
   char const* Name ()const{return name.data();}
@@ -544,7 +544,7 @@ template<class R>auto giveStringView (ReceiveBuffer<R>& buf){
 class SendBuffer{
   SendBuffer (SendBuffer const&);
   SendBuffer& operator= (SendBuffer);
-  int32_t savedSize=0;
+  ::int32_t savedSize=0;
 protected:
   int index=0;
   int const bufsize;
@@ -565,7 +565,7 @@ public:
   }
 
   template<class T>void receive (T t){
-    static_assert(::std::is_arithmetic<T>::value||::std::is_enum<T>::value,"");
+    static_assert(::std::is_arithmetic<T>::value||::std::is_enum<T>::value);
     receive(&t,sizeof t);
   }
 
@@ -577,13 +577,13 @@ public:
   }
 
   template<class T>T receive (int where,T t){
-    static_assert(::std::is_arithmetic<T>::value,"");
+    static_assert(::std::is_arithmetic<T>::value);
     ::memcpy(buf+where,&t,sizeof t);
     return t;
   }
 
-  void fillInSize (int32_t max){
-    int32_t marshalledBytes=index-savedSize;
+  void fillInSize (::int32_t max){
+    ::int32_t marshalledBytes=index-savedSize;
     if(marshalledBytes>max)raise("fillInSize",max);
     receive(savedSize,marshalledBytes);
     savedSize=index;
@@ -592,7 +592,7 @@ public:
   void reset (){savedSize=index=0;}
   void rollback (){index=savedSize;}
 
-  void receiveFile (fileType d,int32_t sz){
+  void receiveFile (fileType d,::int32_t sz){
     receive(sz);
     checkSpace(sz);
     if(Read(d,buf+index,sz)!=sz)raise("SendBuffer receiveFile");
