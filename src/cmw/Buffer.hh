@@ -304,134 +304,130 @@ template<class R>void giveFiles (ReceiveBuffer<R>& b){
 
 struct SameFormat{
   template<template<class> class B,class U>
-  void read (B<SameFormat>& buf,U& data){buf.give(&data,sizeof(U));}
+  void read (B<SameFormat>& b,U& data){b.give(&data,sizeof(U));}
 
   template<template<class> class B,class U>
-  void readBlock (B<SameFormat>& buf,U* data,int elements)
-  {buf.give(data,elements*sizeof(U));}
+  void readBlock (B<SameFormat>& b,U* data,int elements)
+  {b.give(data,elements*sizeof(U));}
 };
 
 struct LeastSignificantFirst{
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& buf,::uint8_t& val)
-  {val=buf.giveOne();}
+  void read (B<LeastSignificantFirst>& b,::uint8_t& val)
+  {val=b.giveOne();}
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& buf,::uint16_t& val){
-    val=buf.giveOne();
-    val|=buf.giveOne()<<8;
+  void read (B<LeastSignificantFirst>& b,::uint16_t& val){
+    val=b.giveOne();
+    val|=b.giveOne()<<8;
   }
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& buf,::uint32_t& val){
-    val=buf.giveOne();
-    val|=buf.giveOne()<<8;
-    val|=buf.giveOne()<<16;
-    val|=buf.giveOne()<<24;
+  void read (B<LeastSignificantFirst>& b,::uint32_t& val){
+    val=b.giveOne();
+    val|=b.giveOne()<<8;
+    val|=b.giveOne()<<16;
+    val|=b.giveOne()<<24;
   }
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& buf,::uint64_t& val){
-    val=buf.giveOne();
-    val|=buf.giveOne()<<8;
-    val|=buf.giveOne()<<16;
-    val|=buf.giveOne()<<24;
-    val|=(::uint64_t)buf.giveOne()<<32;
-    val|=(::uint64_t)buf.giveOne()<<40;
-    val|=(::uint64_t)buf.giveOne()<<48;
-    val|=(::uint64_t)buf.giveOne()<<56;
+  void read (B<LeastSignificantFirst>& b,::uint64_t& val){
+    val=b.giveOne();
+    val|=b.giveOne()<<8;
+    val|=b.giveOne()<<16;
+    val|=b.giveOne()<<24;
+    val|=(::uint64_t)b.giveOne()<<32;
+    val|=(::uint64_t)b.giveOne()<<40;
+    val|=(::uint64_t)b.giveOne()<<48;
+    val|=(::uint64_t)b.giveOne()<<56;
   }
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& buf,float& f){
+  void read (B<LeastSignificantFirst>& b,float& f){
     ::uint32_t tmp;
-    this->read(buf,tmp);
+    this->read(b,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& buf,double& d){
+  void read (B<LeastSignificantFirst>& b,double& d){
     ::uint64_t tmp;
-    this->read(buf,tmp);
+    this->read(b,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
 
   template<template<class> class B,class U>
-  void readBlock (B<LeastSignificantFirst>& buf,U* data,int elements){
-    for(int i=0;i<elements;++i){*(data+i)=buf.template give<U>();}
+  void readBlock (B<LeastSignificantFirst>& b,U* data,int elements){
+    for(int i=0;i<elements;++i){*(data+i)=b.template give<U>();}
   }
 
   //Overloads for uint8_t and int8_t
   template<template<class> class B>
-  void readBlock (B<LeastSignificantFirst>& buf,::uint8_t* data,int elements){
-    buf.give(data,elements);
-  }
+  void readBlock (B<LeastSignificantFirst>& b,::uint8_t* data,int elements)
+  {b.give(data,elements);}
 
   template<template<class> class B>
-  void readBlock (B<LeastSignificantFirst>& buf,int8_t* data,int elements){
-    buf.give(data,elements);
-  }
+  void readBlock (B<LeastSignificantFirst>& b,int8_t* data,int elements)
+  {b.give(data,elements);}
 };
 
 struct MostSignificantFirst{
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& buf,::uint8_t& val)
-  {val=buf.giveOne();}
+  void read (B<MostSignificantFirst>& b,::uint8_t& val)
+  {val=b.giveOne();}
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& buf,::uint16_t& val){
-    val=buf.giveOne()<<8;
-    val|=buf.giveOne();
+  void read (B<MostSignificantFirst>& b,::uint16_t& val){
+    val=b.giveOne()<<8;
+    val|=b.giveOne();
   }
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& buf,::uint32_t& val){
-    val=buf.giveOne()<<24;
-    val|=buf.giveOne()<<16;
-    val|=buf.giveOne()<<8;
-    val|=buf.giveOne();
+  void read (B<MostSignificantFirst>& b,::uint32_t& val){
+    val=b.giveOne()<<24;
+    val|=b.giveOne()<<16;
+    val|=b.giveOne()<<8;
+    val|=b.giveOne();
   }
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& buf,::uint64_t& val){
-    val=(::uint64_t)buf.giveOne()<<56;
-    val|=(::uint64_t)buf.giveOne()<<48;
-    val|=(::uint64_t)buf.giveOne()<<40;
-    val|=(::uint64_t)buf.giveOne()<<32;
-    val|=buf.giveOne()<<24;
-    val|=buf.giveOne()<<16;
-    val|=buf.giveOne()<<8;
-    val|=buf.giveOne();
+  void read (B<MostSignificantFirst>& b,::uint64_t& val){
+    val=(::uint64_t)b.giveOne()<<56;
+    val|=(::uint64_t)b.giveOne()<<48;
+    val|=(::uint64_t)b.giveOne()<<40;
+    val|=(::uint64_t)b.giveOne()<<32;
+    val|=b.giveOne()<<24;
+    val|=b.giveOne()<<16;
+    val|=b.giveOne()<<8;
+    val|=b.giveOne();
   }
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& buf,float& f){
+  void read (B<MostSignificantFirst>& b,float& f){
     ::uint32_t tmp;
-    this->read(buf,tmp);
+    this->read(b,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& buf,double& d){
+  void read (B<MostSignificantFirst>& b,double& d){
     ::uint64_t tmp;
-    this->read(buf,tmp);
+    this->read(b,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
 
   template<template<class> class B,class U>
-  void readBlock (B<MostSignificantFirst>& buf,U* data,int elements){
-    for(int i=0;i<elements;++i){*(data+i)=buf.template give<U>();}
+  void readBlock (B<MostSignificantFirst>& b,U* data,int elements){
+    for(int i=0;i<elements;++i){*(data+i)=b.template give<U>();}
   }
 
   template<template<class> class B>
-  void readBlock (B<MostSignificantFirst>& buf,::uint8_t* data,int elements){
-    buf.give(data,elements);
-  }
+  void readBlock (B<MostSignificantFirst>& b,::uint8_t* data,int elements)
+  {b.give(data,elements);}
 
   template<template<class> class B>
-  void readBlock (B<MostSignificantFirst>& buf,int8_t* data,int elements){
-    buf.give(data,elements);
-  }
+  void readBlock (B<MostSignificantFirst>& b,int8_t* data,int elements)
+  {b.give(data,elements);}
 };
 
 template<class R> class ReceiveBuffer{
@@ -496,7 +492,7 @@ public:
   }
 
   template<class T>T giveStringy (){
-    MarshallingInt len(*this);
+    MarshallingInt len{*this};
     checkData(len());
     T s(rbuf+subTotal+rindex,len());
     rindex+=len();
@@ -504,7 +500,7 @@ public:
   }
 
   template<::std::size_t N>void copyString (char(&dest)[N]){
-    MarshallingInt len(*this);
+    MarshallingInt len{*this};
     if(len()>=N)raise("ReceiveBuffer copyString");
     give(dest,len());
     dest[len()]=0;
@@ -522,24 +518,22 @@ public:
   }
 };
 
-template<class T,class R>
-T give (ReceiveBuffer<R>& buf){return buf.template give<T>();}
+template<class T,class R>T give (ReceiveBuffer<R>& b)
+{return b.template give<T>();}
 
-template<class R>bool giveBool (ReceiveBuffer<R>& buf){
-  switch(buf.giveOne()){
+template<class R>bool giveBool (ReceiveBuffer<R>& b){
+  switch(b.giveOne()){
     case 0:return false;
     case 1:return true;
     default:raise("giveBool");
   }
 }
 
-template<class R>auto giveString (ReceiveBuffer<R>& buf){
-  return buf.template giveStringy<::std::string>();
-}
+template<class R>auto giveString (ReceiveBuffer<R>& b)
+{return b.template giveStringy<::std::string>();}
 
-template<class R>auto giveStringView (ReceiveBuffer<R>& buf){
-  return buf.template giveStringy<::std::string_view>();
-}
+template<class R>auto giveStringView (ReceiveBuffer<R>& b)
+{return b.template giveStringy<::std::string_view>();}
 
 class SendBuffer{
   SendBuffer (SendBuffer const&);
@@ -569,17 +563,17 @@ public:
     receive(&t,sizeof t);
   }
 
+  template<class T>T receive (int where,T t){
+    static_assert(::std::is_arithmetic<T>::value);
+    ::memcpy(buf+where,&t,sizeof t);
+    return t;
+  }
+
   int reserveBytes (int n){
     checkSpace(n);
     auto i=index;
     index+=n;
     return i;
-  }
-
-  template<class T>T receive (int where,T t){
-    static_assert(::std::is_arithmetic<T>::value);
-    ::memcpy(buf+where,&t,sizeof t);
-    return t;
   }
 
   void fillInSize (::int32_t max){
