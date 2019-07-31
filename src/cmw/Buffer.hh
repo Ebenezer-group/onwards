@@ -2,7 +2,6 @@
 #define CMW_Buffer_hh 1
 #include"quicklz.h"
 #include<algorithm>//min
-#include<array>
 #include<charconv>//from_chars
 #include<exception>
 #include<initializer_list>
@@ -499,11 +498,12 @@ public:
     return s;
   }
 
-  template<::std::size_t N>void copyString (char(&dest)[N]){
+  template<::std::size_t N>auto copyString (char(&dest)[N]){
     MarshallingInt len{*this};
     if(len()>=N)raise("ReceiveBuffer copyString");
     give(dest,len());
     dest[len()]=0;
+    return len();
   }
 
   template<class T>void giveIlist (T& lst){
@@ -770,43 +770,39 @@ public:
 
 template<int N>class FixedString{
   MarshallingInt len;
-  ::std::array<char,N> str;
+  char str[N];
  public:
   FixedString (){}
 
   explicit FixedString (::std::string_view s):len(s.length()){
     if(len()>=N)raise("FixedString ctor");
-    ::strncpy(&str[0],s.data(),len());
+    ::strncpy(str,s.data(),len());
     str[len()]=0;
   }
 
-  template<class R>explicit FixedString (ReceiveBuffer<R>& b):len(b){
-    if(len()>=N)raise("FixedString stream ctor");
-    b.give(&str[0],len());
-    str[len()]=0;
-  }
+  template<class R>explicit FixedString (ReceiveBuffer<R>& b):
+      len(b.copyString(str)){}
 
   void marshal (SendBuffer& b)const{
     len.marshal(b);
-    b.receive(&str[0],len());
+    b.receive(str,len());
   }
 
   int bytesAvailable (){return N-(len()+1);}
 
-  char* operator() (){return &str[0];}
-  char const* c_str ()const{return &str[0];}
+  char* operator() (){return str;}
+  char const* c_str ()const{return str;}
   char operator[] (int i)const{return str[i];}
 };
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
 
 struct FILEwrapper{
-  ::FILE* hndl;
+  ::FILE* const hndl;
   char line[120];
 
-  FILEwrapper (char const* fn,char const* mode){
-    if((hndl=::fopen(fn,mode))==nullptr)raise("FILEwrapper",fn,mode,errno);
-  }
+  FILEwrapper (char const* fn,char const* mode):hndl(::fopen(fn,mode))
+  {if(nullptr==hndl)raise("FILEwrapper",fn,mode,errno);}
   char* fgets (){return ::fgets(line,sizeof line,hndl);}
   ~FILEwrapper (){::fclose(hndl);}
 };
