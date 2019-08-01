@@ -499,14 +499,6 @@ public:
     return s;
   }
 
-  template<::std::size_t N>auto copyString (char(&dest)[N]){
-    MarshallingInt len{*this};
-    if(len()>=N)raise("ReceiveBuffer copyString");
-    give(dest,len());
-    dest[len()]=0;
-    return len();
-  }
-
   template<class T>void giveIlist (T& lst){
     for(int c=give<::uint32_t>();c>0;--c)
       lst.push_back(*T::value_type::BuildPolyInstance(*this));
@@ -781,8 +773,12 @@ template<int N>class FixedString{
     str[len()]=0;
   }
 
-  template<class R>explicit FixedString (ReceiveBuffer<R>& b):
-      len(b.copyString(str)){}
+  template<class R>explicit FixedString (ReceiveBuffer<R>& b):len(b){
+    if(len()>=N)raise("FixedString stream ctor");
+    b.give(str,len());
+    str[len()]=0;
+  }
+
 
   void marshal (SendBuffer& b)const{
     len.marshal(b);
