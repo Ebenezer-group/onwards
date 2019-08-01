@@ -289,7 +289,7 @@ public:
   explicit File (::std::string_view n):name(n){}
 
   template<class R>
-  explicit File (ReceiveBuffer<R>& b):name(giveStringView(b)){
+  explicit File (ReceiveBuffer<R>& b):name(b.giveStringView()){
     fileWrapper f{name.data(),O_WRONLY|O_CREAT|O_TRUNC
                   ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH};
     b.giveFile(f.d);
@@ -491,10 +491,10 @@ public:
     }
   }
 
-  template<class T>T giveStringy (){
+  auto giveStringView (){
     MarshallingInt len{*this};
     checkData(len());
-    T s(rbuf+subTotal+rindex,len());
+    ::std::string_view s(rbuf+subTotal+rindex,len());
     rindex+=len();
     return s;
   }
@@ -521,12 +521,6 @@ template<class R>bool giveBool (ReceiveBuffer<R>& b){
     default:raise("giveBool");
   }
 }
-
-template<class R>auto giveString (ReceiveBuffer<R>& b)
-{return b.template giveStringy<::std::string>();}
-
-template<class R>auto giveStringView (ReceiveBuffer<R>& b)
-{return b.template giveStringy<::std::string_view>();}
 
 class SendBuffer{
   SendBuffer (SendBuffer const&);
@@ -778,7 +772,6 @@ template<int N>class FixedString{
     b.give(str,len());
     str[len()]=0;
   }
-
 
   void marshal (SendBuffer& b)const{
     len.marshal(b);

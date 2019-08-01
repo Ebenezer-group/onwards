@@ -23,7 +23,7 @@ int genzMain (int ac,char** av)try{
     setRcvTimeout(buf.sock_,tm);
     if(buf.getPacket()){
       if(giveBool(buf))::exit(EXIT_SUCCESS);
-      leave("cmwA:%s\n",giveStringView(buf).data());
+      leave("cmwA:%s\n",buf.giveStringView().data());
     }
   }
   leave("No reply received.  Is the cmwA running?\n");

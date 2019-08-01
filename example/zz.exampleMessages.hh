@@ -17,7 +17,7 @@ template<class R>void give (::cmw::ReceiveBuffer<R>& buf
     a.resize(a.size()+ca);
     buf.giveBlock(&(*(a.end()-ca)),ca);
   }
-  b=giveString(buf);
+  b=buf.giveStringView();
 }
 
 ::int32_t Mar (::cmw::SendBuffer& buf

@@ -107,7 +107,7 @@ class cmwAmbassador{
     while(!cmwBuf.flush());
     fds[0].events=POLLIN;
     while(!cmwBuf.gotPacket());
-    if(!giveBool(cmwBuf))bail("Login:%s",giveStringView(cmwBuf).data());
+    if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
     if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
   }
 
@@ -181,7 +181,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
               setDirectory(req.path.c_str());
               giveFiles(cmwBuf);
               outFront<true>(req);
-            }else outFront<false>(req,"CMW:",giveStringView(cmwBuf));
+            }else outFront<false>(req,"CMW:",cmwBuf.giveStringView());
           }
           pendingRequests.erase(::std::begin(pendingRequests));
         }while(cmwBuf.nextMessage());
