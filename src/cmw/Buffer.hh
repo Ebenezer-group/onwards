@@ -56,6 +56,7 @@ public:
   void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
   char const* what ()const noexcept{return s.c_str();}
 };
+
 struct fiasco:failure{explicit fiasco(char const* s):failure(s){}};
 
 template<class E>void apps (E& e){throw e;}
@@ -217,8 +218,7 @@ public:
 
   //Reads a sequence of bytes in variable-length format and
   //builds a 32 bit integer.
-  template<class R>
-  explicit MarshallingInt (ReceiveBuffer<R>& b):val(0){
+  template<class R>explicit MarshallingInt (ReceiveBuffer<R>& b):val(0){
     ::uint32_t shift=1;
     for(;;){
       ::uint8_t a=b.giveOne();
@@ -284,22 +284,21 @@ struct fileWrapper{
 };
 
 class File{
-  ::std::string_view name;
+  ::std::string_view nam;
 public:
-  explicit File (::std::string_view n):name(n){}
+  explicit File (::std::string_view n):nam(n){}
 
   template<class R>
-  explicit File (ReceiveBuffer<R>& b):name(b.giveStringView()){
-    fileWrapper f{name.data(),O_WRONLY|O_CREAT|O_TRUNC
-                  ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH};
-    b.giveFile(f.d);
+  explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView()){
+    b.giveFile(fileWrapper{nam.data(),O_WRONLY|O_CREAT|O_TRUNC
+                           ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
   }
 
-  char const* Name ()const{return name.data();}
+  char const* name ()const{return nam.data();}
 };
-template<class R>void giveFiles (ReceiveBuffer<R>& b){
-  for(auto n=MarshallingInt{b}();n>0;--n)File{b};
-}
+
+template<class R>void giveFiles (ReceiveBuffer<R>& b)
+{for(auto n=MarshallingInt{b}();n>0;--n)File{b};}
 #endif
 
 struct SameFormat{
@@ -441,18 +440,18 @@ protected:
 public:
   ReceiveBuffer (char* addr,int bytes):packetLength(bytes),rbuf(addr){}
 
-  void checkData (int n){
-    if(n>msgLength-rindex)raise("ReceiveBuffer checkData",n,msgLength,rindex);
+  void checkLen (int n){
+    if(n>msgLength-rindex)raise("ReceiveBuffer checkLen",n,msgLength,rindex);
   }
 
   void give (void* address,int len){
-    checkData(len);
+    checkLen(len);
     ::memcpy(address,rbuf+subTotal+rindex,len);
     rindex+=len;
   }
 
   char giveOne (){
-    checkData(1);
+    checkLen(1);
     return rbuf[subTotal+rindex++];
   }
 
@@ -483,7 +482,7 @@ public:
 
   void giveFile (fileType d){
     int sz=give<::uint32_t>();
-    checkData(sz);
+    checkLen(sz);
     while(sz>0){
       int rc=Write(d,rbuf+subTotal+rindex,sz);
       sz-=rc;
@@ -493,7 +492,7 @@ public:
 
   auto giveStringView (){
     MarshallingInt len{*this};
-    checkData(len());
+    checkLen(len());
     ::std::string_view s(rbuf+subTotal+rindex,len());
     rindex+=len();
     return s;
