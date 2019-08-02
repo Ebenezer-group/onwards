@@ -264,9 +264,8 @@ inline int Read (int fd,void* data,int len){
   raise("Read",len,errno);
 }
 
-template<class...T>void syslogWrapper (int pri,char const* fmt,T... t){
-  ::syslog(pri,fmt,t...);
-}
+template<class...T>void syslogWrapper (int pri,char const* fmt,T... t)
+{::syslog(pri,fmt,t...);}
 
 template<class...T>void bail (char const* fmt,T... t)noexcept{
   syslogWrapper(LOG_ERR,fmt,t...);
@@ -277,9 +276,9 @@ struct fileWrapper{
   int const d;
   fileWrapper ():d(-2){}
   fileWrapper (char const* name,int flags,mode_t mode=0):
-          d(::open(name,flags,mode)){
-    if(d<0)raise("fileWrapper",name,errno);
-  }
+          d(::open(name,flags,mode))
+  {if(d<0)raise("fileWrapper",name,errno);}
+
   ~fileWrapper (){::close(d);}
 };
 
@@ -288,8 +287,7 @@ class File{
 public:
   explicit File (::std::string_view n):nam(n){}
 
-  template<class R>
-  explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView()){
+  template<class R>explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView()){
     b.giveFile(fileWrapper{nam.data(),O_WRONLY|O_CREAT|O_TRUNC
                            ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
   }
@@ -500,13 +498,13 @@ public:
 
   template<class T>void giveIlist (T& lst){
     for(int c=give<::uint32_t>();c>0;--c)
-      lst.push_back(*T::value_type::BuildPolyInstance(*this));
+      lst.push_back(*T::value_type::buildPolyInstance(*this));
   }
 
   template<class T>void giveRbtree (T& rbt){
     auto endIt=rbt.end();
     for(int c=give<::uint32_t>();c>0;--c)
-      rbt.insert_unique(endIt,*T::value_type::BuildPolyInstance(*this));
+      rbt.insert_unique(endIt,*T::value_type::buildPolyInstance(*this));
   }
 };
 

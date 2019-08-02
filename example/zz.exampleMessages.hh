@@ -2,7 +2,7 @@
 #ifndef zz_exampleMessages_hh
 #define zz_exampleMessages_hh 1
 namespace exampleMessages{
-::int32_t Mar (::cmw::SendBuffer& buf
+::int32_t mar (::cmw::SendBuffer& buf
          ,::std::vector<::int32_t> const& a
          ,::std::string const& b){
   receiveBlock(buf,a);
@@ -20,7 +20,7 @@ template<class R>void give (::cmw::ReceiveBuffer<R>& buf
   b=buf.giveStringView();
 }
 
-::int32_t Mar (::cmw::SendBuffer& buf
+::int32_t mar (::cmw::SendBuffer& buf
          ,::std::set<::int32_t> const& a){
   buf.receive<int32_t>(a.size());
   for(auto const& e1:a){
@@ -37,7 +37,7 @@ template<class R>void give (::cmw::ReceiveBuffer<R>& buf
   }
 }
 
-::int32_t Mar (::cmw::SendBuffer& buf
+::int32_t mar (::cmw::SendBuffer& buf
          ,::std::array<::std::array<float, 2>, 3> const& a){
   buf.receive(&a,sizeof a);
   return 10000;
@@ -52,7 +52,7 @@ template<messageID id,class...T>
 void marshal (::cmw::SendBuffer& buf,T&&...t)try{
   buf.reserveBytes(4);
   buf.receive(id);
-  buf.fillInSize(Mar(buf,t...));
+  buf.fillInSize(mar(buf,t...));
 }catch(...){buf.rollback();throw;}
 }
 #endif

@@ -8,7 +8,7 @@ cmwAccount::marshalMembers (::cmw::SendBuffer& buf)const{
 }
 
 namespace mddlBck{
-::int32_t Mar (::cmw::SendBuffer& buf
+::int32_t mar (::cmw::SendBuffer& buf
          ,::std::vector<cmwAccount> const& a
          ,::int32_t b){
   receiveGroup(buf,a);
@@ -16,13 +16,13 @@ namespace mddlBck{
   return 10000;
 }
 
-::int32_t Mar (::cmw::SendBuffer& buf
+::int32_t mar (::cmw::SendBuffer& buf
          ,cmwRequest const& a){
   a.marshal(buf);
   return 700000;
 }
 
-::int32_t Mar (::cmw::SendBuffer& buf){
+::int32_t mar (::cmw::SendBuffer& buf){
   return 10000;
 }
 
@@ -30,13 +30,12 @@ template<messageID id,class...T>
 void marshal (::cmw::SendBuffer& buf,T&&...t)try{
   buf.reserveBytes(4);
   buf.receive<messageID>(id);
-  buf.fillInSize(Mar(buf,t...));
+  buf.fillInSize(mar(buf,t...));
 }catch(...){buf.rollback();throw;}
 }
 
 namespace mddlFrnt{
-template<bool res>
-void marshal (::cmw::SendBuffer& buf
+template<bool res>void marshal (::cmw::SendBuffer& buf
          ,::cmw::stringPlus const& a={}
          ,::int8_t b={})try{
   buf.reserveBytes(4);
