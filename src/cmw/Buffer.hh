@@ -310,30 +310,16 @@ struct SameFormat{
 
 struct LeastSignificantFirst{
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& b,::uint16_t& val){
-    val=b.giveOne();
-    val|=b.giveOne()<<8;
-  }
+  void read (B<LeastSignificantFirst>& b,::uint16_t& val)
+  {for(int c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& b,::uint32_t& val){
-    val=b.giveOne();
-    val|=b.giveOne()<<8;
-    val|=b.giveOne()<<16;
-    val|=b.giveOne()<<24;
-  }
+  void read (B<LeastSignificantFirst>& b,::uint32_t& val)
+  {for(int c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& b,::uint64_t& val){
-    val=b.giveOne();
-    val|=b.giveOne()<<8;
-    val|=b.giveOne()<<16;
-    val|=b.giveOne()<<24;
-    val|=b.giveOne()<<32;
-    val|=b.giveOne()<<40;
-    val|=b.giveOne()<<48;
-    val|=b.giveOne()<<56;
-  }
+  void read (B<LeastSignificantFirst>& b,::uint64_t& val)
+  {for(int c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
   void read (B<LeastSignificantFirst>& b,float& f){

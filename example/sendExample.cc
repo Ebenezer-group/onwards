@@ -42,9 +42,9 @@ int main ()try{
 
     case messageID::id3:
     {
-      ::std::array<::std::array<float,2>, 3> ar {{ {1.1f,2.2}
-                                                  ,{3.3,4.4}
-                                                  ,{5.5,6.6}
+      ::std::array<::std::array<float,2>, 3> ar {{ {1.1f,2.2f}
+                                                  ,{3.3f,4.4f}
+                                                  ,{5.5f,6.6f}
                                                 }};
       marshal<messageID::id3>(buf,ar);
     }
