@@ -343,30 +343,16 @@ struct LeastSignificantFirst{
 
 struct MostSignificantFirst{
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& b,::uint16_t& val){
-    val=b.giveOne()<<8;
-    val|=b.giveOne();
-  }
+  void read (B<MostSignificantFirst>& b,::uint16_t& val)
+  {for(int c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& b,::uint32_t& val){
-    val=b.giveOne()<<24;
-    val|=b.giveOne()<<16;
-    val|=b.giveOne()<<8;
-    val|=b.giveOne();
-  }
+  void read (B<MostSignificantFirst>& b,::uint32_t& val)
+  {for(int c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& b,::uint64_t& val){
-    val=b.giveOne()<<56;
-    val|=b.giveOne()<<48;
-    val|=b.giveOne()<<40;
-    val|=b.giveOne()<<32;
-    val|=b.giveOne()<<24;
-    val|=b.giveOne()<<16;
-    val|=b.giveOne()<<8;
-    val|=b.giveOne();
-  }
+  void read (B<MostSignificantFirst>& b,::uint64_t& val)
+  {for(int c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
   void read (B<MostSignificantFirst>& b,float& f){
