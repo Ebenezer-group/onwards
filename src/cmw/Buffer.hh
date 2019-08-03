@@ -353,15 +353,6 @@ struct LeastSignificantFirst{
   void readBlock (B<LeastSignificantFirst>& b,U* data,int elements){
     for(int i=0;i<elements;++i){*(data+i)=b.template give<U>();}
   }
-
-  //Overloads for uint8_t and int8_t
-  template<template<class> class B>
-  void readBlock (B<LeastSignificantFirst>& b,::uint8_t* data,int elements)
-  {b.give(data,elements);}
-
-  template<template<class> class B>
-  void readBlock (B<LeastSignificantFirst>& b,int8_t* data,int elements)
-  {b.give(data,elements);}
 };
 
 struct MostSignificantFirst{
@@ -409,14 +400,6 @@ struct MostSignificantFirst{
   void readBlock (B<MostSignificantFirst>& b,U* data,int elements){
     for(int i=0;i<elements;++i){*(data+i)=b.template give<U>();}
   }
-
-  template<template<class> class B>
-  void readBlock (B<MostSignificantFirst>& b,::uint8_t* data,int elements)
-  {b.give(data,elements);}
-
-  template<template<class> class B>
-  void readBlock (B<MostSignificantFirst>& b,int8_t* data,int elements)
-  {b.give(data,elements);}
 };
 
 template<class R> class ReceiveBuffer{
@@ -468,8 +451,10 @@ public:
     return nextMessage();
   }
 
-  template<class T>void giveBlock (T* data,unsigned int elements)
-  {reader.readBlock(*this,data,elements);}
+  template<class T>void giveBlock (T* data,unsigned int elements){
+    if constexpr(sizeof(T)==1)give(data,elements);
+    else reader.readBlock(*this,data,elements);
+  }
 
   void giveFile (fileType d){
     int sz=give<::uint32_t>();
