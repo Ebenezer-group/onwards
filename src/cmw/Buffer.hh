@@ -329,10 +329,10 @@ struct LeastSignificantFirst{
     val|=b.giveOne()<<8;
     val|=b.giveOne()<<16;
     val|=b.giveOne()<<24;
-    val|=(::uint64_t)b.giveOne()<<32;
-    val|=(::uint64_t)b.giveOne()<<40;
-    val|=(::uint64_t)b.giveOne()<<48;
-    val|=(::uint64_t)b.giveOne()<<56;
+    val|=b.giveOne()<<32;
+    val|=b.giveOne()<<40;
+    val|=b.giveOne()<<48;
+    val|=b.giveOne()<<56;
   }
 
   template<template<class> class B>
@@ -372,10 +372,10 @@ struct MostSignificantFirst{
 
   template<template<class> class B>
   void read (B<MostSignificantFirst>& b,::uint64_t& val){
-    val=(::uint64_t)b.giveOne()<<56;
-    val|=(::uint64_t)b.giveOne()<<48;
-    val|=(::uint64_t)b.giveOne()<<40;
-    val|=(::uint64_t)b.giveOne()<<32;
+    val=b.giveOne()<<56;
+    val|=b.giveOne()<<48;
+    val|=b.giveOne()<<40;
+    val|=b.giveOne()<<32;
     val|=b.giveOne()<<24;
     val|=b.giveOne()<<16;
     val|=b.giveOne()<<8;
