@@ -310,10 +310,6 @@ struct SameFormat{
 
 struct LeastSignificantFirst{
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& b,::uint8_t& val)
-  {val=b.giveOne();}
-
-  template<template<class> class B>
   void read (B<LeastSignificantFirst>& b,::uint16_t& val){
     val=b.giveOne();
     val|=b.giveOne()<<8;
@@ -369,10 +365,6 @@ struct LeastSignificantFirst{
 };
 
 struct MostSignificantFirst{
-  template<template<class> class B>
-  void read (B<MostSignificantFirst>& b,::uint8_t& val)
-  {val=b.giveOne();}
-
   template<template<class> class B>
   void read (B<MostSignificantFirst>& b,::uint16_t& val){
     val=b.giveOne()<<8;
@@ -455,7 +447,8 @@ public:
 
   template<class T>T give (){
     T tmp;
-    reader.read(*this,tmp);
+    if constexpr(sizeof(T)==1)give(&tmp,1);
+    else reader.read(*this,tmp);
     return tmp;
   }
 
@@ -755,7 +748,7 @@ public:
 template<int N>class FixedString{
   MarshallingInt len;
   char str[N];
- public:
+public:
   FixedString (){}
 
   explicit FixedString (::std::string_view s):len(s.length()){
