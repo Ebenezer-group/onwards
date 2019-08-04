@@ -33,7 +33,6 @@ using fileType=HANDLE;
 #include<sys/types.h>
 #include<syslog.h>
 #include<unistd.h>//close,chdir,read,write
-#define _MSVC_LANG 0
 using sockType=int;
 using fileType=int;
 #endif
@@ -563,10 +562,9 @@ inline void receive (SendBuffer& b,stringPlus lst){
 }
 
 template<class T>void receiveBlock (SendBuffer& b,T const& grp){
-  ::int32_t count=grp.size();
-  b.receive(count);
-  if(count>0)
-    b.receive(&*grp.begin(),count*sizeof(typename T::value_type));
+  ::int32_t n=grp.size();
+  b.receive(n);
+  if(n>0)b.receive(&*grp.begin(),n*sizeof(typename T::value_type));
 }
 
 template<class T>void receiveGroup (SendBuffer& b,T const& grp){
