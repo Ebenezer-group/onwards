@@ -401,10 +401,10 @@ public:
   }
 
   template<class T>T give (){
-    T tmp;
-    if constexpr(sizeof(T)==1)give(&tmp,1);
-    else reader.read(*this,tmp);
-    return tmp;
+    T t;
+    if constexpr(sizeof(T)==1)give(&t,1);
+    else reader.read(*this,t);
+    return t;
   }
 
   bool nextMessage (){
@@ -571,11 +571,9 @@ template<class T>void receiveBlock (SendBuffer& b,T const& grp){
 
 template<class T>void receiveGroup (SendBuffer& b,T const& grp){
   b.receive<::int32_t>(grp.size());
-  for(auto const& e:grp)e.marshal(b);
-}
-template<class T>void receiveGroupPointer (SendBuffer& b,T const& grp){
-  b.receive<::int32_t>(grp.size());
-  for(auto p:grp)p->marshal(b);
+  if constexpr(::std::is_pointer_v<typename T::value_type>)
+    for(auto p:grp)p->marshal(b);
+  else for(auto const& e:grp)e.marshal(b);
 }
 
 //Encode integer into variable-length format.
