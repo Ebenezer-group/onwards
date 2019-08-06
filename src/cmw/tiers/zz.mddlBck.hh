@@ -11,7 +11,7 @@ namespace mddlBck{
 ::int32_t mar (::cmw::SendBuffer& buf
          ,::std::vector<cmwAccount> const& a
          ,::int32_t b){
-  receiveGroup(buf,a);
+  receiveBlock(buf,a);
   buf.receive(b);
   return 10000;
 }

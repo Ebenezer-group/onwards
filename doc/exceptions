@@ -1,0 +1,5 @@
+
+Two exception classes are used.  The primary class is called
+'failure' and the other one is called 'fiasco'.  Both of them
+are derived from std::exception.  Only the sockRead and Read
+functions throw fiasco exceptions.

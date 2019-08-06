@@ -193,7 +193,7 @@ inline int sockWrite (sockType s,void const* data,int len
 }
 
 inline int sockRead (sockType s,void* data,int len
-                     ,sockaddr* addr=nullptr,socklen_t* fromLen=nullptr){
+                     ,sockaddr* addr,socklen_t* fromLen){
   int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(r>0)return r;
   auto e=getError();
@@ -492,12 +492,12 @@ public:
   }
 
   template<class T>void receive (T t){
-    static_assert(::std::is_arithmetic<T>::value||::std::is_enum<T>::value);
+    static_assert(::std::is_arithmetic_v<T>||::std::is_enum_v<T>);
     receive(&t,sizeof t);
   }
 
   template<class T>T receive (int where,T t){
-    static_assert(::std::is_arithmetic<T>::value);
+    static_assert(::std::is_arithmetic_v<T>);
     ::memcpy(buf+where,&t,sizeof t);
     return t;
   }
@@ -564,12 +564,9 @@ inline void receive (SendBuffer& b,stringPlus lst){
 template<class T>void receiveBlock (SendBuffer& b,T const& grp){
   ::int32_t n=grp.size();
   b.receive(n);
-  if(n>0)b.receive(&*grp.begin(),n*sizeof(typename T::value_type));
-}
-
-template<class T>void receiveGroup (SendBuffer& b,T const& grp){
-  b.receive<::int32_t>(grp.size());
-  if constexpr(::std::is_pointer_v<typename T::value_type>)
+  if constexpr(::std::is_arithmetic_v<typename T::value_type>){
+    if(n>0)b.receive(&*grp.begin(),n*sizeof(typename T::value_type));
+  }else if constexpr(::std::is_pointer_v<typename T::value_type>)
     for(auto p:grp)p->marshal(b);
   else for(auto const& e:grp)e.marshal(b);
 }
