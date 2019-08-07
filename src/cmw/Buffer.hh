@@ -561,14 +561,15 @@ inline void receive (SendBuffer& b,stringPlus lst){
   for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
 }
 
-template<class T>void receiveBlock (SendBuffer& b,T const& grp){
-  ::int32_t n=grp.size();
+template<template<class...>class C,class T,class...Ts>
+void receiveBlock (SendBuffer& b,C<T,Ts...>const& c){
+  ::int32_t n=c.size();
   b.receive(n);
-  if constexpr(::std::is_arithmetic_v<typename T::value_type>){
-    if(n>0)b.receive(&*grp.begin(),n*sizeof(typename T::value_type));
-  }else if constexpr(::std::is_pointer_v<typename T::value_type>)
-    for(auto p:grp)p->marshal(b);
-  else for(auto const& e:grp)e.marshal(b);
+  if constexpr(::std::is_arithmetic_v<T>){
+    if(n>0)b.receive(&*c.cbegin(),n*sizeof(T));
+  }else if constexpr(::std::is_pointer_v<T>)
+    for(auto e:c)e->marshal(b);
+  else for(auto const& e:c)e.marshal(b);
 }
 
 //Encode integer into variable-length format.
