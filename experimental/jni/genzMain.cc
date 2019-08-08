@@ -1,5 +1,5 @@
 #include<cmw/Buffer.hh>
-#include"zz.frntMddl.hh"
+#include"frntMddl.hh"
 #include<stdio.h>
 #include<stdlib.h>//exit
 #include"jniGenz.h"

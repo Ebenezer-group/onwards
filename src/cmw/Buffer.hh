@@ -567,8 +567,7 @@ void receiveBlock (SendBuffer& b,C<T,Ts...>const& c){
   b.receive(n);
   if constexpr(::std::is_arithmetic_v<T>){
     if(n>0)b.receive(&*c.cbegin(),n*sizeof(T));
-  }else if constexpr(::std::is_pointer_v<T>)
-    for(auto e:c)e->marshal(b);
+  }else if constexpr(::std::is_pointer_v<T>)for(auto e:c)e->marshal(b);
   else for(auto const& e:c)e.marshal(b);
 }
 

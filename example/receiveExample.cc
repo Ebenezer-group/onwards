@@ -7,7 +7,7 @@
 #include<set>
 #include<string>
 #include<vector>
-#include"zz.exampleMessages.hh"
+#include"exampleMessages.hh"
 
 int main ()try{
   ::cmw::winStart();

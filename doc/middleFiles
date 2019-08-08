@@ -28,10 +28,9 @@ where "messageId" is the name of the type that you want to use
 for message Ids.
 
 Based on that input, the C++ Middleware Writer (CMW) creates
-an exampleMessages namespace in a file called
-zz.exampleMessages.hh.  One or more functions are created
-within the namespace for each of the lines with matching
-parentheses.
+an exampleMessages namespace in a file called exampleMessages.hh.  
+One or more functions are created within the namespace for each
+of the lines with matching parentheses.
 
 The available options are: out, in, inLine, maxLength and yeaNay.
 

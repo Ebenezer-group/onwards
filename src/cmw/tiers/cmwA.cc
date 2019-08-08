@@ -74,7 +74,7 @@ struct cmwRequest{
     buf.receive(idx,updatedFiles);
   }
 };
-#include"zz.mddlBck.hh"
+#include"mddlBck.hh"
 using namespace ::mddlBck;
 
 class cmwAmbassador{
