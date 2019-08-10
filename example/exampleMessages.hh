@@ -15,7 +15,7 @@ template<class R>void give (::cmw::ReceiveBuffer<R>& buf
          ,::std::string& b){
   if(int32_t ca=give<uint32_t>(buf);ca>0){
     a.resize(a.size()+ca);
-    buf.giveBlock(&(*(a.end()-ca)),ca);
+    buf.giveBlock(&*(a.end()-ca),ca);
   }
   b=buf.giveStringView();
 }
