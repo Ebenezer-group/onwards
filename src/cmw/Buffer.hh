@@ -229,7 +229,7 @@ public:
   }
 
   void operator= (::int32_t r){val=r;}
-  ::int32_t operator() ()const{return val;}
+  auto operator() ()const{return val;}
   void marshal (SendBuffer&)const;
 };
 inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
