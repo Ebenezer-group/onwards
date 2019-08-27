@@ -543,7 +543,7 @@ public:
   unsigned char* data (){return buf;}
   int getIndex (){return index;}
   int getSize (){return bufsize;}
-  template<class...T>void receiveMulti (char const*,T&&...);
+  template<class...T>void receiveMulti (char const*,T...);
 };
 
 inline void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
