@@ -263,11 +263,8 @@ inline int Read (int fd,void* data,int len){
   raise("Read",len,errno);
 }
 
-template<class...T>void syslogWrapper (int pri,char const* fmt,T... t)
-{::syslog(pri,fmt,t...);}
-
 template<class...T>void bail (char const* fmt,T... t)noexcept{
-  syslogWrapper(LOG_ERR,fmt,t...);
+  ::syslog(LOG_ERR,fmt,t...);
   ::exit(EXIT_FAILURE);
 }
 

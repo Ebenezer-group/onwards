@@ -9,6 +9,7 @@
 #include<stdint.h>
 #include<stdio.h>
 #include<string.h>
+#include<syslog.h>
 #include<sys/stat.h>
 #include<time.h>
 #include<unistd.h>//pread
@@ -112,7 +113,7 @@ class cmwAmbassador{
   }
 
   void reset (char const* context,char const* detail){
-    syslogWrapper(LOG_ERR,"%s:%s",context,detail);
+    ::syslog(LOG_ERR,"%s:%s",context,detail);
     frntBuf.reset();
     ::mddlFrnt::marshal<false>(frntBuf,{context," ",detail});
     for(auto& r:pendingRequests)
@@ -190,7 +191,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
       reset("Fiasco",e.what());
       continue;
     }catch(::std::exception& e){
-      syslogWrapper(LOG_ERR,"Reply from CMW %s",e.what());
+      ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
       if(pendingRequests.front().get())
         outFront<false>(*pendingRequests.front(),e.what());
@@ -209,7 +210,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
         ::new(req)cmwRequest(frntBuf);
         marshal<messageID::generate>(cmwBuf,*req);
       }catch(::std::exception& e){
-        syslogWrapper(LOG_ERR,"Accept request:%s",e.what());
+        ::syslog(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)outFront<false>(*req,e.what());
         if(req)pendingRequests.pop_back();
         continue;
