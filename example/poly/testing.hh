@@ -11,17 +11,17 @@ base::base (::cmw::ReceiveBuffer<R>& buf)
 
 template<class C,class R>
 void baseSwitch (C& c,::cmw::ReceiveBuffer<R>& buf){
-  switch(auto typeNum=::cmw::give<uint8_t>(buf);typeNum){
+  switch(auto typeNum=::cmw::give<::uint8_t>(buf);typeNum){
   case base::typeNum:
-    ::cmw::BuildSegment<base>(c,buf);break;
+    ::cmw::buildSegment<base>(c,buf);break;
   case derived1::typeNum:
-    ::cmw::BuildSegment<derived1>(c,buf);break;
+    ::cmw::buildSegment<derived1>(c,buf);break;
   case derived3::typeNum:
-    ::cmw::BuildSegment<derived3>(c,buf);break;
+    ::cmw::buildSegment<derived3>(c,buf);break;
   case derived2::typeNum:
-    ::cmw::BuildSegment<derived2>(c,buf);break;
+    ::cmw::buildSegment<derived2>(c,buf);break;
   default:
-    throw cmw::failure("baseSwitch: Unknown type");
+    throw ::cmw::failure("baseSwitch: Unknown type");
   }
 }
 
@@ -59,7 +59,7 @@ derived3::derived3 (::cmw::ReceiveBuffer<R>& buf):
 {}
 
 namespace testing{
-inline void marshal (::cmw::SendBuffer& buf
+void marshal (::cmw::SendBuffer& buf
          ,::boost::base_collection<base> const& a)try{
   buf.reserveBytes(4);
   ::cmw::marshalCollection<base,derived1,derived3,derived2>(a,buf);
@@ -68,7 +68,7 @@ inline void marshal (::cmw::SendBuffer& buf
 
 template<class R>void give (::cmw::ReceiveBuffer<R>& buf
          ,::boost::base_collection<base>& a){
-  BuildCollection(a,buf,[](auto& a,auto& buf){baseSwitch(a,buf);});
+  ::cmw::buildCollection(a,buf,[](auto& a,auto& buf){baseSwitch(a,buf);});
 }
 }
 #endif
