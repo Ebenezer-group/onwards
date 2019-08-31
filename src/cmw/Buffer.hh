@@ -11,18 +11,16 @@
 #include<type_traits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8);
 static_assert(::std::numeric_limits<float>::is_iec559,"Only IEEE754 supported");
-
 #include<stdint.h>
 #include<stdio.h>//fopen,snprintf
 #include<stdlib.h>//exit
 #include<string.h>//memcpy,memmove
+
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #include<winsock2.h>
 #include<ws2tcpip.h>
 #define CMW_WINDOWS
 #define poll WSAPoll
-using sockType=SOCKET;
-using fileType=HANDLE;
 #else
 #include<errno.h>
 #include<fcntl.h>//fcntl,open
@@ -33,8 +31,6 @@ using fileType=HANDLE;
 #include<sys/types.h>
 #include<syslog.h>
 #include<unistd.h>//close,chdir,read,write
-using sockType=int;
-using fileType=int;
 #endif
 
 namespace cmw{
@@ -63,8 +59,8 @@ template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
   e<<t; apps(e,ts...);
 }
 
-template<class F=failure,class...T>void raise (char const* s,T...t){
-  F f{s}; apps(f,t...);
+template<class E=failure,class...T>void raise (char const* s,T...t){
+  E e{s}; apps(e,t...);
 }
 
 inline void winStart (){
@@ -88,6 +84,99 @@ inline void setDirectory (char const* d){
 #endif
     raise("setDirectory",d,getError());
 }
+
+class SendBuffer;
+template<class R>class ReceiveBuffer;
+class MarshallingInt{
+  ::int32_t val;
+public:
+  MarshallingInt (){}
+  explicit MarshallingInt (::int32_t v):val(v){}
+  explicit MarshallingInt (::std::string_view v):val(fromChars(v)){}
+
+  //Reads a sequence of bytes in variable-length format and
+  //builds a 32 bit integer.
+  template<class R>explicit MarshallingInt (ReceiveBuffer<R>& b):val(0){
+    ::uint32_t shift=1;
+    for(;;){
+      ::uint8_t a=b.giveOne();
+      val+=(a&127)*shift;
+      if((a&128)==0)return;
+      shift<<=7;
+      val+=shift;
+    }
+  }
+
+  void operator= (::int32_t r){val=r;}
+  auto operator() ()const{return val;}
+  void marshal (SendBuffer&)const;
+};
+inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
+inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
+
+#ifdef CMW_WINDOWS
+using sockType=SOCKET;
+using fileType=HANDLE;
+inline DWORD Write (HANDLE h,void const* data,int len){
+  DWORD bytesWritten=0;
+  if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
+    raise("Write",GetLastError());
+  return bytesWritten;
+}
+
+inline DWORD Read (HANDLE h,void* data,int len){
+  DWORD bytesRead=0;
+  if(!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
+    raise("Read",GetLastError());
+  return bytesRead;
+}
+#else
+using sockType=int;
+using fileType=int;
+inline int Write (int fd,void const* data,int len){
+  if(int r=::write(fd,data,len);r>=0)return r;
+  raise("Write",errno);
+}
+
+inline int Read (int fd,void* data,int len){
+  int r=::read(fd,data,len);
+  if(r>0)return r;
+  if(r==0)raise<fiasco>("Read eof",len);
+  if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
+  raise("Read",len,errno);
+}
+
+template<class...T>void bail (char const* fmt,T... t)noexcept{
+  ::syslog(LOG_ERR,fmt,t...);
+  ::exit(EXIT_FAILURE);
+}
+
+struct fileWrapper{
+  int const d;
+  fileWrapper ():d(-2){}
+  fileWrapper (char const* name,int flags,mode_t mode=0):
+          d(::open(name,flags,mode))
+  {if(d<0)raise("fileWrapper",name,errno);}
+
+  ~fileWrapper (){::close(d);}
+};
+
+class File{
+  ::std::string_view nam;
+public:
+  explicit File (::std::string_view n):nam(n){}
+
+  template<class R>explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView()){
+    b.giveFile(fileWrapper{nam.data(),O_WRONLY|O_CREAT|O_TRUNC
+                           ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
+  }
+
+  char const* name ()const{return nam.data();}
+};
+
+template<class R>void giveFiles (ReceiveBuffer<R>& b)
+{for(auto n=MarshallingInt{b}();n>0;--n)File{b};}
+#endif
 
 inline int pollWrapper (::pollfd* fds,int n,int timeout=-1){
   if(int r=::poll(fds,n,timeout);r>=0)return r;
@@ -205,95 +294,6 @@ inline int sockRead (sockType s,void* data,int len
   )return 0;
   raise("sockRead",s,len,e);
 }
-
-class SendBuffer;
-template<class R>class ReceiveBuffer;
-class MarshallingInt{
-  ::int32_t val;
-public:
-  MarshallingInt (){}
-  explicit MarshallingInt (::int32_t v):val(v){}
-  explicit MarshallingInt (::std::string_view v):val(fromChars(v)){}
-
-  //Reads a sequence of bytes in variable-length format and
-  //builds a 32 bit integer.
-  template<class R>explicit MarshallingInt (ReceiveBuffer<R>& b):val(0){
-    ::uint32_t shift=1;
-    for(;;){
-      ::uint8_t a=b.giveOne();
-      val+=(a&127)*shift;
-      if((a&128)==0)return;
-      shift<<=7;
-      val+=shift;
-    }
-  }
-
-  void operator= (::int32_t r){val=r;}
-  auto operator() ()const{return val;}
-  void marshal (SendBuffer&)const;
-};
-inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
-inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
-
-#ifdef CMW_WINDOWS
-inline DWORD Write (HANDLE h,void const* data,int len){
-  DWORD bytesWritten=0;
-  if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
-    raise("Write",GetLastError());
-  return bytesWritten;
-}
-
-inline DWORD Read (HANDLE h,void* data,int len){
-  DWORD bytesRead=0;
-  if(!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
-    raise("Read",GetLastError());
-  return bytesRead;
-}
-#else
-inline int Write (int fd,void const* data,int len){
-  if(int r=::write(fd,data,len);r>=0)return r;
-  raise("Write",errno);
-}
-
-inline int Read (int fd,void* data,int len){
-  int r=::read(fd,data,len);
-  if(r>0)return r;
-  if(r==0)raise<fiasco>("Read eof",len);
-  if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
-  raise("Read",len,errno);
-}
-
-template<class...T>void bail (char const* fmt,T... t)noexcept{
-  ::syslog(LOG_ERR,fmt,t...);
-  ::exit(EXIT_FAILURE);
-}
-
-struct fileWrapper{
-  int const d;
-  fileWrapper ():d(-2){}
-  fileWrapper (char const* name,int flags,mode_t mode=0):
-          d(::open(name,flags,mode))
-  {if(d<0)raise("fileWrapper",name,errno);}
-
-  ~fileWrapper (){::close(d);}
-};
-
-class File{
-  ::std::string_view nam;
-public:
-  explicit File (::std::string_view n):nam(n){}
-
-  template<class R>explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView()){
-    b.giveFile(fileWrapper{nam.data(),O_WRONLY|O_CREAT|O_TRUNC
-                           ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
-  }
-
-  char const* name ()const{return nam.data();}
-};
-
-template<class R>void giveFiles (ReceiveBuffer<R>& b)
-{for(auto n=MarshallingInt{b}();n>0;--n)File{b};}
-#endif
 
 struct SameFormat{
   template<template<class> class B,class U>
