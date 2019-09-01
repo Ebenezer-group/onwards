@@ -10,7 +10,7 @@
 #include<string_view>
 #include<type_traits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8);
-static_assert(::std::numeric_limits<float>::is_iec559,"Only IEEE754 supported");
+static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<stdint.h>
 #include<stdio.h>//fopen,snprintf
 #include<stdlib.h>//exit
@@ -46,8 +46,8 @@ class failure:public ::std::exception{
   ::std::string s;
 public:
   explicit failure (char const* s):s(s){}
-  void operator<< (::std::string_view st){s.append(" "); s.append(st);}
-  void operator<< (char const* st){s.append(" "); s.append(st);}
+  void operator<< (::std::string_view v){s.append(" "); s.append(v);}
+  void operator<< (char const* v){s.append(" "); s.append(v);}
   void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
   char const* what ()const noexcept{return s.c_str();}
 };
@@ -191,7 +191,7 @@ inline void setRcvTimeout (sockType s,int time){
 #ifdef CMW_WINDOWS
   DWORD t=time*1000;
 #else
-  timeval t{time,0};
+  ::timeval t{time,0};
 #endif
   if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
 }
@@ -222,8 +222,8 @@ class GetaddrinfoWrapper{
  public:
   GetaddrinfoWrapper (char const* node,char const* port,int type,int flags=0){
     ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
-    int rc=::getaddrinfo(node,port,&hints,&head);
-    if(rc!=0)raise("getaddrinfo",::gai_strerror(rc));
+    int r=::getaddrinfo(node,port,&hints,&head);
+    if(r!=0)raise("getaddrinfo",::gai_strerror(r));
     addr=head;
   }
 
@@ -428,9 +428,9 @@ public:
     int sz=give<::uint32_t>();
     checkLen(sz);
     while(sz>0){
-      int rc=Write(d,rbuf+subTotal+rindex,sz);
-      sz-=rc;
-      rindex+=rc;
+      int r=Write(d,rbuf+subTotal+rindex,sz);
+      sz-=r;
+      rindex+=r;
     }
   }
 
