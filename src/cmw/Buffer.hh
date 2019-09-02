@@ -320,14 +320,14 @@ struct LeastSignificantFirst{
   template<template<class> class B>
   void read (B<LeastSignificantFirst>& b,float& f){
     ::uint32_t tmp;
-    this->read(b,tmp);
+    read(b,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
   void read (B<LeastSignificantFirst>& b,double& d){
     ::uint64_t tmp;
-    this->read(b,tmp);
+    read(b,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
 
@@ -353,14 +353,14 @@ struct MostSignificantFirst{
   template<template<class> class B>
   void read (B<MostSignificantFirst>& b,float& f){
     ::uint32_t tmp;
-    this->read(b,tmp);
+    read(b,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
   void read (B<MostSignificantFirst>& b,double& d){
     ::uint64_t tmp;
-    this->read(b,tmp);
+    read(b,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
 
@@ -558,8 +558,8 @@ inline void receive (SendBuffer& b,stringPlus lst){
   for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
 }
 
-template<template<class...>class C,class T,class...Ts>
-void receiveBlock (SendBuffer& b,C<T,Ts...>const& c){
+template<template<class...>class C,class T,class...U>
+void receiveBlock (SendBuffer& b,C<T,U...>const& c){
   ::int32_t n=c.size();
   b.receive(n);
   if constexpr(::std::is_arithmetic_v<T>){
