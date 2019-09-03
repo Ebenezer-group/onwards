@@ -700,7 +700,7 @@ public:
 
   explicit FixedString (::std::string_view s):len(s.length()){
     if(len()>=N)raise("FixedString ctor");
-    ::strncpy(str,s.data(),len());
+    ::memcpy(str,s.data(),len());
     str[len()]=0;
   }
 
