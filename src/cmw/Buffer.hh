@@ -49,7 +49,7 @@ public:
   void operator<< (::std::string_view v){s.append(" "); s.append(v);}
   void operator<< (char const* v){s.append(" "); s.append(v);}
   void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
-  char const* what ()const noexcept{return s.c_str();}
+  auto what ()const noexcept{return s.c_str();}
 };
 
 struct fiasco:failure{explicit fiasco(char const* s):failure(s){}};
@@ -222,13 +222,13 @@ class GetaddrinfoWrapper{
  public:
   GetaddrinfoWrapper (char const* node,char const* port,int type,int flags=0){
     ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
-    int r=::getaddrinfo(node,port,&hints,&head);
-    if(r!=0)raise("getaddrinfo",::gai_strerror(r));
+    if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
+      raise("getaddrinfo",::gai_strerror(r));
     addr=head;
   }
 
   ~GetaddrinfoWrapper (){::freeaddrinfo(head);}
-  ::addrinfo* operator() (){return addr;}
+  auto operator() (){return addr;}
   void inc (){if(addr!=nullptr)addr=addr->ai_next;}
   sockType getSock (){
     for(;addr!=nullptr;addr=addr->ai_next){
