@@ -49,7 +49,7 @@ public:
   void operator<< (::std::string_view v){s.append(" "); s.append(v);}
   void operator<< (char const* v){s.append(" "); s.append(v);}
   void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
-  auto what ()const noexcept{return s.c_str();}
+  char const* what ()const noexcept{return s.c_str();}
 };
 
 struct fiasco:failure{explicit fiasco(char const* s):failure(s){}};
@@ -219,7 +219,7 @@ inline int preserveError (sockType s){
 
 class GetaddrinfoWrapper{
   ::addrinfo* head,*addr;
- public:
+public:
   GetaddrinfoWrapper (char const* node,char const* port,int type,int flags=0){
     ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
     if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
