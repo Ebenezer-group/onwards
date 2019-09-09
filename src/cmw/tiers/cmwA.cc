@@ -187,7 +187,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
           pendingRequests.erase(::std::begin(pendingRequests));
         }while(cmwBuf.nextMessage());
       }
-    }catch(fiasco& e){
+    }catch(Fiasco& e){
       reset("Fiasco",e.what());
       continue;
     }catch(::std::exception& e){
