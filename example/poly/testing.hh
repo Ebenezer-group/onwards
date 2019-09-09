@@ -21,7 +21,7 @@ void baseSwitch (C& c,::cmw::ReceiveBuffer<R>& buf){
   case derived2::typeNum:
     ::cmw::buildSegment<derived2>(c,buf);break;
   default:
-    throw ::cmw::failure("baseSwitch: Unknown type");
+    throw ::cmw::Failure("baseSwitch: Unknown type");
   }
 }
 

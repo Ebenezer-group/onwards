@@ -37,7 +37,7 @@ public:
         this->packetLength=this->template Give<uint32_t>();
         this->packetLength+=sizeof this->packetLength;
         if(this->packetLength>this->bufsize){
-          throw failure("ReceiveBufferTCP::GotPacket -- incoming size too great");
+          throw Failure("ReceiveBufferTCP::GotPacket -- incoming size too great");
         }
         initial=false;
       }

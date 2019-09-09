@@ -31,7 +31,7 @@ public:
 
   void ReceiveFile (int32_t)
   {
-    throw failure("SendBufferFile::ReceiveFile not implemented");
+    throw Failure("SendBufferFile::ReceiveFile not implemented");
   }
 
   int getBufsize()
@@ -64,7 +64,7 @@ public:
         this->msgLength=sizeof this->msgLength;
         this->msgLength=this->packetLength=this->template Give<uint32_t>();
         if (this->packetLength>this->bufsize) {
-          throw failure("ReceiveBufferFile::GotPacket -- incoming size too great");
+          throw Failure("ReceiveBufferFile::GotPacket -- incoming size too great");
         }
       }
 

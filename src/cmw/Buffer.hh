@@ -42,24 +42,24 @@ inline int getError (){
 #endif
 }
 
-class failure:public ::std::exception{
+class Failure:public ::std::exception{
   ::std::string s;
 public:
-  explicit failure (char const* s):s(s){}
+  explicit Failure (char const* s):s(s){}
   void operator<< (::std::string_view v){s.append(" "); s.append(v);}
   void operator<< (char const* v){s.append(" "); s.append(v);}
   void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
   char const* what ()const noexcept{return s.c_str();}
 };
 
-struct fiasco:failure{explicit fiasco(char const* s):failure(s){}};
+struct Fiasco:Failure{explicit Fiasco(char const* s):Failure(s){}};
 
 template<class E>void apps (E& e){throw e;}
 template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
   e<<t; apps(e,ts...);
 }
 
-template<class E=failure,class...T>void raise (char const* s,T...t){
+template<class E=Failure,class...T>void raise (char const* s,T...t){
   E e{s}; apps(e,t...);
 }
 
@@ -141,7 +141,7 @@ inline int Write (int fd,void const* data,int len){
 inline int Read (int fd,void* data,int len){
   int r=::read(fd,data,len);
   if(r>0)return r;
-  if(r==0)raise<fiasco>("Read eof",len);
+  if(r==0)raise<Fiasco>("Read eof",len);
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
   raise("Read",len,errno);
 }
@@ -286,7 +286,7 @@ inline int sockRead (sockType s,void* data,int len
   int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(r>0)return r;
   auto e=getError();
-  if(0==r||ECONNRESET==e)raise<fiasco>("sockRead eof",s,len,e);
+  if(0==r||ECONNRESET==e)raise<Fiasco>("sockRead eof",s,len,e);
   if(EAGAIN==e||EWOULDBLOCK==e
 #ifdef CMW_WINDOWS
      ||WSAETIMEDOUT==e
