@@ -12,16 +12,15 @@ base::base (::cmw::ReceiveBuffer<R>& buf)
 template<class C,class R>
 void baseSwitch (C& c,::cmw::ReceiveBuffer<R>& buf){
   switch(auto typeNum=::cmw::give<::uint8_t>(buf);typeNum){
-  case base::typeNum:
-    ::cmw::buildSegment<base>(c,buf);break;
-  case derived1::typeNum:
-    ::cmw::buildSegment<derived1>(c,buf);break;
-  case derived3::typeNum:
-    ::cmw::buildSegment<derived3>(c,buf);break;
-  case derived2::typeNum:
-    ::cmw::buildSegment<derived2>(c,buf);break;
-  default:
-    throw ::cmw::Failure("baseSwitch: Unknown type");
+    case base::typeNum:
+      ::cmw::buildSegment<base>(c,buf);break;
+    case derived1::typeNum:
+      ::cmw::buildSegment<derived1>(c,buf);break;
+    case derived3::typeNum:
+      ::cmw::buildSegment<derived3>(c,buf);break;
+    case derived2::typeNum:
+      ::cmw::buildSegment<derived2>(c,buf);break;
+    default: ::cmw::raise("baseSwitch: Unknown type");
   }
 }
 
