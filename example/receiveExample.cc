@@ -21,7 +21,7 @@ int main ()try{
     switch(msgid){
       case messageID::id1:
       {
-        ::std::vector<int32_t> vec;
+        ::std::vector<::int32_t> vec;
         ::std::string str;
         give(buf,vec,str);
         for(auto val:vec){::std::cout<<val<<' ';}
@@ -31,7 +31,7 @@ int main ()try{
 
       case messageID::id2:
       {
-        ::std::set<int32_t> iset;
+        ::std::set<::int32_t> iset;
         give(buf,iset);
         for(auto val:iset){::std::cout<<val<<' ';}
       }
