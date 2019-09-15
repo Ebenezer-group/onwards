@@ -2,7 +2,8 @@ version: 2
 jobs:
   build_gcc_debug:
     machine:
-      - image: ubuntu-1604:201903-01
+      image: ubuntu-1604:201903-01
+      docker_layer_caching:true
     steps:
       - checkout
       - run: apt update && apt install -y cmake ninja-build gcc g++
