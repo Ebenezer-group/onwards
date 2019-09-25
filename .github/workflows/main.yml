@@ -5,7 +5,21 @@ on: [push]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [
+          ubuntu-18.04-gcc-9
+        ]
+
+        include:
+          - name: ubuntu-18.04-gcc-9
+            os: ubuntu-18.04
+            compiler: gcc
+            version: "9"
 
     steps:
     - uses: actions/checkout@v1
