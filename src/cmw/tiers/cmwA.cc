@@ -42,7 +42,7 @@ struct cmwRequest{
 
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):acctNbr(buf),path(buf)
-                     ,now(::time(nullptr)){
+                       ,now(::time(nullptr)){
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
     *pos=0;
@@ -112,7 +112,7 @@ class cmwAmbassador{
     if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
   }
 
-  void reset (char const* context,char const* detail){
+  void reset (char const* context,char const* detail=""){
     ::syslog(LOG_ERR,"%s:%s",context,detail);
     frntBuf.reset();
     ::mddlFrnt::marshal<false>(frntBuf,{context," ",detail});
@@ -200,6 +200,10 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
 
     if(fds[0].revents&POLLOUT&&sendData())fds[0].events=POLLIN;
 
+    if(!pendingRequests.empty()&&pendingRequests.front().get()
+       &&::time(nullptr)-pendingRequests.front()->now>90)
+      reset("Unreplied request");
+
     if(fds[1].revents&POLLIN){
       bool gotAddr=false;
       cmwRequest* req=nullptr;
@@ -225,4 +229,4 @@ int main (int ac,char** av)try{
   if(ac!=2)bail("Usage: cmwA config-file");
   cmwAmbassador{av[1]};
 }catch(::std::exception& e){bail("Oops:%s",e.what());
-}catch(...){bail("Unknown exception!");}
+}catch(...){bail("Unknown exception");}
