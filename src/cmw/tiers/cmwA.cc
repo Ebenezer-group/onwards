@@ -201,7 +201,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
     if(fds[0].revents&POLLOUT&&sendData())fds[0].events=POLLIN;
 
     if(!pendingRequests.empty()&&pendingRequests.front().get()
-       &&::time(nullptr)-pendingRequests.front()->now>90)
+       &&::time(nullptr)-pendingRequests.front()->now>9)
       reset("Unreplied request");
 
     if(fds[1].revents&POLLIN){
