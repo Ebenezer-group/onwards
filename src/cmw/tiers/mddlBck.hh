@@ -22,10 +22,6 @@ namespace mddlBck{
   return 700000;
 }
 
-::int32_t mar (::cmw::SendBuffer& buf){
-  return 10000;
-}
-
 template<messageID id,class...T>
 void marshal (::cmw::SendBuffer& buf,T&&...t)try{
   buf.reserveBytes(4);
@@ -35,7 +31,8 @@ void marshal (::cmw::SendBuffer& buf,T&&...t)try{
 }
 
 namespace mddlFrnt{
-template<bool res>void marshal (::cmw::SendBuffer& buf
+template<bool res>
+void marshal (::cmw::SendBuffer& buf
          ,::cmw::stringPlus const& a={}
          ,::int8_t b={})try{
   buf.reserveBytes(4);

@@ -14,6 +14,7 @@
 #include<time.h>
 #include<unistd.h>//pread
 #include<netinet/in.h>//sockaddr_in6,socklen_t
+#include<arpa/inet.h>//
 ::int32_t previousTime;
 using namespace ::cmw;
 
@@ -42,7 +43,7 @@ struct cmwRequest{
 
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):acctNbr(buf),path(buf)
-                       ,now(::time(nullptr)){
+                     ,now(::time(nullptr)){
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
     *pos=0;
@@ -95,13 +96,23 @@ class cmwAmbassador{
 
   void login (){
     marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
-    while(-1==(fds[0].fd=cmwBuf.sock_=connectWrapper("1.tcp.ngrok.io",
+    for(;;){
+      int s=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
+      ::sockaddr_in addr{};
+      addr.sin_family=AF_INET;
+      ::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr);
+      addr.sin_port=
 #ifdef CMW_ENDIAN_BIG
-                      "28911"))){
+        htons(56790);
 #else
-                      "26898"))){
+        htons(56789);
 #endif
-      ::printf("connectWrapper %d\n",errno);
+      if(0==::connect(s,(::sockaddr*)&addr,sizeof(addr))){
+        fds[0].fd=cmwBuf.sock_=s;
+	break;
+      }
+      ::printf("connect %d\n",errno);
+      ::close(s);
       pollWrapper(nullptr,0,loginPause);
     }
 
@@ -112,12 +123,12 @@ class cmwAmbassador{
     if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
   }
 
-  void reset (char const* context,char const* detail=""){
+  void reset (char const* context,char const* detail){
     ::syslog(LOG_ERR,"%s:%s",context,detail);
     frntBuf.reset();
     ::mddlFrnt::marshal<false>(frntBuf,{context," ",detail});
     for(auto& r:pendingRequests)
-      if(r.get())frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
+      frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
     pendingRequests.clear();
     closeSocket(fds[0].fd);
     cmwBuf.compressedReset();
@@ -155,35 +166,21 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
 
   checkField("Login-attempts-interval-in-milliseconds");
   loginPause=fromChars(::strtok(nullptr,"\n \r"));
-  checkField("Keepalive-interval-in-milliseconds");
-  int const keepaliveInterval=fromChars(::strtok(nullptr,"\n \r"));
 
   login();
   for(;;){
-    if(0==pollWrapper(fds,2,keepaliveInterval)){
-      if(pendingRequests.empty())
-        try{
-          marshal<messageID::keepalive>(cmwBuf);
-          fds[0].events|=POLLOUT;
-          pendingRequests.push_back(nullptr);
-        }catch(::std::exception& e){reset("Keepalive",e.what());}
-      else reset("Keepalive","No reply from CMW");
-      continue;
-    }
-
+    pollWrapper(fds,2);
     try{
       if(fds[0].revents&POLLIN&&cmwBuf.gotPacket()){
         do{
           assert(!pendingRequests.empty());
-          if(pendingRequests.front().get()){
-            auto const& req=*pendingRequests.front();
-            if(giveBool(cmwBuf)){
-              Write(req.fl.d,&req.now,sizeof req.now);
-              setDirectory(req.path.c_str());
-              giveFiles(cmwBuf);
-              outFront<true>(req);
-            }else outFront<false>(req,"CMW:",cmwBuf.giveStringView());
-          }
+          auto const& req=*pendingRequests.front();
+          if(giveBool(cmwBuf)){
+            Write(req.fl.d,&req.now,sizeof req.now);
+            setDirectory(req.path.c_str());
+            giveFiles(cmwBuf);
+            outFront<true>(req);
+          }else outFront<false>(req,"CMW:",cmwBuf.giveStringView());
           pendingRequests.erase(::std::begin(pendingRequests));
         }while(cmwBuf.nextMessage());
       }
@@ -193,16 +190,11 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
     }catch(::std::exception& e){
       ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
-      if(pendingRequests.front().get())
-        outFront<false>(*pendingRequests.front(),e.what());
+      outFront<false>(*pendingRequests.front(),e.what());
       pendingRequests.erase(::std::begin(pendingRequests));
     }
 
     if(fds[0].revents&POLLOUT&&sendData())fds[0].events=POLLIN;
-
-    if(!pendingRequests.empty()&&pendingRequests.front().get()
-       &&::time(nullptr)-pendingRequests.front()->now>9)
-      reset("Unreplied request");
 
     if(fds[1].revents&POLLIN){
       bool gotAddr=false;
@@ -228,5 +220,4 @@ int main (int ac,char** av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac!=2)bail("Usage: cmwA config-file");
   cmwAmbassador{av[1]};
-}catch(::std::exception& e){bail("Oops:%s",e.what());
-}catch(...){bail("Unknown exception");}
+}catch(::std::exception& e){bail("Oops:%s",e.what());}
