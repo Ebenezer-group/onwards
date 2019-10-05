@@ -100,7 +100,8 @@ class cmwAmbassador{
       int s=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
       ::sockaddr_in addr{};
       addr.sin_family=AF_INET;
-      ::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr);
+      if(::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr)<=0)
+	bail("inet_pton",errno);
       addr.sin_port=
 #ifdef CMW_ENDIAN_BIG
         htons(56790);
