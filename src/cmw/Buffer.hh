@@ -660,6 +660,7 @@ public:
     ::cmw::reset(decomp);
     compIndex=bytesRead=0;
     kosher=true;
+    closeSocket(sock_);
   }
 
   using ReceiveBuffer<R>::rbuf;

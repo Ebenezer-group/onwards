@@ -101,7 +101,7 @@ class cmwAmbassador{
       ::sockaddr_in addr{};
       addr.sin_family=AF_INET;
       if(::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr)<=0)
-	bail("inet_pton",errno);
+        bail("inet_pton",errno);
       addr.sin_port=
 #ifdef CMW_ENDIAN_BIG
         htons(56790);
@@ -110,10 +110,10 @@ class cmwAmbassador{
 #endif
       if(0==::connect(s,(::sockaddr*)&addr,sizeof(addr))){
         fds[0].fd=cmwBuf.sock_=s;
-	break;
+        break;
       }
       ::printf("connect %d\n",errno);
-      ::close(s);
+      closeSocket(s);
       pollWrapper(nullptr,0,loginPause);
     }
 
@@ -131,7 +131,6 @@ class cmwAmbassador{
     for(auto& r:pendingRequests)
       frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
     pendingRequests.clear();
-    closeSocket(fds[0].fd);
     cmwBuf.compressedReset();
     login();
   }
