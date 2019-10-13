@@ -13,8 +13,12 @@
 #include<sys/stat.h>
 #include<time.h>
 #include<unistd.h>//pread
-#include<netinet/in.h>//sockaddr_in6,socklen_t
-#include<arpa/inet.h>//
+#ifdef __linux__
+#include<linux/sctp.h>//sockaddr_in6,socklen_t
+#else
+#include<netinet/sctp.h>
+#endif
+#include<arpa/inet.h>//inet_pton
 ::int32_t previousTime;
 using namespace ::cmw;
 
@@ -113,12 +117,18 @@ class cmwAmbassador{
         break;
       }
       ::printf("connect %d\n",errno);
-      closeSocket(s);
+      ::close(s);
       pollWrapper(nullptr,0,loginPause);
     }
 
     while(!cmwBuf.flush());
     fds[0].events=POLLIN;
+    ::sctp_paddrparams paddr{};
+    paddr.spp_address.ss_family=AF_INET;
+    paddr.spp_hbinterval=240000;
+    paddr.spp_flags=SPP_HB_ENABLE;
+    if(-1==::setsockopt(fds[0].fd,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
+                        ,&paddr,sizeof paddr))bail("setsockopt",errno);
     while(!cmwBuf.gotPacket());
     if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
     if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
