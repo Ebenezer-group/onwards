@@ -134,7 +134,7 @@ class cmwAmbassador{
     if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
   }
 
-  void reset (char const* context,char const* detail){
+  void reset (char const* context,char const* detail=""){
     ::syslog(LOG_ERR,"%s:%s",context,detail);
     frntBuf.reset();
     ::mddlFrnt::marshal<false>(frntBuf,{context," ",detail});
@@ -180,6 +180,8 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
   login();
   for(;;){
     pollWrapper(fds,2);
+    if(fds[0].revents&POLLERR){reset("Lost contact");continue;}
+
     try{
       if(fds[0].revents&POLLIN&&cmwBuf.gotPacket()){
         do{
