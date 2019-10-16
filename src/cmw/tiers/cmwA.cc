@@ -212,7 +212,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
       bool gotAddr=false;
       cmwRequest* req=nullptr;
       try{
-        req=&*pendingRequests.emplace_back(::std::make_unique<cmwRequest>());
+        req=&*pendingRequests.emplace_back(::new cmwRequest);
         frntBuf.getPacket((::sockaddr*)&req->frnt,&req->frntLn);
         gotAddr=true;
         ::new(req)cmwRequest(frntBuf);
