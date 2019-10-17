@@ -127,8 +127,8 @@ class cmwAmbassador{
     paddr.spp_address.ss_family=AF_INET;
     paddr.spp_hbinterval=240000;
     paddr.spp_flags=SPP_HB_ENABLE;
-    if(-1==::setsockopt(fds[0].fd,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
-                        ,&paddr,sizeof paddr))bail("setsockopt",errno);
+    if(::setsockopt(fds[0].fd,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
+                    ,&paddr,sizeof paddr)==-1)bail("setsockopt",errno);
     while(!cmwBuf.gotPacket());
     if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
     if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
@@ -174,7 +174,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
   fds[1].fd=frntBuf.sock_=udpServer(::strtok(nullptr,"\n \r"));
   fds[1].events=POLLIN;
 
-  checkField("Login-attempts-interval-in-milliseconds");
+  checkField("Login-interval-in-milliseconds");
   loginPause=fromChars(::strtok(nullptr,"\n \r"));
 
   login();
