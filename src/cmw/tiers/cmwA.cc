@@ -65,15 +65,15 @@ struct cmwRequest{
 
   void marshal (SendBuffer& buf)const{
     acctNbr.marshal(buf);
-    if(auto ind=buf.reserveBytes(1);
-         !buf.receive(ind,marshalFile(mdlFile,buf))){receive(buf,mdlFile,1);}
+    if(auto ind=buf.reserveBytes(1);!buf.receive(ind,marshalFile(mdlFile,buf)))
+      receive(buf,mdlFile,1);
 
     ::int8_t updatedFiles=0;
     auto const idx=buf.reserveBytes(sizeof updatedFiles);
     FILEwrapper f{mdlFile,"r"};
     while(auto line=f.fgets()){
       char const* tok=::strtok(line,"\n \r");
-      if(!::strncmp(tok,"//",2)||!::strcmp(tok,"fixedMessageLengths"))continue;
+      if(!::strncmp(tok,"//",2))continue;
       if(!::strcmp(tok,"--"))break;
       if(marshalFile(tok,buf))++updatedFiles;
     }
