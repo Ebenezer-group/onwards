@@ -34,17 +34,17 @@ be seen in the mddlBck.hh file in the tiers directory.
 If the CMW isn't able yet to correctly generate code for a given type,
 you may have to add a comment, shown below, within the body of the type.
 In that case it's up to you to provide the implementation for 'marshal'.
-Here's an example:
+For example:
 
 1  class Abc{
 2    //CMW_skip
 3
 4  public:
 5    template<class R>explicit Abc (::cmw::ReceiveBuffer<R>&){
-6    // you provide the implementation
+6      // you provide the implementation
 7    }
 8
 9    void marshal (::cmw::SendBuffer& b)const{
-10   // you provide the implementation
+10     // you provide the implementation
 11   }
 12 };

@@ -81,7 +81,6 @@ struct cmwRequest{
   }
 };
 #include"mddlBck.hh"
-using namespace ::mddlBck;
 
 class cmwAmbassador{
   BufferCompressed<
@@ -99,7 +98,7 @@ class cmwAmbassador{
   int loginPause;
 
   void login (){
-    marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
+    ::mddlBck::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
     for(;;){
       int s=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
       ::sockaddr_in addr{};
@@ -216,7 +215,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
         frntBuf.getPacket((::sockaddr*)&req->frnt,&req->frntLn);
         gotAddr=true;
         ::new(req)cmwRequest(frntBuf);
-        marshal<messageID::generate>(cmwBuf,*req);
+        ::mddlBck::marshal<messageID::generate>(cmwBuf,*req);
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)outFront<false>(*req,e.what());

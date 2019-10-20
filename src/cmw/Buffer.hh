@@ -699,7 +699,7 @@ template<int N>class FixedString{
 public:
   FixedString (){}
 
-  explicit FixedString (::std::string_view s):len(s.length()){
+  explicit FixedString (::std::string_view s):len(s.size()){
     if(len()>=N)raise("FixedString ctor");
     ::memcpy(str,s.data(),len());
     str[len()]=0;
