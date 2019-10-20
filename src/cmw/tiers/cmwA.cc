@@ -80,7 +80,7 @@ struct cmwRequest{
     buf.receive(idx,updatedFiles);
   }
 };
-#include"mddlBck.hh"
+#include"back.hh"
 
 class cmwAmbassador{
   BufferCompressed<
@@ -98,7 +98,7 @@ class cmwAmbassador{
   int loginPause;
 
   void login (){
-    ::mddlBck::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
+    ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
     for(;;){
       int s=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
       ::sockaddr_in addr{};
@@ -136,7 +136,7 @@ class cmwAmbassador{
   void reset (char const* context,char const* detail=""){
     ::syslog(LOG_ERR,"%s:%s",context,detail);
     frntBuf.reset();
-    ::mddlFrnt::marshal<false>(frntBuf,{context," ",detail});
+    ::front::marshal<false>(frntBuf,{context," ",detail});
     for(auto& r:pendingRequests)
       frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
     pendingRequests.clear();
@@ -149,7 +149,7 @@ class cmwAmbassador{
 
   template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
     frntBuf.reset();
-    ::mddlFrnt::marshal<res>(frntBuf,{t...});
+    ::front::marshal<res>(frntBuf,{t...});
     frntBuf.send((::sockaddr*)&req.frnt,req.frntLn);
   }
 
@@ -215,7 +215,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
         frntBuf.getPacket((::sockaddr*)&req->frnt,&req->frntLn);
         gotAddr=true;
         ::new(req)cmwRequest(frntBuf);
-        ::mddlBck::marshal<messageID::generate>(cmwBuf,*req);
+        ::back::marshal<messageID::generate>(cmwBuf,*req);
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)outFront<false>(*req,e.what());
