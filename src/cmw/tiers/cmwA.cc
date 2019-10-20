@@ -80,7 +80,7 @@ struct cmwRequest{
     buf.receive(idx,updatedFiles);
   }
 };
-#include"middle.mdl.hh"
+#include"cmwA.mdl.hh"
 
 class cmwAmbassador{
   BufferCompressed<
