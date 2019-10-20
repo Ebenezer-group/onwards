@@ -297,81 +297,80 @@ inline int sockRead (sockType s,void* data,int len
 
 struct SameFormat{
   template<template<class> class B,class U>
-  void read (B<SameFormat>& b,U& data){b.give(&data,sizeof(U));}
+  static void read (B<SameFormat>& b,U& data){b.give(&data,sizeof(U));}
 
   template<template<class> class B,class U>
-  void readBlock (B<SameFormat>& b,U* data,int elements)
+  static void readBlock (B<SameFormat>& b,U* data,int elements)
   {b.give(data,elements*sizeof(U));}
 };
 
 struct LeastSignificantFirst{
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& b,::uint16_t& val)
+  static void read (B<LeastSignificantFirst>& b,::uint16_t& val)
   {for(::uint8_t c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& b,::uint32_t& val)
+  static void read (B<LeastSignificantFirst>& b,::uint32_t& val)
   {for(::uint8_t c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& b,::uint64_t& val)
+  static void read (B<LeastSignificantFirst>& b,::uint64_t& val)
   {for(::uint8_t c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& b,float& f){
+  static void read (B<LeastSignificantFirst>& b,float& f){
     ::uint32_t tmp;
     read(b,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
-  void read (B<LeastSignificantFirst>& b,double& d){
+  static void read (B<LeastSignificantFirst>& b,double& d){
     ::uint64_t tmp;
     read(b,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
 
   template<template<class> class B,class U>
-  void readBlock (B<LeastSignificantFirst>& b,U* data,int elements){
+  static void readBlock (B<LeastSignificantFirst>& b,U* data,int elements){
     for(int i=0;i<elements;++i){*(data+i)=b.template give<U>();}
   }
 };
 
 struct MostSignificantFirst{
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& b,::uint16_t& val)
+  static void read (B<MostSignificantFirst>& b,::uint16_t& val)
   {for(::uint8_t c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& b,::uint32_t& val)
+  static void read (B<MostSignificantFirst>& b,::uint32_t& val)
   {for(::uint8_t c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& b,::uint64_t& val)
+  static void read (B<MostSignificantFirst>& b,::uint64_t& val)
   {for(::uint8_t c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& b,float& f){
+  static void read (B<MostSignificantFirst>& b,float& f){
     ::uint32_t tmp;
     read(b,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
   template<template<class> class B>
-  void read (B<MostSignificantFirst>& b,double& d){
+  static void read (B<MostSignificantFirst>& b,double& d){
     ::uint64_t tmp;
     read(b,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
 
   template<template<class> class B,class U>
-  void readBlock (B<MostSignificantFirst>& b,U* data,int elements){
+  static void readBlock (B<MostSignificantFirst>& b,U* data,int elements){
     for(int i=0;i<elements;++i){*(data+i)=b.template give<U>();}
   }
 };
 
 template<class R> class ReceiveBuffer{
-  R reader;
   int msgLength=0;
   int subTotal=0;
 protected:
@@ -399,7 +398,7 @@ public:
   template<class T>T give (){
     T t;
     if constexpr(sizeof(T)==1)give(&t,1);
-    else reader.read(*this,t);
+    else R::read(*this,t);
     return t;
   }
 
@@ -421,7 +420,7 @@ public:
 
   template<class T>void giveBlock (T* data,unsigned int elements){
     if constexpr(sizeof(T)==1)give(data,elements);
-    else reader.readBlock(*this,data,elements);
+    else R::readBlock(*this,data,elements);
   }
 
   void giveFile (fileType d){
