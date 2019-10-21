@@ -1,7 +1,7 @@
 #include<cmw/Buffer.hh>
 #include<boost/poly_collection/base_collection.hpp>
 #include"base.hh"
-#include"testing.hh"
+#include"testing.mdl.hh"
 #include<iostream>
 
 int main ()try{

@@ -1,6 +1,6 @@
 #include<base.hh>
 #include<boost/poly_collection/base_collection.hpp>
-#include"testing.hh"
+#include"testing.mdl.hh"
 
 int main (){
   using namespace ::cmw;
