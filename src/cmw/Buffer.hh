@@ -171,7 +171,7 @@ public:
                            ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
   }
 
-  char const* name ()const{return nam.data();}
+  auto name ()const{return nam;}
 };
 
 template<class R>void giveFiles (ReceiveBuffer<R>& b)

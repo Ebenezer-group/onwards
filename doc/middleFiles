@@ -28,7 +28,7 @@ where "messageId" is the name of the type that you want to use
 for message Ids.
 
 Based on that input, the C++ Middleware Writer (CMW) creates
-an exampleMessages namespace in a file called exampleMessages.hh.  
+an exampleMessages namespace in a file called {middle file name}.hh.
 One or more functions are created within the namespace for each
 of the lines with matching parentheses.
 
@@ -40,8 +40,7 @@ generated.  If you specify only -in, only a message-parsing/
 receiving function is output.
 
 The inLine option indicates that a generated function should
-be marked as inline.  This option may help reduce the size of
-your executables.
+be marked as inline.
 
 The maxLength option allows you to specify the maximum length
 for a message.  If the length of the message exceeds the value
