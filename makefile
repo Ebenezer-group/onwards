@@ -7,8 +7,8 @@ EXAMPLES:=example/sendExample example/receiveExample
 all:$(TIERS) $(EXAMPLES)
 .PHONY:all clean
 
-#zz.middleBack.hh: account.hh $(BASE)middleBack.mdl
-#	genz 2 $(BASE)middleBack.mdl
+#cmwA.mdl.hh: account.hh $(BASE)cmwA.mdl
+#	genz 2 $(BASE)cmwA.mdl
 
 $(BASE)genz:$(BASE)genz.cc
 	$(CXXFLAGS)
