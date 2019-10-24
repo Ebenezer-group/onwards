@@ -40,7 +40,7 @@ struct cmwRequest{
   MarshallingInt const acctNbr;
   FixedString120 path;
   ::int32_t now;
-  char const* mdlFile;
+  char* mdlFile;
   fileWrapper fl;
 
   cmwRequest (){}
@@ -81,7 +81,7 @@ struct cmwRequest{
     buf.receive(idx,updatedFiles);
   }
 
-  auto outputFile (){return ::strcat(mdlFile,".hh");}
+  auto outputFile ()const{return ::strcat(mdlFile,".hh");}
 };
 #include"cmwA.mdl.hh"
 
