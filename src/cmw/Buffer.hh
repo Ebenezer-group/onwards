@@ -164,7 +164,11 @@ struct fileWrapper{
 class File{
   ::std::string_view nam;
 public:
-  explicit File (::std::string_view n):nam(n){}
+  template<class R>
+  explicit File (::std::string_view n,ReceiveBuffer<R>* b=nullptr):nam(n){
+    if(b!=nullptr)b->giveFile(fileWrapper{nam.data(),O_WRONLY|O_CREAT|O_TRUNC
+                                          ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
+  }
 
   template<class R>explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView()){
     b.giveFile(fileWrapper{nam.data(),O_WRONLY|O_CREAT|O_TRUNC

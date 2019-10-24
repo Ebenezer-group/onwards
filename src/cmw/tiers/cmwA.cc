@@ -50,6 +50,7 @@ struct cmwRequest{
                      ,now(::time(nullptr)){
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
+    if(path.bytesAvailable()<3)raise("No room for file suffix");
     *pos=0;
     setDirectory(path());
     mdlFile=pos+1;
@@ -79,6 +80,8 @@ struct cmwRequest{
     }
     buf.receive(idx,updatedFiles);
   }
+
+  auto outputFile (){return ::strcat(mdlFile,".hh");}
 };
 #include"cmwA.mdl.hh"
 
@@ -189,7 +192,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
           if(giveBool(cmwBuf)){
             Write(req.fl.d,&req.now,sizeof req.now);
             setDirectory(req.path.c_str());
-            File{cmwBuf};
+            File{req.outputFile(),&cmwBuf};
             outFront<true>(req);
           }else outFront<false>(req,"CMW:",cmwBuf.giveStringView());
           pendingRequests.erase(::std::begin(pendingRequests));
