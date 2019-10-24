@@ -189,7 +189,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
           if(giveBool(cmwBuf)){
             Write(req.fl.d,&req.now,sizeof req.now);
             setDirectory(req.path.c_str());
-            giveFiles(cmwBuf);
+            File{cmwBuf};
             outFront<true>(req);
           }else outFront<false>(req,"CMW:",cmwBuf.giveStringView());
           pendingRequests.erase(::std::begin(pendingRequests));

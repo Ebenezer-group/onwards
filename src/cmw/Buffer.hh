@@ -173,9 +173,6 @@ public:
 
   auto name ()const{return nam;}
 };
-
-template<class R>void giveFiles (ReceiveBuffer<R>& b)
-{for(auto n=MarshallingInt{b}();n>0;--n)File{b};}
 #endif
 
 inline int pollWrapper (::pollfd* fds,int n,int timeout=-1){
