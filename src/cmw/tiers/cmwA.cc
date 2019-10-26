@@ -182,8 +182,6 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
   login();
   for(;;){
     pollWrapper(fds,2);
-    if(fds[0].revents&POLLERR){reset("Lost contact");continue;}
-
     try{
       if(fds[0].revents&POLLIN&&cmwBuf.gotPacket()){
         do{
@@ -209,6 +207,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
     }
 
     if(fds[0].revents&POLLOUT&&sendData())fds[0].events=POLLIN;
+    if(fds[0].revents&POLLERR)reset("Lost contact");
 
     if(fds[1].revents&POLLIN){
       bool gotAddr=false;
