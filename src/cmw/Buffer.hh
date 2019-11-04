@@ -161,21 +161,22 @@ struct fileWrapper{
   ~fileWrapper (){::close(d);}
 };
 
+auto helper=[](auto n,auto& b){
+  b.giveFile(fileWrapper{n.data(),O_WRONLY|O_CREAT|O_TRUNC
+                         ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
+};
+
 class File{
   ::std::string_view nam;
 public:
   explicit File (::std::string_view n):nam(n){}
 
   template<class R>explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView()){
-    b.giveFile(fileWrapper{nam.data(),O_WRONLY|O_CREAT|O_TRUNC
-                           ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
+    helper(nam,b);
   }
 
   template<class R>
-  explicit File (::std::string_view n,ReceiveBuffer<R>& b):nam(n){
-    b.giveFile(fileWrapper{nam.data(),O_WRONLY|O_CREAT|O_TRUNC
-                           ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
-  }
+  File (::std::string_view n,ReceiveBuffer<R>& b):nam(n){helper(n,b);}
 
   auto name ()const{return nam;}
 };
@@ -735,6 +736,9 @@ struct FILEwrapper{
   {if(nullptr==hndl)raise("FILEwrapper",fn,mode,errno);}
   char* fgets (){return ::fgets(line,sizeof line,hndl);}
   ~FILEwrapper (){::fclose(hndl);}
+};
+struct int24{
+  unsigned long data:24;
 };
 }
 #endif
