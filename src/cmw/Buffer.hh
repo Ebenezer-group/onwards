@@ -161,7 +161,7 @@ struct fileWrapper{
   ~fileWrapper (){::close(d);}
 };
 
-auto getFile=[](auto n,auto& b){
+auto getFile=[](::std::string_view n,auto& b){
   b.giveFile(fileWrapper{n.data(),O_WRONLY|O_CREAT|O_TRUNC
                          ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
 };
