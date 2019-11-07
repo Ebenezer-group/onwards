@@ -161,8 +161,8 @@ struct fileWrapper{
   ~fileWrapper (){::close(d);}
 };
 
-auto getFile=[](::std::string_view n,auto& b){
-  b.giveFile(fileWrapper{n.data(),O_WRONLY|O_CREAT|O_TRUNC
+auto getFile=[](char const* n,auto& b){
+  b.giveFile(fileWrapper{n,O_WRONLY|O_CREAT|O_TRUNC
                          ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
 };
 
@@ -172,7 +172,7 @@ public:
   explicit File (::std::string_view n):nam(n){}
 
   template<class R>explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView()){
-    getFile(nam,b);
+    getFile(nam.data(),b);
   }
 
   auto name ()const{return nam;}
