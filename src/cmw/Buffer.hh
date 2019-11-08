@@ -35,10 +35,11 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 
 namespace cmw{
 inline int getError (){
+  return
 #ifdef CMW_WINDOWS
-  return WSAGetLastError();
+   WSAGetLastError();
 #else
-  return errno;
+   errno;
 #endif
 }
 
@@ -167,12 +168,13 @@ auto getFile=[](char const* n,auto& b){
 };
 
 class File{
-  ::std::string_view nam;
+  char const* nam;
 public:
-  explicit File (::std::string_view n):nam(n){}
+  explicit File (char const* n):nam(n){}
 
-  template<class R>explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView()){
-    getFile(nam.data(),b);
+  template<class R>
+  explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView().data()){
+    getFile(nam,b);
   }
 
   auto name ()const{return nam;}
