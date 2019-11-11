@@ -4,7 +4,7 @@
 inline void
 cmwAccount::marshalMembers (::cmw::SendBuffer& buf)const{
   number.marshal(buf);
-  password.marshal(buf);
+  receive(buf,password);
 }
 
 namespace back{

@@ -1,6 +1,6 @@
 struct cmwAccount{
   ::cmw::MarshallingInt number;
-  ::cmw::FixedString60 password;
+  ::std::string_view password;
 
   cmwAccount (){}
   cmwAccount (int n,char const* p):number(n),password(p){}

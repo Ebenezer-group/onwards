@@ -169,7 +169,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
   while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
     auto num=fromChars(::strtok(nullptr,"\n \r"));
     checkField("Password");
-    accounts.emplace_back(num,::strtok(nullptr,"\n \r"));
+    accounts.emplace_back(num,::strdup(::strtok(nullptr,"\n \r")));
   }
   if(accounts.empty())bail("An account number is required.");
   if(::strcmp("UDP-port-number",tok))bail("Expected UDP-port-number");
