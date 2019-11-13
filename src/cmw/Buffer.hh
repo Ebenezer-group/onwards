@@ -6,6 +6,9 @@
 #include<exception>
 #include<initializer_list>
 #include<limits>
+#if __cplusplus>201703L
+#include<span>
+#endif
 #include<string>
 #include<string_view>
 #include<type_traits>
@@ -435,6 +438,18 @@ public:
       rindex+=r;
     }
   }
+
+#if __cplusplus>201703L
+  template<class T>auto giveSpan (){
+    static_assert(::std::is_arithmetic_v<T>);
+    ::int32_t sz=give<::uint32_t>();
+    ::int32_t serLen=sizeof(T)*sz;
+    checkLen(serLen);
+    ::std::span<T> s(reinterpret_cast<T*>(rbuf+subTotal+rindex),sz);
+    rindex+=serLen;
+    return s;
+  }
+#endif
 
   auto giveStringView (){
     MarshallingInt len{*this};
