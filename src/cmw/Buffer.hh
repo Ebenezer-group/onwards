@@ -495,14 +495,16 @@ public:
 
   SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
 
-  void checkSpace (int n){
+  int reserveBytes (int n){
     if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
+    auto i=index;
+    index+=n;
+    return i;
   }
 
   void receive (void const* data,int size){
-    checkSpace(size);
-    ::memcpy(buf+index,data,size);
-    index+=size;
+    auto prev=reserveBytes(size);
+    ::memcpy(buf+prev,data,size);
   }
 
   template<class T>void receive (T t){
@@ -514,13 +516,6 @@ public:
     static_assert(::std::is_arithmetic_v<T>);
     ::memcpy(buf+where,&t,sizeof t);
     return t;
-  }
-
-  int reserveBytes (int n){
-    checkSpace(n);
-    auto i=index;
-    index+=n;
-    return i;
   }
 
   void fillInSize (::int32_t max){
@@ -535,9 +530,8 @@ public:
 
   void receiveFile (fileType d,::int32_t sz){
     receive(sz);
-    checkSpace(sz);
-    if(Read(d,buf+index,sz)!=sz)raise("SendBuffer receiveFile");
-    index+=sz;
+    auto prev=reserveBytes(sz);
+    if(Read(d,buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
   }
 
   bool flush (){
