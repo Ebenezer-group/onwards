@@ -7,6 +7,7 @@
 #include<initializer_list>
 #include<limits>
 #if __cplusplus>201703L
+#include<bit>
 #include<span>
 #endif
 #include<string>
@@ -327,14 +328,22 @@ struct LeastSignificantFirst{
   static void read (B<LeastSignificantFirst>& b,float& f){
     ::uint32_t tmp;
     read(b,tmp);
+#if __cplusplus>201703L
+    f=::std::bit_cast<float>(tmp);
+#else
     ::memcpy(&f,&tmp,sizeof f);
+#endif
   }
 
   template<template<class> class B>
   static void read (B<LeastSignificantFirst>& b,double& d){
     ::uint64_t tmp;
     read(b,tmp);
+#if __cplusplus>201703L
+    d=::std::bit_cast<double>(tmp);
+#else
     ::memcpy(&d,&tmp,sizeof d);
+#endif
   }
 
   template<template<class> class B,class U>
@@ -360,14 +369,22 @@ struct MostSignificantFirst{
   static void read (B<MostSignificantFirst>& b,float& f){
     ::uint32_t tmp;
     read(b,tmp);
+#if __cplusplus>201703L
+    f=::std::bit_cast<float>(tmp);
+#else
     ::memcpy(&f,&tmp,sizeof f);
+#endif
   }
 
   template<template<class> class B>
   static void read (B<MostSignificantFirst>& b,double& d){
     ::uint64_t tmp;
     read(b,tmp);
+#if __cplusplus>201703L
+    d=::std::bit_cast<double>(tmp);
+#else
     ::memcpy(&d,&tmp,sizeof d);
+#endif
   }
 
   template<template<class> class B,class U>
