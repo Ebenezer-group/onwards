@@ -162,22 +162,22 @@ public:
 
 cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
   FILEwrapper cfg{config,"r"};
-  auto checkField=[&](char const* fld){
-    if(::strcmp(fld,::strtok(cfg.fgets()," ")))bail("Expected %s",fld);
+  auto checkField=[](char const* fld,char const* actl){
+    if(::strcmp(fld,actl))bail("Expected %s",fld);
+    return ::strtok(nullptr,"\n \r");
   };
   char const* tok;
   while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
     auto num=fromChars(::strtok(nullptr,"\n \r"));
-    checkField("Password");
-    accounts.emplace_back(num,::strdup(::strtok(nullptr,"\n \r")));
+    tok=checkField("Password",::strtok(cfg.fgets()," "));
+    accounts.emplace_back(num,::strdup(tok));
   }
   if(accounts.empty())bail("An account number is required.");
-  if(::strcmp("UDP-port-number",tok))bail("Expected UDP-port-number");
-  fds[1].fd=frntBuf.sock_=udpServer(::strtok(nullptr,"\n \r"));
+  fds[1].fd=frntBuf.sock_=udpServer(checkField("UDP-port-number",tok));
   fds[1].events=POLLIN;
 
-  checkField("Login-interval-in-milliseconds");
-  loginPause=fromChars(::strtok(nullptr,"\n \r"));
+  tok=checkField("Login-interval-in-milliseconds",::strtok(cfg.fgets()," "));
+  loginPause=fromChars(tok);
 
   login();
   for(;;){
