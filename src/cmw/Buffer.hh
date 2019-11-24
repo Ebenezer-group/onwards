@@ -56,7 +56,7 @@ public:
   char const* what ()const noexcept{return s.c_str();}
 };
 
-struct Fiasco:Failure{explicit Fiasco(char const* s):Failure(s){}};
+struct Fiasco:Failure{explicit Fiasco (char const* s):Failure(s){}};
 
 template<class E>void apps (E& e){throw e;}
 template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
@@ -744,9 +744,6 @@ struct FILEwrapper{
   {if(nullptr==hndl)raise("FILEwrapper",fn,mode,errno);}
   char* fgets (){return ::fgets(line,sizeof line,hndl);}
   ~FILEwrapper (){::fclose(hndl);}
-};
-struct int24{
-  unsigned long data:24;
 };
 }
 #endif
