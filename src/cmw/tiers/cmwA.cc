@@ -1,4 +1,4 @@
-#include<cmw/Buffer.hh>
+#include<cmw/BufferImpl.hh>
 #include"account.hh"
 #include"messageIDs.hh"
 
@@ -160,12 +160,13 @@ public:
   cmwAmbassador (char*);
 };
 
+auto checkField=[](char const* fld,char const* actl){
+  if(::strcmp(fld,actl))bail("Expected %s",fld);
+  return ::strtok(nullptr,"\n \r");
+};
+
 cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
   FILEwrapper cfg{config,"r"};
-  auto checkField=[](char const* fld,char const* actl){
-    if(::strcmp(fld,actl))bail("Expected %s",fld);
-    return ::strtok(nullptr,"\n \r");
-  };
   char const* tok;
   while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
     auto num=fromChars(::strtok(nullptr,"\n \r"));

@@ -1,5 +1,5 @@
 //  This program receives messages sent by sendExample.
-#include<cmw/Buffer.hh>
+#include<cmw/BufferImpl.hh>
 #include"messageIDs.hh"
 
 #include<array>
