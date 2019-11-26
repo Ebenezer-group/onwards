@@ -53,6 +53,7 @@ struct cmwRequest{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     *pos=0;
     setDirectory(path());
+    *pos='/';
     mdlFile=pos+1;
     char last[60];
     ::snprintf(last,sizeof last,".%s.last",mdlFile);
@@ -83,8 +84,8 @@ struct cmwRequest{
 
   auto outputFile ()const{
     Write(fl.d,&now,sizeof now);
-    setDirectory(path.c_str());
-    return ::strcat(mdlFile,".hh");
+    ::strcat(mdlFile,".hh");
+    return path.c_str();
   }
 };
 #include"cmwA.mdl.hh"
