@@ -1,6 +1,6 @@
 #ifndef base_hh
 #define base_hh 1
-#include<cmw/Buffer.hh>
+#include<cmw/BufferImpl.hh>
 #include<cmw/Complex.hh>
 
 struct base{

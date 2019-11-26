@@ -1,4 +1,4 @@
-#include<cmw/Buffer.hh>
+#include<cmw/BufferImpl.hh>
 #include"genz.mdl.hh"
 #include<stdio.h>
 #include<stdlib.h>//exit

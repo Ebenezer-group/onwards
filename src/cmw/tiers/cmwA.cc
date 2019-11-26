@@ -81,7 +81,11 @@ struct cmwRequest{
     buf.receive(idx,updatedFiles);
   }
 
-  auto outputFile ()const{return ::strcat(mdlFile,".hh");}
+  auto outputFile ()const{
+    Write(fl.d,&now,sizeof now);
+    setDirectory(path.c_str());
+    return ::strcat(mdlFile,".hh");
+  }
 };
 #include"cmwA.mdl.hh"
 
@@ -189,8 +193,6 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
           assert(!pendingRequests.empty());
           auto const& req=*pendingRequests.front();
           if(giveBool(cmwBuf)){
-            Write(req.fl.d,&req.now,sizeof req.now);
-            setDirectory(req.path.c_str());
             getFile(req.outputFile(),cmwBuf);
             outFront<true>(req);
           }else outFront<false>(req,"CMW:",cmwBuf.giveStringView());
