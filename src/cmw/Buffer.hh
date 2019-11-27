@@ -445,7 +445,7 @@ void receiveBlock (SendBuffer& b,C<T,U...>const& c){
   else for(auto const& e:c)e.marshal(b);
 }
 
-auto constexpr udp_packet_max=1280;
+inline auto constexpr udp_packet_max=1280;
 template<class R,int N=udp_packet_max>
 struct BufferStack:SendBuffer,ReceiveBuffer<R>{
 private:
