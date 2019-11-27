@@ -206,8 +206,9 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
     }catch(::std::exception& e){
       ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
-      outFront<false>(*pendingRequests.front(),e.what());
-      pendingRequests.erase(::std::begin(pendingRequests));
+      auto it=::std::begin(pendingRequests);
+      outFront<false>(**it,e.what());
+      pendingRequests.erase(it);
     }
 
     if(fds[0].revents&POLLOUT&&sendData())fds[0].events=POLLIN;
