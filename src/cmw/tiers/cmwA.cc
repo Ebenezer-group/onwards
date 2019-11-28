@@ -82,7 +82,7 @@ struct cmwRequest{
     buf.receive(idx,updatedFiles);
   }
 
-  auto outputFile ()const{
+  auto outputFile (){
     Write(fl.d,&now,sizeof now);
     ::strcat(mdlFile,".hh");
     return path.c_str();
@@ -192,12 +192,12 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
       if(fds[0].revents&POLLIN&&cmwBuf.gotPacket()){
         do{
           assert(!pendingRequests.empty());
-          auto const& req=*pendingRequests.front();
+          auto it=::std::begin(pendingRequests);
           if(giveBool(cmwBuf)){
-            getFile(req.outputFile(),cmwBuf);
-            outFront<true>(req);
-          }else outFront<false>(req,"CMW:",cmwBuf.giveStringView());
-          pendingRequests.erase(::std::begin(pendingRequests));
+            getFile((**it).outputFile(),cmwBuf);
+            outFront<true>(**it);
+          }else outFront<false>(**it,"CMW:",cmwBuf.giveStringView());
+          pendingRequests.erase(it);
         }while(cmwBuf.nextMessage());
       }
     }catch(Fiasco& e){
