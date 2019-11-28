@@ -36,14 +36,14 @@ bool marshalFile (char const* name,SendBuffer& buf){
 
 struct cmwRequest{
   ::sockaddr_in6 frnt;
-  ::socklen_t frntLn=sizeof frnt;
+  ::socklen_t frntLn;
   MarshallingInt const acctNbr;
   FixedString120 path;
   ::int32_t now;
   char* mdlFile;
   fileWrapper fl;
 
-  cmwRequest (){}
+  cmwRequest ():frntLn(sizeof frnt){}
 
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):acctNbr(buf),path(buf)
