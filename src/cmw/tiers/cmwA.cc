@@ -12,7 +12,7 @@
 #include<syslog.h>
 #include<sys/stat.h>
 #include<time.h>
-#include<unistd.h>//pread
+#include<unistd.h>//pread,sleep
 #ifdef __linux__
 #include<linux/sctp.h>//sockaddr_in6,socklen_t
 #else
@@ -125,7 +125,7 @@ class cmwAmbassador{
       }
       ::printf("connect %d\n",errno);
       ::close(s);
-      pollWrapper(nullptr,0,loginPause);
+      ::sleep(loginPause);
     }
 
     while(!cmwBuf.flush());
@@ -182,7 +182,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
   fds[1].fd=frntBuf.sock_=udpServer(checkField("UDP-port-number",tok));
   fds[1].events=POLLIN;
 
-  tok=checkField("Login-interval-in-milliseconds",::strtok(cfg.fgets()," "));
+  tok=checkField("Login-interval-in-seconds",::strtok(cfg.fgets()," "));
   loginPause=fromChars(tok);
 
   login();
