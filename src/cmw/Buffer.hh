@@ -428,7 +428,7 @@ inline void receive (SendBuffer& b,::std::string_view s){
 }
 
 inline void receiveNull (SendBuffer& b,char const* s){
-  receive(b,::std::string_view (s,::strlen(s)+1));
+  receive(b,::std::string_view(s,::strlen(s)+1));
 }
 
 using stringPlus=::std::initializer_list<::std::string_view>;

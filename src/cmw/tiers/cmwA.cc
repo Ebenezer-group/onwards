@@ -47,7 +47,7 @@ struct cmwRequest{
 
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):acctNbr(buf),path(buf)
-                     ,now(::time(nullptr)){
+                       ,now(::time(nullptr)){
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
     if(path.bytesAvailable()<3)raise("No room for file suffix");
@@ -82,7 +82,7 @@ struct cmwRequest{
     buf.receive(idx,updatedFiles);
   }
 
-  auto outputFile (){
+  auto getFileName (){
     Write(fl.d,&now,sizeof now);
     ::strcat(mdlFile,".hh");
     return path.c_str();
@@ -194,7 +194,7 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
           assert(!pendingRequests.empty());
           auto it=::std::begin(pendingRequests);
           if(giveBool(cmwBuf)){
-            getFile((**it).outputFile(),cmwBuf);
+            getFile((**it).getFileName(),cmwBuf);
             outFront<true>(**it);
           }else outFront<false>(**it,"CMW:",cmwBuf.giveStringView());
           pendingRequests.erase(it);
