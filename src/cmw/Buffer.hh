@@ -473,14 +473,14 @@ struct SendBufferHeap:SendBuffer{
 
 template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 private:
-  ::qlz_state_compress* compress;
+  ::qlz_state_compress* compress=nullptr;
   int const compSize;
   int compPacketSize;
   int compIndex=0;
-  char* compBuf;
+  char* compBuf=nullptr;
   bool kosher=true;
 
-  ::qlz_state_decompress* decomp;
+  ::qlz_state_decompress* decomp=nullptr;
   int bytesRead=0;
   char* compressedStart;
 
@@ -493,8 +493,7 @@ private:
   }
 public:
   BufferCompressed (int sz,int d):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz],0)
-              ,compress(nullptr),compSize(sz+(sz>>3)+400),compBuf(nullptr)
-              ,decomp(nullptr){(void)d;}
+                     ,compSize(sz+(sz>>3)+400){(void)d;}
 
   explicit BufferCompressed (int sz):BufferCompressed(sz,0){
     compress=new ::qlz_state_compress();
