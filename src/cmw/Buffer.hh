@@ -464,7 +464,7 @@ public:
   }
 };
 
-template<class T>void reset (T* p){::memset(p,0,sizeof(T));}
+auto reset=[](auto p){::memset(p,0,sizeof(*p));};
 
 struct SendBufferHeap:SendBuffer{
   SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
