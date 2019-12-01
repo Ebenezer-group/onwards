@@ -1,6 +1,6 @@
 #ifndef CMW_Buffer_hh
 #define CMW_Buffer_hh 1
-#include"quicklz.h"
+#include"cmw/quicklz.h"
 #include<algorithm>//min
 #include<exception>
 #include<initializer_list>
