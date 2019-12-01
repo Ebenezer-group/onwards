@@ -4,15 +4,12 @@
 #include<algorithm>//min
 #include<exception>
 #include<initializer_list>
-#include<limits>
 #if __cplusplus>201703L
 #include<span>
 #endif
 #include<string>
 #include<string_view>
 #include<type_traits>
-static_assert(::std::numeric_limits<unsigned char>::digits==8);
-static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<stdint.h>
 #include<stdio.h>//fopen,snprintf
 #include<stdlib.h>//exit
@@ -464,10 +461,10 @@ public:
   }
 };
 
-auto reset=[](auto p){::memset(p,0,sizeof(*p));};
+auto reset=[](auto p){::memset(p,0,sizeof *p);};
 
 struct SendBufferHeap:SendBuffer{
-  SendBufferHeap (int sz):SendBuffer(new unsigned char[sz],sz){}
+  SendBufferHeap (int n):SendBuffer(new unsigned char[n],n){}
   ~SendBufferHeap (){delete[]buf;}
 };
 

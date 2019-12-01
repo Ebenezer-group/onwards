@@ -2,6 +2,9 @@
 #define CMW_BufferImpl_hh 1
 #include"cmw/Buffer.hh"
 #include<charconv>//from_chars
+#include<limits>
+static_assert(::std::numeric_limits<unsigned char>::digits==8);
+static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #ifndef CMW_WINDOWS
 #include<errno.h>
 #include<netdb.h>
