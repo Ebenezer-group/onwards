@@ -14,7 +14,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #endif
 
 namespace cmw{
-inline int getError (){
+int getError (){
   return
 #ifdef CMW_WINDOWS
      WSAGetLastError();
@@ -23,7 +23,7 @@ inline int getError (){
 #endif
 }
 
-inline void winStart (){
+void winStart (){
 #ifdef CMW_WINDOWS
   WSADATA w;
   if(auto r=::WSAStartup(MAKEWORD(2,2),&w);0!=r)raise("WSAStartup",r);
@@ -58,14 +58,14 @@ inline void MarshallingInt::marshal (SendBuffer& b)const{
 }
 
 #ifdef CMW_WINDOWS
-inline DWORD Write (HANDLE h,void const* data,int len){
+DWORD Write (HANDLE h,void const* data,int len){
   DWORD bytesWritten=0;
   if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
     raise("Write",GetLastError());
   return bytesWritten;
 }
 
-inline DWORD Read (HANDLE h,void* data,int len){
+DWORD Read (HANDLE h,void* data,int len){
   DWORD bytesRead=0;
   if(!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
     raise("Read",GetLastError());
@@ -77,7 +77,7 @@ inline int Write (int fd,void const* data,int len){
   raise("Write",errno);
 }
 
-inline int Read (int fd,void* data,int len){
+int Read (int fd,void* data,int len){
   int r=::read(fd,data,len);
   if(r>0)return r;
   if(r==0)raise<Fiasco>("Read eof",len);
@@ -92,7 +92,7 @@ fileWrapper::fileWrapper (char const* name,int flags,mode_t mode):
 inline fileWrapper::~fileWrapper (){::close(d);}
 #endif
 
-inline void setRcvTimeout (sockType s,int time){
+void setRcvTimeout (sockType s,int time){
 #ifdef CMW_WINDOWS
   DWORD t=time*1000;
 #else
@@ -116,13 +116,13 @@ inline void closeSocket (sockType s){
     raise("closeSocket",getError());
 }
 
-inline int preserveError (sockType s){
+int preserveError (sockType s){
   auto e=getError();
   closeSocket(s);
   return e;
 }
 
-inline int pollWrapper (::pollfd* fds,int n,int timeout){
+int pollWrapper (::pollfd* fds,int n,int timeout){
   if(int r=::poll(fds,n,timeout);r>=0)return r;
   raise("poll",getError());
 }
@@ -160,7 +160,7 @@ sockType udpServer (char const* port){
   raise("udpServer",preserveError(s));
 }
 
-inline sockType tcpServer (char const* port){
+sockType tcpServer (char const* port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
   auto s=ai.getSock();
 
@@ -177,8 +177,8 @@ inline int acceptWrapper(sockType s){
   raise("acceptWrapper",e);
 }
 
-inline int sockWrite (sockType s,void const* data,int len
-                      ,sockaddr const* addr,socklen_t toLen){
+int sockWrite (sockType s,void const* data,int len
+               ,sockaddr const* addr,socklen_t toLen){
   if(int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);r>0)
     return r;
   auto e=getError();
@@ -186,8 +186,7 @@ inline int sockWrite (sockType s,void const* data,int len
   raise("sockWrite",s,e);
 }
 
-inline int sockRead (sockType s,void* data,int len
-                     ,sockaddr* addr,socklen_t* fromLen){
+int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen){
   int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(r>0)return r;
   auto e=getError();
