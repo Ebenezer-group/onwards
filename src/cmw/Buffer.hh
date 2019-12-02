@@ -31,8 +31,6 @@
 struct pollfd;
 struct addrinfo;
 namespace cmw{
-int getError ();
-
 class Failure:public ::std::exception{
   ::std::string s;
 public:
@@ -45,15 +43,16 @@ public:
 
 struct Fiasco:Failure{explicit Fiasco(char const* s):Failure(s){}};
 
-template<class E>void apps (E& e){throw e;}
+template<class E>void apps (E&){}
 template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
   e<<t; apps(e,ts...);
 }
 
 template<class E=Failure,class...T>void raise (char const* s,T...t){
-  E e{s}; apps(e,t...);
+  E e{s}; apps(e,t...); throw e;
 }
 
+int getError ();
 void winStart ();
 int fromChars (::std::string_view);
 void setDirectory (char const*);
@@ -110,7 +109,7 @@ struct fileWrapper{
   ~fileWrapper ();
 };
 
-auto getFile=[](char const* n,auto& b){
+auto getFile =[](char const* n,auto& b){
   b.giveFile(fileWrapper{n,O_WRONLY|O_CREAT|O_TRUNC
                          ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
 };
@@ -129,9 +128,9 @@ public:
 };
 #endif
 
-template<class T>int setsockWrapper (sockType s,int opt,T t){
+auto setsockWrapper =[](sockType s,int opt,auto t){
   return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
-}
+};
 
 void setRcvTimeout (sockType,int);
 int setNonblocking (sockType);
@@ -154,7 +153,6 @@ public:
 };
 
 sockType connectWrapper (char const* node,char const* port);
-
 sockType udpServer (char const* port);
 sockType tcpServer (char const* port);
 int acceptWrapper(sockType s);
@@ -162,7 +160,7 @@ int acceptWrapper(sockType s);
 int sockWrite (sockType s,void const* data,int len
                ,sockaddr const* addr=nullptr,socklen_t toLen=0);
 
-int sockRead (sockType s,void* data,int len ,sockaddr* addr,socklen_t* fromLen);
+int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen);
 
 struct SameFormat{
   template<template<class> class B,class U>
@@ -489,8 +487,8 @@ private:
     return false;
   }
 public:
-  BufferCompressed (int sz,int d):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz],0)
-                     ,compSize(sz+(sz>>3)+400){(void)d;}
+  BufferCompressed (int sz,int):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz],0)
+                     ,compSize(sz+(sz>>3)+400){}
 
   explicit BufferCompressed (int sz):BufferCompressed(sz,0){
     compress=new ::qlz_state_compress();
