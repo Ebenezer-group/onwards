@@ -163,11 +163,10 @@ int sockWrite (sockType s,void const* data,int len
 int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen);
 
 struct SameFormat{
-  template<template<class> class B,class U>
-  static void read (B<SameFormat>& b,U& data){b.give(&data,sizeof(U));}
+  template<class B,class U>static void read (B& b,U& data)
+  {b.give(&data,sizeof(U));}
 
-  template<template<class> class B,class U>
-  static void readBlock (B<SameFormat>& b,U* data,int elements)
+  template<class B,class U>static void readBlock (B& b,U* data,int elements)
   {b.give(data,elements*sizeof(U));}
 };
 
