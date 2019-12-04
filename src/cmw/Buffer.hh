@@ -172,67 +172,55 @@ struct SameFormat{
 };
 
 struct LeastSignificantFirst{
-  template<template<class> class B>
-  static void read (B<LeastSignificantFirst>& b,::uint16_t& val)
+  template<class B>static void read (B& b,::uint16_t& val)
   {for(::uint8_t c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
 
-  template<template<class> class B>
-  static void read (B<LeastSignificantFirst>& b,::uint32_t& val)
+  template<class B>static void read (B& b,::uint32_t& val)
   {for(::uint8_t c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
 
-  template<template<class> class B>
-  static void read (B<LeastSignificantFirst>& b,::uint64_t& val)
+  template<class B>static void read (B& b,::uint64_t& val)
   {for(::uint8_t c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
 
-  template<template<class> class B>
-  static void read (B<LeastSignificantFirst>& b,float& f){
+  template<class B>static void read (B& b,float& f){
     ::uint32_t tmp;
     read(b,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
-  template<template<class> class B>
-  static void read (B<LeastSignificantFirst>& b,double& d){
+  template<class B>static void read (B& b,double& d){
     ::uint64_t tmp;
     read(b,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
 
-  template<template<class> class B,class U>
-  static void readBlock (B<LeastSignificantFirst>& b,U* data,int elements){
+  template<class B,class U>static void readBlock (B& b,U* data,int elements){
     for(int i=0;i<elements;++i){*(data+i)=b.template give<U>();}
   }
 };
 
 struct MostSignificantFirst{
-  template<template<class> class B>
-  static void read (B<MostSignificantFirst>& b,::uint16_t& val)
+  template<class B>static void read (B& b,::uint16_t& val)
   {for(::uint8_t c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
 
-  template<template<class> class B>
-  static void read (B<MostSignificantFirst>& b,::uint32_t& val)
+  template<class B>static void read (B& b,::uint32_t& val)
   {for(::uint8_t c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
 
-  template<template<class> class B>
-  static void read (B<MostSignificantFirst>& b,::uint64_t& val)
+  template<class B>static void read (B& b,::uint64_t& val)
   {for(::uint8_t c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
 
-  template<template<class> class B>
-  static void read (B<MostSignificantFirst>& b,float& f){
+  template<class B>static void read (B& b,float& f){
     ::uint32_t tmp;
     read(b,tmp);
     ::memcpy(&f,&tmp,sizeof f);
   }
 
-  template<template<class> class B>
-  static void read (B<MostSignificantFirst>& b,double& d){
+  template<class B> static void read (B& b,double& d){
     ::uint64_t tmp;
     read(b,tmp);
     ::memcpy(&d,&tmp,sizeof d);
   }
 
-  template<template<class> class B,class U>
-  static void readBlock (B<MostSignificantFirst>& b,U* data,int elements){
+  template<class B,class U>static void readBlock (B& b,U* data,int elements){
     for(int i=0;i<elements;++i){*(data+i)=b.template give<U>();}
   }
 };
@@ -264,7 +252,7 @@ public:
 
   template<class T>T give (){
     T t;
-    if constexpr(sizeof(T)==1)give(&t,1);
+    if(sizeof(T)==1)give(&t,1);
     else R::read(*this,t);
     return t;
   }
@@ -286,7 +274,7 @@ public:
   }
 
   template<class T>void giveBlock (T* data,unsigned int elements){
-    if constexpr(sizeof(T)==1)give(data,elements);
+    if(sizeof(T)==1)give(data,elements);
     else R::readBlock(*this,data,elements);
   }
 
