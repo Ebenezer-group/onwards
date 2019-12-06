@@ -421,8 +421,8 @@ inline void receive (SendBuffer& b,stringPlus lst){
   for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
 }
 
-template<template<class...>class C,class T,class...U>
-void receiveBlock (SendBuffer& b,C<T,U...>const& c){
+template<template<class...>class C,class T>
+void receiveBlock (SendBuffer& b,C<T>const& c){
   ::int32_t n=c.size();
   b.receive(n);
   if constexpr(::std::is_arithmetic_v<T>){

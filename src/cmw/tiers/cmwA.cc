@@ -91,14 +91,7 @@ struct cmwRequest{
 #include"cmwA.mdl.hh"
 
 class cmwAmbassador{
-  BufferCompressed<
-#ifdef CMW_ENDIAN_BIG
-    LeastSignificantFirst
-#else
-    SameFormat
-#endif
-  > cmwBuf;
-
+  BufferCompressed<SameFormat> cmwBuf;
   BufferStack<SameFormat> frntBuf;
   ::std::vector<cmwAccount> accounts;
   ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
@@ -113,12 +106,7 @@ class cmwAmbassador{
       addr.sin_family=AF_INET;
       if(::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr)<=0)
         bail("inet_pton",errno);
-      addr.sin_port=
-#ifdef CMW_ENDIAN_BIG
-        htons(56790);
-#else
-        htons(56789);
-#endif
+      addr.sin_port=htons(56789);
       if(0==::connect(s,(::sockaddr*)&addr,sizeof(addr))){
         fds[0].fd=cmwBuf.sock_=s;
         break;
