@@ -133,8 +133,7 @@ class cmwAmbassador{
     ::syslog(LOG_ERR,"%s:%s",context,detail);
     frntBuf.reset();
     ::front::marshal<false>(frntBuf,{context," ",detail});
-    for(auto& r:pendingRequests)
-      frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
+    for(auto& r:pendingRequests)frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
     pendingRequests.clear();
     cmwBuf.compressedReset();
     login();
@@ -153,10 +152,10 @@ public:
   cmwAmbassador (char*);
 };
 
-auto checkField=[](char const* fld,char const* actl){
+auto checkField (char const* fld,char const* actl){
   if(::strcmp(fld,actl))bail("Expected %s",fld);
   return ::strtok(nullptr,"\n \r");
-};
+}
 
 cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
   FILEwrapper cfg{config,"r"};
