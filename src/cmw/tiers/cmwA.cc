@@ -43,11 +43,10 @@ struct cmwRequest{
   char* mdlFile;
   fileWrapper fl;
 
-  cmwRequest ():frntLn(sizeof frnt){}
+  cmwRequest ():frntLn(sizeof frnt),now(::time(nullptr)){}
 
   template<class R>
-  explicit cmwRequest (ReceiveBuffer<R>& buf):acctNbr(buf),path(buf)
-                       ,now(::time(nullptr)){
+  explicit cmwRequest (ReceiveBuffer<R>& buf):acctNbr(buf),path(buf){
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
     if(path.bytesAvailable()<3)raise("No room for file suffix");
