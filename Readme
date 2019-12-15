@@ -3,8 +3,8 @@ The CMW and the software found in this repository provide
 support for messaging and serialization.
 
 License
-The software is under the BSD 1-clause license.  Two of the
-files, quicklz.h and quicklz.c, are from another developer and 
+The software is under the BSD license.  Two of the files, 
+quicklz.h and quicklz.c, are from another developer and 
 should only be used in conjunction with the CMW.
 
 Building

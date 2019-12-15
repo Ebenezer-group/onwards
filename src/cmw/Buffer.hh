@@ -446,7 +446,7 @@ public:
   }
 };
 
-auto reset=[](auto p){::memset(p,0,sizeof *p);};
+auto clear =[](auto p){::memset(p,0,sizeof *p);};
 
 struct SendBufferHeap:SendBuffer{
   SendBufferHeap (int n):SendBuffer(new unsigned char[n],n){}
@@ -506,8 +506,8 @@ public:
 
   void compressedReset (){
     reset();
-    ::cmw::reset(compress);
-    ::cmw::reset(decomp);
+    clear(compress);
+    clear(decomp);
     compIndex=bytesRead=0;
     kosher=true;
     closeSocket(sock_);

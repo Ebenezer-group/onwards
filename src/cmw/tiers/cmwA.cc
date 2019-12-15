@@ -90,12 +90,12 @@ struct cmwRequest{
 #include"cmwA.mdl.hh"
 
 class cmwAmbassador{
-  BufferCompressed<SameFormat> cmwBuf;
-  BufferStack<SameFormat> frntBuf;
   ::std::vector<cmwAccount> accounts;
   ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
   ::pollfd fds[2];
   int loginPause;
+  BufferCompressed<SameFormat> cmwBuf;
+  BufferStack<SameFormat> frntBuf;
 
   void login (){
     ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
