@@ -37,13 +37,13 @@ bool marshalFile (char const* name,SendBuffer& buf){
 struct cmwRequest{
   ::sockaddr_in6 frnt;
   ::socklen_t frntLn;
-  ::int32_t now;
+  ::int32_t bday;
   MarshallingInt const acctNbr;
   FixedString120 path;
   char* mdlFile;
   fileWrapper fl;
 
-  cmwRequest ():frntLn(sizeof frnt),now(::time(nullptr)){}
+  cmwRequest ():frntLn(sizeof frnt),bday(::time(nullptr)){}
 
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):acctNbr(buf),path(buf){
@@ -82,7 +82,7 @@ struct cmwRequest{
   }
 
   auto getFileName (){
-    Write(fl.d,&now,sizeof now);
+    Write(fl.d,&bday,sizeof bday);
     ::strcat(mdlFile,".hh");
     return path.c_str();
   }
