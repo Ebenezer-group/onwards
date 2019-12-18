@@ -85,11 +85,11 @@ int Read (int fd,void* data,int len){
   raise("Read",len,errno);
 }
 
-fileWrapper::fileWrapper (char const* name,int flags,mode_t mode):
+FileWrapper::FileWrapper (char const* name,int flags,mode_t mode):
           d(::open(name,flags,mode))
-{if(d<0)raise("fileWrapper",name,errno);}
+{if(d<0)raise("FileWrapper",name,errno);}
 
-inline fileWrapper::~fileWrapper (){::close(d);}
+inline FileWrapper::~FileWrapper (){::close(d);}
 #endif
 
 void setRcvTimeout (sockType s,int time){

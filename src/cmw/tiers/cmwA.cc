@@ -29,7 +29,7 @@ bool marshalFile (char const* name,SendBuffer& buf){
   if('.'==name[0]||name[0]=='/')receiveNull(buf,::strrchr(name,'/')+1);
   else receiveNull(buf,name);
 
-  fileWrapper f(name,O_RDONLY);
+  FileWrapper f(name,O_RDONLY);
   buf.receiveFile(f.d,sb.st_size);
   return true;
 }
@@ -41,7 +41,7 @@ struct cmwRequest{
   MarshallingInt const acctNbr;
   FixedString120 path;
   char* mdlFile;
-  fileWrapper fl;
+  FileWrapper fl;
 
   cmwRequest ():frntLn(sizeof frnt),bday(::time(nullptr)){}
 
@@ -56,7 +56,7 @@ struct cmwRequest{
     mdlFile=pos+1;
     char last[60];
     ::snprintf(last,sizeof last,".%s.last",mdlFile);
-    ::new(&fl)fileWrapper(last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    ::new(&fl)FileWrapper(last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     switch(::pread(fl.d,&previousTime,sizeof previousTime,0)){
       default:break;
       case 0:previousTime=0;break;

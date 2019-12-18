@@ -102,15 +102,15 @@ template<class...T>void bail (char const* fmt,T... t)noexcept{
   ::exit(EXIT_FAILURE);
 }
 
-struct fileWrapper{
+struct FileWrapper{
   int const d;
-  fileWrapper ():d(-2){}
-  fileWrapper (char const* name,int flags,mode_t mode=0);
-  ~fileWrapper ();
+  FileWrapper ():d(-2){}
+  FileWrapper (char const* name,int flags,mode_t mode=0);
+  ~FileWrapper ();
 };
 
 auto getFile =[](char const* n,auto& b){
-  b.giveFile(fileWrapper{n,O_WRONLY|O_CREAT|O_TRUNC
+  b.giveFile(FileWrapper{n,O_WRONLY|O_CREAT|O_TRUNC
                          ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
 };
 
