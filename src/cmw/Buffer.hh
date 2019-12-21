@@ -105,7 +105,7 @@ template<class...T>void bail (char const* fmt,T... t)noexcept{
 struct FileWrapper{
   int const d;
   FileWrapper ():d(-2){}
-  FileWrapper (char const* name,int flags,mode_t mode=0);
+  FileWrapper (char const* name,int flags,mode_t=0);
   ~FileWrapper ();
 };
 
@@ -158,9 +158,9 @@ sockType tcpServer (char const* port);
 int acceptWrapper(sockType s);
 
 int sockWrite (sockType s,void const* data,int len
-               ,sockaddr const* addr=nullptr,socklen_t toLen=0);
+               ,sockaddr const* =nullptr,socklen_t=0);
 
-int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen);
+int sockRead (sockType s,void* data,int len,sockaddr*,socklen_t*);
 
 struct SameFormat{
   template<class B,class U>static void read (B& b,U& data)
