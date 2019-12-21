@@ -29,8 +29,7 @@ bool marshalFile (char const* name,SendBuffer& buf){
   if('.'==name[0]||name[0]=='/')receiveNull(buf,::strrchr(name,'/')+1);
   else receiveNull(buf,name);
 
-  FileWrapper f(name,O_RDONLY);
-  buf.receiveFile(f.d,sb.st_size);
+  buf.receiveFile(FileWrapper{name,O_RDONLY}.d,sb.st_size);
   return true;
 }
 
