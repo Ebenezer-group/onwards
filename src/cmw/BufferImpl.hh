@@ -17,9 +17,9 @@ namespace cmw{
 int getError (){
   return
 #ifdef CMW_WINDOWS
-     WSAGetLastError();
+    WSAGetLastError();
 #else
-     errno;
+    errno;
 #endif
 }
 
@@ -31,9 +31,9 @@ void winStart (){
 }
 
 int fromChars (::std::string_view s){
-  int res=0;
-  ::std::from_chars(s.data(),s.data()+s.size(),res);
-  return res;
+  int n=0;
+  ::std::from_chars(s.data(),s.data()+s.size(),n);
+  return n;
 }
 
 inline void setDirectory (char const* d){
@@ -199,8 +199,8 @@ int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen){
   raise("sockRead",s,len,e);
 }
 
-FILEwrapper::FILEwrapper (char const* fn,char const* mode):hndl(::fopen(fn,mode))
-{if(nullptr==hndl)raise("FILEwrapper",fn,mode,errno);}
+FILEwrapper::FILEwrapper (char const* n,char const* mode):hndl(::fopen(n,mode))
+{if(nullptr==hndl)raise("FILEwrapper",n,mode,errno);}
 char* FILEwrapper::fgets (){return ::fgets(line,sizeof line,hndl);}
 FILEwrapper::~FILEwrapper (){::fclose(hndl);}
 }

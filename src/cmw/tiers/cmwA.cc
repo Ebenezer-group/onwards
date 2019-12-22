@@ -19,13 +19,13 @@
 #include<netinet/sctp.h>
 #endif
 #include<arpa/inet.h>//inet_pton
-::int32_t previousTime;
+::int32_t prevTime;
 using namespace ::cmw;
 
 bool marshalFile (char const* name,SendBuffer& buf){
   struct ::stat sb;
   if(::stat(name,&sb)<0)raise("stat",name,errno);
-  if(sb.st_mtime<=previousTime)return false;
+  if(sb.st_mtime<=prevTime)return false;
   if('.'==name[0]||name[0]=='/')receiveNull(buf,::strrchr(name,'/')+1);
   else receiveNull(buf,name);
 
@@ -58,9 +58,9 @@ public:
     char last[60];
     ::snprintf(last,sizeof last,".%s.last",mdlFile);
     ::new(&fl)FileWrapper(last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-    switch(::pread(fl.d,&previousTime,sizeof previousTime,0)){
+    switch(::pread(fl.d,&prevTime,sizeof prevTime,0)){
       default:break;
-      case 0:previousTime=0;break;
+      case 0:prevTime=0;break;
       case -1:raise("pread",errno);
     }
   }
