@@ -1,7 +1,6 @@
 #ifndef CMW_Buffer_hh
 #define CMW_Buffer_hh 1
 #include"cmw/quicklz.h"
-#include<algorithm>//min
 #include<exception>
 #include<initializer_list>
 #if __cplusplus>201703L
@@ -442,6 +441,11 @@ struct SendBufferHeap:SendBuffer{
   ~SendBufferHeap (){delete[]buf;}
 };
 
+template<class T>T const& myMin (T const& a,T const& b){
+  if(a<b)return a;
+  return b;
+}
+
 template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 private:
   ::qlz_state_compress* compress=nullptr;
@@ -523,7 +527,7 @@ public:
       this->update();
       return true;
     }
-    bytesRead+=Read(sock_,rbuf,::std::min(bufsize,compPacketSize-bytesRead));
+    bytesRead+=Read(sock_,rbuf,myMin(bufsize,compPacketSize-bytesRead));
     if(bytesRead==compPacketSize){
       kosher=true;
       bytesRead=0;
