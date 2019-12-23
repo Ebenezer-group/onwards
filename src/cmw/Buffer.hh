@@ -12,7 +12,6 @@
 #include<type_traits>
 #include<stdint.h>
 #include<stdio.h>//fopen,snprintf
-#include<stdlib.h>//exit
 #include<string.h>//memcpy,memmove
 
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
@@ -58,7 +57,7 @@ int fromChars (::std::string_view);
 void setDirectory (char const*);
 
 class SendBuffer;
-template<class R>class ReceiveBuffer;
+template<class>class ReceiveBuffer;
 class MarshallingInt{
   ::int32_t val;
 public:
@@ -97,9 +96,11 @@ using fileType=int;
 int Write (int,void const*,int);
 int Read (int,void*,int);
 
+void exitFailure ();
+
 template<class...T>void bail (char const* fmt,T... t)noexcept{
   ::syslog(LOG_ERR,fmt,t...);
-  ::exit(EXIT_FAILURE);
+  exitFailure();
 }
 
 struct FileWrapper{

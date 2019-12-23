@@ -10,6 +10,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<errno.h>
 #include<netdb.h>
 #include<poll.h>
+#include<stdlib.h>//exit
 #include<unistd.h>
 #endif
 
@@ -83,6 +84,10 @@ int Read (int fd,void* data,int len){
   if(r==0)raise<Fiasco>("Read eof",len);
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
   raise("Read",len,errno);
+}
+
+void exitFailure (){
+  ::exit(EXIT_FAILURE);
 }
 
 FileWrapper::FileWrapper (char const* name,int flags,mode_t mode):
