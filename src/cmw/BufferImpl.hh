@@ -31,7 +31,7 @@ void winStart (){
 }
 
 int fromChars (::std::string_view s){
-  int n=0;
+  int n;
   ::std::from_chars(s.data(),s.data()+s.size(),n);
   return n;
 }
@@ -203,5 +203,23 @@ FILEwrapper::FILEwrapper (char const* n,char const* mode):hndl(::fopen(n,mode))
 {if(nullptr==hndl)raise("FILEwrapper",n,mode,errno);}
 char* FILEwrapper::fgets (){return ::fgets(line,sizeof line,hndl);}
 FILEwrapper::~FILEwrapper (){::fclose(hndl);}
+
+void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
+
+void receive (SendBuffer& b,::std::string_view s){
+  MarshallingInt(s.size()).marshal(b);
+  b.receive(s.data(),s.size());
+}
+
+void receiveNull (SendBuffer& b,char const* s){
+  receive(b,::std::string_view(s,::strlen(s)+1));
+}
+
+void receive (SendBuffer& b,stringPlus lst){
+  ::int32_t t=0;
+  for(auto s:lst)t+=s.size();
+  MarshallingInt{t}.marshal(b);
+  for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
+}
 }
 #endif

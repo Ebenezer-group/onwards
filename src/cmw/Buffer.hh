@@ -155,12 +155,12 @@ public:
 sockType connectWrapper (char const* node,char const* port);
 sockType udpServer (char const* port);
 sockType tcpServer (char const* port);
-int acceptWrapper(sockType s);
+int acceptWrapper (sockType);
 
-int sockWrite (sockType s,void const* data,int len
-               ,sockaddr const* =nullptr,socklen_t=0);
+int sockWrite (sockType,void const* data,int len
+               ,::sockaddr const* =nullptr,::socklen_t=0);
 
-int sockRead (sockType s,void* data,int len,sockaddr*,socklen_t*);
+int sockRead (sockType,void* data,int len,::sockaddr*,::socklen_t*);
 
 struct SameFormat{
   template<class B,class U>static void read (B& b,U& data)
@@ -402,24 +402,12 @@ public:
   template<class...T>void receiveMulti (char const*,T...);
 };
 
-inline void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
-
-inline void receive (SendBuffer& b,::std::string_view s){
-  MarshallingInt(s.size()).marshal(b);
-  b.receive(s.data(),s.size());
-}
-
-inline void receiveNull (SendBuffer& b,char const* s){
-  receive(b,::std::string_view(s,::strlen(s)+1));
-}
+void receiveBool (SendBuffer&,bool);
+void receive (SendBuffer&,::std::string_view);
+void receiveNull (SendBuffer&,char const*);
 
 using stringPlus=::std::initializer_list<::std::string_view>;
-inline void receive (SendBuffer& b,stringPlus lst){
-  ::int32_t t=0;
-  for(auto s:lst)t+=s.size();
-  MarshallingInt{t}.marshal(b);
-  for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
-}
+void receive (SendBuffer&,stringPlus);
 
 template<template<class...>class C,class T>
 void receiveBlock (SendBuffer& b,C<T>const& c){
@@ -579,7 +567,7 @@ struct FILEwrapper{
   ::FILE* const hndl;
   char line[120];
 
-  FILEwrapper (char const* fn,char const* mode);
+  FILEwrapper (char const* n,char const* mode);
   char* fgets ();
   ~FILEwrapper ();
 };
