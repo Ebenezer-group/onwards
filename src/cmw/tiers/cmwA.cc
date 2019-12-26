@@ -101,22 +101,20 @@ class cmwAmbassador{
   void login (){
     ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
     for(;;){
-      int s=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
+      cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
       ::sockaddr_in addr{};
       addr.sin_family=AF_INET;
       if(::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr)<=0)
         bail("inet_pton",errno);
       addr.sin_port=htons(56789);
-      if(0==::connect(s,(::sockaddr*)&addr,sizeof(addr))){
-        fds[0].fd=cmwBuf.sock_=s;
-        break;
-      }
+      if(0==::connect(cmwBuf.sock_,(::sockaddr*)&addr,sizeof(addr)))break;
       ::printf("connect %d\n",errno);
-      ::close(s);
+      ::close(cmwBuf.sock_);
       ::sleep(loginPause);
     }
 
     while(!cmwBuf.flush());
+    fds[0].fd=cmwBuf.sock_;
     fds[0].events=POLLIN;
     ::sctp_paddrparams paddr{};
     paddr.spp_address.ss_family=AF_INET;
