@@ -94,20 +94,16 @@ class cmwAmbassador{
   ::std::vector<cmwAccount> accounts;
   ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
   ::pollfd fds[2];
+  ::sockaddr_in addr{};
   int loginPause;
-  BufferCompressed<SameFormat> cmwBuf;
+  BufferCompressed<SameFormat> cmwBuf{1101000};
   BufferStack<SameFormat> frntBuf;
 
   void login (){
     ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
-    ::sockaddr_in addr{};
-    addr.sin_family=AF_INET;
-    if(::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr)<=0)
-      bail("inet_pton",errno);
-    addr.sin_port=htons(56789);
     for(;;){
       cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-      if(0==::connect(cmwBuf.sock_,(::sockaddr*)&addr,sizeof(addr)))break;
+      if(0==::connect(cmwBuf.sock_,(::sockaddr*)&addr,sizeof addr))break;
       ::printf("connect %d\n",errno);
       ::close(cmwBuf.sock_);
       ::sleep(loginPause);
@@ -155,7 +151,7 @@ auto checkField (char const* fld,char const* actl){
   return ::strtok(nullptr,"\n \r");
 }
 
-cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
+cmwAmbassador::cmwAmbassador (char* config){
   FILEwrapper cfg{config,"r"};
   char const* tok;
   while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
@@ -170,6 +166,10 @@ cmwAmbassador::cmwAmbassador (char* config):cmwBuf(1101000){
   tok=checkField("Login-interval-in-seconds",::strtok(cfg.fgets()," "));
   loginPause=fromChars(tok);
 
+  addr.sin_family=AF_INET;
+  if(::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr)<=0)
+    bail("inet_pton",errno);
+  addr.sin_port=htons(56789);
   login();
   for(;;){
     pollWrapper(fds,2);
