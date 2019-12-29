@@ -90,68 +90,63 @@ public:
 };
 #include"cmwA.mdl.hh"
 
-class cmwAmbassador{
-  ::std::vector<cmwAccount> accounts;
-  ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
-  ::pollfd fds[2];
-  ::sockaddr_in addr{};
-  int loginPause;
-  BufferCompressed<SameFormat> cmwBuf{1101000};
-  BufferStack<SameFormat> frntBuf;
+::sockaddr_in addr{};
+::std::vector<cmwAccount> accounts;
+::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
+::pollfd fds[2];
+int loginPause;
+BufferCompressed<SameFormat> cmwBuf{1101000};
+BufferStack<SameFormat> frntBuf;
 
-  void login (){
-    ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
-    for(;;){
-      cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-      if(0==::connect(cmwBuf.sock_,(::sockaddr*)&addr,sizeof addr))break;
-      ::printf("connect %d\n",errno);
-      ::close(cmwBuf.sock_);
-      ::sleep(loginPause);
-    }
-
-    while(!cmwBuf.flush());
-    fds[0].fd=cmwBuf.sock_;
-    fds[0].events=POLLIN;
-    ::sctp_paddrparams paddr{};
-    paddr.spp_address.ss_family=AF_INET;
-    paddr.spp_hbinterval=240000;
-    paddr.spp_flags=SPP_HB_ENABLE;
-    if(::setsockopt(fds[0].fd,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
-                    ,&paddr,sizeof paddr)==-1)bail("setsockopt",errno);
-    while(!cmwBuf.gotPacket());
-    if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
-    if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
+void login (){
+  ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
+  for(;;){
+    cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
+    if(0==::connect(cmwBuf.sock_,(::sockaddr*)&addr,sizeof addr))break;
+    ::printf("connect %d\n",errno);
+    ::close(cmwBuf.sock_);
+    ::sleep(loginPause);
   }
 
-  void reset (char const* context,char const* detail=""){
-    ::syslog(LOG_ERR,"%s:%s",context,detail);
-    frntBuf.reset();
-    ::front::marshal<false>(frntBuf,{context," ",detail});
-    for(auto& r:pendingRequests)frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
-    pendingRequests.clear();
-    cmwBuf.compressedReset();
-    login();
-  }
+  while(!cmwBuf.flush());
+  fds[0].fd=cmwBuf.sock_;
+  fds[0].events=POLLIN;
+  ::sctp_paddrparams paddr{};
+  paddr.spp_address.ss_family=AF_INET;
+  paddr.spp_hbinterval=240000;
+  paddr.spp_flags=SPP_HB_ENABLE;
+  if(::setsockopt(fds[0].fd,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
+                  ,&paddr,sizeof paddr)==-1)bail("setsockopt",errno);
+  while(!cmwBuf.gotPacket());
+  if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
+  if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
+}
 
-  bool sendData ()try{return cmwBuf.flush();}
-  catch(::std::exception& e){reset("sendData",e.what());return true;}
+void reset (char const* context,char const* detail=""){
+  ::syslog(LOG_ERR,"%s:%s",context,detail);
+  frntBuf.reset();
+  ::front::marshal<false>(frntBuf,{context," ",detail});
+  for(auto& r:pendingRequests)frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
+  pendingRequests.clear();
+  cmwBuf.compressedReset();
+  login();
+}
 
-  template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
-    frntBuf.reset();
-    ::front::marshal<res>(frntBuf,{t...});
-    frntBuf.send((::sockaddr*)&req.frnt,req.frntLn);
-  }
+bool sendData ()try{return cmwBuf.flush();}
+catch(::std::exception& e){reset("sendData",e.what());return true;}
 
-public:
-  cmwAmbassador (char*);
-};
+template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
+  frntBuf.reset();
+  ::front::marshal<res>(frntBuf,{t...});
+  frntBuf.send((::sockaddr*)&req.frnt,req.frntLn);
+}
 
 auto checkField (char const* fld,char const* actl){
   if(::strcmp(fld,actl))bail("Expected %s",fld);
   return ::strtok(nullptr,"\n \r");
 }
 
-cmwAmbassador::cmwAmbassador (char* config){
+void cmwAmbassador (char* config){
   FILEwrapper cfg{config,"r"};
   char const* tok;
   while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
@@ -222,5 +217,5 @@ cmwAmbassador::cmwAmbassador (char* config){
 int main (int ac,char** av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac!=2)bail("Usage: cmwA config-file");
-  cmwAmbassador{av[1]};
+  cmwAmbassador(av[1]);
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
