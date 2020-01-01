@@ -146,8 +146,10 @@ auto checkField (char const* fld,char const* actl){
   return ::strtok(nullptr,"\n \r");
 }
 
-void cmwAmbassador (char* config){
-  FILEwrapper cfg{config,"r"};
+int main (int ac,char** av)try{
+  ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
+  if(ac!=2)bail("Usage: cmwA config-file");
+  FILEwrapper cfg{av[1],"r"};
   char const* tok;
   while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
     auto num=fromChars(::strtok(nullptr,"\n \r"));
@@ -166,6 +168,7 @@ void cmwAmbassador (char* config){
     bail("inet_pton",errno);
   addr.sin_port=htons(56789);
   login();
+
   for(;;){
     pollWrapper(fds,2);
     try{
@@ -212,10 +215,4 @@ void cmwAmbassador (char* config){
       if(!sendData())fds[0].events|=POLLOUT;
     }
   }
-}
-
-int main (int ac,char** av)try{
-  ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
-  if(ac!=2)bail("Usage: cmwA config-file");
-  cmwAmbassador(av[1]);
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
