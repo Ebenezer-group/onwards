@@ -90,7 +90,7 @@ public:
 };
 #include"cmwA.mdl.hh"
 
-::sockaddr_in addr{};
+::sockaddr_in addr;
 ::std::vector<cmwAccount> accounts;
 ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
 ::pollfd fds[2];
@@ -163,9 +163,9 @@ int main (int ac,char** av)try{
   tok=checkField("Login-interval-in-seconds",::strtok(cfg.fgets()," "));
   loginPause=fromChars(tok);
 
-  addr.sin_family=AF_INET;
   if(::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr)<=0)
     bail("inet_pton",errno);
+  addr.sin_family=AF_INET;
   addr.sin_port=htons(56789);
   login();
 
