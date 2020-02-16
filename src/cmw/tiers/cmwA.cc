@@ -89,13 +89,16 @@ public:
 };
 #include"cmwA.mdl.hh"
 
+auto checkField (char const* fld,char const* actl){
+  if(::strcmp(fld,actl))bail("Expected %s",fld);
+  return ::strtok(nullptr,"\n \r");
+}
+
 ::sockaddr_in addr;
 ::std::vector<cmwAccount> accounts;
-::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
 ::pollfd fds[2];
 int loginPause;
 BufferCompressed<SameFormat> cmwBuf{1101000};
-BufferStack<SameFormat> frntBuf;
 
 void login (){
   ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
@@ -121,6 +124,9 @@ void login (){
   if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
 }
 
+::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
+BufferStack<SameFormat> frntBuf;
+
 void reset (char const* context,char const* detail=""){
   ::syslog(LOG_ERR,"%s:%s",context,detail);
   frntBuf.reset();
@@ -138,11 +144,6 @@ template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
   frntBuf.reset();
   ::front::marshal<res>(frntBuf,{t...});
   frntBuf.send((::sockaddr*)&req.frnt,req.frntLn);
-}
-
-auto checkField (char const* fld,char const* actl){
-  if(::strcmp(fld,actl))bail("Expected %s",fld);
-  return ::strtok(nullptr,"\n \r");
 }
 
 int main (int ac,char** av)try{
