@@ -100,6 +100,29 @@ auto checkField (char const* fld,char const* actl){
 int loginPause;
 BufferCompressed<SameFormat> cmwBuf{1101000};
 
+void setup (int ac,char** av){
+  ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
+  if(ac!=2)bail("Usage: cmwA config-file");
+  FILEwrapper cfg{av[1],"r"};
+  char const* tok;
+  while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
+    auto num=fromChars(::strtok(nullptr,"\n \r"));
+    tok=checkField("Password",::strtok(cfg.fgets()," "));
+    accounts.emplace_back(num,::strdup(tok));
+  }
+  if(accounts.empty())bail("An account number is required.");
+  fds[1].fd=frntBuf.sock_=udpServer(checkField("UDP-port-number",tok));
+  fds[1].events=POLLIN;
+
+  tok=checkField("Login-interval-in-seconds",::strtok(cfg.fgets()," "));
+  loginPause=fromChars(tok);
+
+  if(::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr)<=0)
+    bail("inet_pton",errno);
+  addr.sin_family=AF_INET;
+  addr.sin_port=htons(56789);
+}
+
 void login (){
   ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
   for(;;){
@@ -147,26 +170,7 @@ template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
 }
 
 int main (int ac,char** av)try{
-  ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
-  if(ac!=2)bail("Usage: cmwA config-file");
-  FILEwrapper cfg{av[1],"r"};
-  char const* tok;
-  while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
-    auto num=fromChars(::strtok(nullptr,"\n \r"));
-    tok=checkField("Password",::strtok(cfg.fgets()," "));
-    accounts.emplace_back(num,::strdup(tok));
-  }
-  if(accounts.empty())bail("An account number is required.");
-  fds[1].fd=frntBuf.sock_=udpServer(checkField("UDP-port-number",tok));
-  fds[1].events=POLLIN;
-
-  tok=checkField("Login-interval-in-seconds",::strtok(cfg.fgets()," "));
-  loginPause=fromChars(tok);
-
-  if(::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr)<=0)
-    bail("inet_pton",errno);
-  addr.sin_family=AF_INET;
-  addr.sin_port=htons(56789);
+  setup(ac,av);
   login();
 
   for(;;){
