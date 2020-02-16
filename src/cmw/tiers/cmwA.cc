@@ -99,6 +99,8 @@ auto checkField (char const* fld,char const* actl){
 ::pollfd fds[2];
 int loginPause;
 BufferCompressed<SameFormat> cmwBuf{1101000};
+::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
+BufferStack<SameFormat> frntBuf;
 
 void setup (int ac,char** av){
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
@@ -146,9 +148,6 @@ void login (){
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
   if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
 }
-
-::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
-BufferStack<SameFormat> frntBuf;
 
 void reset (char const* context,char const* detail=""){
   ::syslog(LOG_ERR,"%s:%s",context,detail);
