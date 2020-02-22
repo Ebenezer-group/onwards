@@ -46,7 +46,7 @@ template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
   e<<t; apps(e,ts...);
 }
 
-template<class E=Failure,class...T>void raise (char const* s,T...t){
+template<class E=Failure,class...T>[[noreturn]]void raise (char const* s,T...t){
   E e{s}; apps(e,t...); throw e;
 }
 
