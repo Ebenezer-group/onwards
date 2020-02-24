@@ -1,5 +1,5 @@
 project('onwards','cpp')
-add_global_arguments('-std=c++17','-Os','-flto','-W','-Wall','-Wextra','-Wno-return-type',language:'cpp')
+add_global_arguments('-std=c++17','-Os','-flto','-W','-Wall','-Wextra',language:'cpp')
 inc=include_directories('src')
 executable('genz','src/cmw/tiers/genz.cc',include_directories:inc)
 message(host_machine.system())

@@ -193,7 +193,7 @@ struct LeastSignificantFirst{
   }
 
   template<class B,class U>static void readBlock (B& b,U* data,int elements){
-    for(int i=0;i<elements;++i){*(data+i)=b.template give<U>();}
+    for(;elements>0;--elements){*data++=b.template give<U>();}
   }
 };
 
@@ -220,7 +220,7 @@ struct MostSignificantFirst{
   }
 
   template<class B,class U>static void readBlock (B& b,U* data,int elements){
-    for(int i=0;i<elements;++i){*(data+i)=b.template give<U>();}
+    for(;elements>0;--elements){*data++=b.template give<U>();}
   }
 };
 
