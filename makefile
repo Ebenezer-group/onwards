@@ -28,11 +28,11 @@ example/receiveExample:example/receiveExample.cc
 clean:
 	rm -f $(TIERS) $(EXAMPLES)
 
-INSTALL_DIR=/usr/local
+INSTALL_DIR=/usr/local/
 install:
-	cp -f src/cmw/*.hh src/cmw/quicklz.h $(INSTALL_DIR)/include
-	cp -f $(TIERS) $(INSTALL_DIR)/bin
+	cp -f src/cmw/*.hh src/cmw/quicklz.h $(INSTALL_DIR)include
+	cp -f $(TIERS) $(INSTALL_DIR)bin
 
 uninstall:
-	cd $(INSTALL_DIR)/include && rm -f $(includes)
+	cd $(INSTALL_DIR)include && rm -f $(includes)
 
