@@ -172,7 +172,7 @@ struct SameFormat{
 
 struct LeastSignificantFirst{
   template<class B,class U>static void read (B& b,U& val)
-  {for(auto c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
+  {for(auto c=0;c<sizeof(U);++c)val|=b.giveOne()<<8*c;}
 
   template<class B>static void read (B& b,float& f){
     ::uint32_t tmp;
@@ -193,7 +193,7 @@ struct LeastSignificantFirst{
 
 struct MostSignificantFirst{
   template<class B,class U>static void read (B& b,U& val)
-  {for(auto c=sizeof val;c>0;--c)val|=b.giveOne()<<8*(c-1);}
+  {for(auto c=sizeof(U);c>0;--c)val|=b.giveOne()<<8*(c-1);}
 
   template<class B>static void read (B& b,float& f){
     ::uint32_t tmp;
