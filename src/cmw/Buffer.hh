@@ -171,14 +171,8 @@ struct SameFormat{
 };
 
 struct LeastSignificantFirst{
-  template<class B>static void read (B& b,::uint16_t& val)
-  {for(::uint8_t c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
-
-  template<class B>static void read (B& b,::uint32_t& val)
-  {for(::uint8_t c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
-
-  template<class B>static void read (B& b,::uint64_t& val)
-  {for(::uint8_t c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
+  template<class B,class U>static void read (B& b,U& val)
+  {for(auto c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
 
   template<class B>static void read (B& b,float& f){
     ::uint32_t tmp;
@@ -198,14 +192,8 @@ struct LeastSignificantFirst{
 };
 
 struct MostSignificantFirst{
-  template<class B>static void read (B& b,::uint16_t& val)
-  {for(::uint8_t c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
-
-  template<class B>static void read (B& b,::uint32_t& val)
-  {for(::uint8_t c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
-
-  template<class B>static void read (B& b,::uint64_t& val)
-  {for(::uint8_t c=sizeof(val)-1;c>=0;--c)val|=b.giveOne()<<8*c;}
+  template<class B,class U>static void read (B& b,U& val)
+  {for(auto c=sizeof val;c>0;--c)val|=b.giveOne()<<8*(c-1);}
 
   template<class B>static void read (B& b,float& f){
     ::uint32_t tmp;
