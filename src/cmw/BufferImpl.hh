@@ -89,7 +89,7 @@ int Read (int fd,void* data,int len){
 void exitFailure (){::exit(EXIT_FAILURE);}
 
 FileWrapper::FileWrapper (char const* name,int flags,mode_t mode):
-        d(::open(name,flags,mode)) {if(d<0)raise("FileWrapper",name,errno);}
+        d{::open(name,flags,mode)} {if(d<0)raise("FileWrapper",name,errno);}
 
 inline FileWrapper::~FileWrapper (){::close(d);}
 #endif
@@ -172,7 +172,7 @@ sockType tcpServer (char const* port){
   raise("tcpServer",preserveError(s));
 }
 
-inline int acceptWrapper(sockType s){
+inline int acceptWrapper (sockType s){
   if(int n=::accept(s,nullptr,nullptr);n>=0)return n;
   auto e=getError();
   if(ECONNABORTED==e)return 0;
@@ -201,7 +201,7 @@ int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen){
   raise("sockRead",s,len,e);
 }
 
-FILEwrapper::FILEwrapper (char const* n,char const* mode):hndl(::fopen(n,mode))
+FILEwrapper::FILEwrapper (char const* n,char const* mode):hndl{::fopen(n,mode)}
 {if(nullptr==hndl)raise("FILEwrapper",n,mode,errno);}
 char* FILEwrapper::fgets (){return ::fgets(line,sizeof line,hndl);}
 FILEwrapper::~FILEwrapper (){::fclose(hndl);}
