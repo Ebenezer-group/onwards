@@ -39,7 +39,7 @@ public:
   char const* what ()const noexcept{return s.c_str();}
 };
 
-struct Fiasco:Failure{explicit Fiasco(char const* s):Failure(s){}};
+struct Fiasco:Failure{explicit Fiasco (char const* s):Failure{s}{}};
 
 template<class E>void apps (E&){}
 template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
@@ -61,8 +61,8 @@ class MarshallingInt{
   ::int32_t val;
 public:
   MarshallingInt (){}
-  explicit MarshallingInt (::int32_t v):val(v){}
-  explicit MarshallingInt (::std::string_view v):val(fromChars(v)){}
+  explicit MarshallingInt (::int32_t v):val{v}{}
+  explicit MarshallingInt (::std::string_view v):val{fromChars(v)}{}
 
   //Reads a sequence of bytes in variable-length format and
   //builds a 32 bit integer.
@@ -220,7 +220,7 @@ protected:
   int packetLength;
   char* const rbuf;
 public:
-  ReceiveBuffer (char* addr,int bytes):packetLength(bytes),rbuf(addr){}
+  ReceiveBuffer (char* addr,int bytes):packetLength{bytes},rbuf{addr}{}
 
   void checkLen (int n){
     if(n>msgLength-rindex)raise("ReceiveBuffer checkLen",n,msgLength,rindex);

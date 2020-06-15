@@ -89,8 +89,7 @@ int Read (int fd,void* data,int len){
 void exitFailure (){::exit(EXIT_FAILURE);}
 
 FileWrapper::FileWrapper (char const* name,int flags,mode_t mode):
-        d(::open(name,flags,mode))
-{if(d<0)raise("FileWrapper",name,errno);}
+        d(::open(name,flags,mode)) {if(d<0)raise("FileWrapper",name,errno);}
 
 inline FileWrapper::~FileWrapper (){::close(d);}
 #endif
