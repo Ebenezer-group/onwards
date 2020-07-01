@@ -39,7 +39,7 @@ int main ()try{
 
       case messageID::id3:
       {
-        ::std::array<std::array<float,2>,3> a;
+        ::std::array<::std::array<float,2>,3> a;
         give(buf,a);
         for(auto subarray:a){
           for(auto val:subarray){::std::cout<<val<<' ';}
