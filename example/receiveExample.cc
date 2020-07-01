@@ -24,7 +24,7 @@ int main ()try{
         ::std::vector<::int32_t> vec;
         ::std::string str;
         give(buf,vec,str);
-        for(auto val:vec){::std::cout<<val<<' ';}
+        for(auto v:vec){::std::cout<<v<<' ';}
         ::std::cout<<'\n'<<str;
       }
       break;
@@ -33,7 +33,7 @@ int main ()try{
       {
         ::std::set<::int32_t> iset;
         give(buf,iset);
-        for(auto val:iset){::std::cout<<val<<' ';}
+        for(auto v:iset){::std::cout<<v<<' ';}
       }
       break;
 
@@ -42,7 +42,7 @@ int main ()try{
         ::std::array<::std::array<float,2>,3> a;
         give(buf,a);
         for(auto subarray:a){
-          for(auto val:subarray){::std::cout<<val<<' ';}
+          for(auto v:subarray){::std::cout<<v<<' ';}
           ::std::cout<<'\n';
         }
       }
