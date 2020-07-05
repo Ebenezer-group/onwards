@@ -44,7 +44,7 @@ private:
   FileWrapper fl;
 public:
 
-  cmwRequest ():frntLn(sizeof frnt){}
+  cmwRequest ():frntLn{sizeof frnt}{}
 
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):bday{::time(nullptr)}
