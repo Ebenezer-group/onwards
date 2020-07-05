@@ -44,10 +44,11 @@ private:
   FileWrapper fl;
 public:
 
-  cmwRequest ():frntLn(sizeof frnt),bday(::time(nullptr)){}
+  cmwRequest ():frntLn(sizeof frnt){}
 
   template<class R>
-  explicit cmwRequest (ReceiveBuffer<R>& buf):acctNbr(buf),path(buf){
+  explicit cmwRequest (ReceiveBuffer<R>& buf):bday{::time(nullptr)}
+       ,acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
