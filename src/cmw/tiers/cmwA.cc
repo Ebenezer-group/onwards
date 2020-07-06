@@ -208,6 +208,7 @@ int main (int ac,char** av)try{
         req=&*pendingRequests.emplace_back(::new cmwRequest);
         frntBuf.getPacket((::sockaddr*)&req->frnt,&req->frntLn);
         gotAddr=true;
+	req->~cmwRequest();
         ::new(req)cmwRequest(frntBuf);
         ::back::marshal<messageID::generate>(cmwBuf,*req);
       }catch(::std::exception& e){
