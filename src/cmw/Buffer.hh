@@ -80,9 +80,9 @@ public:
   void operator= (::int32_t r){val=r;}
   auto operator() ()const{return val;}
   void marshal (SendBuffer&)const;
+  friend bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
+  friend bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
 };
-inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
-inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
 
 #ifdef CMW_WINDOWS
 using sockType=SOCKET;
