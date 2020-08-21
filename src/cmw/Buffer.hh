@@ -106,6 +106,7 @@ struct FileWrapper{
   int const d;
   FileWrapper ():d{-2}{}
   FileWrapper (char const* name,int flags,mode_t=0);
+  FileWrapper (FileWrapper const&)=delete;
   ~FileWrapper ();
 };
 
@@ -561,6 +562,7 @@ struct FILEwrapper{
   char line[120];
 
   FILEwrapper (char const* n,char const* mode);
+  FILEwrapper (FILEwrapper const&)=delete;
   char* fgets ();
   ~FILEwrapper ();
 };
