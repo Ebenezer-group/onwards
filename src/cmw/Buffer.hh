@@ -430,10 +430,7 @@ struct SendBufferHeap:SendBuffer{
   ~SendBufferHeap (){delete[]buf;}
 };
 
-template<class T>T const& myMin (T const& a,T const& b){
-  if(a<b)return a;
-  return b;
-}
+template<class T>T const& myMin (T const& a,T const& b){return a<b?a:b;}
 
 template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 private:
