@@ -555,13 +555,13 @@ using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
 
 struct FILEwrapper{
-  ::FILE* const hndl;
+  FILE* const hndl;
   char line[120];
 
   FILEwrapper (char const* n,char const* mode);
   FILEwrapper (FILEwrapper const&)=delete;
-  char* fgets ();
   ~FILEwrapper ();
+  char* fgets ();
 };
 }
 #endif
