@@ -1,6 +1,6 @@
 account.hh
 --
-//Messages the middle tier either sends to or receives from the back tier.
+//Messages the middle tier sends to the back and front tiers
 back <messageID_t=messageID>
   -out (::std::vector<cmwAccount>,::int32_t)
   -out -maxLength=700000 (cmwRequest)
