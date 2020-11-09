@@ -1,5 +1,5 @@
-#ifndef CMW_Buffer_hh
-#define CMW_Buffer_hh 1
+#ifndef CMW_BUFFER_HH
+#define CMW_BUFFER_HH
 #include"cmw/quicklz.h"
 #include<exception>
 #include<initializer_list>

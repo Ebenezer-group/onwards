@@ -1,5 +1,5 @@
-#ifndef CMW_BufferImpl_hh
-#define CMW_BufferImpl_hh 1
+#ifndef CMW_BUFFERIMPL_HH
+#define CMW_BUFFERIMPL_HH
 #include"cmw/Buffer.hh"
 #include"cmw/quicklz.c"
 #include<charconv>//from_chars

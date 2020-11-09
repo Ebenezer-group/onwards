@@ -1,5 +1,5 @@
-#ifndef CMW_Complex_hh
-#define CMW_Complex_hh 1
+#ifndef CMW_COMPLEX_HH
+#define CMW_COMPLEX_HH
 #include<cmw/Buffer.hh>
 #include<complex>
 
