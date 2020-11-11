@@ -1,5 +1,5 @@
-#ifndef base_hh
-#define base_hh 1
+#ifndef BASE_HH
+#define BASE_HH
 #include<cmw/BufferImpl.hh>
 #include<cmw/Complex.hh>
 
