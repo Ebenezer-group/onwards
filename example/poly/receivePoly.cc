@@ -5,8 +5,7 @@
 #include<iostream>
 
 int main ()try{
-  using namespace ::cmw;
-  BufferStack<SameFormat> buffer(udpServer("13579"));
+  ::cmw::BufferStack<SameFormat> buffer(udpServer("13579"));
 
   for(;;){
     buffer.getPacket();

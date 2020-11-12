@@ -17,13 +17,12 @@ int main ()try{
     buf.getPacket();
     auto const msgid=::cmw::give<messageID>(buf);
     ::std::cout<<"Message id: "<<static_cast<unsigned>(msgid)<<'\n';
-    using namespace ::exampleMessages;
     switch(msgid){
       case messageID::id1:
       {
         ::std::vector<::int32_t> vec;
         ::std::string str;
-        give(buf,vec,str);
+	exampleMessages::give(buf,vec,str);
         for(auto v:vec){::std::cout<<v<<' ';}
         ::std::cout<<'\n'<<str;
       }
@@ -32,7 +31,7 @@ int main ()try{
       case messageID::id2:
       {
         ::std::set<::int32_t> iset;
-        give(buf,iset);
+	exampleMessages::give(buf,iset);
         for(auto v:iset){::std::cout<<v<<' ';}
       }
       break;
@@ -40,7 +39,7 @@ int main ()try{
       case messageID::id3:
       {
         ::std::array<::std::array<float,2>,3> a;
-        give(buf,a);
+	exampleMessages::give(buf,a);
         for(auto subarray:a){
           for(auto v:subarray){::std::cout<<v<<' ';}
           ::std::cout<<'\n';

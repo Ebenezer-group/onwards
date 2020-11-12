@@ -127,7 +127,7 @@ void setup (int ac,char** av){
 }
 
 void login (){
-  ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
+  back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
   for(;;){
     cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
     if(0==::connect(cmwBuf.sock_,(::sockaddr*)&addr,sizeof addr))break;
@@ -153,7 +153,7 @@ void login (){
 void reset (char const* context,char const* detail=""){
   ::syslog(LOG_ERR,"%s:%s",context,detail);
   frntBuf.reset();
-  ::front::marshal<false>(frntBuf,{context," ",detail});
+  front::marshal<false>(frntBuf,{context," ",detail});
   for(auto& r:pendingRequests)frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
   pendingRequests.clear();
   cmwBuf.compressedReset();
@@ -165,7 +165,7 @@ catch(::std::exception& e){reset("sendData",e.what());return true;}
 
 template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
   frntBuf.reset();
-  ::front::marshal<res>(frntBuf,{t...});
+  front::marshal<res>(frntBuf,{t...});
   frntBuf.send((::sockaddr*)&req.frnt,req.frntLn);
 }
 
@@ -210,7 +210,7 @@ int main (int ac,char** av)try{
         gotAddr=true;
         req->~cmwRequest();
         ::new(req)cmwRequest(frntBuf);
-        ::back::marshal<messageID::generate>(cmwBuf,*req);
+        back::marshal<messageID::generate>(cmwBuf,*req);
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)outFront<false>(*req,e.what());

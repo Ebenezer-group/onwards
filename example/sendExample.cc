@@ -24,19 +24,18 @@ int main ()try{
   ::std::cout<<"Enter the ID of the message to send: 0,1 or 2.\n";
   int msgID;
   ::std::cin>>msgID;
-  using namespace ::exampleMessages;
   switch(msgID){
     case messageID::id1:
     {
       ::std::vector<int32_t> vec {100,97,94,91,88,85};
-      marshal<messageID::id1>(buf,vec,"Proverbs 24:27");
+      exampleMessages::marshal<messageID::id1>(buf,vec,"Proverbs 24:27");
     }
     break;
 
     case messageID::id2:
     {
       ::std::set<int32_t> iset {100,97,94,91,88,85};
-      marshal<messageID::id2>(buf,iset);
+      exampleMessages::marshal<messageID::id2>(buf,iset);
     }
     break;
 
@@ -46,7 +45,7 @@ int main ()try{
                                                   ,{3.3f,4.4f}
                                                   ,{5.5f,6.6f}
                                                 }};
-      marshal<messageID::id3>(buf,ar);
+      exampleMessages::marshal<messageID::id3>(buf,ar);
     }
     break;
 
