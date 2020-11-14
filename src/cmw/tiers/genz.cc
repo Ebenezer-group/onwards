@@ -3,12 +3,12 @@
 #include<stdio.h>
 #include<stdlib.h>//exit
 
-template<class...T>void leave (char const* fmt,T...t)noexcept{
+template<class...T>void leave (char const *fmt,T...t)noexcept{
   ::fprintf(stderr,fmt,t...);
   ::exit(EXIT_FAILURE);
 }
 
-int main (int ac,char** av)try{
+int main (int ac,char **av)try{
   using namespace ::cmw;
   if(ac<3||ac>5)
     leave("Usage: genz account-num mdl-file-path [node] [port]\n");

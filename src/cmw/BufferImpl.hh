@@ -1,7 +1,7 @@
 #ifndef CMW_BUFFERIMPL_HH
 #define CMW_BUFFERIMPL_HH
-#include"cmw/Buffer.hh"
-#include"cmw/quicklz.c"
+#include<cmw/Buffer.hh>
+#include<cmw/quicklz.c>
 #include<charconv>//from_chars
 #include<limits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8);
@@ -37,7 +37,7 @@ int fromChars (::std::string_view s){
   return n;
 }
 
-inline void setDirectory (char const* d){
+inline void setDirectory (char const *d){
 #ifdef CMW_WINDOWS
   if(!::SetCurrentDirectory(d))
 #else
@@ -59,26 +59,26 @@ inline void MarshallingInt::marshal (SendBuffer& b)const{
 }
 
 #ifdef CMW_WINDOWS
-DWORD Write (HANDLE h,void const* data,int len){
+DWORD Write (HANDLE h,void const *data,int len){
   DWORD bytesWritten=0;
   if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
     raise("Write",GetLastError());
   return bytesWritten;
 }
 
-DWORD Read (HANDLE h,void* data,int len){
+DWORD Read (HANDLE h,void *data,int len){
   DWORD bytesRead=0;
   if(!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
     raise("Read",GetLastError());
   return bytesRead;
 }
 #else
-inline int Write (int fd,void const* data,int len){
+inline int Write (int fd,void const *data,int len){
   if(int r=::write(fd,data,len);r>=0)return r;
   raise("Write",errno);
 }
 
-int Read (int fd,void* data,int len){
+int Read (int fd,void *data,int len){
   int r=::read(fd,data,len);
   if(r>0)return r;
   if(r==0)raise<Fiasco>("Read eof",len);
@@ -88,7 +88,7 @@ int Read (int fd,void* data,int len){
 
 void exitFailure (){::exit(EXIT_FAILURE);}
 
-FileWrapper::FileWrapper (char const* name,int flags,mode_t mode):
+FileWrapper::FileWrapper (char const *name,int flags,mode_t mode):
         d{::open(name,flags,mode)} {if(d<0)raise("FileWrapper",name,errno);}
 
 inline FileWrapper::~FileWrapper (){::close(d);}
@@ -124,12 +124,12 @@ int preserveError (sockType s){
   return e;
 }
 
-int pollWrapper (::pollfd* fds,int n,int timeout){
+int pollWrapper (::pollfd *fds,int n,int timeout){
   if(int r=::poll(fds,n,timeout);r>=0)return r;
   raise("poll",getError());
 }
 
-GetaddrinfoWrapper::GetaddrinfoWrapper (char const* node,char const* port
+GetaddrinfoWrapper::GetaddrinfoWrapper (char const *node,char const *port
                                         ,int type,int flags){
   ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
   if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
@@ -147,7 +147,7 @@ sockType GetaddrinfoWrapper::getSock (){
   raise("getaddrinfo getSock");
 }
 
-inline sockType connectWrapper (char const* node,char const* port){
+inline sockType connectWrapper (char const *node,char const *port){
   GetaddrinfoWrapper ai{node,port,SOCK_STREAM};
   auto s=ai.getSock();
   if(0==::connect(s,ai()->ai_addr,ai()->ai_addrlen))return s;
@@ -155,14 +155,14 @@ inline sockType connectWrapper (char const* node,char const* port){
   return -1;
 }
 
-sockType udpServer (char const* port){
+sockType udpServer (char const *port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
   auto s=ai.getSock();
   if(0==::bind(s,ai()->ai_addr,ai()->ai_addrlen))return s;
   raise("udpServer",preserveError(s));
 }
 
-sockType tcpServer (char const* port){
+sockType tcpServer (char const *port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
   auto s=ai.getSock();
 
@@ -179,8 +179,8 @@ inline int acceptWrapper (sockType s){
   raise("acceptWrapper",e);
 }
 
-int sockWrite (sockType s,void const* data,int len
-               ,sockaddr const* addr,socklen_t toLen){
+int sockWrite (sockType s,void const *data,int len
+               ,sockaddr const *addr,socklen_t toLen){
   if(int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);r>0)
     return r;
   auto e=getError();
@@ -188,7 +188,7 @@ int sockWrite (sockType s,void const* data,int len
   raise("sockWrite",s,e);
 }
 
-int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen){
+int sockRead (sockType s,void *data,int len,sockaddr *addr,socklen_t *fromLen){
   int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(r>0)return r;
   auto e=getError();
@@ -201,7 +201,7 @@ int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen){
   raise("sockRead",s,len,e);
 }
 
-FILEwrapper::FILEwrapper (char const* n,char const* mode):hndl{::fopen(n,mode)}
+FILEwrapper::FILEwrapper (char const *n,char const *mode):hndl{::fopen(n,mode)}
 {if(nullptr==hndl)raise("FILEwrapper",n,mode,errno);}
 char* FILEwrapper::fgets (){return ::fgets(line,sizeof line,hndl);}
 FILEwrapper::~FILEwrapper (){::fclose(hndl);}
@@ -213,7 +213,7 @@ void receive (SendBuffer& b,::std::string_view s){
   b.receive(s.data(),s.size());
 }
 
-void receiveNull (SendBuffer& b,char const* s){
+void receiveNull (SendBuffer& b,char const *s){
   receive(b,::std::string_view(s,::strlen(s)+1));
 }
 

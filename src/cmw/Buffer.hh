@@ -1,6 +1,6 @@
 #ifndef CMW_BUFFER_HH
 #define CMW_BUFFER_HH
-#include"cmw/quicklz.h"
+#include<cmw/quicklz.h>
 #include<exception>
 #include<initializer_list>
 #if __cplusplus>201703L
@@ -32,21 +32,21 @@ namespace cmw{
 class Failure:public ::std::exception{
   ::std::string s;
 public:
-  explicit Failure (char const* s):s(s){}
+  explicit Failure (char const *s):s(s){}
   void operator<< (::std::string_view v){s.append(" "); s.append(v);}
-  void operator<< (char const* v){s.append(" "); s.append(v);}
+  void operator<< (char const *v){s.append(" "); s.append(v);}
   void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
   char const* what ()const noexcept{return s.c_str();}
 };
 
-struct Fiasco:Failure{explicit Fiasco (char const* s):Failure{s}{}};
+struct Fiasco:Failure{explicit Fiasco (char const *s):Failure{s}{}};
 
 template<class E>void apps (E&){}
 template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
   e<<t; apps(e,ts...);
 }
 
-template<class E=Failure,class...T>[[noreturn]]void raise (char const* s,T...t){
+template<class E=Failure,class...T>[[noreturn]]void raise (char const *s,T...t){
   E e{s}; apps(e,t...); throw e;
 }
 
@@ -97,7 +97,7 @@ int Read (int,void*,int);
 
 void exitFailure ();
 
-template<class...T>void bail (char const* fmt,T... t)noexcept{
+template<class...T>void bail (char const *fmt,T... t)noexcept{
   ::syslog(LOG_ERR,fmt,t...);
   exitFailure();
 }
@@ -105,20 +105,20 @@ template<class...T>void bail (char const* fmt,T... t)noexcept{
 struct FileWrapper{
   int const d;
   FileWrapper ():d{-2}{}
-  FileWrapper (char const* name,int flags,mode_t=0);
+  FileWrapper (char const *name,int flags,mode_t=0);
   FileWrapper (FileWrapper const&)=delete;
   ~FileWrapper ();
 };
 
-auto getFile =[](char const* n,auto& b){
+auto getFile =[](char const *n,auto& b){
   b.giveFile(FileWrapper{n,O_WRONLY|O_CREAT|O_TRUNC
                          ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
 };
 
 class File{
-  char const* nam;
+  char const *nam;
 public:
-  explicit File (char const* n):nam(n){}
+  explicit File (char const *n):nam(n){}
 
   template<class R>
   explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView().data()){
@@ -140,9 +140,9 @@ int preserveError (sockType);
 int pollWrapper (::pollfd*,int,int=-1);
 
 class GetaddrinfoWrapper{
-  ::addrinfo* head,*addr;
+  ::addrinfo *head,*addr;
 public:
-  GetaddrinfoWrapper (char const* node,char const* port,int type,int flags=0);
+  GetaddrinfoWrapper (char const *node,char const *port,int type,int flags=0);
 
   ~GetaddrinfoWrapper ();
   auto operator() (){return addr;}
@@ -153,21 +153,21 @@ public:
   GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
 };
 
-sockType connectWrapper (char const* node,char const* port);
-sockType udpServer (char const* port);
-sockType tcpServer (char const* port);
+sockType connectWrapper (char const *node,char const *port);
+sockType udpServer (char const *port);
+sockType tcpServer (char const *port);
 int acceptWrapper (sockType);
 
-int sockWrite (sockType,void const* data,int len
+int sockWrite (sockType,void const *data,int len
                ,::sockaddr const* =nullptr,::socklen_t=0);
 
-int sockRead (sockType,void* data,int len,::sockaddr*,::socklen_t*);
+int sockRead (sockType,void *data,int len,::sockaddr*,::socklen_t*);
 
 struct SameFormat{
   template<class B,class U>static void read (B& b,U& data)
   {b.give(&data,sizeof(U));}
 
-  template<class B,class U>static void readBlock (B& b,U* data,int elements)
+  template<class B,class U>static void readBlock (B& b,U *data,int elements)
   {b.give(data,elements*sizeof(U));}
 };
 
@@ -187,7 +187,7 @@ struct LeastSignificantFirst{
     ::memcpy(&d,&tmp,sizeof d);
   }
 
-  template<class B,class U>static void readBlock (B& b,U* data,int elements){
+  template<class B,class U>static void readBlock (B& b,U *data,int elements){
     for(;elements>0;--elements){*data++=b.template give<U>();}
   }
 };
@@ -208,7 +208,7 @@ struct MostSignificantFirst{
     ::memcpy(&d,&tmp,sizeof d);
   }
 
-  template<class B,class U>static void readBlock (B& b,U* data,int elements){
+  template<class B,class U>static void readBlock (B& b,U *data,int elements){
     for(;elements>0;--elements){*data++=b.template give<U>();}
   }
 };
@@ -221,13 +221,13 @@ protected:
   int packetLength;
   char* const rbuf;
 public:
-  ReceiveBuffer (char* addr,int bytes):packetLength{bytes},rbuf{addr}{}
+  ReceiveBuffer (char *addr,int bytes):packetLength{bytes},rbuf{addr}{}
 
   void checkLen (int n){
     if(n>msgLength-rindex)raise("ReceiveBuffer checkLen",n,msgLength,rindex);
   }
 
-  void give (void* address,int len){
+  void give (void *address,int len){
     checkLen(len);
     ::memcpy(address,rbuf+subTotal+rindex,len);
     rindex+=len;
@@ -261,7 +261,7 @@ public:
     return nextMessage();
   }
 
-  template<class T>void giveBlock (T* data,unsigned int elements){
+  template<class T>void giveBlock (T *data,unsigned int elements){
     if(sizeof(T)==1)give(data,elements);
     else R::readBlock(*this,data,elements);
   }
@@ -320,7 +320,7 @@ template<class R>bool giveBool (ReceiveBuffer<R>& b){
 }
 
 class SendBuffer{
-  SendBuffer (SendBuffer const&);
+  SendBuffer (SendBuffer const&)=delete;
   SendBuffer& operator= (SendBuffer);
   ::int32_t savedSize=0;
 protected:
@@ -330,7 +330,7 @@ protected:
 public:
   sockType sock_=-1;
 
-  SendBuffer (unsigned char* addr,int sz):bufsize(sz),buf(addr){}
+  SendBuffer (unsigned char *addr,int sz):bufsize(sz),buf(addr){}
 
   int reserveBytes (int n){
     if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
@@ -339,7 +339,7 @@ public:
     return i;
   }
 
-  void receive (void const* data,int size){
+  void receive (void const *data,int size){
     auto prev=reserveBytes(size);
     ::memcpy(buf+prev,data,size);
   }
@@ -382,7 +382,7 @@ public:
   }
 
   //UDP-friendly alternative to flush
-  void send (::sockaddr* addr=nullptr,::socklen_t len=0)
+  void send (::sockaddr *addr=nullptr,::socklen_t len=0)
   {sockWrite(sock_,buf,index,addr,len);}
 
   unsigned char* data (){return buf;}
@@ -417,7 +417,7 @@ public:
   BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>((char*)ar,0){}
   BufferStack (int s):BufferStack(){sock_=s;}
 
-  bool getPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
+  bool getPacket (::sockaddr *addr=nullptr,::socklen_t *len=nullptr){
     this->packetLength=sockRead(sock_,ar,N,addr,len);
     return this->update();
   }
@@ -434,16 +434,16 @@ template<class T>T const& myMin (T const& a,T const& b){return a<b?a:b;}
 
 template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 private:
-  ::qlz_state_compress* compress=nullptr;
+  ::qlz_state_compress *compress=nullptr;
   int const compSize;
   int compPacketSize;
   int compIndex=0;
-  char* compBuf=nullptr;
+  char *compBuf=nullptr;
   bool kosher=true;
 
-  ::qlz_state_decompress* decomp=nullptr;
+  ::qlz_state_decompress *decomp=nullptr;
   int bytesRead=0;
-  char* compressedStart;
+  char *compressedStart;
 
   bool doFlush (){
     int const bytes=Write(sock_,compBuf,compIndex);
@@ -558,7 +558,7 @@ struct FILEwrapper{
   FILE* const hndl;
   char line[120];
 
-  FILEwrapper (char const* n,char const* mode);
+  FILEwrapper (char const *n,char const *mode);
   FILEwrapper (FILEwrapper const&)=delete;
   ~FILEwrapper ();
   char* fgets ();

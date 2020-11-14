@@ -22,7 +22,7 @@
 ::int32_t prevTime;
 using namespace ::cmw;
 
-bool marshalFile (char const* name,SendBuffer& buf){
+bool marshalFile (char const *name,SendBuffer& buf){
   struct ::stat sb;
   if(::stat(name,&sb)<0)raise("stat",name,errno);
   if(sb.st_mtime<=prevTime)return false;
@@ -40,7 +40,7 @@ private:
   ::int32_t bday;
   MarshallingInt const acctNbr;
   FixedString120 path;
-  char* mdlFile;
+  char *mdlFile;
   FileWrapper fl;
 public:
 
@@ -74,7 +74,7 @@ public:
     auto const idx=buf.reserveBytes(sizeof updatedFiles);
     FILEwrapper f{mdlFile,"r"};
     while(auto line=f.fgets()){
-      char const* tok=::strtok(line,"\n \r");
+      char const *tok=::strtok(line,"\n \r");
       if(!::strncmp(tok,"//",2))continue;
       if(!::strcmp(tok,"--"))break;
       if(marshalFile(tok,buf))++updatedFiles;
@@ -90,7 +90,7 @@ public:
 };
 #include"cmwA.mdl.hh"
 
-auto checkField (char const* fld,char const* actl){
+auto checkField (char const *fld,char const *actl){
   if(::strcmp(fld,actl))bail("Expected %s",fld);
   return ::strtok(nullptr,"\n \r");
 }
@@ -103,11 +103,11 @@ BufferCompressed<SameFormat> cmwBuf{1101000};
 ::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
 BufferStack<SameFormat> frntBuf;
 
-void setup (int ac,char** av){
+void setup (int ac,char **av){
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac!=2)bail("Usage: cmwA config-file");
   FILEwrapper cfg{av[1],"r"};
-  char const* tok;
+  char const *tok;
   while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
     auto num=fromChars(::strtok(nullptr,"\n \r"));
     tok=checkField("Password",::strtok(cfg.fgets()," "));
@@ -150,7 +150,7 @@ void login (){
   if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
 }
 
-void reset (char const* context,char const* detail=""){
+void reset (char const *context,char const *detail=""){
   ::syslog(LOG_ERR,"%s:%s",context,detail);
   frntBuf.reset();
   front::marshal<false>(frntBuf,{context," ",detail});
@@ -169,7 +169,7 @@ template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
   frntBuf.send((::sockaddr*)&req.frnt,req.frntLn);
 }
 
-int main (int ac,char** av)try{
+int main (int ac,char **av)try{
   setup(ac,av);
   login();
 
@@ -203,7 +203,7 @@ int main (int ac,char** av)try{
 
     if(fds[1].revents&POLLIN){
       bool gotAddr=false;
-      cmwRequest* req=nullptr;
+      cmwRequest *req=nullptr;
       try{
         req=&*pendingRequests.emplace_back(::new cmwRequest);
         frntBuf.getPacket((::sockaddr*)&req->frnt,&req->frntLn);
