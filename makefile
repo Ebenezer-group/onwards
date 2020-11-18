@@ -1,7 +1,7 @@
 CXX=g++
 CXXFLAGS=$(CXX) -std=c++17 -Isrc -Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
 
-BASE:=src/cmw/tiers/
+BASE:=src/tiers/
 TIERS:=$(BASE)genz $(BASE)cmwA
 EXAMPLES:=example/sendExample example/receiveExample
 all:$(TIERS) $(EXAMPLES)

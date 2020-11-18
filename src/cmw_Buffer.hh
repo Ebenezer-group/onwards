@@ -1,6 +1,6 @@
 #ifndef CMW_BUFFER_HH
 #define CMW_BUFFER_HH
-#include<cmw/quicklz.h>
+#include<quicklz.h>
 #include<exception>
 #include<initializer_list>
 #if __cplusplus>201703L

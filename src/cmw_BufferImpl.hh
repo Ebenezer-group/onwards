@@ -1,7 +1,7 @@
 #ifndef CMW_BUFFERIMPL_HH
 #define CMW_BUFFERIMPL_HH
-#include<cmw/Buffer.hh>
-#include<cmw/quicklz.c>
+#include<cmw_Buffer.hh>
+#include<quicklz.c>
 #include<charconv>//from_chars
 #include<limits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8);

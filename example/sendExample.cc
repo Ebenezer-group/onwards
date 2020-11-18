@@ -1,6 +1,6 @@
 //  This program sends a message and then exits.
 
-#include<cmw/BufferImpl.hh>
+#include<cmw_BufferImpl.hh>
 #include"messageIDs.hh"
 
 #include<array>

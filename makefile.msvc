@@ -1,9 +1,9 @@
 CC=cl
-CFLAGS=-std:c++latest -Isrc -EHsc -O2 -nologo -D"NOMINMAX"
+CFLAGS=-std:c++latest -Isrc\cmw -EHsc -O2 -nologo -D"NOMINMAX"
 
 LIBS="\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib" "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 EXAMPLES=example\sendExample.exe example\receiveExample.exe
-BASE=src\cmw\tiers
+BASE=src\tiers
 GENZ=$(BASE)\genz.exe
 all:$(GENZ) $(EXAMPLES)
 
