@@ -408,8 +408,8 @@ void receiveBlock (SendBuffer& b,C<T>const& c){
   else for(auto const& e:c)e.marshal(b);
 }
 
-inline auto constexpr udp_packet_max=1280;
-template<class R,int N=udp_packet_max>
+inline auto constexpr udpPacketMax=1280;
+template<class R,int N=udpPacketMax>
 struct BufferStack:SendBuffer,ReceiveBuffer<R>{
 private:
   unsigned char ar[N];

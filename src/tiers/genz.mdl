@@ -1,4 +1,4 @@
 --
 middle
-  -out -maxLength=::cmw::udp_packet_max (::cmw::MarshallingInt,char const*)
+  -out -maxLength=::cmw::udpPacketMax (::cmw::MarshallingInt,char const*)
 }

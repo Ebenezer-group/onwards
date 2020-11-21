@@ -7,5 +7,5 @@ back <messageID_t=messageID>
 }
 
 front
-  -out -maxLength=udp_packet_max -yeaNay (::cmw::stringPlus,::int8_t)
+  -out -maxLength=udpPacketMax -yeaNay (::cmw::stringPlus,::int8_t)
 }

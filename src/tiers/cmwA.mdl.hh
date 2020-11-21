@@ -41,7 +41,7 @@ static void marshal (::cmw::SendBuffer& buf
     receive(buf,a);
     buf.receive(b);
   }
-  buf.fillInSize(udp_packet_max);
+  buf.fillInSize(udpPacketMax);
 }catch(...){buf.rollback();throw;}
 };
 #endif
