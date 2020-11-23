@@ -85,7 +85,7 @@ public:
   auto getFileName (){
     Write(fl.d,&bday,sizeof bday);
     ::strcat(mdlFile,".hh");
-    return path.c_str();
+    return path.data();
   }
 };
 #include"cmwA.mdl.hh"

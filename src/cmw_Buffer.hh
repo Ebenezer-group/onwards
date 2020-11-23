@@ -36,7 +36,7 @@ public:
   void operator<< (::std::string_view v){s.append(" "); s.append(v);}
   void operator<< (char const *v){s.append(" "); s.append(v);}
   void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
-  char const* what ()const noexcept{return s.c_str();}
+  char const* what ()const noexcept{return s.data();}
 };
 
 struct Fiasco:Failure{explicit Fiasco (char const *s):Failure{s}{}};
@@ -548,7 +548,7 @@ public:
   int bytesAvailable (){return N-(len()+1);}
 
   char* operator() (){return str;}
-  char const* c_str ()const{return str;}
+  char const* data ()const{return str;}
   char operator[] (int i)const{return str[i];}
 };
 using FixedString60=FixedString<60>;
