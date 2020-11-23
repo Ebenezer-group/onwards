@@ -1,6 +1,6 @@
-#include<cmw_BufferImpl.hh>
-#include"account.hh"
-#include"messageIDs.hh"
+#include<cmw_BufferImpl.h>
+#include"account.h"
+#include"messageIDs.h"
 
 #include<memory>//unique_ptr
 #include<vector>
@@ -49,7 +49,7 @@ public:
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):bday{::time(nullptr)}
        ,acctNbr{buf},path{buf}{
-    if(path.bytesAvailable()<3)raise("No room for file suffix");
+    if(path.bytesAvailable()<2)raise("No room for file suffix");
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
     *pos=0;
@@ -84,11 +84,11 @@ public:
 
   auto getFileName (){
     Write(fl.d,&bday,sizeof bday);
-    ::strcat(mdlFile,".hh");
+    ::strcat(mdlFile,".h");
     return path.data();
   }
 };
-#include"cmwA.mdl.hh"
+#include"cmwA.mdl.h"
 
 auto checkField (char const *fld,char const *actl){
   if(::strcmp(fld,actl))bail("Expected %s",fld);

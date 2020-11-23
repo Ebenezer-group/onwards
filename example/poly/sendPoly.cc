@@ -1,6 +1,6 @@
-#include<base.hh>
+#include<base.h>
 #include<boost/poly_collection/base_collection.hpp>
-#include"testing.mdl.hh"
+#include"testing.mdl.h"
 
 int main (){
   ::boost::base_collection<base> c;

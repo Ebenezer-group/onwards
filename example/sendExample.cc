@@ -1,14 +1,14 @@
 //  This program sends a message and then exits.
 
-#include<cmw_BufferImpl.hh>
-#include"messageIDs.hh"
+#include<cmw_BufferImpl.h>
+#include"messageIDs.h"
 
 #include<array>
 #include<iostream>
 #include<set>
 #include<string>
 #include<vector>
-#include"example.mdl.hh"
+#include"example.mdl.h"
 
 int main ()try{
   ::cmw::winStart();

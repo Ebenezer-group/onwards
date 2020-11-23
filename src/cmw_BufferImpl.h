@@ -1,6 +1,6 @@
-#ifndef CMW_BUFFERIMPL_HH
-#define CMW_BUFFERIMPL_HH
-#include<cmw_Buffer.hh>
+#ifndef CMW_BUFFERIMPL_H
+#define CMW_BUFFERIMPL_H
+#include<cmw_Buffer.h>
 #include<quicklz.c>
 #include<charconv>//from_chars
 #include<limits>

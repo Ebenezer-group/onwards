@@ -1,5 +1,5 @@
-#include<cmw_BufferImpl.hh>
-#include"genz.mdl.hh"
+#include<cmw_BufferImpl.h>
+#include"genz.mdl.h"
 #include<stdio.h>
 #include<stdlib.h>//exit
 
