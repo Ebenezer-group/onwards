@@ -81,8 +81,8 @@ class MarshallingInt{
   auto operator() ()const{return val;}
   void marshal (SendBuffer&)const;
 };
-bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
-bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
+inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
+inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
 
 #ifdef CMW_WINDOWS
 using sockType=SOCKET;
