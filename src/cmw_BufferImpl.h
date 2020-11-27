@@ -47,7 +47,7 @@ inline void setDirectory (char const *d){
 }
 
 //Encode integer into variable-length format.
-inline void MarshallingInt::marshal (SendBuffer& b)const{
+void MarshallingInt::marshal (SendBuffer& b)const{
   ::uint32_t n=val;
   for(;;){
     ::uint8_t a=n&127;

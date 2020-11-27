@@ -31,7 +31,7 @@ struct addrinfo;
 namespace cmw{
 class Failure:public ::std::exception{
   ::std::string s;
-public:
+ public:
   explicit Failure (char const *s):s(s){}
   void operator<< (::std::string_view v){s.append(" "); s.append(v);}
   void operator<< (char const *v){s.append(" "); s.append(v);}
@@ -59,7 +59,7 @@ class SendBuffer;
 template<class>class ReceiveBuffer;
 class MarshallingInt{
   ::int32_t val;
-public:
+ public:
   MarshallingInt (){}
   explicit MarshallingInt (::int32_t v):val{v}{}
   explicit MarshallingInt (::std::string_view v):val{fromChars(v)}{}
@@ -117,7 +117,7 @@ auto getFile =[](char const *n,auto& b){
 
 class File{
   char const *nam;
-public:
+ public:
   explicit File (char const *n):nam(n){}
 
   template<class R>
@@ -141,7 +141,7 @@ int pollWrapper (::pollfd*,int,int=-1);
 
 class GetaddrinfoWrapper{
   ::addrinfo *head,*addr;
-public:
+ public:
   GetaddrinfoWrapper (char const *node,char const *port,int type,int flags=0);
 
   ~GetaddrinfoWrapper ();
@@ -216,11 +216,12 @@ struct MostSignificantFirst{
 template<class R> class ReceiveBuffer{
   int msgLength=0;
   int subTotal=0;
-protected:
+ protected:
   int rindex=0;
   int packetLength;
   char* const rbuf;
-public:
+
+ public:
   ReceiveBuffer (char *addr,int bytes):packetLength{bytes},rbuf{addr}{}
 
   void checkLen (int n){
@@ -323,11 +324,11 @@ class SendBuffer{
   SendBuffer (SendBuffer const&)=delete;
   SendBuffer& operator= (SendBuffer);
   ::int32_t savedSize=0;
-protected:
+ protected:
   int index=0;
   int const bufsize;
   unsigned char* const buf;
-public:
+ public:
   sockType sock_=-1;
 
   SendBuffer (unsigned char *addr,int sz):bufsize(sz),buf(addr){}
@@ -411,9 +412,9 @@ void receiveBlock (SendBuffer& b,C<T>const& c){
 inline auto constexpr udpPacketMax=1280;
 template<class R,int N=udpPacketMax>
 struct BufferStack:SendBuffer,ReceiveBuffer<R>{
-private:
+ private:
   unsigned char ar[N];
-public:
+ public:
   BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>((char*)ar,0){}
   BufferStack (int s):BufferStack(){sock_=s;}
 
@@ -433,7 +434,7 @@ struct SendBufferHeap:SendBuffer{
 template<class T>T const& myMin (T const& a,T const& b){return a<b?a:b;}
 
 template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
-private:
+ private:
   ::qlz_state_compress *compress=nullptr;
   int const compSize;
   int compPacketSize;
@@ -452,7 +453,7 @@ private:
     ::memmove(compBuf,compBuf+bytes,compIndex);
     return false;
   }
-public:
+ public:
   BufferCompressed (int sz,int):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz],0)
                      ,compSize(sz+(sz>>3)+400){}
 
@@ -525,7 +526,7 @@ public:
 template<int N>class FixedString{
   MarshallingInt len;
   char str[N];
-public:
+ public:
   FixedString (){}
 
   explicit FixedString (::std::string_view s):len(s.size()){

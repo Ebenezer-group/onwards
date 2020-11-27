@@ -36,19 +36,19 @@ bool marshalFile (char const *name,SendBuffer& buf){
 struct cmwRequest{
   ::sockaddr_in6 frnt;
   ::socklen_t frntLn;
-private:
+ private:
   ::int32_t bday;
   MarshallingInt const acctNbr;
   FixedString120 path;
   char *mdlFile;
   FileWrapper fl;
-public:
 
+ public:
   cmwRequest ():frntLn{sizeof frnt}{}
 
   template<class R>
-  explicit cmwRequest (ReceiveBuffer<R>& buf):bday{::time(nullptr)}
-       ,acctNbr{buf},path{buf}{
+  explicit cmwRequest (ReceiveBuffer<R>& buf):
+     bday{static_cast<int32_t>(::time(nullptr))},acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<2)raise("No room for file suffix");
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
