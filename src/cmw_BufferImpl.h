@@ -37,7 +37,7 @@ int fromChars (::std::string_view s){
   return n;
 }
 
-inline void setDirectory (char const *d){
+void setDirectory (char const *d){
 #ifdef CMW_WINDOWS
   if(!::SetCurrentDirectory(d))
 #else
@@ -73,7 +73,7 @@ DWORD Read (HANDLE h,void *data,int len){
   return bytesRead;
 }
 #else
-inline int Write (int fd,void const *data,int len){
+int Write (int fd,void const *data,int len){
   if(int r=::write(fd,data,len);r>=0)return r;
   raise("Write",errno);
 }
@@ -91,7 +91,7 @@ void exitFailure (){::exit(EXIT_FAILURE);}
 FileWrapper::FileWrapper (char const *name,int flags,mode_t mode):
         d{::open(name,flags,mode)} {if(d<0)raise("FileWrapper",name,errno);}
 
-inline FileWrapper::~FileWrapper (){::close(d);}
+FileWrapper::~FileWrapper (){::close(d);}
 #endif
 
 void setRcvTimeout (sockType s,int time){
@@ -109,7 +109,7 @@ inline int setNonblocking (sockType s){
 #endif
 }
 
-inline void closeSocket (sockType s){
+void closeSocket (sockType s){
 #ifdef CMW_WINDOWS
   if(::closesocket(s)==SOCKET_ERROR)
 #else
@@ -147,7 +147,7 @@ sockType GetaddrinfoWrapper::getSock (){
   raise("getaddrinfo getSock");
 }
 
-inline sockType connectWrapper (char const *node,char const *port){
+sockType connectWrapper (char const *node,char const *port){
   GetaddrinfoWrapper ai{node,port,SOCK_STREAM};
   auto s=ai.getSock();
   if(0==::connect(s,ai()->ai_addr,ai()->ai_addrlen))return s;
@@ -172,7 +172,7 @@ sockType tcpServer (char const *port){
   raise("tcpServer",preserveError(s));
 }
 
-inline int acceptWrapper (sockType s){
+int acceptWrapper (sockType s){
   if(int n=::accept(s,nullptr,nullptr);n>=0)return n;
   auto e=getError();
   if(ECONNABORTED==e)return 0;
