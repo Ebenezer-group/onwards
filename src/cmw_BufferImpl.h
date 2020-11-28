@@ -206,6 +206,36 @@ FILEwrapper::FILEwrapper (char const *n,char const *mode):hndl{::fopen(n,mode)}
 char* FILEwrapper::fgets (){return ::fgets(line,sizeof line,hndl);}
 FILEwrapper::~FILEwrapper (){::fclose(hndl);}
 
+int SendBuffer::reserveBytes (int n){
+  if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
+  auto i=index;
+  index+=n;
+  return i;
+}
+
+void SendBuffer::fillInSize (::int32_t max){
+  ::int32_t marshalledBytes=index-savedSize;
+  if(marshalledBytes>max)raise("fillInSize",max);
+  receive(savedSize,marshalledBytes);
+  savedSize=index;
+}
+
+void SendBuffer::receiveFile (fileType d,::int32_t sz){
+  receive(sz);
+  auto prev=reserveBytes(sz);
+  if(Read(d,buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
+}
+
+bool SendBuffer::flush (){
+  int const bytes=sockWrite(sock_,buf,index);
+  if(bytes==index){reset();return true;}
+
+  index-=bytes;
+  savedSize=index;
+  ::memmove(buf,buf+bytes,index);
+  return false;
+}
+
 void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
 
 void receive (SendBuffer& b,::std::string_view s){

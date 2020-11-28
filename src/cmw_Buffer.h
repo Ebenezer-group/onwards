@@ -333,12 +333,7 @@ class SendBuffer{
 
   SendBuffer (unsigned char *addr,int sz):bufsize(sz),buf(addr){}
 
-  int reserveBytes (int n){
-    if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
-    auto i=index;
-    index+=n;
-    return i;
-  }
+  int reserveBytes (int n);
 
   void receive (void const *data,int size){
     auto prev=reserveBytes(size);
@@ -356,31 +351,14 @@ class SendBuffer{
     return t;
   }
 
-  void fillInSize (::int32_t max){
-    ::int32_t marshalledBytes=index-savedSize;
-    if(marshalledBytes>max)raise("fillInSize",max);
-    receive(savedSize,marshalledBytes);
-    savedSize=index;
-  }
+  void fillInSize (::int32_t max);
 
   void reset (){savedSize=index=0;}
   void rollback (){index=savedSize;}
 
-  void receiveFile (fileType d,::int32_t sz){
-    receive(sz);
-    auto prev=reserveBytes(sz);
-    if(Read(d,buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
-  }
+  void receiveFile (fileType,::int32_t sz);
 
-  bool flush (){
-    int const bytes=sockWrite(sock_,buf,index);
-    if(bytes==index){reset();return true;}
-
-    index-=bytes;
-    savedSize=index;
-    ::memmove(buf,buf+bytes,index);
-    return false;
-  }
+  bool flush ();
 
   //UDP-friendly alternative to flush
   void send (::sockaddr *addr=nullptr,::socklen_t len=0)
