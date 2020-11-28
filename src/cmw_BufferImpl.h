@@ -6,7 +6,9 @@
 #include<limits>
 static_assert(::std::numeric_limits<unsigned char>::digits==8);
 static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
-#ifndef CMW_WINDOWS
+#ifdef CMW_WINDOWS
+#define poll WSAPoll
+#else
 #include<errno.h>
 #include<netdb.h>
 #include<poll.h>

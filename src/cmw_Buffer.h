@@ -16,7 +16,6 @@
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #include<ws2tcpip.h>
 #define CMW_WINDOWS
-#define poll WSAPoll
 #else
 #include<fcntl.h>//fcntl,open
 #include<sys/socket.h>
