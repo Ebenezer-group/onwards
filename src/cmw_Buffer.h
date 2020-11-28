@@ -116,10 +116,10 @@ auto getFile =[](char const *n,auto& b){
 class File{
   char const *nam;
  public:
-  explicit File (char const *n):nam(n){}
+  explicit File (char const *n):nam{n}{}
 
   template<class R>
-  explicit File (ReceiveBuffer<R>& b):nam(b.giveStringView().data()){
+  explicit File (ReceiveBuffer<R>& b):nam{b.giveStringView().data()}{
     getFile(nam,b);
   }
 

@@ -48,7 +48,7 @@ struct cmwRequest{
 
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):
-     bday{static_cast<int32_t>(::time(nullptr))},acctNbr{buf},path{buf}{
+     bday{static_cast<::int32_t>(::time(nullptr))},acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<2)raise("No room for file suffix");
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
