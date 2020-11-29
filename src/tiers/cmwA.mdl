@@ -1,4 +1,4 @@
-account.hh
+account.h
 --
 //Messages the middle tier sends to the back and front tiers
 back <messageID_t=messageID>
