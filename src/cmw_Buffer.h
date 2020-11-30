@@ -501,9 +501,8 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 template<int N>class FixedString{
   MarshallingInt len;
   char str[N];
- public:
-  FixedString (){}
 
+ public:
   explicit FixedString (::std::string_view s):len(s.size()){
     if(len()>=N)raise("FixedString ctor");
     ::memcpy(str,s.data(),len());

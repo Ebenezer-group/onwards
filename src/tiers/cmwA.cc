@@ -44,8 +44,6 @@ struct cmwRequest{
   FileWrapper fl;
 
  public:
-  cmwRequest ():frntLn{sizeof frnt}{}
-
   template<class R>
   explicit cmwRequest (ReceiveBuffer<R>& buf):
      bday{static_cast<::int32_t>(::time(nullptr))},acctNbr{buf},path{buf}{
@@ -163,10 +161,10 @@ void reset (char const *context,char const *detail=""){
 bool sendData ()try{return cmwBuf.flush();}
 catch(::std::exception& e){reset("sendData",e.what());return true;}
 
-template<bool res,class...T>void outFront (cmwRequest const& req,T...t){
+template<bool res,class...T>void outFront (::sockaddr_in6 const& sa,::socklen_t len,T...t){
   frntBuf.reset();
   front::marshal<res>(frntBuf,{t...});
-  frntBuf.send((::sockaddr*)&req.frnt,req.frntLn);
+  frntBuf.send((::sockaddr*)&sa,len);
 }
 
 int main (int ac,char **av)try{
@@ -182,8 +180,8 @@ int main (int ac,char **av)try{
           auto it=::std::begin(pendingRequests);
           if(giveBool(cmwBuf)){
             getFile((**it).getFileName(),cmwBuf);
-            outFront<true>(**it);
-          }else outFront<false>(**it,"CMW:",cmwBuf.giveStringView());
+            outFront<true>((*it)->frnt,(*it)->frntLn);
+          }else outFront<false>((*it)->frnt,(*it)->frntLn,"CMW:",cmwBuf.giveStringView());
           pendingRequests.erase(it);
         }while(cmwBuf.nextMessage());
       }
@@ -194,7 +192,7 @@ int main (int ac,char **av)try{
       ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
       auto it=::std::begin(pendingRequests);
-      outFront<false>(**it,e.what());
+      outFront<false>((*it)->frnt,(*it)->frntLn,e.what());
       pendingRequests.erase(it);
     }
 
@@ -204,16 +202,18 @@ int main (int ac,char **av)try{
     if(fds[1].revents&POLLIN){
       bool gotAddr=false;
       cmwRequest *req=nullptr;
+      ::sockaddr_in6 frnt;
+      ::socklen_t frntLn=sizeof frnt;
       try{
-        req=&*pendingRequests.emplace_back(::new cmwRequest);
-        frntBuf.getPacket((::sockaddr*)&req->frnt,&req->frntLn);
+        frntBuf.getPacket((::sockaddr*)&frnt,&frntLn);
         gotAddr=true;
-        req->~cmwRequest();
-        ::new(req)cmwRequest(frntBuf);
+        req=&*pendingRequests.emplace_back(::new cmwRequest(frntBuf));
         back::marshal<messageID::generate>(cmwBuf,*req);
+	req->frnt=frnt;
+	req->frntLn=frntLn;
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
-        if(gotAddr)outFront<false>(*req,e.what());
+        if(gotAddr)outFront<false>(frnt,frntLn,e.what());
         if(req)pendingRequests.pop_back();
         continue;
       }
