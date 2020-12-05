@@ -34,10 +34,10 @@ bool marshalFile (char const *name,SendBuffer& buf){
 }
 
 struct cmwRequest{
-  ::sockaddr_in6 frnt;
-  ::socklen_t frntLn;
+  ::sockaddr_in6 const frnt;
+  ::socklen_t const frntLn;
  private:
-  ::int32_t bday;
+  ::int32_t const bday;
   MarshallingInt const acctNbr;
   FixedString120 path;
   char *mdlFile;
@@ -45,8 +45,9 @@ struct cmwRequest{
 
  public:
   template<class R>
-  explicit cmwRequest (ReceiveBuffer<R>& buf):
-     bday{static_cast<::int32_t>(::time(nullptr))},acctNbr{buf},path{buf}{
+  cmwRequest (::sockaddr_in6 const& ft,::socklen_t ln,ReceiveBuffer<R>& buf):
+     frnt{ft},frntLn{ln},bday{static_cast<::int32_t>(::time(nullptr))}
+     ,acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<2)raise("No room for file suffix");
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
@@ -161,7 +162,8 @@ void reset (char const *context,char const *detail=""){
 bool sendData ()try{return cmwBuf.flush();}
 catch(::std::exception& e){reset("sendData",e.what());return true;}
 
-template<bool res,class...T>void outFront (::sockaddr_in6 const& sa,::socklen_t len,T...t){
+template<bool res,class...T>
+void outFront (::sockaddr_in6 const& sa,::socklen_t len,T...t){
   frntBuf.reset();
   front::marshal<res>(frntBuf,{t...});
   frntBuf.send((::sockaddr*)&sa,len);
@@ -207,10 +209,8 @@ int main (int ac,char **av)try{
       try{
         frntBuf.getPacket((::sockaddr*)&frnt,&frntLn);
         gotAddr=true;
-        req=&*pendingRequests.emplace_back(::new cmwRequest(frntBuf));
+        req=&*pendingRequests.emplace_back(new cmwRequest(frnt,frntLn,frntBuf));
         back::marshal<messageID::generate>(cmwBuf,*req);
-        req->frnt=frnt;
-        req->frntLn=frntLn;
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)outFront<false>(frnt,frntLn,e.what());
