@@ -102,7 +102,7 @@ template<class...T>void bail (char const *fmt,T... t)noexcept{
 
 struct FileWrapper{
   int const d;
-  FileWrapper (){-2}{}
+  FileWrapper ():d{-2}{}
   FileWrapper (char const *name,int flags,mode_t=0);
   FileWrapper (FileWrapper const&)=delete;
   ~FileWrapper ();
