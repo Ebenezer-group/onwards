@@ -386,8 +386,7 @@ void receiveBlock (SendBuffer& b,C<T>const& c){
 
 inline auto constexpr udpPacketMax=1280;
 template<class R,int N=udpPacketMax>
-struct BufferStack:SendBuffer,ReceiveBuffer<R>{
- private:
+class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
   unsigned char ar[N];
  public:
   BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>((char*)ar,0){}

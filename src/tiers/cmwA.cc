@@ -205,15 +205,15 @@ int main (int ac,char **av)try{
       bool gotAddr=false;
       cmwRequest *req=nullptr;
       ::sockaddr_in6 frnt;
-      ::socklen_t frntLn=sizeof frnt;
+      ::socklen_t len=sizeof frnt;
       try{
-        frntBuf.getPacket((::sockaddr*)&frnt,&frntLn);
+        frntBuf.getPacket((::sockaddr*)&frnt,&len);
         gotAddr=true;
-        req=&*pendingRequests.emplace_back(new cmwRequest(frnt,frntLn,frntBuf));
+        req=&*pendingRequests.emplace_back(new cmwRequest(frnt,len,frntBuf));
         back::marshal<messageID::generate>(cmwBuf,*req);
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
-        if(gotAddr)outFront<false>(frnt,frntLn,e.what());
+        if(gotAddr)outFront<false>(frnt,len,e.what());
         if(req)pendingRequests.pop_back();
         continue;
       }
