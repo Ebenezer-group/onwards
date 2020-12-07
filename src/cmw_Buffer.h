@@ -76,6 +76,7 @@ class MarshallingInt{
   }
 
   void operator= (::int32_t r){val=r;}
+  void operator+= (::int32_t r){val+=r;}
   auto operator() ()const{return val;}
   void marshal (SendBuffer&)const;
 };
@@ -519,7 +520,15 @@ template<int N>class FixedString{
     b.receive(str,len());
   }
 
-  int bytesAvailable (){return N-(len()+1);}
+  int bytesAvailable ()const{return N-(len()+1);}
+
+  void append (::std::string_view s){
+    if(bytesAvailable()>=s.size()){
+      ::memcpy(str+len(),s.data(),s.size());
+      len+=s.size();
+      str[len()]=0;
+    }
+  }
 
   char* operator() (){return str;}
   char const* data ()const{return str;}

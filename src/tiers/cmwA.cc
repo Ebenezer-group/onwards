@@ -83,7 +83,7 @@ struct cmwRequest{
 
   auto getFileName (){
     Write(fl.d,&bday,sizeof bday);
-    ::strcat(mdlFile,".h");
+    path.append(".h");
     return path.data();
   }
 };
