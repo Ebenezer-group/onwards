@@ -7,7 +7,7 @@ EXAMPLES:=example/sendExample example/receiveExample
 all:$(TIERS) $(EXAMPLES)
 .PHONY:all clean
 
-#cmwA.mdl.hh: account.hh $(BASE)cmwA.mdl
+#cmwA.mdl.h: account.h $(BASE)cmwA.mdl
 #	genz 2 $(BASE)cmwA.mdl
 
 $(BASE)genz:$(BASE)genz.cc
@@ -30,7 +30,7 @@ clean:
 
 INSTALL_DIR=/usr/local/
 install:
-	cp -f src/cmw/*.hh src/cmw/quicklz.h $(INSTALL_DIR)include
+	cp -f src/*.h  $(INSTALL_DIR)include
 	cp -f $(TIERS) $(INSTALL_DIR)bin
 
 uninstall:

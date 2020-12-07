@@ -1,6 +1,6 @@
-#ifndef CMW_COMPLEX_HH
-#define CMW_COMPLEX_HH
-#include<cmw/Buffer.hh>
+#ifndef CMW_COMPLEX_H
+#define CMW_COMPLEX_H
+#include<cmw_Buffer.h>
 #include<complex>
 
 namespace cmw{

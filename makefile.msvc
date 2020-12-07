@@ -21,9 +21,9 @@ clean:
 
 INSTALL_DIR=\Users\Store
 install:
-	copy src\cmw\*.hh src\cmw\quicklz.h  $(INSTALL_DIR)\include
+	copy src\cmw\*.h src\cmw\quicklz.h  $(INSTALL_DIR)\include
 	copy $(GENZ) $(INSTALL_DIR)\bin
 
 uninstall:
-	cd $(INSTALL_DIR)\include && del *.hh
+	cd $(INSTALL_DIR)\include && del *.h
 
