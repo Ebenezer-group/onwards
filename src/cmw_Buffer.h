@@ -520,7 +520,7 @@ template<int N>class FixedString{
     b.receive(str,len());
   }
 
-  int bytesAvailable ()const{return N-(len()+1);}
+  unsigned int bytesAvailable ()const{return N-(len()+1);}
 
   void append (::std::string_view s){
     if(bytesAvailable()>=s.size()){
