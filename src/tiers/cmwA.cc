@@ -2,7 +2,6 @@
 #include"account.h"
 #include"messageIDs.h"
 
-#include<memory>//unique_ptr
 #include<vector>
 #include<assert.h>
 #include<errno.h>
@@ -33,13 +32,13 @@ bool marshalFile (char const *name,SendBuffer& buf){
   return true;
 }
 
-struct socky{
+struct Socky{
   ::sockaddr_in6 addr;
   ::socklen_t len=sizeof addr;
 };
 
 struct cmwRequest{
-  socky const frnt;
+  Socky const frnt;
  private:
   ::int32_t const bday;
   MarshallingInt const acctNbr;
@@ -49,7 +48,7 @@ struct cmwRequest{
 
  public:
   template<class R>
-  cmwRequest (socky const& ft,ReceiveBuffer<R>& buf):frnt{ft}
+  cmwRequest (Socky const& ft,ReceiveBuffer<R>& buf):frnt{ft}
      ,bday{static_cast<::int32_t>(::time(nullptr))},acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<2)raise("No room for file suffix");
     char* const pos=::strrchr(path(),'/');
@@ -98,12 +97,12 @@ auto checkField (char const *fld,char const *actl){
 }
 
 ::sockaddr_in addr;
-::std::vector<cmwAccount> accounts;
 ::pollfd fds[2];
-int loginPause;
 BufferCompressed<SameFormat> cmwBuf{1101000};
-::std::vector<::std::unique_ptr<cmwRequest>> pendingRequests;
+::std::vector<cmwAccount> accounts;
+::std::vector<cmwRequest*> pendingRequests;
 BufferStack<SameFormat> frntBuf;
+int loginPause;
 
 void setup (int ac,char **av){
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
@@ -156,7 +155,10 @@ void reset (char const *context,char const *detail=""){
   ::syslog(LOG_ERR,"%s:%s",context,detail);
   frntBuf.reset();
   front::marshal<false>(frntBuf,{context," ",detail});
-  for(auto& r:pendingRequests)frntBuf.send((::sockaddr*)&r->frnt.addr,r->frnt.len);
+  for(auto r:pendingRequests){
+    frntBuf.send((::sockaddr*)&r->frnt.addr,r->frnt.len);
+    delete r;
+  }
   pendingRequests.clear();
   cmwBuf.compressedReset();
   login();
@@ -166,7 +168,7 @@ bool sendData ()try{return cmwBuf.flush();}
 catch(::std::exception& e){reset("sendData",e.what());return true;}
 
 template<bool res,class...T>
-void outFront (socky const& sa,T...t){
+void outFront (Socky const& sa,T...t){
   frntBuf.reset();
   front::marshal<res>(frntBuf,{t...});
   frntBuf.send((::sockaddr*)&sa.addr,sa.len);
@@ -187,6 +189,7 @@ int main (int ac,char **av)try{
             getFile((*it)->getFileName(),cmwBuf);
             outFront<true>((*it)->frnt);
           }else outFront<false>((*it)->frnt,"CMW:",cmwBuf.giveStringView());
+          delete *it;
           pendingRequests.erase(it);
         }while(cmwBuf.nextMessage());
       }
@@ -198,6 +201,7 @@ int main (int ac,char **av)try{
       assert(!pendingRequests.empty());
       auto it=::std::begin(pendingRequests);
       outFront<false>((*it)->frnt,e.what());
+      delete *it;
       pendingRequests.erase(it);
     }
 
@@ -207,16 +211,17 @@ int main (int ac,char **av)try{
     if(fds[1].revents&POLLIN){
       bool gotAddr=false;
       cmwRequest *req=nullptr;
-      socky frnt;
+      Socky frnt;
       try{
         frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
         gotAddr=true;
-        req=&*pendingRequests.emplace_back(new cmwRequest(frnt,frntBuf));
+        req=new cmwRequest(frnt,frntBuf);
         back::marshal<messageID::generate>(cmwBuf,*req);
+        pendingRequests.push_back(req);
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)outFront<false>(frnt,e.what());
-        if(req)pendingRequests.pop_back();
+        delete req;
         continue;
       }
       if(!sendData())fds[0].events|=POLLOUT;
