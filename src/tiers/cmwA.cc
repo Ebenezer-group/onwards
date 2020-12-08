@@ -33,9 +33,13 @@ bool marshalFile (char const *name,SendBuffer& buf){
   return true;
 }
 
+struct socky{
+  ::sockaddr_in6 addr;
+  ::socklen_t len=sizeof addr;
+};
+
 struct cmwRequest{
-  ::sockaddr_in6 const frnt;
-  ::socklen_t const frntLn;
+  socky const frnt;
  private:
   ::int32_t const bday;
   MarshallingInt const acctNbr;
@@ -45,9 +49,8 @@ struct cmwRequest{
 
  public:
   template<class R>
-  cmwRequest (::sockaddr_in6 const& ft,::socklen_t ln,ReceiveBuffer<R>& buf):
-     frnt{ft},frntLn{ln},bday{static_cast<::int32_t>(::time(nullptr))}
-     ,acctNbr{buf},path{buf}{
+  cmwRequest (socky const& ft,ReceiveBuffer<R>& buf):frnt{ft}
+     ,bday{static_cast<::int32_t>(::time(nullptr))},acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<2)raise("No room for file suffix");
     char* const pos=::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
@@ -153,7 +156,7 @@ void reset (char const *context,char const *detail=""){
   ::syslog(LOG_ERR,"%s:%s",context,detail);
   frntBuf.reset();
   front::marshal<false>(frntBuf,{context," ",detail});
-  for(auto& r:pendingRequests)frntBuf.send((::sockaddr*)&r->frnt,r->frntLn);
+  for(auto& r:pendingRequests)frntBuf.send((::sockaddr*)&r->frnt.addr,r->frnt.len);
   pendingRequests.clear();
   cmwBuf.compressedReset();
   login();
@@ -163,10 +166,10 @@ bool sendData ()try{return cmwBuf.flush();}
 catch(::std::exception& e){reset("sendData",e.what());return true;}
 
 template<bool res,class...T>
-void outFront (::sockaddr_in6 const& sa,::socklen_t len,T...t){
+void outFront (socky const& sa,T...t){
   frntBuf.reset();
   front::marshal<res>(frntBuf,{t...});
-  frntBuf.send((::sockaddr*)&sa,len);
+  frntBuf.send((::sockaddr*)&sa.addr,sa.len);
 }
 
 int main (int ac,char **av)try{
@@ -181,9 +184,9 @@ int main (int ac,char **av)try{
           assert(!pendingRequests.empty());
           auto it=::std::begin(pendingRequests);
           if(giveBool(cmwBuf)){
-            getFile((**it).getFileName(),cmwBuf);
-            outFront<true>((*it)->frnt,(*it)->frntLn);
-          }else outFront<false>((*it)->frnt,(*it)->frntLn,"CMW:",cmwBuf.giveStringView());
+            getFile((*it)->getFileName(),cmwBuf);
+            outFront<true>((*it)->frnt);
+          }else outFront<false>((*it)->frnt,"CMW:",cmwBuf.giveStringView());
           pendingRequests.erase(it);
         }while(cmwBuf.nextMessage());
       }
@@ -194,7 +197,7 @@ int main (int ac,char **av)try{
       ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
       auto it=::std::begin(pendingRequests);
-      outFront<false>((*it)->frnt,(*it)->frntLn,e.what());
+      outFront<false>((*it)->frnt,e.what());
       pendingRequests.erase(it);
     }
 
@@ -204,16 +207,15 @@ int main (int ac,char **av)try{
     if(fds[1].revents&POLLIN){
       bool gotAddr=false;
       cmwRequest *req=nullptr;
-      ::sockaddr_in6 frnt;
-      ::socklen_t len=sizeof frnt;
+      socky frnt;
       try{
-        frntBuf.getPacket((::sockaddr*)&frnt,&len);
+        frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
         gotAddr=true;
-        req=&*pendingRequests.emplace_back(new cmwRequest(frnt,len,frntBuf));
+        req=&*pendingRequests.emplace_back(new cmwRequest(frnt,frntBuf));
         back::marshal<messageID::generate>(cmwBuf,*req);
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
-        if(gotAddr)outFront<false>(frnt,len,e.what());
+        if(gotAddr)outFront<false>(frnt,e.what());
         if(req)pendingRequests.pop_back();
         continue;
       }
