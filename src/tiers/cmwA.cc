@@ -112,7 +112,7 @@ void setup (int ac,char **av){
   while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
     auto num=fromChars(::strtok(nullptr,"\n \r"));
     tok=checkField("Password",::strtok(cfg.fgets()," "));
-    accounts.emplace_back(num,::strdup(tok));
+    accounts.emplace_back(num,tok);
   }
   if(accounts.empty())bail("An account number is required.");
   fds[1].fd=frntBuf.sock_=udpServer(checkField("UDP-port-number",tok));
@@ -209,12 +209,11 @@ int main (int ac,char **av)try{
     if(fds[0].revents&POLLERR)reset("Lost contact");
 
     if(fds[1].revents&POLLIN){
+      Socky frnt;
       bool gotAddr=false;
       cmwRequest *req=nullptr;
-      Socky frnt;
       try{
-        frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
-        gotAddr=true;
+        gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
         req=new cmwRequest(frnt,frntBuf);
         back::marshal<messageID::generate>(cmwBuf,*req);
         pendingRequests.push_back(req);

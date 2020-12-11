@@ -4,7 +4,7 @@
 inline void
 cmwAccount::marshalMembers (::cmw::SendBuffer& buf)const{
   number.marshal(buf);
-  receive(buf,password);
+  password.marshal(buf);
 }
 
 struct back{
