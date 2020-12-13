@@ -503,6 +503,8 @@ template<int N>class FixedString{
   char str[N];
 
  public:
+  FixedString ():len(0){}
+
   explicit FixedString (::std::string_view s):len(s.size()){
     if(len()>=N)raise("FixedString ctor");
     ::memcpy(str,s.data(),len());
@@ -545,6 +547,58 @@ struct FILEwrapper{
   FILEwrapper (FILEwrapper const&)=delete;
   ~FILEwrapper ();
   char* fgets ();
+};
+
+template<class T>class FixedVector{
+  ::int32_t index=0;
+  ::int32_t size_;
+  T *arr;
+
+ public:
+  FixedVector ():size_(0),arr(nullptr){}
+  explicit FixedVector (int sz):size_(sz),arr(new T[sz]){}
+
+  template<class R>explicit
+  FixedVector (::cmw::ReceiveBuffer<R>& buf):size_(give<::uint32_t>(buf))
+     ,arr(new T[size_]){
+    for(int n=0;n<size_;++n){
+      if constexpr(::std::is_arithmetic_v<T>){
+        arr[n]=::cmw::give<T>(buf);
+      }else{
+        new(arr+n)T(buf);
+      }
+    }
+  }
+
+  FixedVector (FixedVector const&)=delete;
+  FixedVector& operator= (FixedVector const&)=delete;
+
+  FixedVector& operator= (FixedVector&& other){
+    index=other.index;
+    size_=other.size_;
+    ::std::swap(arr,other.arr);
+    return *this;
+  }
+
+  // Call this after default construction
+  void betterLateThanNever (int sz){
+    //delete []arr;
+    arr=new T[sz];
+    size_=sz;
+  }
+
+  ~FixedVector (){
+    delete []arr;
+  }
+
+  T* begin (){return arr;}
+  T* end (){return arr+size_;}
+  auto size (){return size_;}
+
+  void pushBack (T const& t){
+    //assert(arr!=nullptr && index<size_);
+    arr[index++]=t;
+  }
 };
 }
 #endif
