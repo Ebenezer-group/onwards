@@ -551,19 +551,19 @@ struct FILEwrapper{
 
 template<class T>class FixedVector{
   ::int32_t index=0;
-  ::int32_t size_;
-  T *arr;
+  ::int32_t size_=0;
+  T *arr=nullptr;
 
  public:
-  FixedVector ():size_(0),arr(nullptr){}
+  FixedVector (){}
   explicit FixedVector (int sz):size_(sz),arr(new T[sz]){}
 
   template<class R>explicit
-  FixedVector (::cmw::ReceiveBuffer<R>& buf):size_(give<::uint32_t>(buf))
+  FixedVector (ReceiveBuffer<R>& buf):size_(give<::uint32_t>(buf))
      ,arr(new T[size_]){
     for(int n=0;n<size_;++n){
       if constexpr(::std::is_arithmetic_v<T>){
-        arr[n]=::cmw::give<T>(buf);
+        arr[n]=give<T>(buf);
       }else{
         new(arr+n)T(buf);
       }
