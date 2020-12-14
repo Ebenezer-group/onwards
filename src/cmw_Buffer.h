@@ -573,7 +573,7 @@ template<class T>class FixedVector{
   FixedVector (FixedVector const&)=delete;
   FixedVector& operator= (FixedVector const&)=delete;
 
-  FixedVector& operator= (FixedVector&& other){
+  FixedVector& operator= (FixedVector&& other)noexcept{
     index=other.index;
     size_=other.size_;
     ::std::swap(arr,other.arr);
@@ -591,9 +591,11 @@ template<class T>class FixedVector{
     delete []arr;
   }
 
-  T* begin (){return arr;}
-  T* end (){return arr+size_;}
-  auto size (){return size_;}
+  T* begin ()const{return arr;}
+  T* end ()const{return arr+size_;}
+  T const* cbegin ()const{begin();}
+  T const* cend ()const{end();}
+  auto size ()const{return size_;}
 
   void pushBack (T const& t){
     //assert(arr!=nullptr && index<size_);
