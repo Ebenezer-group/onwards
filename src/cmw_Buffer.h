@@ -102,8 +102,8 @@ template<class...T>void bail (char const *fmt,T... t)noexcept{
 }
 
 struct FileWrapper{
-  int const d;
-  FileWrapper ():d{-2}{}
+  int const d=-2;
+  FileWrapper (){}
   FileWrapper (char const *name,int flags,mode_t=0);
   FileWrapper (FileWrapper const&)=delete;
   ~FileWrapper ();
@@ -499,11 +499,11 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 };
 
 template<int N>class FixedString{
-  MarshallingInt len;
+  MarshallingInt len{};
   char str[N];
 
  public:
-  FixedString ():len(0){}
+  FixedString (){}
 
   explicit FixedString (::std::string_view s):len(s.size()){
     if(len()>=N)raise("FixedString ctor");
