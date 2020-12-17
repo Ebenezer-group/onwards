@@ -32,7 +32,6 @@ class Failure:public ::std::exception{
  public:
   explicit Failure (char const *s):s(s){}
   void operator<< (::std::string_view v){s.append(" "); s.append(v);}
-  void operator<< (char const *v){s.append(" "); s.append(v);}
   void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
   char const* what ()const noexcept{return s.data();}
 };
@@ -499,7 +498,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 };
 
 template<int N>class FixedString{
-  MarshallingInt len{};
+  MarshallingInt len{0};
   char str[N];
 
  public:
@@ -582,13 +581,13 @@ template<class T>class FixedVector{
 
   // Call this after default construction
   void betterLateThanNever (int sz){
-    //delete []arr;
+    //delete[]arr;
     arr=new T[sz];
     size_=sz;
   }
 
   ~FixedVector (){
-    delete []arr;
+    delete[]arr;
   }
 
   T* begin ()const{return arr;}
