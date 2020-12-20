@@ -574,8 +574,12 @@ template<class T>class FixedVector{
 
   FixedVector& operator= (FixedVector&& other)noexcept{
     index=other.index;
+    other.index=0;
     size_=other.size_;
-    ::std::swap(arr,other.arr);
+    other.size_=0;
+    delete[]arr;
+    arr=other.arr;
+    other.arr=nullptr;
     return *this;
   }
 
