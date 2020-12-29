@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(onwards)
 include_directories(src)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     add_definitions(-Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")

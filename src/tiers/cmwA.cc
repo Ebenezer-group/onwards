@@ -98,11 +98,11 @@ auto checkField (char const *fld,char const *actl){
 
 ::sockaddr_in addr;
 ::pollfd fds[2];
-BufferCompressed<SameFormat> cmwBuf{1101000};
+int loginPause;
 ::std::vector<cmwAccount> accounts;
 ::std::vector<cmwRequest*> pendingRequests;
+BufferCompressed<SameFormat> cmwBuf{1101000};
 BufferStack<SameFormat> frntBuf;
-int loginPause;
 
 void setup (int ac,char **av){
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);

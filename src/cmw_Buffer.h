@@ -3,9 +3,7 @@
 #include<quicklz.h>
 #include<exception>
 #include<initializer_list>
-#if __cplusplus>201703L
 #include<span>
-#endif
 #include<string>
 #include<string_view>
 #include<type_traits>
@@ -275,7 +273,6 @@ template<class R> class ReceiveBuffer{
     }
   }
 
-#if __cplusplus>201703L
   template<class T>auto giveSpan (){
     static_assert(::std::is_arithmetic_v<T>);
     ::int32_t sz=give<::uint32_t>();
@@ -285,7 +282,6 @@ template<class R> class ReceiveBuffer{
     rindex+=serLen;
     return s;
   }
-#endif
 
   auto giveStringView (){
     MarshallingInt len{*this};
@@ -405,6 +401,7 @@ struct SendBufferHeap:SendBuffer{
   ~SendBufferHeap (){delete[]buf;}
 };
 
+#ifndef CMW_WINDOWS
 template<class T>T const& myMin (T const& a,T const& b){return a<b?a:b;}
 
 template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
@@ -496,6 +493,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     return false;
   }
 };
+#endif
 
 template<int N>class FixedString{
   MarshallingInt len{0};
