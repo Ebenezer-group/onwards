@@ -8,7 +8,7 @@ quicklz.h and quicklz.c, are from another developer and
 should only be used in conjunction with the CMW.
 
 Building
-If you are on *nix, you can use either Make or CMake.
+If you are on \*nix, you can use either Make or CMake.
 On Windows, I suggest using CMake.  If you're using a
 big-endian machine, add -DCMW_ENDIAN_BIG to the CXXFLAGS
 in the makefile.
@@ -19,7 +19,7 @@ is called "cmwA", which is short for CMW Ambassador.  The
 front tier is called "genz" and is a command line interface.
 The middle tier isn't built on Windows.  The middle tier is
 still needed for Windows users so it has to be running on a
-*nix system.
+\*nix system.
 
 A compiler with 2017 C++ support and an implementation of
 std::span are required to use The CMW.  (Build flags that
@@ -52,7 +52,7 @@ genz.exe 14 /Users/brian/onwards/example/example.mdl
 
 The path for a Middle file (.mdl) is next.  Zero or more header
 files are listed in a Middle file to specify a request.  There's
-more info on Middle files here --
+more info on Middle files here:
 https://github.com/Ebenezer-group/onwards/blob/master/doc/middleFiles
 .
 
