@@ -1,13 +1,15 @@
 The C++ Middleware Writer (CMW) is an on-line code generator.
 The CMW and the software found in this repository provide
-support for messaging and serialization.
+support for messaging and serialization.  Here's an example
+of the [input](https://github.com/Ebenezer-group/onwards/blob/master/example/example.mdl)
+and [output](https://github.com/Ebenezer-group/onwards/blob/master/example/example.mdl.h).
 
-### License
+#### License
 The software is under the BSD license.  Two of the files,
 quicklz.h and quicklz.c, are from another developer and
 should only be used in conjunction with the CMW.
 
-### Building
+#### Building
 If you are on \*nix, you can use either Make or CMake.
 On Windows, I suggest using CMake.  If you're using a
 big-endian machine, add -DCMW_ENDIAN_BIG to the CXXFLAGS
@@ -26,7 +28,7 @@ std::span are required to use The CMW.  (Build flags that
 dictate 2020 C++ are only used to ensure a std::span
 implementation.)
 
-### Accounts
+#### Accounts
 An account is needed to use the CMW.  Before running the
 middle tier, you have to get an account and modify your
 cmwA.cfg file to include your account number(s) and
@@ -36,7 +38,7 @@ After receiving an account number, update your cmwA.cfg
 file accordingly.
 
 
-Running the cmwA (after installing):
+#### Running the cmwA (after installing)
 
 cmwA cmwA.cfg
 
@@ -61,7 +63,7 @@ to one of your directories and modifying the copy according to
 your needs.
 
 
-### Troubleshooting
+#### Troubleshooting
 The middle tier has to be running for the front tier to work.
 If genz fails with "No reply received.  Is the cmwA running?"
 make sure the middle tier is running.
