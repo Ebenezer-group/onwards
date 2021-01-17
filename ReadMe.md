@@ -25,7 +25,7 @@ still needed for Windows users so it has to be running on a
 
 A compiler with 2017 C++ support and an implementation of
 std::span are required to use The CMW.  (Build flags that
-dictate 2020 C++ are only used to ensure a std::span
+specify 2020 C++ are only used to ensure a std::span
 implementation.)
 
 #### Accounts
