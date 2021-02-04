@@ -1,7 +1,7 @@
 CC=cl
-CFLAGS=-std:c++latest -Isrc\cmw -EHsc -O2 -nologo -D"NOMINMAX"
+CFLAGS=-std:c++latest -Isrc -EHsc -O2 -nologo -D"NOMINMAX"
 
-LIBS="\program files\Microsoft SDKs\Windows\v7.1\Lib\wsock32.lib" "\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
+LIBS="\program files\Microsoft SDKs\Windows\v7.1\Lib\ws2_32.lib"
 EXAMPLES=example\sendExample.exe example\receiveExample.exe
 BASE=src\tiers
 GENZ=$(BASE)\genz.exe
@@ -21,7 +21,7 @@ clean:
 
 INSTALL_DIR=\Users\Store
 install:
-	copy src\cmw\*.h src\cmw\quicklz.h  $(INSTALL_DIR)\include
+	copy src\*.h  $(INSTALL_DIR)\include
 	copy $(GENZ) $(INSTALL_DIR)\bin
 
 uninstall:
