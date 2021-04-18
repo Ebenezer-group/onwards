@@ -96,6 +96,7 @@ auto checkField (char const *fld,char const *actl){
   return ::strtok(nullptr,"\n \r");
 }
 
+namespace{
 ::sockaddr_in addr;
 ::pollfd fds[2];
 int loginPause;
@@ -103,6 +104,7 @@ int loginPause;
 ::std::vector<cmwRequest*> pendingRequests;
 BufferCompressed<SameFormat> cmwBuf{1101000};
 BufferStack<SameFormat> frntBuf;
+}
 
 void setup (int ac,char **av){
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);

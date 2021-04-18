@@ -380,7 +380,7 @@ void receiveBlock (SendBuffer& b,C<T>const& c){
   else for(auto const& e:c)e.marshal(b);
 }
 
-inline auto constexpr udpPacketMax=1280;
+inline constexpr auto udpPacketMax=1280;
 template<class R,int N=udpPacketMax>
 class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
   unsigned char ar[N];
