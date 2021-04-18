@@ -53,5 +53,5 @@ int main ()try{
       std::cout<<"unknown message id\n";
       return 0;
   }
-  buf.send(ai()->ai_addr,ai()->ai_addrlen);
+  buf.send(ai().ai_addr,ai().ai_addrlen);
 }catch(::std::exception& e){::std::cout<<"failure: "<<e.what()<<"\n";}

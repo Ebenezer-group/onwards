@@ -141,7 +141,7 @@ class GetaddrinfoWrapper{
   GetaddrinfoWrapper (char const *node,char const *port,int type,int flags=0);
 
   ~GetaddrinfoWrapper ();
-  auto operator() (){return addr;}
+  auto& operator() (){return *addr;}
   void inc ();
 
   sockType getSock ();

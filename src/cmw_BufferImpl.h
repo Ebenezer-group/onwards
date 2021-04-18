@@ -152,7 +152,7 @@ sockType GetaddrinfoWrapper::getSock (){
 sockType connectWrapper (char const *node,char const *port){
   GetaddrinfoWrapper ai{node,port,SOCK_STREAM};
   auto s=ai.getSock();
-  if(0==::connect(s,ai()->ai_addr,ai()->ai_addrlen))return s;
+  if(0==::connect(s,ai().ai_addr,ai().ai_addrlen))return s;
   errno=preserveError(s);
   return -1;
 }
@@ -160,7 +160,7 @@ sockType connectWrapper (char const *node,char const *port){
 sockType udpServer (char const *port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
   auto s=ai.getSock();
-  if(0==::bind(s,ai()->ai_addr,ai()->ai_addrlen))return s;
+  if(0==::bind(s,ai().ai_addr,ai().ai_addrlen))return s;
   raise("udpServer",preserveError(s));
 }
 
@@ -169,7 +169,7 @@ sockType tcpServer (char const *port){
   auto s=ai.getSock();
 
   if(int on=1;setsockWrapper(s,SO_REUSEADDR,on)==0
-    &&::bind(s,ai()->ai_addr,ai()->ai_addrlen)==0
+    &&::bind(s,ai().ai_addr,ai().ai_addrlen)==0
     &&::listen(s,SOMAXCONN)==0)return s;
   raise("tcpServer",preserveError(s));
 }
