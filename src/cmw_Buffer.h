@@ -330,8 +330,7 @@ class SendBuffer{
   int reserveBytes (int n);
 
   void receive (void const *data,int size){
-    auto prev=reserveBytes(size);
-    ::memcpy(buf+prev,data,size);
+    ::memcpy(buf+reserveBytes(size),data,size);
   }
 
   template<class T>void receive (T t){

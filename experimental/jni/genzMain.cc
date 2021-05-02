@@ -4,12 +4,12 @@
 #include<stdlib.h>//exit
 #include"jniGenz.h"
 
-template<class...T>void leave (char const* fmt,T...t)noexcept{
+template<class...T>void leave (char const *fmt,T...t)noexcept{
   ::fprintf(stderr,fmt,t...);
   ::exit(EXIT_FAILURE);
 }
 
-int genzMain (int ac,char** av)try{
+int genzMain (int ac,char **av)try{
   using namespace ::cmw;
   if(ac<3||ac>5)
     leave("Usage: genz account-num mdl-file-path [node] [port]\n");
@@ -19,7 +19,7 @@ int genzMain (int ac,char** av)try{
 
   ::middle::marshal(buf,MarshallingInt(av[1]),av[2]);
   for(int tm=8;tm<13;tm+=4){
-    buf.send(res()->ai_addr,res()->ai_addrlen);
+    buf.send(res().ai_addr,res().ai_addrlen);
     setRcvTimeout(buf.sock_,tm);
     if(buf.getPacket()){
       if(giveBool(buf))::exit(EXIT_SUCCESS);

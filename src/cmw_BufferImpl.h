@@ -203,11 +203,6 @@ int sockRead (sockType s,void *data,int len,sockaddr *addr,socklen_t *fromLen){
   raise("sockRead",s,len,e);
 }
 
-FILEwrapper::FILEwrapper (char const *n,char const *mode):hndl{::fopen(n,mode)}
-{if(nullptr==hndl)raise("FILEwrapper",n,mode,errno);}
-char* FILEwrapper::fgets (){return ::fgets(line,sizeof line,hndl);}
-FILEwrapper::~FILEwrapper (){::fclose(hndl);}
-
 int SendBuffer::reserveBytes (int n){
   if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
   auto i=index;
@@ -255,5 +250,10 @@ void receive (SendBuffer& b,stringPlus lst){
   MarshallingInt{t}.marshal(b);
   for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
 }
+
+FILEwrapper::FILEwrapper (char const *n,char const *mode):hndl{::fopen(n,mode)}
+{if(nullptr==hndl)raise("FILEwrapper",n,mode,errno);}
+char* FILEwrapper::fgets (){return ::fgets(line,sizeof line,hndl);}
+FILEwrapper::~FILEwrapper (){::fclose(hndl);}
 }
 #endif
