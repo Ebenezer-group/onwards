@@ -430,6 +430,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     decomp=new ::qlz_state_decompress();
   }
 
+  using ReceiveBuffer<R>::rbuf;
   ~BufferCompressed (){
     delete[]rbuf;
     delete compress;
@@ -453,14 +454,13 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 
   void compressedReset (){
     reset();
-    *compress={0};
-    *decomp={0};
+    *compress={};
+    *decomp={};
     compIndex=bytesRead=0;
     kosher=true;
     closeSocket(sock_);
   }
 
-  using ReceiveBuffer<R>::rbuf;
   bool gotPacket (){
     if(kosher){
       if(bytesRead<9){
