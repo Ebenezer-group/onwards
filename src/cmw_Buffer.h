@@ -363,8 +363,7 @@ class SendBuffer{
 };
 
 void receiveBool (SendBuffer&,bool);
-void receive (SendBuffer&,::std::string_view);
-void receiveNull (SendBuffer&,char const*);
+void receive (SendBuffer&,::std::string_view,int=0);
 
 using stringPlus=::std::initializer_list<::std::string_view>;
 void receive (SendBuffer&,stringPlus);
@@ -392,8 +391,6 @@ class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
     return this->update();
   }
 };
-
-auto clear =[](auto p){::memset(p,0,sizeof *p);};
 
 struct SendBufferHeap:SendBuffer{
   SendBufferHeap (int n):SendBuffer(new unsigned char[n],n){}
@@ -456,8 +453,8 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 
   void compressedReset (){
     reset();
-    clear(compress);
-    clear(decomp);
+    *compress={0};
+    *decomp={0};
     compIndex=bytesRead=0;
     kosher=true;
     closeSocket(sock_);

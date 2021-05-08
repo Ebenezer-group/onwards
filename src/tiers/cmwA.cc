@@ -25,8 +25,8 @@ bool marshalFile (char const *name,SendBuffer& buf){
   struct ::stat sb;
   if(::stat(name,&sb)<0)raise("stat",name,errno);
   if(sb.st_mtime<=prevTime)return false;
-  if('.'==name[0]||name[0]=='/')receiveNull(buf,::strrchr(name,'/')+1);
-  else receiveNull(buf,name);
+  if('.'==name[0]||name[0]=='/')receive(buf,::strrchr(name,'/')+1,1);
+  else receive(buf,name,1);
 
   buf.receiveFile(FileWrapper{name,O_RDONLY}.d,sb.st_size);
   return true;
@@ -69,7 +69,7 @@ struct cmwRequest{
   void marshal (SendBuffer& buf)const{
     acctNbr.marshal(buf);
     if(auto ind=buf.reserveBytes(1);!buf.receive(ind,marshalFile(mdlFile,buf)))
-      receiveNull(buf,mdlFile);
+      receive(buf,mdlFile,1);
 
     ::int8_t updatedFiles=0;
     auto const idx=buf.reserveBytes(sizeof updatedFiles);

@@ -235,13 +235,9 @@ bool SendBuffer::flush (){
 
 void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
 
-void receive (SendBuffer& b,::std::string_view s){
-  MarshallingInt(s.size()).marshal(b);
-  b.receive(s.data(),s.size());
-}
-
-void receiveNull (SendBuffer& b,char const *s){
-  receive(b,::std::string_view(s,::strlen(s)+1));
+void receive (SendBuffer& b,::std::string_view s,int a){
+  MarshallingInt(s.size()+a).marshal(b);
+  b.receive(s.data(),s.size()+a);
 }
 
 void receive (SendBuffer& b,stringPlus lst){
