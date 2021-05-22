@@ -1,4 +1,3 @@
-CXX=g++
 CXXFLAGS=$(CXX) -std=c++20 -Isrc -Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
 
 BASE:=src/tiers/
