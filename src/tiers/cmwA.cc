@@ -17,7 +17,6 @@
 #else
 #include<netinet/sctp.h>
 #endif
-#include<arpa/inet.h>//inet_pton
 ::int32_t prevTime;
 using namespace ::cmw;
 
@@ -97,7 +96,7 @@ auto checkField (char const *fld,char const *actl){
 }
 
 namespace{
-::sockaddr_in addr;
+GetaddrinfoWrapper res("75.23.62.38","56789",SOCK_STREAM);
 ::pollfd fds[2];
 int loginPause;
 ::std::vector<cmwAccount> accounts;
@@ -122,18 +121,13 @@ void setup (int ac,char **av){
 
   tok=checkField("Login-interval-in-seconds",::strtok(cfg.fgets()," "));
   loginPause=fromChars(tok);
-
-  if(::inet_pton(AF_INET,"75.23.62.38",&addr.sin_addr)<=0)
-    bail("inet_pton",errno);
-  addr.sin_family=AF_INET;
-  addr.sin_port=htons(56789);
 }
 
 void login (){
   back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
   for(;;){
     cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-    if(0==::connect(cmwBuf.sock_,(::sockaddr*)&addr,sizeof addr))break;
+    if(0==::connect(cmwBuf.sock_,res().ai_addr,res().ai_addrlen))break;
     ::printf("connect %d\n",errno);
     ::close(cmwBuf.sock_);
     ::sleep(loginPause);
