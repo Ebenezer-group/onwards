@@ -15,7 +15,6 @@
 #include<ws2tcpip.h>
 #define CMW_WINDOWS
 #else
-#include<fcntl.h>//open
 #include<sys/socket.h>
 #include<sys/stat.h>//open
 #include<sys/types.h>
@@ -101,14 +100,14 @@ template<class...T>void bail (char const *fmt,T... t)noexcept{
 struct FileWrapper{
   int const d=-2;
   FileWrapper (){}
-  FileWrapper (char const *name,int flags,mode_t=0);
+  FileWrapper (char const *name,int flags,mode_t);
+  FileWrapper (char const *name,mode_t);
   FileWrapper (FileWrapper const&)=delete;
   ~FileWrapper ();
 };
 
 auto getFile =[](char const *n,auto& b){
-  b.giveFile(FileWrapper{n,O_WRONLY|O_CREAT|O_TRUNC
-                         ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
+  b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
 };
 
 class File{

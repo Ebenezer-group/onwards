@@ -10,6 +10,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #define poll WSAPoll
 #else
 #include<errno.h>
+#include<fcntl.h>//fcntl,open
 #include<netdb.h>
 #include<poll.h>
 #include<stdlib.h>//exit
@@ -92,6 +93,9 @@ void exitFailure (){::exit(EXIT_FAILURE);}
 
 FileWrapper::FileWrapper (char const *name,int flags,mode_t mode):
         d{::open(name,flags,mode)} {if(d<0)raise("FileWrapper",name,errno);}
+
+FileWrapper::FileWrapper (char const *name,mode_t mode):
+        FileWrapper(name,O_CREAT|O_WRONLY|O_TRUNC,mode){}
 
 FileWrapper::~FileWrapper (){::close(d);}
 #endif
