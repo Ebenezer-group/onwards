@@ -17,7 +17,6 @@
 #else
 #include<sys/socket.h>
 #include<sys/stat.h>//open
-#include<sys/types.h>
 #include<syslog.h>
 #endif
 
@@ -100,8 +99,8 @@ template<class...T>void bail (char const *fmt,T... t)noexcept{
 struct FileWrapper{
   int const d=-2;
   FileWrapper (){}
-  FileWrapper (char const *name,int flags,mode_t);
-  FileWrapper (char const *name,mode_t);
+  FileWrapper (char const*,int flags,mode_t);
+  FileWrapper (char const*,mode_t);
   FileWrapper (FileWrapper const&)=delete;
   ~FileWrapper ();
 };

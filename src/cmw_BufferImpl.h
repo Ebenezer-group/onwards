@@ -14,7 +14,8 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<netdb.h>
 #include<poll.h>
 #include<stdlib.h>//exit
-#include<unistd.h>
+#include<sys/types.h>
+#include<unistd.h>//chdir
 #endif
 
 namespace cmw{
