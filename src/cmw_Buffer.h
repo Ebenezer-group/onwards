@@ -8,14 +8,14 @@
 #include<string_view>
 #include<type_traits>
 #include<stdint.h>
-#include<stdio.h>//fopen,snprintf
+#include<stdio.h>//FILE,snprintf
 #include<string.h>//memcpy,memmove
 
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #include<ws2tcpip.h>
 #define CMW_WINDOWS
 #else
-#include<fcntl.h>//fcntl,open
+#include<fcntl.h>//open
 #include<sys/socket.h>
 #include<sys/stat.h>//open
 #include<sys/types.h>
