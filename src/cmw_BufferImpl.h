@@ -110,7 +110,7 @@ void setRcvTimeout (sockType s,int time){
   if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
 }
 
-inline int setNonblocking (sockType s){
+int setNonblocking (sockType s){
 #ifndef CMW_WINDOWS
   return ::fcntl(s,F_SETFL,O_NONBLOCK);
 #endif
@@ -254,6 +254,7 @@ void receive (SendBuffer& b,stringPlus lst){
 
 FILEwrapper::FILEwrapper (char const *n,char const *mode):hndl{::fopen(n,mode)}
 {if(nullptr==hndl)raise("FILEwrapper",n,mode,errno);}
+
 char* FILEwrapper::fgets (){return ::fgets(line,sizeof line,hndl);}
 FILEwrapper::~FILEwrapper (){::fclose(hndl);}
 }
