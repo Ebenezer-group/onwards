@@ -110,7 +110,7 @@ void setRcvTimeout (sockType s,int time){
   if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
 }
 
-int setNonblocking (sockType s){
+inline int setNonblocking (sockType s){
 #ifndef CMW_WINDOWS
   return ::fcntl(s,F_SETFL,O_NONBLOCK);
 #endif

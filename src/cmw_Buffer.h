@@ -101,7 +101,7 @@ struct FileWrapper{
   FileWrapper (){}
   FileWrapper (char const*,int flags,mode_t);
   FileWrapper (char const*,mode_t);
-  FileWrapper (FileWrapper const&)=delete;
+  FileWrapper (FileWrapper&)=delete;
   ~FileWrapper ();
 };
 
@@ -143,7 +143,7 @@ class GetaddrinfoWrapper{
   void inc ();
 
   sockType getSock ();
-  GetaddrinfoWrapper (GetaddrinfoWrapper const&)=delete;
+  GetaddrinfoWrapper (GetaddrinfoWrapper&)=delete;
   GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
 };
 
@@ -313,7 +313,7 @@ template<class R>bool giveBool (ReceiveBuffer<R>& b){
 }
 
 class SendBuffer{
-  SendBuffer (SendBuffer const&)=delete;
+  SendBuffer (SendBuffer&)=delete;
   SendBuffer& operator= (SendBuffer);
   ::int32_t savedSize=0;
  protected:
@@ -535,7 +535,7 @@ struct FILEwrapper{
   char line[120];
 
   FILEwrapper (char const *n,char const *mode);
-  FILEwrapper (FILEwrapper const&)=delete;
+  FILEwrapper (FILEwrapper&)=delete;
   ~FILEwrapper ();
   char* fgets ();
 };
