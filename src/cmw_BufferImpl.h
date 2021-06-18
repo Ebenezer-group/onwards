@@ -110,8 +110,11 @@ void setRcvTimeout (sockType s,int time){
   if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
 }
 
-inline int setNonblocking (sockType s){
-#ifndef CMW_WINDOWS
+int setNonblocking (sockType s){
+#ifdef CMW_WINDOWS
+  DWORD e=1;
+  return ::ioctlsocket(s,FIONBIO,&e);
+#else
   return ::fcntl(s,F_SETFL,O_NONBLOCK);
 #endif
 }
