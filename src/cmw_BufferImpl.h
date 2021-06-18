@@ -62,6 +62,8 @@ void MarshallingInt::marshal (SendBuffer& b)const{
   }
 }
 
+void exitFailure (){::exit(EXIT_FAILURE);}
+
 #ifdef CMW_WINDOWS
 DWORD Write (HANDLE h,void const *data,int len){
   DWORD bytesWritten=0;
@@ -89,8 +91,6 @@ int Read (int fd,void *data,int len){
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
   raise("Read",len,errno);
 }
-
-void exitFailure (){::exit(EXIT_FAILURE);}
 
 FileWrapper::FileWrapper (char const *name,int flags,mode_t mode):
         d{::open(name,flags,mode)} {if(d<0)raise("FileWrapper",name,errno);}

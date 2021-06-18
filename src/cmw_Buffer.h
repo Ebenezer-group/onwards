@@ -78,6 +78,8 @@ class MarshallingInt{
 inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
 inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
 
+void exitFailure ();
+
 #ifdef CMW_WINDOWS
 using sockType=SOCKET;
 using fileType=HANDLE;
@@ -88,8 +90,6 @@ using sockType=int;
 using fileType=int;
 int Write (int,void const*,int);
 int Read (int,void*,int);
-
-void exitFailure ();
 
 template<class...T>void bail (char const *fmt,T... t)noexcept{
   ::syslog(LOG_ERR,fmt,t...);
