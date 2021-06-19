@@ -4,6 +4,7 @@
 #include<quicklz.c>
 #include<charconv>//from_chars
 #include<limits>
+#include<stdlib.h>//exit
 static_assert(::std::numeric_limits<unsigned char>::digits==8);
 static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #ifdef CMW_WINDOWS
@@ -13,7 +14,6 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<fcntl.h>//fcntl,open
 #include<netdb.h>
 #include<poll.h>
-#include<stdlib.h>//exit
 #include<sys/types.h>
 #include<unistd.h>//chdir
 #endif

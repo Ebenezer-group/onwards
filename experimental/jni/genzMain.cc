@@ -1,16 +1,15 @@
 #include<cmw_BufferImpl.h>
 #include"genz.mdl.h"
 #include<stdio.h>
-#include<stdlib.h>//exit
 #include"jniGenz.h"
 
+using namespace ::cmw;
 template<class...T>void leave (char const *fmt,T...t)noexcept{
   ::fprintf(stderr,fmt,t...);
-  ::exit(EXIT_FAILURE);
+  exitFailure();
 }
 
 int genzMain (int ac,char **av)try{
-  using namespace ::cmw;
   if(ac<3||ac>5)
     leave("Usage: genz account-num mdl-file-path [node] [port]\n");
   winStart();
