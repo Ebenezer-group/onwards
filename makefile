@@ -1,4 +1,4 @@
-CXXFLAGS=$(CXX) -std=c++20 -Isrc -Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
+CXXFLAGS=$(CXX) -std=c++2a -Isrc -Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
 
 BASE:=src/tiers/
 TIERS:=$(BASE)front/genz $(BASE)cmwA
