@@ -4,14 +4,7 @@
 
 #include<vector>
 #include<assert.h>
-#include<errno.h>
-#include<stdint.h>
-#include<stdio.h>
-#include<string.h>
-#include<syslog.h>
-#include<sys/stat.h>
 #include<time.h>
-#include<unistd.h>//pread,sleep
 #ifdef __linux__
 #include<linux/sctp.h>//sockaddr_in6,socklen_t
 #else
@@ -150,7 +143,7 @@ void login (){
 void reset (char const *context,char const *detail=""){
   ::syslog(LOG_ERR,"%s:%s",context,detail);
   frntBuf.reset();
-  front::marshal<false>(frntBuf,{context," ",detail});
+  ::front::marshal<false>(frntBuf,{context," ",detail});
   for(auto r:pendingRequests){
     frntBuf.send((::sockaddr*)&r->frnt.addr,r->frnt.len);
     delete r;
@@ -166,7 +159,7 @@ catch(::std::exception& e){reset("sendData",e.what());return true;}
 template<bool res,class...T>
 void outFront (Socky const& sa,T...t){
   frntBuf.reset();
-  front::marshal<res>(frntBuf,{t...});
+  ::front::marshal<res>(frntBuf,{t...});
   frntBuf.send((::sockaddr*)&sa.addr,sa.len);
 }
 
