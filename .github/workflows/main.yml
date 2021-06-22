@@ -12,14 +12,14 @@ jobs:
       fail-fast: false
       matrix:
         name: [
-          ubuntu-18.04-gcc-9
+          ubuntu-20.04-gcc-10
         ]
 
         include:
-          - name: ubuntu-18.04-gcc-9
-            os: ubuntu-18.04
+          - name: ubuntu-20.04-gcc-10
+            os: ubuntu-20.04
             compiler: gcc
-            version: "9"
+            version: "10"
 
     steps:
     - uses: actions/checkout@v1

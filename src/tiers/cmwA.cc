@@ -180,7 +180,7 @@ int main (int ac,char **av)try{
       if(fds[0].revents&POLLIN&&cmwBuf.gotPacket()){
         do{
           assert(!pendingRequests.empty());
-          auto it=::std::begin(pendingRequests);
+          auto it=::std::cbegin(pendingRequests);
           if(giveBool(cmwBuf)){
             getFile((*it)->getFileName(),cmwBuf);
             outFront<true>((*it)->frnt);
@@ -195,7 +195,7 @@ int main (int ac,char **av)try{
     }catch(::std::exception& e){
       ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
-      auto it=::std::begin(pendingRequests);
+      auto it=::std::cbegin(pendingRequests);
       outFront<false>((*it)->frnt,e.what());
       delete *it;
       pendingRequests.erase(it);
