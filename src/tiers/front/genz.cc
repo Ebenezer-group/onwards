@@ -1,6 +1,5 @@
 #include<cmw_BufferImpl.h>
 #include"genz.mdl.h"
-#include<stdio.h>
 
 using namespace ::cmw;
 template<class...T>void leave (char const *fmt,T...t)noexcept{
