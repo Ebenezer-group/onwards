@@ -1,3 +1,4 @@
+![onwards](https://github.com/Ebenezer-group/onwards/actions/workflows/main.yml/badge.svg)
 The C++ Middleware Writer (CMW) is an on-line code generator.
 The CMW and the software found in this repository provide
 support for messaging and serialization.  Here's an example
