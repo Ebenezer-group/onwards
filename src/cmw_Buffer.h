@@ -3,7 +3,7 @@
 #include<quicklz.h>
 #include<exception>
 #include<initializer_list>
-#include<span>
+//#include<span>
 #include<string>
 #include<string_view>
 #include<type_traits>
@@ -271,6 +271,7 @@ template<class R> class ReceiveBuffer{
     }
   }
 
+#if 0
   template<class T>auto giveSpan (){
     static_assert(::std::is_arithmetic_v<T>);
     ::int32_t sz=give<::uint32_t>();
@@ -280,6 +281,7 @@ template<class R> class ReceiveBuffer{
     rindex+=serLen;
     return s;
   }
+#endif
 
   auto giveStringView (){
     MarshallingInt len{*this};
