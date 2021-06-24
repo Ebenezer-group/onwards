@@ -66,14 +66,14 @@ void exitFailure (){::exit(EXIT_FAILURE);}
 
 #ifdef CMW_WINDOWS
 DWORD Write (HANDLE h,void const *data,int len){
-  DWORD bytesWritten=0;
+  DWORD bytesWritten;
   if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
     raise("Write",GetLastError());
   return bytesWritten;
 }
 
 DWORD Read (HANDLE h,void *data,int len){
-  DWORD bytesRead=0;
+  DWORD bytesRead;
   if(!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
     raise("Read",GetLastError());
   return bytesRead;
