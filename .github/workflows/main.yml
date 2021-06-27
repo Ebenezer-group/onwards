@@ -14,14 +14,14 @@ jobs:
       fail-fast: false
       matrix:
         name: [
-          ubuntu-20.04-gcc-10
+          ubuntu-20.04-clang-12
         ]
 
         include:
-          - name: ubuntu-20.04-gcc-10
+          - name: ubuntu-20.04-clang-12
             os: ubuntu-20.04
-            compiler: gcc
-            version: "10"
+            compiler: clang
+            version: "12"
 
     steps:
     - uses: actions/checkout@v1

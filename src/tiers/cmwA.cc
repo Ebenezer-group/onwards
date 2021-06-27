@@ -157,10 +157,10 @@ bool sendData ()try{return cmwBuf.flush();}
 catch(::std::exception& e){reset("sendData",e.what());return true;}
 
 template<bool res,class...T>
-void outFront (Socky const& sa,T...t){
+void outFront (Socky const& s,T...t){
   frntBuf.reset();
   ::front::marshal<res>(frntBuf,{t...});
-  frntBuf.send((::sockaddr*)&sa.addr,sa.len);
+  frntBuf.send((::sockaddr*)&s.addr,s.len);
 }
 
 int main (int ac,char **av)try{
