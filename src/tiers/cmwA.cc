@@ -10,19 +10,7 @@
 #else
 #include<netinet/sctp.h>
 #endif
-::int32_t prevTime;
 using namespace ::cmw;
-
-bool marshalFile (char const *name,SendBuffer& buf){
-  struct ::stat sb;
-  if(::stat(name,&sb)<0)raise("stat",name,errno);
-  if(sb.st_mtime<=prevTime)return false;
-  if('.'==name[0]||name[0]=='/')receive(buf,::strrchr(name,'/')+1,1);
-  else receive(buf,name,1);
-
-  buf.receiveFile(FileWrapper{name,O_RDONLY,0}.d,sb.st_size);
-  return true;
-}
 
 struct Socky{
   ::sockaddr_in6 addr;
@@ -32,11 +20,23 @@ struct Socky{
 struct cmwRequest{
   Socky const frnt;
  private:
+  static ::int32_t prevTime;
   ::int32_t const bday;
   MarshallingInt const acctNbr;
   FixedString120 path;
   char *mdlFile;
   FileWrapper fl;
+
+  bool marshalFile (char const *name,SendBuffer& buf)const{
+    struct ::stat sb;
+    if(::stat(name,&sb)<0)raise("stat",name,errno);
+    if(sb.st_mtime<=prevTime)return false;
+    if('.'==name[0]||name[0]=='/')receive(buf,::strrchr(name,'/')+1,1);
+    else receive(buf,name,1);
+
+    buf.receiveFile(FileWrapper{name,O_RDONLY,0}.d,sb.st_size);
+    return true;
+  }
 
  public:
   template<class R>
@@ -51,7 +51,7 @@ struct cmwRequest{
     mdlFile=pos+1;
     char last[60];
     ::snprintf(last,sizeof last,".%s.last",mdlFile);
-    ::new(&fl)FileWrapper(last,O_RDWR|O_CREAT,S_IRUSR|S_IRGRP);
+    ::new(&fl)FileWrapper(last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP);
     switch(::pread(fl.d,&prevTime,sizeof prevTime,0)){
       case 0:prevTime=0;break;
       case -1:raise("pread",errno);
@@ -81,6 +81,7 @@ struct cmwRequest{
     return path.data();
   }
 };
+::int32_t cmwRequest::prevTime;
 #include"cmwA.mdl.h"
 
 auto checkField (char const *fld,char const *actl){
