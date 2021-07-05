@@ -27,8 +27,8 @@ class Failure:public ::std::exception{
   ::std::string s;
  public:
   explicit Failure (char const *s):s(s){}
-  void operator<< (::std::string_view v){s.append(" "); s.append(v);}
-  void operator<< (int i){char b[12]; ::snprintf(b,sizeof b,"%d",i);*this<<b;}
+  void operator<< (::std::string_view);
+  void operator<< (int);
   char const* what ()const noexcept{return s.data();}
 };
 

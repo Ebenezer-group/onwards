@@ -19,6 +19,17 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #endif
 
 namespace cmw{
+void Failure::operator<< (::std::string_view v){
+  s.append(" ");
+  s.append(v);
+}
+
+void Failure::operator<< (int i){
+  char b[12];
+  ::snprintf(b,sizeof b,"%d",i);
+  *this<<b;
+}
+
 int getError (){
   return
 #ifdef CMW_WINDOWS
