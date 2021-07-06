@@ -18,6 +18,8 @@
 #include<iterator>
 #include<system_error>
 #include<stdint.h>
+#include<sys/mman.h>
+#include<unistd.h>
 
 namespace mio{
 
@@ -31,6 +33,29 @@ enum class access_mode
     write
 };
 
+namespace detail{
+  
+/**
+ * Returns the last system error as a `std::error_code`.
+ */
+std::error_code last_error ()noexcept;
+
+int open_file (::std::string_view& path, access_mode const,
+	       std::error_code&);
+
+size_t query_file_size (int handle, std::error_code&);
+
+struct mmap_context
+{
+    char* data;
+    int64_t length;
+    int64_t mapped_length;
+};
+
+mmap_context memory_map (int const handle, int64_t const offset,
+			 int64_t const length, access_mode const, std::error_code&);
+} // namespace detail
+  
 /**
  * Determines the page allocation granularity.
  *
@@ -366,6 +391,232 @@ private:
     }
 };
 
+// basic_mmap
+  
+template<access_mode AccessMode, typename ByteT>
+template<access_mode A>
+typename std::enable_if<A == access_mode::write, void>::type
+basic_mmap<AccessMode, ByteT>::sync (std::error_code& error)
+{
+    error.clear();
+    if(!is_open())
+    {
+        error=std::make_error_code(std::errc::bad_file_descriptor);
+        return;
+    }
+
+    if(data())
+    {
+        if(::msync(get_mapping_start(), mapped_length_, MS_SYNC) != 0)
+        {
+            error=detail::last_error();
+            return;
+        }
+    }
+}
+
+template<access_mode AccessMode, typename ByteT>
+basic_mmap<AccessMode, ByteT>::~basic_mmap ()
+{
+    if constexpr(AccessMode==access_mode::write){
+      std::error_code ec;
+      sync(ec);
+    }
+    unmap();
+}
+
+template<access_mode AccessMode, typename ByteT>
+basic_mmap<AccessMode, ByteT>::basic_mmap (basic_mmap&& other)
+    : data_(std::move(other.data_))
+    , length_(std::move(other.length_))
+    , mapped_length_(std::move(other.mapped_length_))
+    , file_handle_(std::move(other.file_handle_))
+    , is_handle_internal_(std::move(other.is_handle_internal_))
+{
+    other.data_ = nullptr;
+    other.length_ = other.mapped_length_ = 0;
+    other.file_handle_ = invalid_handle;
+}
+
+template<access_mode AccessMode, typename ByteT>
+basic_mmap<AccessMode, ByteT>&
+basic_mmap<AccessMode, ByteT>::operator= (basic_mmap&& other)
+{
+    if(this != &other)
+    {
+        // First the existing mapping needs to be removed.
+        unmap();
+        data_ = std::move(other.data_);
+        length_ = std::move(other.length_);
+        mapped_length_ = std::move(other.mapped_length_);
+        file_handle_ = std::move(other.file_handle_);
+        is_handle_internal_ = std::move(other.is_handle_internal_);
+
+        // The moved from basic_mmap's fields need to be reset, because
+        // otherwise other's destructor will unmap the same mapping that was
+        // just moved into this.
+        other.data_ = nullptr;
+        other.length_ = other.mapped_length_ = 0;
+        other.file_handle_ = invalid_handle;
+        other.is_handle_internal_ = false;
+    }
+    return *this;
+}
+
+template<access_mode AccessMode, typename ByteT>
+void basic_mmap<AccessMode, ByteT>::map (::std::string_view path, size_type const offset,
+        size_type const length, std::error_code& error)
+{
+    error.clear();
+    if(path.empty())
+    {
+        error = std::make_error_code(std::errc::invalid_argument);
+        return;
+    }
+    auto const handle=detail::open_file(path, AccessMode, error);
+    if(error)
+    {
+        return;
+    }
+
+    map(handle, offset, length, error);
+    // This MUST be after the call to map, as that sets this to true.
+    if(!error)
+    {
+        is_handle_internal_ = true;
+    }
+}
+
+template<access_mode AccessMode, typename ByteT>
+void basic_mmap<AccessMode, ByteT>::map (const handle_type handle,
+        const size_type offset, const size_type length, std::error_code& error)
+{
+    error.clear();
+    if(handle == invalid_handle)
+    {
+        error = std::make_error_code(std::errc::bad_file_descriptor);
+        return;
+    }
+
+    const auto file_size = detail::query_file_size(handle, error);
+    if(error)
+    {
+        return;
+    }
+
+    if(offset + length > file_size)
+    {
+        error = std::make_error_code(std::errc::invalid_argument);
+        return;
+    }
+
+    const auto ctx = detail::memory_map(handle, offset,
+            length == map_entire_file ? (file_size - offset) : length,
+            AccessMode, error);
+    if(!error)
+    {
+        // We must unmap the previous mapping that may have existed prior to this call.
+        // Note that this must only be invoked after a new mapping has been created in
+        // order to provide the strong guarantee that, should the new mapping fail, the
+        // `map` function leaves this instance in a state as though the function had
+        // never been invoked.
+        unmap();
+        file_handle_ = handle;
+        is_handle_internal_ = false;
+        data_ = reinterpret_cast<pointer>(ctx.data);
+        length_ = ctx.length;
+        mapped_length_ = ctx.mapped_length;
+    }
+}
+
+template<access_mode AccessMode, typename ByteT>
+void basic_mmap<AccessMode, ByteT>::unmap ()
+{
+    if(!is_open()) { return; }
+    // TODO do we care about errors here?
+    if(data_) { ::munmap(const_cast<pointer>(get_mapping_start()), mapped_length_); }
+
+    // If `file_handle_` was obtained by our opening it (when map is called with
+    // a path, rather than an existing file handle), we need to close it,
+    // otherwise it must not be closed as it may still be used outside this
+    // instance.
+    if(is_handle_internal_)
+    {
+        ::close(file_handle_);
+    }
+
+    // Reset fields to their default values.
+    data_ = nullptr;
+    length_ = mapped_length_ = 0;
+    file_handle_ = invalid_handle;
+}
+
+template<access_mode AccessMode, typename ByteT>
+bool basic_mmap<AccessMode, ByteT>::is_mapped ()const noexcept
+{
+    return is_open();
+}
+
+template<access_mode AccessMode, typename ByteT>
+void basic_mmap<AccessMode, ByteT>::swap (basic_mmap& other)
+{
+    if(this != &other)
+    {
+        using std::swap;
+        swap(data_, other.data_);
+        swap(file_handle_, other.file_handle_);
+        swap(length_, other.length_);
+        swap(mapped_length_, other.mapped_length_);
+        swap(is_handle_internal_, other.is_handle_internal_);
+    }
+}
+
+template<access_mode AccessMode, typename ByteT>
+bool operator== (basic_mmap<AccessMode, ByteT> const& a,
+        basic_mmap<AccessMode, ByteT> const& b)
+{
+    return a.data() == b.data()
+        && a.size() == b.size();
+}
+
+template<access_mode AccessMode, typename ByteT>
+bool operator!=(basic_mmap<AccessMode, ByteT> const& a,
+        basic_mmap<AccessMode, ByteT> const& b)
+{
+    return !(a == b);
+}
+
+template<access_mode AccessMode, typename ByteT>
+bool operator< (basic_mmap<AccessMode, ByteT> const& a,
+        basic_mmap<AccessMode, ByteT> const& b)
+{
+    if(a.data() == b.data()) { return a.size() < b.size(); }
+    return a.data() < b.data();
+}
+
+template<access_mode AccessMode, typename ByteT>
+bool operator<= (basic_mmap<AccessMode, ByteT> const& a,
+        basic_mmap<AccessMode, ByteT> const& b)
+{
+    return !(a > b);
+}
+
+template<access_mode AccessMode, typename ByteT>
+bool operator> (basic_mmap<AccessMode, ByteT> const& a,
+        basic_mmap<AccessMode, ByteT> const& b)
+{
+    if(a.data() == b.data()) { return a.size() > b.size(); }
+    return a.data() > b.data();
+}
+
+template<access_mode AccessMode, typename ByteT>
+bool operator>= (basic_mmap<AccessMode, ByteT> const& a,
+        basic_mmap<AccessMode, ByteT> const& b)
+{
+    return !(a < b);
+}
+
+#if 0
 template<access_mode AccessMode, typename ByteT>
 bool operator== (basic_mmap<AccessMode, ByteT> const& a,
         basic_mmap<AccessMode, ByteT> const& b);
@@ -389,6 +640,7 @@ bool operator> (basic_mmap<AccessMode, ByteT> const& a,
 template<access_mode AccessMode, typename ByteT>
 bool operator>= (basic_mmap<AccessMode, ByteT> const& a,
         basic_mmap<AccessMode, ByteT> const& b);
+#endif
 
 /**
  * This is the basis for all read-only mmap objects and should be preferred over
