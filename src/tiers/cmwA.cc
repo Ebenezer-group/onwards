@@ -20,7 +20,7 @@ struct Socky{
 struct cmwRequest{
   Socky const frnt;
  private:
-  static ::int32_t prevTime;
+  static inline :int32_t prevTime;
   ::int32_t const bday;
   MarshallingInt const acctNbr;
   FixedString120 path;
@@ -81,7 +81,6 @@ struct cmwRequest{
     return path.data();
   }
 };
-::int32_t cmwRequest::prevTime;
 #include"cmwA.mdl.h"
 
 auto checkField (char const *fld,char const *actl){
