@@ -21,7 +21,7 @@
 #include<sys/mman.h>
 #include<unistd.h>
 
-namespace mio{
+namespace cmw{
 
 /**
  * This is used to determine whether to create a read-only or
@@ -464,6 +464,70 @@ basic_mmap<AccessMode, ByteT>::operator= (basic_mmap&& other)
 }
 
 template<access_mode AccessMode, typename ByteT>
+void basic_mmap<AccessMode, ByteT>::unmap ()
+{
+    if(!is_open()) { return; }
+    // TODO do we care about errors here?
+    if(data_) { ::munmap(const_cast<pointer>(get_mapping_start()), mapped_length_); }
+
+    // If `file_handle_` was obtained by our opening it (when map is called with
+    // a path, rather than an existing file handle), we need to close it,
+    // otherwise it must not be closed as it may still be used outside this
+    // instance.
+    if(is_handle_internal_)
+    {
+        ::close(file_handle_);
+    }
+
+    // Reset fields to their default values.
+    data_ = nullptr;
+    length_ = mapped_length_ = 0;
+    file_handle_ = invalid_handle;
+}
+
+template<access_mode AccessMode, typename ByteT>
+void basic_mmap<AccessMode, ByteT>::map (const handle_type handle,
+        size_type const offset, size_type const length, std::error_code& error)
+{
+    error.clear();
+    if(handle == invalid_handle)
+    {
+        error = std::make_error_code(std::errc::bad_file_descriptor);
+        return;
+    }
+
+    auto const file_size = detail::query_file_size(handle, error);
+    if(error)
+    {
+        return;
+    }
+
+    if(offset + length > file_size)
+    {
+        error = std::make_error_code(std::errc::invalid_argument);
+        return;
+    }
+
+    auto const ctx = detail::memory_map(handle, offset,
+            length == map_entire_file ? (file_size - offset) : length,
+            AccessMode, error);
+    if(!error)
+    {
+        // We must unmap the previous mapping that may have existed prior to this call.
+        // Note that this must only be invoked after a new mapping has been created in
+        // order to provide the strong guarantee that, should the new mapping fail, the
+        // `map` function leaves this instance in a state as though the function had
+        // never been invoked.
+        unmap();
+        file_handle_ = handle;
+        is_handle_internal_ = false;
+        data_ = reinterpret_cast<pointer>(ctx.data);
+        length_ = ctx.length;
+        mapped_length_ = ctx.mapped_length;
+    }
+}
+
+template<access_mode AccessMode, typename ByteT>
 void basic_mmap<AccessMode, ByteT>::map (::std::string_view path, size_type const offset,
         size_type const length, std::error_code& error)
 {
@@ -485,70 +549,6 @@ void basic_mmap<AccessMode, ByteT>::map (::std::string_view path, size_type cons
     {
         is_handle_internal_ = true;
     }
-}
-
-template<access_mode AccessMode, typename ByteT>
-void basic_mmap<AccessMode, ByteT>::map (const handle_type handle,
-        const size_type offset, const size_type length, std::error_code& error)
-{
-    error.clear();
-    if(handle == invalid_handle)
-    {
-        error = std::make_error_code(std::errc::bad_file_descriptor);
-        return;
-    }
-
-    const auto file_size = detail::query_file_size(handle, error);
-    if(error)
-    {
-        return;
-    }
-
-    if(offset + length > file_size)
-    {
-        error = std::make_error_code(std::errc::invalid_argument);
-        return;
-    }
-
-    const auto ctx = detail::memory_map(handle, offset,
-            length == map_entire_file ? (file_size - offset) : length,
-            AccessMode, error);
-    if(!error)
-    {
-        // We must unmap the previous mapping that may have existed prior to this call.
-        // Note that this must only be invoked after a new mapping has been created in
-        // order to provide the strong guarantee that, should the new mapping fail, the
-        // `map` function leaves this instance in a state as though the function had
-        // never been invoked.
-        unmap();
-        file_handle_ = handle;
-        is_handle_internal_ = false;
-        data_ = reinterpret_cast<pointer>(ctx.data);
-        length_ = ctx.length;
-        mapped_length_ = ctx.mapped_length;
-    }
-}
-
-template<access_mode AccessMode, typename ByteT>
-void basic_mmap<AccessMode, ByteT>::unmap ()
-{
-    if(!is_open()) { return; }
-    // TODO do we care about errors here?
-    if(data_) { ::munmap(const_cast<pointer>(get_mapping_start()), mapped_length_); }
-
-    // If `file_handle_` was obtained by our opening it (when map is called with
-    // a path, rather than an existing file handle), we need to close it,
-    // otherwise it must not be closed as it may still be used outside this
-    // instance.
-    if(is_handle_internal_)
-    {
-        ::close(file_handle_);
-    }
-
-    // Reset fields to their default values.
-    data_ = nullptr;
-    length_ = mapped_length_ = 0;
-    file_handle_ = invalid_handle;
 }
 
 template<access_mode AccessMode, typename ByteT>
@@ -691,5 +691,5 @@ mmap_sink make_mmap_sink (MappingToken const& token, std::error_code& error)
     return make_mmap_sink(token, 0, map_entire_file, error);
 }
 
-} // namespace mio
+} // namespace cmw
 #endif // MIO_MMAP_HEADER

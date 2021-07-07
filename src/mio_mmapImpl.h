@@ -20,7 +20,7 @@
 #include<fcntl.h>
 #include<sys/stat.h>
 
-namespace mio{
+namespace cmw{
 namespace detail{
   
 /**
@@ -95,5 +95,5 @@ size_t page_size ()
     return pageSize;
 }
 
-} // namespace mio
+} // namespace cmw
 #endif // MIO_BASIC_MMAP_IMPL
