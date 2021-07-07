@@ -134,7 +134,7 @@ public:
      * any operation that attempts to access nonexistent underlying data will
      * result in undefined behaviour/segmentation faults.
      */
-    basic_mmap() = default;
+    basic_mmap ()=default;
 
 #ifdef __cpp_exceptions
     /**
@@ -142,8 +142,7 @@ public:
      * while establishing the mapping is wrapped in a `std::system_error` and is
      * thrown.
      */
-    template<typename String>
-    basic_mmap(const String& path, const size_type offset = 0, const size_type length = map_entire_file)
+    basic_mmap (std::string_view const& path, size_type const offset = 0, size_type const length = map_entire_file)
     {
         std::error_code error;
         map(path, offset, length, error);
@@ -155,7 +154,7 @@ public:
      * while establishing the mapping is wrapped in a `std::system_error` and is
      * thrown.
      */
-    basic_mmap(const handle_type handle, const size_type offset = 0, const size_type length = map_entire_file)
+    basic_mmap (handle_type const handle, size_type const offset = 0, size_type const length = map_entire_file)
     {
         std::error_code error;
         map(handle, offset, length, error);
@@ -181,12 +180,12 @@ public:
      * If this is a read-write mapping, the destructor invokes sync. Regardless
      * of the access mode, unmap is invoked as a final step.
      */
-    ~basic_mmap ();
+    ~basic_mmap (){unmap();}
 
-    handle_type file_handle () const noexcept { return file_handle_; }
+    handle_type file_handle () const { return file_handle_; }
 
     /** Returns whether a valid memory mapping has been created. */
-    bool is_open ()const noexcept { return file_handle_ != invalid_handle; }
+    bool is_open ()const { return file_handle_ != invalid_handle; }
 
     /**
      * Returns true if no mapping was established, that is, conceptually the
@@ -204,11 +203,11 @@ public:
      * bytes that were mapped which is a multiple of the underlying operating system's
      * page allocation granularity.
      */
-    size_type length ()const noexcept { return length_; }
-    size_type mapped_length ()const noexcept { return mapped_length_; }
+    size_type length ()const { return length_; }
+    size_type mapped_length ()const { return mapped_length_; }
 
     /** Returns the offset relative to the start of the mapping. */
-    size_type mapping_offset ()const noexcept
+    size_type mapping_offset ()const 
     {
         return mapped_length_ - length_;
     }
@@ -230,9 +229,9 @@ public:
     template<
         access_mode A = AccessMode,
         typename = typename std::enable_if<A == access_mode::write>::type
-    > iterator begin ()noexcept { return data(); }
-    const_iterator begin ()const noexcept { return data(); }
-    const_iterator cbegin ()const noexcept { return data(); }
+    > iterator begin (){ return data(); }
+    const_iterator begin ()const { return data(); }
+    const_iterator cbegin ()const { return data(); }
 
     /**
      * Returns an iterator one past the last requested byte, if a valid memory mapping
@@ -416,16 +415,6 @@ basic_mmap<AccessMode, ByteT>::sync (std::error_code& error)
 }
 
 template<access_mode AccessMode, typename ByteT>
-basic_mmap<AccessMode, ByteT>::~basic_mmap ()
-{
-    if constexpr(AccessMode==access_mode::write){
-      std::error_code ec;
-      sync(ec);
-    }
-    unmap();
-}
-
-template<access_mode AccessMode, typename ByteT>
 basic_mmap<AccessMode, ByteT>::basic_mmap (basic_mmap&& other)
     : data_(std::move(other.data_))
     , length_(std::move(other.length_))
@@ -486,7 +475,7 @@ void basic_mmap<AccessMode, ByteT>::unmap ()
 }
 
 template<access_mode AccessMode, typename ByteT>
-void basic_mmap<AccessMode, ByteT>::map (const handle_type handle,
+void basic_mmap<AccessMode, ByteT>::map (handle_type const handle,
         size_type const offset, size_type const length, std::error_code& error)
 {
     error.clear();
