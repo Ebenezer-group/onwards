@@ -616,32 +616,6 @@ bool operator>= (basic_mmap<AccessMode, ByteT> const& a,
     return !(a < b);
 }
 
-#if 0
-template<access_mode AccessMode, typename ByteT>
-bool operator== (basic_mmap<AccessMode, ByteT> const& a,
-        basic_mmap<AccessMode, ByteT> const& b);
-
-template<access_mode AccessMode, typename ByteT>
-bool operator!= (basic_mmap<AccessMode, ByteT> const& a,
-        basic_mmap<AccessMode, ByteT> const& b);
-
-template<access_mode AccessMode, typename ByteT>
-bool operator< (basic_mmap<AccessMode, ByteT> const& a,
-        basic_mmap<AccessMode, ByteT> const& b);
-
-template<access_mode AccessMode, typename ByteT>
-bool operator<= (basic_mmap<AccessMode, ByteT> const& a,
-        basic_mmap<AccessMode, ByteT> const& b);
-
-template<access_mode AccessMode, typename ByteT>
-bool operator> (basic_mmap<AccessMode, ByteT> const& a,
-        basic_mmap<AccessMode, ByteT> const& b);
-
-template<access_mode AccessMode, typename ByteT>
-bool operator>= (basic_mmap<AccessMode, ByteT> const& a,
-        basic_mmap<AccessMode, ByteT> const& b);
-#endif
-
 /**
  * This is the basis for all read-only mmap objects and should be preferred over
  * directly using `basic_mmap`.
