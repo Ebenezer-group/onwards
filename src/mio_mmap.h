@@ -240,9 +240,9 @@ public:
     template<
         access_mode A = AccessMode,
         typename = typename std::enable_if<A == access_mode::write>::type
-    > iterator end ()noexcept { return data() + length(); }
-    const_iterator end ()const noexcept { return data() + length(); }
-    const_iterator cend ()const noexcept { return data() + length(); }
+    > iterator end () { return data() + length(); }
+    const_iterator end ()const { return data() + length(); }
+    const_iterator cend ()const { return data() + length(); }
 
     /**
      * Returns a reverse iterator to the last memory mapped byte, if a valid
@@ -252,10 +252,10 @@ public:
     template<
         access_mode A = AccessMode,
         typename = typename std::enable_if<A == access_mode::write>::type
-    > reverse_iterator rbegin ()noexcept { return reverse_iterator(end()); }
-    const_reverse_iterator rbegin ()const noexcept
+    > reverse_iterator rbegin (){ return reverse_iterator(end()); }
+    const_reverse_iterator rbegin ()const
     { return const_reverse_iterator(end()); }
-    const_reverse_iterator crbegin ()const noexcept
+    const_reverse_iterator crbegin ()const
     { return const_reverse_iterator(end()); }
 
     /**
@@ -265,10 +265,10 @@ public:
     template<
         access_mode A = AccessMode,
         typename = typename std::enable_if<A == access_mode::write>::type
-    > reverse_iterator rend ()noexcept { return reverse_iterator(begin()); }
-    const_reverse_iterator rend ()const noexcept
+    > reverse_iterator rend (){ return reverse_iterator(begin()); }
+    const_reverse_iterator rend ()const
     { return const_reverse_iterator(begin()); }
-    const_reverse_iterator crend ()const noexcept
+    const_reverse_iterator crend ()const
     { return const_reverse_iterator(begin()); }
 
     /**
@@ -276,8 +276,8 @@ public:
      * by `data`). If this is invoked when no valid memory mapping has been created
      * prior to this call, undefined behaviour ensues.
      */
-    reference operator[] (size_type const i)noexcept { return data_[i]; }
-    const_reference operator[] (size_type const i)const noexcept { return data_[i]; }
+    reference operator[] (size_type const i){ return data_[i]; }
+    const_reference operator[] (size_type const i)const { return data_[i]; }
 
     /**
      * Establishes a memory mapping with AccessMode. If the mapping is unsuccesful, the
@@ -368,7 +368,7 @@ public:
      */
     void unmap ();
 
-    void swap (basic_mmap& other);
+    void swap (basic_mmap&);
 
     /**
      * All operators compare the address of the first byte and size of the two mapped
@@ -416,11 +416,11 @@ basic_mmap<AccessMode, ByteT>::sync (std::error_code& error)
 
 template<access_mode AccessMode, typename ByteT>
 basic_mmap<AccessMode, ByteT>::basic_mmap (basic_mmap&& other)
-    : data_(std::move(other.data_))
-    , length_(std::move(other.length_))
-    , mapped_length_(std::move(other.mapped_length_))
-    , file_handle_(std::move(other.file_handle_))
-    , is_handle_internal_(std::move(other.is_handle_internal_))
+    : data_(other.data_)
+    , length_(other.length_)
+    , mapped_length_(other.mapped_length_)
+    , file_handle_(other.file_handle_)
+    , is_handle_internal_(other.is_handle_internal_)
 {
     other.data_ = nullptr;
     other.length_ = other.mapped_length_ = 0;
@@ -435,11 +435,11 @@ basic_mmap<AccessMode, ByteT>::operator= (basic_mmap&& other)
     {
         // First the existing mapping needs to be removed.
         unmap();
-        data_ = std::move(other.data_);
-        length_ = std::move(other.length_);
-        mapped_length_ = std::move(other.mapped_length_);
-        file_handle_ = std::move(other.file_handle_);
-        is_handle_internal_ = std::move(other.is_handle_internal_);
+        data_ = other.data_;
+        length_ = other.length_;
+        mapped_length_ = other.mapped_length_;
+        file_handle_ = other.file_handle_;
+        is_handle_internal_ = other.is_handle_internal_;
 
         // The moved from basic_mmap's fields need to be reset, because
         // otherwise other's destructor will unmap the same mapping that was
