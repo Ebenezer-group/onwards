@@ -2,7 +2,7 @@ struct cmwAccount{
   ::cmw::MarshallingInt number;
   ::cmw::FixedString60 password;
 
-  cmwAccount (int n,char const *p):number(n),password(p){}
+  cmwAccount (int n,::std::string_view p):number(n),password(p){}
   template<class R>explicit cmwAccount (::cmw::ReceiveBuffer<R>&);
 
   void marshalMembers (::cmw::SendBuffer&)const;

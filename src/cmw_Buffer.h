@@ -98,11 +98,14 @@ template<class...T>void bail (char const *fmt,T... t)noexcept{
 
 struct FileWrapper{
   int const d=-2;
+  char line[120];
   FileWrapper (){}
   FileWrapper (char const*,int flags,mode_t);
   FileWrapper (char const*,mode_t);
   FileWrapper (FileWrapper&)=delete;
   ~FileWrapper ();
+  char getc ();
+  char* getline ();
 };
 
 auto getFile =[](char const *n,auto& b){

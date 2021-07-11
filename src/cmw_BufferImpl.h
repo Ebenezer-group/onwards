@@ -113,6 +113,26 @@ FileWrapper::FileWrapper (char const *name,mode_t mode):
         FileWrapper(name,O_CREAT|O_WRONLY|O_TRUNC,mode){}
 
 FileWrapper::~FileWrapper (){::close(d);}
+
+char FileWrapper::getc (){
+  static char buf[200];
+  static int ind=0;
+  static int bytes=0;
+  if(ind>=bytes){
+    bytes=Read(d,buf,sizeof buf);
+    ind=0;
+  }
+  return buf[ind++];
+}
+
+char* FileWrapper::getline (){
+  size_t ind=0;
+  while((line[ind]=getc())!='\n'){
+    if(line[ind]=='\r')raise("getline carriage return");
+    if(++ind>=sizeof line)raise("getline line too long");
+  }
+  return line;
+}
 #endif
 
 void setRcvTimeout (sockType s,int time){
@@ -276,3 +296,4 @@ char* FILEwrapper::fgets (){return ::fgets(line,sizeof line,hndl);}
 FILEwrapper::~FILEwrapper (){::fclose(hndl);}
 }
 #endif
+

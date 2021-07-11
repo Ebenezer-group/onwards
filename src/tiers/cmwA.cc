@@ -65,8 +65,8 @@ struct cmwRequest{
 
     ::int8_t updatedFiles=0;
     auto const idx=buf.reserveBytes(sizeof updatedFiles);
-    FILEwrapper f{mdlFile,"r"};
-    while(auto line=f.fgets()){
+    FileWrapper f{mdlFile,O_RDONLY,0};
+    while(auto line=f.getline()){
       char const *tok=::strtok(line,"\n \r");
       if(!::strncmp(tok,"//",2))continue;
       if(!::strcmp(tok,"--"))break;
@@ -101,18 +101,18 @@ BufferStack<SameFormat> frntBuf;
 void setup (int ac,char **av){
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac!=2)bail("Usage: cmwA config-file");
-  FILEwrapper cfg{av[1],"r"};
+  FileWrapper cfg{av[1],O_RDONLY,0};
   char const *tok;
-  while((tok=::strtok(cfg.fgets()," "))&&!::strcmp("Account-number",tok)){
+  while((tok=::strtok(cfg.getline()," "))&&!::strcmp("Account-number",tok)){
     auto num=fromChars(::strtok(nullptr,"\n \r"));
-    tok=checkField("Password",::strtok(cfg.fgets()," "));
+    tok=checkField("Password",::strtok(cfg.getline()," "));
     accounts.emplace_back(num,tok);
   }
   if(accounts.empty())bail("An account number is required.");
   fds[1].fd=frntBuf.sock_=udpServer(checkField("UDP-port-number",tok));
   fds[1].events=POLLIN;
 
-  tok=checkField("Login-interval-in-seconds",::strtok(cfg.fgets()," "));
+  tok=checkField("Login-interval-in-seconds",::strtok(cfg.getline()," "));
   loginPause=fromChars(tok);
 }
 
