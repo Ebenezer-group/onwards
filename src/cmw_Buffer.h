@@ -8,7 +8,6 @@
 #include<string_view>
 #include<type_traits>
 #include<stdint.h>
-#include<stdio.h>//FILE,snprintf
 #include<string.h>//memcpy,memmove
 
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
@@ -532,15 +531,5 @@ template<int N>class FixedString{
 };
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
-
-struct FILEwrapper{
-  FILE* const hndl;
-  char line[120];
-
-  FILEwrapper (char const *n,char const *mode);
-  FILEwrapper (FILEwrapper&)=delete;
-  ~FILEwrapper ();
-  char* fgets ();
-};
 }
 #endif

@@ -4,6 +4,7 @@
 #include<quicklz.c>
 #include<charconv>//from_chars
 #include<limits>
+#include<stdio.h>//snprintf
 #include<stdlib.h>//exit
 static_assert(::std::numeric_limits<unsigned char>::digits==8);
 static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
@@ -115,7 +116,7 @@ FileWrapper::FileWrapper (char const *name,mode_t mode):
 FileWrapper::~FileWrapper (){::close(d);}
 
 char FileWrapper::getc (){
-  static char buf[200];
+  static char buf[400];
   static int ind=0;
   static int bytes=0;
   if(ind>=bytes){
@@ -288,12 +289,6 @@ void receive (SendBuffer& b,stringPlus lst){
   MarshallingInt{t}.marshal(b);
   for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
 }
-
-FILEwrapper::FILEwrapper (char const *n,char const *mode):hndl{::fopen(n,mode)}
-{if(nullptr==hndl)raise("FILEwrapper",n,mode,errno);}
-
-char* FILEwrapper::fgets (){return ::fgets(line,sizeof line,hndl);}
-FILEwrapper::~FILEwrapper (){::fclose(hndl);}
 }
 #endif
 
