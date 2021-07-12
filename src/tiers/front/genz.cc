@@ -3,7 +3,7 @@
 
 using namespace ::cmw;
 template<class...T>void leave (char const *fmt,T...t)noexcept{
-  ::fprintf(stderr,fmt,t...);
+  ::std::fprintf(stderr,fmt,t...);
   exitFailure();
 }
 

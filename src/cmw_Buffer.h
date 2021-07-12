@@ -7,8 +7,8 @@
 #include<string>
 #include<string_view>
 #include<type_traits>
-#include<stdint.h>
-#include<string.h>//memcpy,memmove
+#include<cstdint>
+#include<cstring>//memcpy,memmove
 
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #include<ws2tcpip.h>
@@ -174,13 +174,13 @@ struct LeastSignificantFirst{
   template<class B>static void read (B& b,float& f){
     ::uint32_t tmp;
     read(b,tmp);
-    ::memcpy(&f,&tmp,sizeof f);
+    ::std::memcpy(&f,&tmp,sizeof f);
   }
 
   template<class B>static void read (B& b,double& d){
     ::uint64_t tmp;
     read(b,tmp);
-    ::memcpy(&d,&tmp,sizeof d);
+    ::std::memcpy(&d,&tmp,sizeof d);
   }
 
   template<class B,class U>static void readBlock (B& b,U *data,int elements){
@@ -195,13 +195,13 @@ struct MostSignificantFirst{
   template<class B>static void read (B& b,float& f){
     ::uint32_t tmp;
     read(b,tmp);
-    ::memcpy(&f,&tmp,sizeof f);
+    ::std::memcpy(&f,&tmp,sizeof f);
   }
 
   template<class B> static void read (B& b,double& d){
     ::uint64_t tmp;
     read(b,tmp);
-    ::memcpy(&d,&tmp,sizeof d);
+    ::std::memcpy(&d,&tmp,sizeof d);
   }
 
   template<class B,class U>static void readBlock (B& b,U *data,int elements){
@@ -226,7 +226,7 @@ template<class R> class ReceiveBuffer{
 
   void give (void *address,int len){
     checkLen(len);
-    ::memcpy(address,rbuf+subTotal+rindex,len);
+    ::std::memcpy(address,rbuf+subTotal+rindex,len);
     rindex+=len;
   }
 
@@ -330,7 +330,7 @@ class SendBuffer{
   int reserveBytes (int n);
 
   void receive (void const *data,int size){
-    ::memcpy(buf+reserveBytes(size),data,size);
+    ::std::memcpy(buf+reserveBytes(size),data,size);
   }
 
   template<class T>void receive (T t){
@@ -340,7 +340,7 @@ class SendBuffer{
 
   template<class T>T receive (int where,T t){
     static_assert(::std::is_arithmetic_v<T>);
-    ::memcpy(buf+where,&t,sizeof t);
+    ::std::memcpy(buf+where,&t,sizeof t);
     return t;
   }
 
@@ -417,7 +417,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     int const bytes=Write(sock_,compBuf,compIndex);
     if(bytes==compIndex){compIndex=0;return true;}
     compIndex-=bytes;
-    ::memmove(compBuf,compBuf+bytes,compIndex);
+    ::std::memmove(compBuf,compBuf+bytes,compIndex);
     return false;
   }
  public:
@@ -472,7 +472,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
           raise("gotPacket too big",compPacketSize,this->packetLength,bufsize);
         }
         compressedStart=rbuf+bufsize-compPacketSize;
-        ::memmove(compressedStart,rbuf,9);
+        ::std::memmove(compressedStart,rbuf,9);
       }
       bytesRead+=Read(sock_,compressedStart+bytesRead,compPacketSize-bytesRead);
       if(bytesRead<compPacketSize)return false;
@@ -500,7 +500,7 @@ template<int N>class FixedString{
 
   explicit FixedString (::std::string_view s):len(s.size()){
     if(len()>=N)raise("FixedString ctor");
-    ::memcpy(str,s.data(),len());
+    ::std::memcpy(str,s.data(),len());
     str[len()]=0;
   }
 
@@ -519,7 +519,7 @@ template<int N>class FixedString{
 
   void append (::std::string_view s){
     if(bytesAvailable()>=s.size()){
-      ::memcpy(str+len(),s.data(),s.size());
+      ::std::memcpy(str+len(),s.data(),s.size());
       len+=s.size();
       str[len()]=0;
     }

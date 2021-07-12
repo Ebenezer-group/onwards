@@ -4,8 +4,8 @@
 #include<quicklz.c>
 #include<charconv>//from_chars
 #include<limits>
-#include<stdio.h>//snprintf
-#include<stdlib.h>//exit
+#include<cstdio>//snprintf
+#include<cstdlib>//exit
 static_assert(::std::numeric_limits<unsigned char>::digits==8);
 static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #ifdef CMW_WINDOWS
@@ -30,7 +30,7 @@ void Failure::operator<< (::std::string_view v){
 
 void Failure::operator<< (int i){
   char b[12];
-  ::snprintf(b,sizeof b,"%d",i);
+  ::std::snprintf(b,sizeof b,"%d",i);
   *this<<b;
 }
 
@@ -77,7 +77,7 @@ void MarshallingInt::marshal (SendBuffer& b)const{
   }
 }
 
-void exitFailure (){::exit(EXIT_FAILURE);}
+void exitFailure (){::std::exit(EXIT_FAILURE);}
 
 #ifdef CMW_WINDOWS
 DWORD Write (HANDLE h,void const *data,int len){
@@ -272,7 +272,7 @@ bool SendBuffer::flush (){
 
   index-=bytes;
   savedSize=index;
-  ::memmove(buf,buf+bytes,index);
+  ::std::memmove(buf,buf+bytes,index);
   return false;
 }
 

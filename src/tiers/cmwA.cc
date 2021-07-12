@@ -3,8 +3,8 @@
 #include"messageIDs.h"
 
 #include<vector>
-#include<assert.h>
-#include<time.h>
+#include<cassert>
+#include<ctime>
 #ifdef __linux__
 #include<linux/sctp.h>//sockaddr_in6,socklen_t
 #else
@@ -31,7 +31,7 @@ struct cmwRequest{
     struct ::stat sb;
     if(::stat(name,&sb)<0)raise("stat",name,errno);
     if(sb.st_mtime<=prevTime)return false;
-    if('.'==name[0]||name[0]=='/')receive(buf,::strrchr(name,'/')+1,1);
+    if('.'==name[0]||name[0]=='/')receive(buf,::std::strrchr(name,'/')+1,1);
     else receive(buf,name,1);
 
     buf.receiveFile(FileWrapper{name,O_RDONLY,0}.d,sb.st_size);
@@ -41,16 +41,16 @@ struct cmwRequest{
  public:
   template<class R>
   cmwRequest (Socky const& ft,ReceiveBuffer<R>& buf):frnt{ft}
-     ,bday{static_cast<::int32_t>(::time(nullptr))},acctNbr{buf},path{buf}{
+     ,bday{static_cast<::int32_t>(::std::time(nullptr))},acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<2)raise("No room for file suffix");
-    char* const pos=::strrchr(path(),'/');
+    char* const pos=::std::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
     *pos=0;
     setDirectory(path());
     *pos='/';
     mdlFile=pos+1;
     char last[60];
-    ::snprintf(last,sizeof last,".%s.last",mdlFile);
+    ::std::snprintf(last,sizeof last,".%s.last",mdlFile);
     ::new(&fl)FileWrapper(last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP);
     switch(::pread(fl.d,&prevTime,sizeof prevTime,0)){
       case 0:prevTime=0;break;
@@ -67,9 +67,9 @@ struct cmwRequest{
     auto const idx=buf.reserveBytes(sizeof updatedFiles);
     FileWrapper f{mdlFile,O_RDONLY,0};
     while(auto line=f.getline()){
-      char const *tok=::strtok(line,"\n \r");
-      if(!::strncmp(tok,"//",2))continue;
-      if(!::strcmp(tok,"--"))break;
+      char const *tok=::std::strtok(line,"\n \r");
+      if(!::std::strncmp(tok,"//",2))continue;
+      if(!::std::strcmp(tok,"--"))break;
       if(marshalFile(tok,buf))++updatedFiles;
     }
     buf.receive(idx,updatedFiles);
@@ -84,8 +84,8 @@ struct cmwRequest{
 #include"cmwA.mdl.h"
 
 auto checkField (char const *fld,char const *actl){
-  if(::strcmp(fld,actl))bail("Expected %s",fld);
-  return ::strtok(nullptr,"\n \r");
+  if(::std::strcmp(fld,actl))bail("Expected %s",fld);
+  return ::std::strtok(nullptr,"\n \r");
 }
 
 namespace{
@@ -103,16 +103,16 @@ void setup (int ac,char **av){
   if(ac!=2)bail("Usage: cmwA config-file");
   FileWrapper cfg{av[1],O_RDONLY,0};
   char const *tok;
-  while((tok=::strtok(cfg.getline()," "))&&!::strcmp("Account-number",tok)){
-    auto num=fromChars(::strtok(nullptr,"\n \r"));
-    tok=checkField("Password",::strtok(cfg.getline()," "));
+  while((tok=::std::strtok(cfg.getline()," "))&&!::std::strcmp("Account-number",tok)){
+    auto num=fromChars(::std::strtok(nullptr,"\n \r"));
+    tok=checkField("Password",::std::strtok(cfg.getline()," "));
     accounts.emplace_back(num,tok);
   }
   if(accounts.empty())bail("An account number is required.");
   fds[1].fd=frntBuf.sock_=udpServer(checkField("UDP-port-number",tok));
   fds[1].events=POLLIN;
 
-  tok=checkField("Login-interval-in-seconds",::strtok(cfg.getline()," "));
+  tok=checkField("Login-interval-in-seconds",::std::strtok(cfg.getline()," "));
   loginPause=fromChars(tok);
 }
 
@@ -121,7 +121,7 @@ void login (){
   for(;;){
     cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
     if(0==::connect(cmwBuf.sock_,res().ai_addr,res().ai_addrlen))break;
-    ::printf("connect %d\n",errno);
+    ::std::printf("connect %d\n",errno);
     ::close(cmwBuf.sock_);
     ::sleep(loginPause);
   }
