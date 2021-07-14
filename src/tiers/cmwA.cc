@@ -1,6 +1,6 @@
-#include<cmw_BufferImpl.h>
-#include"account.h"
-#include"messageIDs.h"
+#include<cmw_BufferImpl.hh>
+#include"account.hh"
+#include"messageIDs.hh"
 
 #include<vector>
 #include<cassert>
@@ -42,7 +42,7 @@ struct cmwRequest{
   template<class R>
   cmwRequest (Socky const& ft,ReceiveBuffer<R>& buf):frnt{ft}
      ,bday{static_cast<::int32_t>(::std::time(nullptr))},acctNbr{buf},path{buf}{
-    if(path.bytesAvailable()<2)raise("No room for file suffix");
+    if(path.bytesAvailable()<3)raise("No room for file suffix");
     char* const pos=::std::strrchr(path(),'/');
     if(nullptr==pos)raise("cmwRequest didn't find /");
     *pos=0;
@@ -77,11 +77,11 @@ struct cmwRequest{
 
   auto getFileName (){
     Write(fl.d,&bday,sizeof bday);
-    path.append(".h");
+    path.append(".hh");
     return path.data();
   }
 };
-#include"cmwA.mdl.h"
+#include"cmwA.mdl.hh"
 
 auto checkField (char const *fld,char const *actl){
   if(::std::strcmp(fld,actl))bail("Expected %s",fld);

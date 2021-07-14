@@ -15,7 +15,7 @@
 #ifndef MIO_BASIC_MMAP_IMPL
 #define MIO_BASIC_MMAP_IMPL
 
-#include"mio_mmap.h"
+#include"mio_mmap.hh"
 
 #include<fcntl.h>
 #include<sys/stat.h>

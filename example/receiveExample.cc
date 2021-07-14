@@ -1,13 +1,13 @@
 //  This program receives messages sent by sendExample.
-#include<cmw_BufferImpl.h>
-#include"messageIDs.h"
+#include<cmw_BufferImpl.hh>
+#include"messageIDs.hh"
 
 #include<array>
 #include<iostream>
 #include<set>
 #include<string>
 #include<vector>
-#include"example.mdl.h"
+#include"example.mdl.hh"
 
 int main ()try{
   ::cmw::winStart();

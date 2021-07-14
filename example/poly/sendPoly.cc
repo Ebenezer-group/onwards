@@ -1,6 +1,7 @@
-#include<base.h>
+#include<base.hh>
+#include<cmw_BufferImpl.hh>
 #include<boost/poly_collection/base_collection.hpp>
-#include"testing.mdl.h"
+#include"testing.mdl.hh"
 
 int main (){
   ::boost::base_collection<base> c;

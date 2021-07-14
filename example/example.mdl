@@ -1,4 +1,4 @@
-opaque.h
+opaque.hh
 --
 exampleMessages <messageID_t=messageID>
   -out -in (::std::vector<::int32_t>,::std::string)

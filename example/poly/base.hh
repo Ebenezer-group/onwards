@@ -1,7 +1,7 @@
-#ifndef BASE_H
-#define BASE_H
-#include<cmw_BufferImpl.h>
-#include<cmw_Complex.h>
+#ifndef BASE_HH
+#define BASE_HH
+#include<cmw_Buffer.hh>
+#include<cmw_Complex.hh>
 
 struct base{
   base ()=default;

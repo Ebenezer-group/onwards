@@ -1,6 +1,6 @@
-#ifndef CMW_BUFFERIMPL_H
-#define CMW_BUFFERIMPL_H
-#include<cmw_Buffer.h>
+#ifndef CMW_BUFFERIMPL_HH
+#define CMW_BUFFERIMPL_HH
+#include<cmw_Buffer.hh>
 #include<quicklz.c>
 #include<charconv>//from_chars
 #include<limits>
@@ -19,7 +19,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<unistd.h>//chdir
 #endif
 
-// This .h file contains implementations and should only
+// This file contains implementations and should only
 // be included by one source file in a project.
 
 namespace cmw{
@@ -127,7 +127,7 @@ char FileWrapper::getc (){
 }
 
 char* FileWrapper::getline (){
-  size_t ind=0;
+  ::std::size_t ind=0;
   while((line[ind]=getc())!='\n'){
     if(line[ind]=='\r')raise("getline carriage return");
     if(++ind>=sizeof line)raise("getline line too long");
