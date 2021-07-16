@@ -3,7 +3,7 @@ The C++ Middleware Writer (CMW) is an on-line code generator.
 The CMW and the software found in this repository provide
 support for messaging and serialization.  Here's an example
 of the [input](https://github.com/Ebenezer-group/onwards/blob/master/example/example.mdl)
-and [output](https://github.com/Ebenezer-group/onwards/blob/master/example/example.mdl.h).
+and [output](https://github.com/Ebenezer-group/onwards/blob/master/example/example.mdl.hh).
 
 #### License
 The software is under the BSD license.  Two of the files,
