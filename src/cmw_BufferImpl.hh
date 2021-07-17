@@ -123,12 +123,13 @@ char FileBuffer::getc (){
   return buf[ind++];
 }
 
-char* FileBuffer::getline (){
+char* FileBuffer::getline (char delim){
   ::std::size_t ind=0;
-  while((line[ind]=getc())!='\n'){
+  while((line[ind]=getc())!=delim){
     if(line[ind]=='\r')raise("getline carriage return");
     if(++ind>=sizeof line)raise("getline line too long");
   }
+  line[ind]=0;
   return line;
 }
 #endif

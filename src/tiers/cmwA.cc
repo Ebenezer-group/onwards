@@ -66,8 +66,7 @@ struct cmwRequest{
     ::int8_t updatedFiles=0;
     auto const idx=buf.reserveBytes(sizeof updatedFiles);
     FileBuffer f{mdlFile,O_RDONLY};
-    while(auto line=f.getline()){
-      char const *tok=::std::strtok(line,"\n \r");
+    while(auto tok=f.getline()){
       if(!::std::strncmp(tok,"//",2))continue;
       if(!::std::strcmp(tok,"--"))break;
       if(marshalFile(tok,buf))++updatedFiles;
@@ -85,7 +84,6 @@ struct cmwRequest{
 
 auto checkField (char const *fld,char const *actl){
   if(::std::strcmp(fld,actl))bail("Expected %s",fld);
-  return ::std::strtok(nullptr,"\n \r");
 }
 
 namespace{
@@ -103,17 +101,18 @@ void setup (int ac,char **av){
   if(ac!=2)bail("Usage: cmwA config-file");
   FileBuffer cfg{av[1],O_RDONLY};
   char const *tok;
-  while((tok=::std::strtok(cfg.getline()," "))&&!::std::strcmp("Account-number",tok)){
-    auto num=fromChars(::std::strtok(nullptr,"\n \r"));
-    tok=checkField("Password",::std::strtok(cfg.getline()," "));
-    accounts.emplace_back(num,tok);
+  while((tok=cfg.getline(' '))&&!::std::strcmp("Account-number",tok)){
+    auto num=fromChars(cfg.getline());
+    checkField("Password",cfg.getline(' '));
+    accounts.emplace_back(num,cfg.getline());
   }
   if(accounts.empty())bail("An account number is required.");
-  fds[1].fd=frntBuf.sock_=udpServer(checkField("UDP-port-number",tok));
+  checkField("UDP-port-number",tok);
+  fds[1].fd=frntBuf.sock_=udpServer(cfg.getline());
   fds[1].events=POLLIN;
 
-  tok=checkField("Login-interval-in-seconds",::std::strtok(cfg.getline()," "));
-  loginPause=fromChars(tok);
+  checkField("Login-interval-in-seconds",cfg.getline(' '));
+  loginPause=fromChars(cfg.getline());
 }
 
 void login (){

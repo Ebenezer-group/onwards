@@ -113,7 +113,7 @@ struct FileBuffer{
   
   FileBuffer (char const* name,int flags):fl(name,flags,0){}
   char getc ();
-  char* getline ();
+  char* getline (char='\n');
 };
 
 auto getFile =[](char const *n,auto& b){
