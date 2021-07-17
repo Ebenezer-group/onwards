@@ -97,12 +97,21 @@ template<class...T>void bail (char const *fmt,T... t)noexcept{
 
 struct FileWrapper{
   int const d=-2;
-  char line[120];
   FileWrapper (){}
   FileWrapper (char const*,int flags,mode_t);
   FileWrapper (char const*,mode_t);
   FileWrapper (FileWrapper&)=delete;
   ~FileWrapper ();
+};
+
+struct FileBuffer{
+  FileWrapper fl;
+  char buf[400];
+  char line[120];
+  int ind=0;
+  int bytes=0;
+  
+  FileBuffer (char const* name,int flags):fl(name,flags,0){}
   char getc ();
   char* getline ();
 };

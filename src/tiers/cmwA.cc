@@ -65,7 +65,7 @@ struct cmwRequest{
 
     ::int8_t updatedFiles=0;
     auto const idx=buf.reserveBytes(sizeof updatedFiles);
-    FileWrapper f{mdlFile,O_RDONLY,0};
+    FileBuffer f{mdlFile,O_RDONLY};
     while(auto line=f.getline()){
       char const *tok=::std::strtok(line,"\n \r");
       if(!::std::strncmp(tok,"//",2))continue;
@@ -101,7 +101,7 @@ BufferStack<SameFormat> frntBuf;
 void setup (int ac,char **av){
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac!=2)bail("Usage: cmwA config-file");
-  FileWrapper cfg{av[1],O_RDONLY,0};
+  FileBuffer cfg{av[1],O_RDONLY};
   char const *tok;
   while((tok=::std::strtok(cfg.getline()," "))&&!::std::strcmp("Account-number",tok)){
     auto num=fromChars(::std::strtok(nullptr,"\n \r"));

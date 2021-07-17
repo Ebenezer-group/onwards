@@ -115,18 +115,15 @@ FileWrapper::FileWrapper (char const *name,mode_t mode):
 
 FileWrapper::~FileWrapper (){::close(d);}
 
-char FileWrapper::getc (){
-  static char buf[400];
-  static int ind=0;
-  static int bytes=0;
+char FileBuffer::getc (){
   if(ind>=bytes){
-    bytes=Read(d,buf,sizeof buf);
+    bytes=Read(fl.d,buf,sizeof buf);
     ind=0;
   }
   return buf[ind++];
 }
 
-char* FileWrapper::getline (){
+char* FileBuffer::getline (){
   ::std::size_t ind=0;
   while((line[ind]=getc())!='\n'){
     if(line[ind]=='\r')raise("getline carriage return");
