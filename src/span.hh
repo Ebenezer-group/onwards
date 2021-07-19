@@ -6,7 +6,6 @@ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4820.pdf
 
 //          Copyright Tristan Brindle 2018.
 // Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file ../../LICENSE_1_0.txt or copy at
 //          https://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef TCB_SPAN_HH
@@ -14,10 +13,8 @@ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4820.pdf
 
 #include <array>
 #include <cstddef>
-#include <cstdint>
 #include <type_traits>
 
-#include <cstdio>
 #include <stdexcept>
 
 // Various feature test macros
@@ -26,19 +23,13 @@ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4820.pdf
 #define TCB_SPAN_NAMESPACE_NAME std
 #endif
 
-#define TCB_SPAN_HAVE_CPP14
-
 namespace TCB_SPAN_NAMESPACE_NAME {
 
 // Establish default contract checking behavior
 #if !defined(TCB_SPAN_THROW_ON_CONTRACT_VIOLATION) &&                          \
     !defined(TCB_SPAN_TERMINATE_ON_CONTRACT_VIOLATION) &&                      \
     !defined(TCB_SPAN_NO_CONTRACT_CHECKING)
-#if defined(NDEBUG) || !defined(TCB_SPAN_HAVE_CPP14)
 #define TCB_SPAN_NO_CONTRACT_CHECKING
-#else
-#define TCB_SPAN_TERMINATE_ON_CONTRACT_VIOLATION
-#endif
 #endif
 
 #if defined(TCB_SPAN_THROW_ON_CONTRACT_VIOLATION)
@@ -79,9 +70,9 @@ namespace detail {
 
 template <typename E, std::size_t S>
 struct span_storage {
-    constexpr span_storage() noexcept = default;
+    constexpr span_storage () noexcept = default;
 
-    constexpr span_storage(E* p_ptr, std::size_t /*unused*/) noexcept
+    constexpr span_storage (E* p_ptr, std::size_t /*unused*/) noexcept
        : ptr(p_ptr)
     {}
 
@@ -91,9 +82,9 @@ struct span_storage {
 
 template <typename E>
 struct span_storage<E, dynamic_extent> {
-    constexpr span_storage() noexcept = default;
+    constexpr span_storage () noexcept = default;
 
-    constexpr span_storage(E* p_ptr, std::size_t p_size) noexcept
+    constexpr span_storage (E* p_ptr, std::size_t p_size) noexcept
         : ptr(p_ptr), size(p_size)
     {}
 
@@ -172,7 +163,7 @@ class span {
     static_assert(!std::is_abstract<ElementType>::value,
                   "A span's ElementType cannot be an abstract class type");
 
-    using storage_type = detail::span_storage<ElementType, Extent>;
+    detail::span_storage<ElementType, Extent> storage_{};
 
 public:
     // constants and types
@@ -181,9 +172,9 @@ public:
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
     using pointer = element_type*;
-    using const_pointer = const element_type*;
+    using const_pointer = element_type const*;
     using reference = element_type&;
-    using const_reference = const element_type&;
+    using const_reference = element_type const&;
     using iterator = pointer;
     using reverse_iterator = std::reverse_iterator<iterator>;
 
@@ -193,16 +184,16 @@ public:
     template <
         std::size_t E = Extent,
         typename std::enable_if<(E == dynamic_extent || E <= 0), int>::type = 0>
-    constexpr span() noexcept
+    constexpr span () noexcept
     {}
 
-    constexpr span(pointer ptr, size_type count)
+    constexpr span (pointer ptr, size_type count)
         : storage_(ptr, count)
     {
         TCB_SPAN_EXPECT(extent == dynamic_extent || count == extent);
     }
 
-    constexpr span(pointer first_elem, pointer last_elem)
+    constexpr span (pointer first_elem, pointer last_elem)
         : storage_(first_elem, last_elem - first_elem)
     {
         TCB_SPAN_EXPECT(extent == dynamic_extent ||
@@ -216,7 +207,7 @@ public:
                       detail::is_container_element_type_compatible<
                           element_type (&)[N], ElementType>::value,
                   int>::type = 0>
-    constexpr span(element_type (&arr)[N]) noexcept : storage_(arr, N)
+    constexpr span (element_type (&arr)[N]) noexcept : storage_(arr, N)
     {}
 
     template <std::size_t N, std::size_t E = Extent,
@@ -246,7 +237,7 @@ public:
                 detail::is_container_element_type_compatible<
                     Container&, ElementType>::value,
             int>::type = 0>
-    constexpr span(Container& cont)
+    constexpr span (Container& cont)
         : storage_(detail::data(cont), detail::size(cont))
     {}
 
@@ -257,11 +248,11 @@ public:
                 detail::is_container_element_type_compatible<
                     Container const&, ElementType>::value,
             int>::type = 0>
-    constexpr span(Container const& cont)
+    constexpr span (Container const& cont)
         : storage_(detail::data(cont), detail::size(cont))
     {}
 
-    constexpr span(span const& other) noexcept = default;
+    constexpr span (span const& other) noexcept = default;
 
     template <typename OtherElementType, std::size_t OtherExtent,
               typename std::enable_if<
@@ -269,14 +260,13 @@ public:
                       std::is_convertible<OtherElementType (*)[],
                                           ElementType (*)[]>::value,
                   int>::type = 0>
-    constexpr span(span<OtherElementType, OtherExtent> const& other) noexcept
+    constexpr span (span<OtherElementType, OtherExtent> const& other) noexcept
         : storage_(other.data(), other.size())
     {}
 
-    ~span() noexcept = default;
+    ~span () noexcept = default;
 
-    constexpr span&
-    operator= (span const& other) noexcept = default;
+    constexpr span& operator= (span const& other) noexcept = default;
 
     // [span.sub], span subviews
     template <std::size_t Count>
@@ -367,9 +357,9 @@ public:
     constexpr pointer data() const noexcept { return storage_.ptr; }
 
     // [span.iterators], span iterator support
-    constexpr iterator begin() const noexcept { return data(); }
+    constexpr iterator begin () const noexcept { return data(); }
 
-    constexpr iterator end() const noexcept { return data() + size(); }
+    constexpr iterator end () const noexcept { return data() + size(); }
 
     constexpr reverse_iterator rbegin () const noexcept
     {
@@ -380,9 +370,6 @@ public:
     {
         return reverse_iterator(begin());
     }
-
-private:
-    storage_type storage_{};
 };
 
 /* Deduction Guides */
