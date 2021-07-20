@@ -13,9 +13,8 @@ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4820.pdf
 
 #include <array>
 #include <cstddef>
-#include <type_traits>
-
 #include <stdexcept>
+#include <type_traits>
 
 // Various feature test macros
 
@@ -26,8 +25,8 @@ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4820.pdf
 namespace TCB_SPAN_NAMESPACE_NAME {
 
 // Establish default contract checking behavior
-#if !defined(TCB_SPAN_THROW_ON_CONTRACT_VIOLATION) &&                          \
-    !defined(TCB_SPAN_TERMINATE_ON_CONTRACT_VIOLATION) &&                      \
+#if !defined(TCB_SPAN_THROW_ON_CONTRACT_VIOLATION) &&             \
+    !defined(TCB_SPAN_TERMINATE_ON_CONTRACT_VIOLATION) &&         \
     !defined(TCB_SPAN_NO_CONTRACT_CHECKING)
 #define TCB_SPAN_NO_CONTRACT_CHECKING
 #endif
@@ -70,9 +69,9 @@ namespace detail {
 
 template <typename E, std::size_t S>
 struct span_storage {
-    constexpr span_storage () noexcept = default;
+    constexpr span_storage () = default;
 
-    constexpr span_storage (E* p_ptr, std::size_t /*unused*/) noexcept
+    constexpr span_storage (E* p_ptr, std::size_t /*unused*/)
        : ptr(p_ptr)
     {}
 
@@ -82,9 +81,9 @@ struct span_storage {
 
 template <typename E>
 struct span_storage<E, dynamic_extent> {
-    constexpr span_storage () noexcept = default;
+    constexpr span_storage () = default;
 
-    constexpr span_storage (E* p_ptr, std::size_t p_size) noexcept
+    constexpr span_storage (E* p_ptr, std::size_t p_size)
         : ptr(p_ptr), size(p_size)
     {}
 
@@ -94,7 +93,6 @@ struct span_storage<E, dynamic_extent> {
 
 using std::data;
 using std::size;
-using std::void_t;
 
 template <typename T>
 using uncvref_t =
@@ -116,8 +114,8 @@ template <typename, typename = void>
 struct has_size_and_data : std::false_type {};
 
 template <typename T>
-struct has_size_and_data<T, void_t<decltype(detail::size(std::declval<T>())),
-                                   decltype(detail::data(std::declval<T>()))>>
+struct has_size_and_data<T, std::void_t<decltype(detail::size(std::declval<T>())),
+                                        decltype(detail::data(std::declval<T>()))>>
     : std::true_type {};
 
 template <typename C, typename U = uncvref_t<C>>
@@ -184,8 +182,7 @@ public:
     template <
         std::size_t E = Extent,
         typename std::enable_if<(E == dynamic_extent || E <= 0), int>::type = 0>
-    constexpr span () noexcept
-    {}
+    constexpr span () {}
 
     constexpr span (pointer ptr, size_type count)
         : storage_(ptr, count)
@@ -207,7 +204,7 @@ public:
                       detail::is_container_element_type_compatible<
                           element_type (&)[N], ElementType>::value,
                   int>::type = 0>
-    constexpr span (element_type (&arr)[N]) noexcept : storage_(arr, N)
+    constexpr span (element_type (&arr)[N]) : storage_(arr, N)
     {}
 
     template <std::size_t N, std::size_t E = Extent,
@@ -216,7 +213,7 @@ public:
                       detail::is_container_element_type_compatible<
                           std::array<value_type, N>&, ElementType>::value,
                   int>::type = 0>
-    constexpr span (std::array<value_type, N>& arr) noexcept
+    constexpr span (std::array<value_type, N>& arr)
         : storage_(arr.data(), N)
     {}
 
@@ -252,7 +249,7 @@ public:
         : storage_(detail::data(cont), detail::size(cont))
     {}
 
-    constexpr span (span const& other) noexcept = default;
+    constexpr span (span const&) noexcept = default;
 
     template <typename OtherElementType, std::size_t OtherExtent,
               typename std::enable_if<
@@ -266,7 +263,7 @@ public:
 
     ~span () noexcept = default;
 
-    constexpr span& operator= (span const& other) noexcept = default;
+    constexpr span& operator= (span const&) noexcept = default;
 
     // [span.sub], span subviews
     template <std::size_t Count>
@@ -323,14 +320,14 @@ public:
     }
 
     // [span.obs], span observers
-    constexpr size_type size() const noexcept { return storage_.size; }
+    constexpr size_type size () const { return storage_.size; }
 
-    constexpr size_type size_bytes() const noexcept
+    constexpr size_type size_bytes () const
     {
         return size() * sizeof(element_type);
     }
 
-    [[nodiscard]] constexpr bool empty() const noexcept
+    [[nodiscard]] constexpr bool empty () const noexcept
     {
         return size() == 0;
     }
@@ -354,19 +351,19 @@ public:
         return *(data() + (size() - 1));
     }
 
-    constexpr pointer data() const noexcept { return storage_.ptr; }
+    constexpr pointer data () const { return storage_.ptr; }
 
     // [span.iterators], span iterator support
-    constexpr iterator begin () const noexcept { return data(); }
+    constexpr iterator begin () const { return data(); }
 
-    constexpr iterator end () const noexcept { return data() + size(); }
+    constexpr iterator end () const { return data() + size(); }
 
-    constexpr reverse_iterator rbegin () const noexcept
+    constexpr reverse_iterator rbegin () const
     {
         return reverse_iterator(end());
     }
 
-    constexpr reverse_iterator rend () const noexcept
+    constexpr reverse_iterator rend () const
     {
         return reverse_iterator(begin());
     }
