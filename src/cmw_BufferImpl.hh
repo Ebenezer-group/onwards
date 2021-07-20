@@ -124,12 +124,12 @@ char FileBuffer::getc (){
 }
 
 char* FileBuffer::getline (char delim){
-  ::std::size_t ind=0;
-  while((line[ind]=getc())!=delim){
-    if(line[ind]=='\r')raise("getline carriage return");
-    if(++ind>=sizeof line)raise("getline line too long");
+  ::std::size_t idx=0;
+  while((line[idx]=getc())!=delim){
+    if(line[idx]=='\r')raise("getline carriage return");
+    if(++idx>=sizeof line)raise("getline line too long");
   }
-  line[ind]=0;
+  line[idx]=0;
   return line;
 }
 #endif

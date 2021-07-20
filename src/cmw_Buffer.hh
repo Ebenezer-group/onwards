@@ -505,7 +505,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 #endif
 
 template<int N>class FixedString{
-  MarshallingInt len{0};
+  MarshallingInt len{};
   char str[N];
 
  public:
