@@ -47,7 +47,6 @@ template<class E=Failure,class...T>[[noreturn]]void raise (char const *s,T...t){
 }
 
 int getError ();
-void winStart ();
 int fromChars (::std::string_view);
 void setDirectory (char const*);
 

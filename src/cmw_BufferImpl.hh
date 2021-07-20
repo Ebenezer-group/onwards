@@ -1,3 +1,6 @@
+// This file contains implementations and should only
+// be included by one source file in a project.
+
 #ifndef CMW_BUFFERIMPL_HH
 #define CMW_BUFFERIMPL_HH
 #include<cmw_Buffer.hh>
@@ -18,9 +21,6 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<sys/types.h>
 #include<unistd.h>//chdir
 #endif
-
-// This file contains implementations and should only
-// be included by one source file in a project.
 
 namespace cmw{
 void Failure::operator<< (::std::string_view v){
