@@ -26,7 +26,7 @@ template<messageID id,class...T>
 static void marshal (::cmw::SendBuffer& buf,T&&...t)try{
   buf.reserveBytes(4);
   buf.receive<messageID>(id);
-  buf.fillInSize(mar(buf,t...));
+  buf.fillInSize(mar(buf,::std::forward<T>(t)...));
 }catch(...){buf.rollback();throw;}
 };
 

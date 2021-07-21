@@ -34,19 +34,19 @@ void Failure::operator<< (int i){
   *this<<b;
 }
 
+void winStart (){
+#ifdef CMW_WINDOWS
+  WSADATA w;
+  if(auto r=::WSAStartup(MAKEWORD(2,2),&w);0!=r)raise("WSAStartup",r);
+#endif
+}
+
 int getError (){
   return
 #ifdef CMW_WINDOWS
     WSAGetLastError();
 #else
     errno;
-#endif
-}
-
-void winStart (){
-#ifdef CMW_WINDOWS
-  WSADATA w;
-  if(auto r=::WSAStartup(MAKEWORD(2,2),&w);0!=r)raise("WSAStartup",r);
 #endif
 }
 
