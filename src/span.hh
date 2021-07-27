@@ -11,10 +11,10 @@ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4820.pdf
 #ifndef TCB_SPAN_HH
 #define TCB_SPAN_HH
 
-#include <array>
-#include <cstddef>
-#include <stdexcept>
-#include <type_traits>
+#include<array>
+#include<cstddef>
+#include<stdexcept>
+#include<type_traits>
 
 // Various feature test macros
 
@@ -406,8 +406,8 @@ constexpr span<T, N> make_span (std::array<T, N>& arr) noexcept
 }
 
 template <typename T, std::size_t N>
-constexpr span<const T, N>
-make_span (const std::array<T, N>& arr) noexcept
+constexpr span<T const, N>
+make_span (std::array<T, N> const& arr) noexcept
 {
     return {arr};
 }

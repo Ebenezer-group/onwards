@@ -82,7 +82,7 @@ struct cmwRequest{
 };
 #include"cmwA.mdl.hh"
 
-auto checkField (char const *fld,char const *actl){
+void checkField (char const *fld,char const *actl){
   if(::std::strcmp(fld,actl))bail("Expected %s",fld);
 }
 
@@ -116,7 +116,7 @@ void setup (int ac,char **av){
 }
 
 void login (){
-  back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
+  ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
   for(;;){
     cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
     if(0==::connect(cmwBuf.sock_,res().ai_addr,res().ai_addrlen))break;
@@ -128,12 +128,12 @@ void login (){
   while(!cmwBuf.flush());
   fds[0].fd=cmwBuf.sock_;
   fds[0].events=POLLIN;
-  ::sctp_paddrparams paddr{};
-  paddr.spp_address.ss_family=AF_INET;
-  paddr.spp_hbinterval=240000;
-  paddr.spp_flags=SPP_HB_ENABLE;
+  ::sctp_paddrparams pad{};
+  pad.spp_address.ss_family=AF_INET;
+  pad.spp_hbinterval=240000;
+  pad.spp_flags=SPP_HB_ENABLE;
   if(::setsockopt(fds[0].fd,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
-                  ,&paddr,sizeof paddr)==-1)bail("setsockopt",errno);
+                  ,&pad,sizeof pad)==-1)bail("setsockopt",errno);
   while(!cmwBuf.gotPacket());
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
   if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
@@ -153,7 +153,10 @@ void reset (char const *context,char const *detail=""){
 }
 
 bool sendData ()try{return cmwBuf.flush();}
-catch(::std::exception& e){reset("sendData",e.what());return true;}
+catch(::std::exception& e){
+  reset("sendData",e.what());
+  return true;
+}
 
 template<bool res,class...T>
 void outFront (Socky const& s,T...t){
