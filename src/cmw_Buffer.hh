@@ -361,7 +361,7 @@ class SendBuffer{
   void reset (){savedSize=index=0;}
   void rollback (){index=savedSize;}
 
-  void receiveFile (fileType,::int32_t sz);
+  void receiveFile (char const*,::int32_t sz);
   bool flush ();
 
   //UDP-friendly alternative to flush

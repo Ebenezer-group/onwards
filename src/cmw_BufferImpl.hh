@@ -258,10 +258,11 @@ void SendBuffer::fillInSize (::int32_t max){
   savedSize=index;
 }
 
-void SendBuffer::receiveFile (fileType d,::int32_t sz){
+void SendBuffer::receiveFile (char const* n,::int32_t sz){
   receive(sz);
   auto prev=reserveBytes(sz);
-  if(Read(d,buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
+  FileWrapper fl{n,O_RDONLY,0};
+  if(Read(fl.d,buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
 }
 
 bool SendBuffer::flush (){
