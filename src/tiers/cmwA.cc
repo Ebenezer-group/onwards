@@ -96,25 +96,6 @@ BufferCompressed<SameFormat> cmwBuf{1101000};
 BufferStack<SameFormat> frntBuf;
 }
 
-void setup (int ac,char **av){
-  ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
-  if(ac!=2)bail("Usage: cmwA config-file");
-  FileBuffer cfg{av[1],O_RDONLY};
-  char const *tok;
-  while((tok=cfg.getline(' '))&&!::std::strcmp("Account-number",tok)){
-    auto num=fromChars(cfg.getline());
-    checkField("Password",cfg.getline(' '));
-    accounts.emplace_back(num,cfg.getline());
-  }
-  if(accounts.empty())bail("An account number is required.");
-  checkField("UDP-port-number",tok);
-  fds[1].fd=frntBuf.sock_=udpServer(cfg.getline());
-  fds[1].events=POLLIN;
-
-  checkField("Login-interval-in-seconds",cfg.getline(' '));
-  loginPause=fromChars(cfg.getline());
-}
-
 void login (){
   ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
   for(;;){
@@ -166,7 +147,22 @@ void outFront (Socky const& s,T...t){
 }
 
 int main (int ac,char **av)try{
-  setup(ac,av);
+  ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
+  if(ac!=2)bail("Usage: cmwA config-file");
+  FileBuffer cfg{av[1],O_RDONLY};
+  char const *tok;
+  while((tok=cfg.getline(' '))&&!::std::strcmp("Account-number",tok)){
+    auto num=fromChars(cfg.getline());
+    checkField("Password",cfg.getline(' '));
+    accounts.emplace_back(num,cfg.getline());
+  }
+  if(accounts.empty())bail("An account number is required.");
+  checkField("UDP-port-number",tok);
+  fds[1].fd=frntBuf.sock_=udpServer(cfg.getline());
+  fds[1].events=POLLIN;
+
+  checkField("Login-interval-in-seconds",cfg.getline(' '));
+  loginPause=fromChars(cfg.getline());
   login();
 
   for(;;){
