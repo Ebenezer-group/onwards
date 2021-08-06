@@ -133,14 +133,14 @@ void reset (char const *context,char const *detail=""){
   login();
 }
 
-bool sendData ()try{return cmwBuf.flush();}
-catch(::std::exception& e){
+bool sendData ()try{return cmwBuf.flush();
+}catch(::std::exception& e){
   reset("sendData",e.what());
   return true;
 }
 
 template<bool res,class...T>
-void outFront (Socky const& s,T...t){
+void toFront (Socky const& s,T...t){
   frntBuf.reset();
   ::front::marshal<res>(frntBuf,{t...});
   frntBuf.send((::sockaddr*)&s.addr,s.len);
@@ -174,8 +174,8 @@ int main (int ac,char **av)try{
           auto it=::std::cbegin(pendingRequests);
           if(giveBool(cmwBuf)){
             getFile((*it)->getFileName(),cmwBuf);
-            outFront<true>((*it)->frnt);
-          }else outFront<false>((*it)->frnt,"CMW:",cmwBuf.giveStringView());
+            toFront<true>((*it)->frnt);
+          }else toFront<false>((*it)->frnt,"CMW:",cmwBuf.giveStringView());
           delete *it;
           pendingRequests.erase(it);
         }while(cmwBuf.nextMessage());
@@ -187,7 +187,7 @@ int main (int ac,char **av)try{
       ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
       auto it=::std::cbegin(pendingRequests);
-      outFront<false>((*it)->frnt,e.what());
+      toFront<false>((*it)->frnt,e.what());
       delete *it;
       pendingRequests.erase(it);
     }
@@ -206,7 +206,7 @@ int main (int ac,char **av)try{
         pendingRequests.push_back(req);
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
-        if(gotAddr)outFront<false>(frnt,e.what());
+        if(gotAddr)toFront<false>(frnt,e.what());
         delete req;
         continue;
       }

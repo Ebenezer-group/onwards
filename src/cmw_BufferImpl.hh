@@ -258,12 +258,14 @@ void SendBuffer::fillInSize (::int32_t max){
   savedSize=index;
 }
 
+#ifndef CMW_WINDOWS
 void SendBuffer::receiveFile (char const* n,::int32_t sz){
   receive(sz);
   auto prev=reserveBytes(sz);
   FileWrapper fl{n,O_RDONLY,0};
   if(Read(fl.d,buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
 }
+#endif
 
 bool SendBuffer::flush (){
   int const bytes=sockWrite(sock_,buf,index);
