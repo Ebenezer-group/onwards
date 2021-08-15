@@ -6,7 +6,7 @@
 #include<cassert>
 #include<ctime>
 #ifdef __linux__
-#include<linux/sctp.h>//sockaddr_in6,socklen_t
+#include<linux/sctp.h>
 #else
 #include<netinet/sctp.h>
 #endif
@@ -133,9 +133,9 @@ void reset (char const *context,char const *detail=""){
   login();
 }
 
-bool sendData ()try{return cmwBuf.flush();
+bool toBack ()try{return cmwBuf.flush();
 }catch(::std::exception& e){
-  reset("sendData",e.what());
+  reset("toBack",e.what());
   return true;
 }
 
@@ -192,7 +192,7 @@ int main (int ac,char **av)try{
       pendingRequests.erase(it);
     }
 
-    if(fds[0].revents&POLLOUT&&sendData())fds[0].events=POLLIN;
+    if(fds[0].revents&POLLOUT&&toBack())fds[0].events=POLLIN;
     if(fds[0].revents&POLLERR)reset("Lost contact");
 
     if(fds[1].revents&POLLIN){
@@ -210,7 +210,7 @@ int main (int ac,char **av)try{
         delete req;
         continue;
       }
-      if(!sendData())fds[0].events|=POLLOUT;
+      if(!toBack())fds[0].events|=POLLOUT;
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
