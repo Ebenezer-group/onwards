@@ -5,7 +5,11 @@
 #include<vector>
 #include<cassert>
 #include<ctime>
+#ifdef __linux__
+#include<linux/sctp.h>
+#else
 #include<netinet/sctp.h>
+#endif
 using namespace ::cmw;
 
 struct Socky{
