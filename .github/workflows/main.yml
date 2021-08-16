@@ -26,4 +26,5 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name:
-      run: make CXX=clang++
+      run: sudo apt-get -y libsctp-dev
+           make CXX=clang++
