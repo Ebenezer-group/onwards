@@ -1,7 +1,7 @@
 #include<cmw_BufferImpl.hh>
 #include"genz.mdl.hh"
-
 using namespace ::cmw;
+
 template<class...T>void leave (char const *fmt,T...t)noexcept{
   ::std::fprintf(stderr,fmt,t...);
   exitFailure();

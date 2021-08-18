@@ -1,11 +1,11 @@
 // This file contains implementations and should only
-// be included by one source file in a project.
+// be included by one source file per program.
 
 #ifndef CMW_BUFFERIMPL_HH
 #define CMW_BUFFERIMPL_HH
 #include<cmw_Buffer.hh>
 #include<quicklz.c>
-#include<charconv>//from_chars
+#include<charconv>
 #include<limits>
 #include<cstdio>//snprintf
 #include<cstdlib>//exit

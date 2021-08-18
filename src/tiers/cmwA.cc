@@ -5,7 +5,7 @@
 #include<vector>
 #include<cassert>
 #include<ctime>
-#include<netinet/sctp.h>
+#include<netinet/sctp.h>//May need libsctp-dev
 using namespace ::cmw;
 
 struct Socky{

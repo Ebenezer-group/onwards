@@ -39,11 +39,14 @@ struct Fiasco:Failure{explicit Fiasco (char const *s):Failure{s}{}};
 
 template<class E>void apps (E&){}
 template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
-  e<<t; apps(e,ts...);
+  e<<t;
+  apps(e,ts...);
 }
 
 template<class E=Failure,class...T>[[noreturn]]void raise (char const *s,T...t){
-  E e{s}; apps(e,t...); throw e;
+  E e{s};
+  apps(e,t...);
+  throw e;
 }
 
 int getError ();
@@ -221,16 +224,16 @@ struct MostSignificantFirst{
   }
 };
 
-template<class R> class ReceiveBuffer{
+template<class R>class ReceiveBuffer{
   int msgLength=0;
   int subTotal=0;
  protected:
-  int rindex=0;
-  int packetLength;
   char* const rbuf;
+  int packetLength;
+  int rindex=0;
 
  public:
-  ReceiveBuffer (char *addr,int bytes):packetLength{bytes},rbuf{addr}{}
+  ReceiveBuffer (char *addr,int bytes):rbuf{addr},packetLength{bytes}{}
 
   void checkLen (int n){
     if(n>msgLength-rindex)raise("ReceiveBuffer checkLen",n,msgLength,rindex);
