@@ -20,7 +20,6 @@
 #else
 #include<sys/socket.h>
 #include<sys/stat.h>//open
-#include<syslog.h>
 #endif
 
 struct pollfd;
@@ -83,8 +82,6 @@ class MarshallingInt{
 inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
 inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
 
-void exitFailure ();
-
 #ifdef CMW_WINDOWS
 using sockType=SOCKET;
 using fileType=HANDLE;
@@ -95,11 +92,6 @@ using sockType=int;
 using fileType=int;
 int Write (int,void const*,int);
 int Read (int,void*,int);
-
-template<class...T>void bail (char const *fmt,T... t)noexcept{
-  ::syslog(LOG_ERR,fmt,t...);
-  exitFailure();
-}
 
 struct FileWrapper{
   int const d=-2;
@@ -116,7 +108,7 @@ struct FileBuffer{
   char line[120];
   int ind=0;
   int bytes=0;
-  
+
   FileBuffer (char const* name,int flags):fl(name,flags,0){}
   char getc ();
   char* getline (char='\n');
@@ -229,11 +221,11 @@ template<class R>class ReceiveBuffer{
   int subTotal=0;
  protected:
   char* const rbuf;
-  int packetLength;
+  int packetLength=0;
   int rindex=0;
 
  public:
-  ReceiveBuffer (char *addr,int bytes):rbuf{addr},packetLength{bytes}{}
+  ReceiveBuffer (char *addr):rbuf{addr}{}
 
   void checkLen (int n){
     if(n>msgLength-rindex)raise("ReceiveBuffer checkLen",n,msgLength,rindex);
@@ -398,7 +390,7 @@ template<class R,int N=udpPacketMax>
 class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
   unsigned char ar[N];
  public:
-  BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>((char*)ar,0){}
+  BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>((char*)ar){}
   BufferStack (int s):BufferStack(){sock_=s;}
 
   bool getPacket (::sockaddr *addr=nullptr,::socklen_t *len=nullptr){
@@ -436,7 +428,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     return false;
   }
  public:
-  BufferCompressed (int sz,int):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz],0)
+  BufferCompressed (int sz,int):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz])
                      ,compSize(sz+(sz>>3)+400){}
 
   explicit BufferCompressed (int sz):BufferCompressed(sz,0){

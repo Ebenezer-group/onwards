@@ -19,6 +19,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<netdb.h>
 #include<poll.h>
 #include<sys/types.h>
+#include<syslog.h>
 #include<unistd.h>//chdir
 #endif
 
@@ -131,6 +132,11 @@ char* FileBuffer::getline (char delim){
   }
   line[idx]=0;
   return line;
+}
+
+template<class...T>void bail (char const *fmt,T... t)noexcept{
+  ::syslog(LOG_ERR,fmt,t...);
+  exitFailure();
 }
 #endif
 
@@ -292,4 +298,3 @@ void receive (SendBuffer& b,stringPlus lst){
 }
 }
 #endif
-
