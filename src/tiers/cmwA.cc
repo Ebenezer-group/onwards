@@ -82,15 +82,11 @@ void checkField (char const *fld,char const *actl){
   if(::std::strcmp(fld,actl))bail("Expected %s",fld);
 }
 
-namespace{
 GetaddrinfoWrapper res("75.23.62.38","56789",SOCK_STREAM);
 ::pollfd fds[2];
 int loginPause;
 ::std::vector<cmwAccount> accounts;
-::std::vector<cmwRequest*> pendingRequests;
 BufferCompressed<SameFormat> cmwBuf{1101000};
-BufferStack<SameFormat> frntBuf;
-}
 
 void login (){
   ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
@@ -115,6 +111,9 @@ void login (){
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
   if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
 }
+
+::std::vector<cmwRequest*> pendingRequests;
+BufferStack<SameFormat> frntBuf;
 
 void reset (char const *context,char const *detail=""){
   ::syslog(LOG_ERR,"%s:%s",context,detail);

@@ -24,7 +24,7 @@ The middle tier isn't built on Windows.  The middle tier is
 still needed for Windows users so it has to be running on a
 \*nix system.
 
-A compiler with 2017 C++ support is required to use the CMW.
+A compiler with 2017 C++ or newer is required to use the CMW.
 
 #### Accounts
 An account is needed to use the CMW.  Before running the
@@ -71,9 +71,9 @@ between the back and middle tiers.  We may have changed the
 protocol between these tiers and now your version of the
 middle tier no longer works.  The thing to do in this case
 is to check our website for an announcement/email that you
-may have missed.  Probably you will have to clone/download
-the new version of the repo and then rebuild and reinstall
-in order to fix the problem.
+may have missed.  Probably you will have to clone the new
+version of the repo and then rebuild and reinstall in order
+to fix the problem.
 
 If you have only moved/renamed header files listed in your
 .mdl files, you will need to touch those files (update
