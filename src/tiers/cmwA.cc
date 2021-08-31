@@ -82,7 +82,7 @@ void checkField (char const *fld,char const *actl){
   if(::std::strcmp(fld,actl))bail("Expected %s",fld);
 }
 
-GetaddrinfoWrapper res("75.23.62.38","56789",SOCK_STREAM);
+GetaddrinfoWrapper gai("75.23.62.38","56789",SOCK_STREAM);
 ::pollfd fds[2];
 int loginPause;
 ::std::vector<cmwAccount> accounts;
@@ -92,7 +92,7 @@ void login (){
   ::back::marshal<messageID::login>(cmwBuf,accounts,cmwBuf.getSize());
   for(;;){
     cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-    if(0==::connect(cmwBuf.sock_,res().ai_addr,res().ai_addrlen))break;
+    if(0==::connect(cmwBuf.sock_,gai().ai_addr,gai().ai_addrlen))break;
     ::std::printf("connect %d\n",errno);
     ::close(cmwBuf.sock_);
     ::sleep(loginPause);
