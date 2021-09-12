@@ -1,8 +1,6 @@
 
-/*
-This is an implementation of C++20's std::span
-http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4820.pdf
-*/
+// This is an implementation of C++20's std::span
+// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4820.pdf
 
 //          Copyright Tristan Brindle 2018.
 // Distributed under the Boost Software License, Version 1.0.
@@ -25,27 +23,27 @@ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4820.pdf
 namespace TCB_SPAN_NAMESPACE_NAME {
 
 // Establish default contract checking behavior
-#if !defined(TCB_SPAN_THROW_ON_CONTRACT_VIOLATION) &&             \
-    !defined(TCB_SPAN_TERMINATE_ON_CONTRACT_VIOLATION) &&         \
+#if !defined(TCB_SPAN_THROW_ON_CONTRACT_VIOLATION) &&      \
+    !defined(TCB_SPAN_TERMINATE_ON_CONTRACT_VIOLATION) &&  \
     !defined(TCB_SPAN_NO_CONTRACT_CHECKING)
 #define TCB_SPAN_NO_CONTRACT_CHECKING
 #endif
 
 #if defined(TCB_SPAN_THROW_ON_CONTRACT_VIOLATION)
-struct contract_violation_error : std::logic_error {
-    explicit contract_violation_error(char const* msg) : std::logic_error(msg)
+struct contract_violation_error : ::std::logic_error{
+    explicit contract_violation_error (char const* msg): ::std::logic_error(msg)
     {}
 };
 
-inline void contract_violation(char const* msg)
+inline void contract_violation (char const* msg)
 {
     throw contract_violation_error(msg);
 }
 
 #elif defined(TCB_SPAN_TERMINATE_ON_CONTRACT_VIOLATION)
-[[noreturn]] inline void contract_violation(char const* /*unused*/)
+[[noreturn]] inline void contract_violation (char const* /*unused*/)
 {
-    std::terminate();
+    ::std::terminate();
 }
 #endif
 
@@ -57,17 +55,17 @@ inline void contract_violation(char const* msg)
 #define TCB_SPAN_EXPECT(cond)
 #endif
 
-using byte = std::byte;
+using byte = ::std::byte;
 
 
-inline constexpr std::size_t dynamic_extent = SIZE_MAX;
+inline constexpr ::std::size_t dynamic_extent = SIZE_MAX;
 
 template <typename ElementType, std::size_t Extent = dynamic_extent>
 class span;
 
 namespace detail {
 
-template <typename E, std::size_t S>
+template<typename E, ::std::size_t S>
 struct span_storage {
     constexpr span_storage () = default;
 

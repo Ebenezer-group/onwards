@@ -38,7 +38,7 @@ file accordingly.
 
 #### Running the cmwA (after installing)
 
-cmwA cmwA.cfg
+nohup cmwA cmwA.cfg
 
 After starting the cmwA, run genz like this:
 
