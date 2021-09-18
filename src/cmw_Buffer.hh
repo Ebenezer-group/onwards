@@ -298,11 +298,6 @@ template<class R>class ReceiveBuffer{
     return s;
   }
 
-  template<class T>void giveIlist (T& lst){
-    for(int c=give<::uint32_t>();c>0;--c)
-      lst.push_back(*T::value_type::buildPolyInstance(*this));
-  }
-
   template<class T>void giveRbtree (T& rbt){
     auto endIt=rbt.end();
     for(int c=give<::uint32_t>();c>0;--c)
