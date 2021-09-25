@@ -3,11 +3,7 @@
 #include<quicklz.h>
 #include<exception>
 #include<initializer_list>
-#if __cplusplus>201703L
 #include<span>
-#else
-#include<span.hh>
-#endif
 #include<string>
 #include<string_view>
 #include<type_traits>

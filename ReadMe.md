@@ -24,7 +24,7 @@ The middle tier isn't built on Windows.  The middle tier is
 still needed for Windows users so it has to be running on a
 \*nix system.
 
-A compiler with 2017 C++ or newer is required to use the CMW.
+A compiler with 2020 C++ or newer is required to use the CMW.
 
 #### Accounts
 An account is needed to use the CMW.  Before running the
