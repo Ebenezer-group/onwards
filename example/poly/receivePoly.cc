@@ -5,15 +5,15 @@
 #include<iostream>
 
 int main ()try{
-  ::cmw::BufferStack<SameFormat> buffer(udpServer("13579"));
+  ::cmw::BufferStack<::cmw::SameFormat> buffer(::cmw::udpServer("13579"));
 
   for(;;){
     buffer.getPacket();
     ::boost::base_collection<base> b;
     testing::give(buffer,b);
     ::std::cout<<"size is "<<b.size()<<::std::endl;
-    ::std::cout<<"size of der1is "<<b.size<derived1>()<<::std::endl;
-    ::std::cout<<"size of der3is "<<b.size<derived3>()<<::std::endl;
+    ::std::cout<<"number of der1 is "<<b.size<derived1>()<<::std::endl;
+    ::std::cout<<"number of der3 is "<<b.size<derived3>()<<::std::endl;
   }
   return 1;
 }catch(std::exception const& ex){
