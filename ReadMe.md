@@ -5,6 +5,8 @@ support for messaging and serialization.  Here's an example
 of the [input](https://github.com/Ebenezer-group/onwards/blob/master/example/example.mdl)
 and [output](https://github.com/Ebenezer-group/onwards/blob/master/example/example.mdl.hh).
 
+A compiler with 2020 C++ or newer is required to use the CMW.
+
 #### License
 The software is under the BSD license.  Two of the files,
 quicklz.h and quicklz.c, are from another developer and
@@ -24,8 +26,6 @@ The middle tier isn't built on Windows.  The middle tier is
 still needed for Windows users so it has to be running on a
 \*nix system.
 
-A compiler with 2020 C++ or newer is required to use the CMW.
-
 #### Accounts
 An account is needed to use the CMW.  Before running the
 middle tier, you have to get an account and modify your
@@ -43,10 +43,6 @@ nohup cmwA cmwA.cfg
 After starting the cmwA, run genz like this:
 
 genz 14 /home/brian/onwards/example/example.mdl
-
-or on Windows:
-
-genz.exe 14 /Users/brian/onwards/example/example.mdl
 
 14 is an account number.  Substitute your account number there.
 
@@ -66,7 +62,7 @@ The middle tier has to be running for the front tier to work.
 If genz fails with "No reply received.  Is the cmwA running?"
 make sure the middle tier is running.
 
-Another possible problem could be due to "breaking changes"
+Another possible problem could be due to a "breaking change"
 between the back and middle tiers.  We may have changed the
 protocol between these tiers and now your version of the
 middle tier no longer works.  The thing to do in this case
