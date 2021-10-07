@@ -92,7 +92,7 @@ int Write (int,void const*,int);
 int Read (int,void*,int);
 
 struct FileWrapper{
-  int const d=-2;
+  int d=-2;
   FileWrapper (){}
   FileWrapper (char const*,int flags,mode_t);
   FileWrapper (char const*,mode_t);
