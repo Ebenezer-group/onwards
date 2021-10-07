@@ -70,7 +70,7 @@ class MarshallingInt{
     }
   }
 
-  MarshallingInt (MarshallingInt& o):val{o.val}{}
+  MarshallingInt (MarshallingInt const& o):val{o.val}{}
 
   void operator= (::int32_t r){val=r;}
   void operator+= (::int32_t r){val+=r;}
@@ -511,7 +511,7 @@ template<int N>class FixedString{
     str[len()]=0;
   }
 
-  FixedString (FixedString& o):len(o.len()){
+  FixedString (FixedString const& o):len(o.len()){
     ::std::memcpy(str,o.str,len());
     str[len()]=0;
   }
