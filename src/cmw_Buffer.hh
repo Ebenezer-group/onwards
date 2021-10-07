@@ -70,6 +70,8 @@ class MarshallingInt{
     }
   }
 
+  MarshallingInt (MarshallingInt& o):val{o.val}{}
+
   void operator= (::int32_t r){val=r;}
   void operator+= (::int32_t r){val+=r;}
   auto operator() ()const{return val;}
@@ -95,6 +97,7 @@ struct FileWrapper{
   FileWrapper (char const*,int flags,mode_t);
   FileWrapper (char const*,mode_t);
   FileWrapper (FileWrapper&)=delete;
+  FileWrapper (FileWrapper&&);
   ~FileWrapper ();
 };
 
@@ -505,6 +508,11 @@ template<int N>class FixedString{
   template<class R>explicit FixedString (ReceiveBuffer<R>& b):len(b){
     if(len()>=N)raise("FixedString stream ctor");
     b.give(str,len());
+    str[len()]=0;
+  }
+
+  FixedString (FixedString& o):len(o.len()){
+    ::std::memcpy(str,o.str,len());
     str[len()]=0;
   }
 
