@@ -70,7 +70,7 @@ class MarshallingInt{
     }
   }
 
-  MarshallingInt (MarshallingInt const& o):val{o.val}{}
+  MarshallingInt (MarshallingInt const&)=default;
 
   void operator= (::int32_t r){val=r;}
   void operator+= (::int32_t r){val+=r;}
