@@ -98,6 +98,7 @@ struct FileWrapper{
   FileWrapper (char const*,mode_t);
   FileWrapper (FileWrapper&)=delete;
   FileWrapper (FileWrapper&&);
+  FileWrapper& operator= (FileWrapper&&);
   ~FileWrapper ();
 };
 
