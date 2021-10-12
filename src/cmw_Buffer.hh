@@ -97,8 +97,8 @@ struct FileWrapper{
   FileWrapper (char const*,int flags,mode_t);
   FileWrapper (char const*,mode_t);
   FileWrapper (FileWrapper&)=delete;
-  FileWrapper (FileWrapper&&);
-  FileWrapper& operator= (FileWrapper&&);
+  FileWrapper (FileWrapper&&)noexcept;
+  FileWrapper& operator= (FileWrapper&&)noexcept;
   ~FileWrapper ();
 };
 
