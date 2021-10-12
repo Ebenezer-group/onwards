@@ -114,9 +114,9 @@ FileWrapper::FileWrapper (char const *name,int flags,mode_t mode):
 FileWrapper::FileWrapper (char const *name,mode_t mode):
         FileWrapper(name,O_CREAT|O_WRONLY|O_TRUNC,mode){}
 
-FileWrapper::FileWrapper (FileWrapper&& o):d{o.d}{o.d=-2;}
+FileWrapper::FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
 
-FileWrapper& FileWrapper::operator= (FileWrapper&& o){
+FileWrapper& FileWrapper::operator= (FileWrapper&& o)noexcept{
   d=o.d;
   o.d=-2;
   return *this;
