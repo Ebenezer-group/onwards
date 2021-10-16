@@ -14,9 +14,7 @@ should only be used in conjunction with the CMW.
 
 #### Building
 If you are on \*nix, you can use either Make or CMake.
-On Windows, I suggest using CMake.  If you're using a
-big-endian machine, add -DCMW_ENDIAN_BIG to the CXXFLAGS
-in the makefile.
+On Windows, CMake is the only option.
 
 Four programs are built.  Two of the programs are the middle
 and front tiers of the C++ Middleware Writer.  The middle tier

@@ -9,6 +9,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 else()
     message(FATAL_ERROR "Unsupported compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
+
 add_executable(genz src/tiers/front/genz.cc)
 add_executable(sendExample example/sendExample.cc)
 add_executable(receiveExample example/receiveExample.cc)
