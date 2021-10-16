@@ -53,7 +53,7 @@ template<class>class ReceiveBuffer;
 class MarshallingInt{
   ::int32_t val;
  public:
-  MarshallingInt (){}
+  MarshallingInt ()=default;
   explicit MarshallingInt (::int32_t v):val{v}{}
   explicit MarshallingInt (::std::string_view v):val{fromChars(v)}{}
 
@@ -92,8 +92,8 @@ int Write (int,void const*,int);
 int Read (int,void*,int);
 
 struct FileWrapper{
-  int d=-2;
-  FileWrapper (){}
+  int d;
+  FileWrapper ():d{-2}{}
   FileWrapper (char const*,int flags,mode_t);
   FileWrapper (char const*,mode_t);
   FileWrapper (FileWrapper&)=delete;
@@ -498,7 +498,7 @@ template<int N>class FixedString{
   char str[N];
 
  public:
-  FixedString (){}
+  FixedString ()=default;
 
   explicit FixedString (::std::string_view s):len(s.size()){
     if(len()>=N)raise("FixedString ctor");
