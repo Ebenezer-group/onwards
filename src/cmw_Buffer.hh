@@ -225,7 +225,7 @@ template<class R>class ReceiveBuffer{
   int rindex=0;
 
  public:
-  ReceiveBuffer (char *addr):rbuf{addr}{}
+  explicit ReceiveBuffer (char *addr):rbuf{addr}{}
 
   void checkLen (int n){
     if(n>msgLength-rindex)raise("ReceiveBuffer checkLen",n,msgLength,rindex);
@@ -386,7 +386,7 @@ class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
   unsigned char ar[N];
  public:
   BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>((char*)ar){}
-  BufferStack (int s):BufferStack(){sock_=s;}
+  explicit BufferStack (int s):BufferStack(){sock_=s;}
 
   bool getPacket (::sockaddr *addr=nullptr,::socklen_t *len=nullptr){
     this->packetLength=sockRead(sock_,ar,N,addr,len);
