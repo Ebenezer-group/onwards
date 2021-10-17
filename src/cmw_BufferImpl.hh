@@ -126,7 +126,7 @@ FileWrapper::~FileWrapper (){::close(d);}
 
 char FileBuffer::getc (){
   if(ind>=bytes){
-    bytes=Read(fl.d,buf,sizeof buf);
+    bytes=Read(fl(),buf,sizeof buf);
     ind=0;
   }
   return buf[ind++];
@@ -277,7 +277,7 @@ void SendBuffer::receiveFile (char const* n,::int32_t sz){
   receive(sz);
   auto prev=reserveBytes(sz);
   FileWrapper fl{n,O_RDONLY,0};
-  if(Read(fl.d,buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
+  if(Read(fl(),buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
 }
 #endif
 

@@ -48,7 +48,7 @@ struct cmwRequest{
     char last[60];
     ::std::snprintf(last,sizeof last,".%s.last",mdlFile);
     ::new(&fl)FileWrapper(last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP);
-    switch(::pread(fl.d,&prevTime,sizeof prevTime,0)){
+    switch(::pread(fl(),&prevTime,sizeof prevTime,0)){
       case 0:prevTime=0;break;
       case -1:raise("pread",errno);
     }
@@ -71,7 +71,7 @@ struct cmwRequest{
   }
 
   auto getFileName (){
-    Write(fl.d,&bday,sizeof bday);
+    Write(fl(),&bday,sizeof bday);
     path.append(".hh");
     return path.data();
   }

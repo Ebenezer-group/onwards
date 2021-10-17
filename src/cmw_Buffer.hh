@@ -91,14 +91,16 @@ using fileType=int;
 int Write (int,void const*,int);
 int Read (int,void*,int);
 
-struct FileWrapper{
+class FileWrapper{
   int d;
+ public:
   FileWrapper ():d{-2}{}
   FileWrapper (char const*,int flags,mode_t);
   FileWrapper (char const*,mode_t);
-  FileWrapper (FileWrapper&)=delete;
+  FileWrapper (FileWrapper const&)=delete;
   FileWrapper (FileWrapper&&)noexcept;
   FileWrapper& operator= (FileWrapper&&)noexcept;
+  auto operator() (){return d;}
   ~FileWrapper ();
 };
 
@@ -115,7 +117,7 @@ struct FileBuffer{
 };
 
 auto getFile =[](char const *n,auto& b){
-  b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}.d);
+  b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}());
 };
 
 class File{
@@ -317,7 +319,7 @@ template<class R>bool giveBool (ReceiveBuffer<R>& b){
 }
 
 class SendBuffer{
-  SendBuffer (SendBuffer&)=delete;
+  SendBuffer (SendBuffer const&)=delete;
   SendBuffer& operator= (SendBuffer);
   ::int32_t savedSize=0;
  protected:
