@@ -30,7 +30,9 @@ class Failure:public ::std::exception{
   char const* what ()const noexcept{return s.data();}
 };
 
-struct Fiasco:Failure{explicit Fiasco (char const *s):Failure{s}{}};
+struct Fiasco:Failure{
+  explicit Fiasco (char const *s):Failure{s}{}
+};
 
 template<class E>void apps (E&){}
 template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
