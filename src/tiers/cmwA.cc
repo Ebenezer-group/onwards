@@ -2,6 +2,7 @@
 #include"account.hh"
 #include"messageIDs.hh"
 
+#include<deque>
 #include<vector>
 #include<cassert>
 #include<ctime>
@@ -112,7 +113,7 @@ void login (){
   if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
 }
 
-::std::vector<cmwRequest> pendingRequests;
+::std::deque<cmwRequest> pendingRequests;
 BufferStack<SameFormat> frntBuf;
 
 void reset (char const *context,char const *detail=""){
