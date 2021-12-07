@@ -38,12 +38,12 @@ int main ()try{
 
       case messageID::id3:
       {
-        ::std::array<::std::array<float,2>,3> a;
+        ::std::array<float,6> a;
 	exampleMessages::give(buf,a);
-        for(auto subarray:a){
-          for(auto v:subarray){::std::cout<<v<<' ';}
-          ::std::cout<<'\n';
-        }
+        for(auto v:a){
+	  ::std::cout<<v<<' ';
+	}
+        ::std::cout<<'\n';
       }
       break;
 

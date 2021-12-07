@@ -38,14 +38,14 @@ template<class R>static void give (::cmw::ReceiveBuffer<R>& buf
 }
 
 static ::int32_t mar (::cmw::SendBuffer& buf
-         ,::std::array<::std::array<float, 2>, 3> const& a){
+         ,::std::array<float,6> const& a){
   buf.receive(&a,sizeof a);
   return 10000;
 }
 
 template<class R>static void give (::cmw::ReceiveBuffer<R>& buf
-         ,::std::array<::std::array<float, 2>, 3>& a){
-  buf.giveBlock(&a[0][0],sizeof a/sizeof(float));
+         ,::std::array<float,6>& a){
+  buf.giveBlock(&a[0],sizeof a/sizeof(float));
 }
 
 template<messageID id,class...T>

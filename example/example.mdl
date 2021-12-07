@@ -3,5 +3,5 @@ opaque.hh
 exampleMessages <messageID_t=messageID>
   -out -in (::std::vector<::int32_t>,::std::string)
   -out -in (::std::set<::int32_t>)
-  -out -in (::std::array<::std::array<float,2>, 3>)
+  -out -in (::std::array<float,6>)
 }
