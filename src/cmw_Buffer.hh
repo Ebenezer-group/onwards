@@ -118,9 +118,7 @@ struct FileBuffer{
   char* getline (char='\n');
 };
 
-auto getFile =[](char const *n,auto& b){
-  b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}());
-};
+void getFile (char const *,auto&);
 
 class File{
   char const *nam;
