@@ -170,51 +170,50 @@ int sockWrite (sockType,void const *data,int len
 int sockRead (sockType,void *data,int len,::sockaddr*,::socklen_t*);
 
 struct SameFormat{
-  template<class B,class U>static void read (B& b,U& data)
-  {b.give(&data,sizeof(U));}
+  static void read (auto& b,auto& data){b.give(&data,sizeof(data));}
 
-  template<class B,class U>static void readBlock (B& b,U *data,int elements)
-  {b.give(data,elements*sizeof(U));}
+  static void readBlock (auto& b,auto data,int elements)
+  {b.give(data,elements*sizeof(*data));}
 };
 
 struct LeastSignificantFirst{
-  template<class B,class U>static void read (B& b,U& val)
-  {for(auto c=0;c<sizeof(U);++c)val|=b.giveOne()<<8*c;}
+  static void read (auto& b,auto& val)
+  {for(auto c=0;c<sizeof(val);++c)val|=b.giveOne()<<8*c;}
 
-  template<class B>static void read (B& b,float& f){
+  static void read (auto& b,float& f){
     ::uint32_t tmp;
     read(b,tmp);
     ::std::memcpy(&f,&tmp,sizeof f);
   }
 
-  template<class B>static void read (B& b,double& d){
+  static void read (auto& b,double& d){
     ::uint64_t tmp;
     read(b,tmp);
     ::std::memcpy(&d,&tmp,sizeof d);
   }
 
-  template<class B,class U>static void readBlock (B& b,U *data,int elements){
+  static void readBlock (auto& b,auto data,int elements){
     for(;elements>0;--elements){read(b,*data++);}
   }
 };
 
 struct MostSignificantFirst{
-  template<class B,class U>static void read (B& b,U& val)
-  {for(auto c=sizeof(U);c>0;--c)val|=b.giveOne()<<8*(c-1);}
+  static void read (auto& b,auto& val)
+  {for(auto c=sizeof(val);c>0;--c)val|=b.giveOne()<<8*(c-1);}
 
-  template<class B>static void read (B& b,float& f){
+  static void read (auto& b,float& f){
     ::uint32_t tmp;
     read(b,tmp);
     ::std::memcpy(&f,&tmp,sizeof f);
   }
 
-  template<class B> static void read (B& b,double& d){
+  static void read (auto& b,double& d){
     ::uint64_t tmp;
     read(b,tmp);
     ::std::memcpy(&d,&tmp,sizeof d);
   }
 
-  template<class B,class U>static void readBlock (B& b,U *data,int elements){
+  static void readBlock (auto& b,auto data,int elements){
     for(;elements>0;--elements){read(b,*data++);}
   }
 };
