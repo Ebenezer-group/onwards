@@ -135,9 +135,9 @@ class File{
 };
 #endif
 
-auto setsockWrapper =[](sockType s,int opt,auto t){
+auto setsockWrapper (sockType s,int opt,auto t){
   return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
-};
+}
 
 void setRcvTimeout (sockType,int);
 int setNonblocking (sockType);
