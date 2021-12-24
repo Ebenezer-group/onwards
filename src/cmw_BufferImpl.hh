@@ -124,10 +124,6 @@ FileWrapper& FileWrapper::operator= (FileWrapper&& o)noexcept{
 
 FileWrapper::~FileWrapper (){::close(d);}
 
-void getFile (char const *n,auto& b){
-  b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}());
-}
-
 char FileBuffer::getc (){
   if(ind>=bytes){
     bytes=Read(fl(),buf,sizeof buf);

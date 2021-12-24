@@ -118,15 +118,16 @@ struct FileBuffer{
   char* getline (char='\n');
 };
 
-void getFile (char const *,auto&);
+void getFile (char const *n,auto& b){
+  b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}());
+}
 
 class File{
   char const *nam;
  public:
   explicit File (char const *n):nam{n}{}
 
-  template<class R>
-  explicit File (ReceiveBuffer<R>& b):nam{b.giveStringView().data()}{
+  explicit File (ReceiveBuffer<auto>& b):nam{b.giveStringView().data()}{
     getFile(nam,b);
   }
 
