@@ -142,7 +142,7 @@ char* FileBuffer::getline (char delim){
   return line;
 }
 
-template<class...T>void bail (char const *fmt,T... t)noexcept{
+void bail (char const *fmt,auto... t)noexcept{
   ::syslog(LOG_ERR,fmt,t...);
   exitFailure();
 }

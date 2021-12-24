@@ -2,7 +2,7 @@
 #include"genz.mdl.hh"
 using namespace ::cmw;
 
-template<class...T>void leave (char const *fmt,T...t)noexcept{
+void leave (char const *fmt,auto...t)noexcept{
   ::std::fprintf(stderr,fmt,t...);
   exitFailure();
 }

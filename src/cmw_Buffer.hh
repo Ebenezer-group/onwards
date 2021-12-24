@@ -34,13 +34,13 @@ struct Fiasco:Failure{
   explicit Fiasco (char const *s):Failure{s}{}
 };
 
-template<class E>void apps (E&){}
-template<class E,class T,class...Ts>void apps (E& e,T t,Ts...ts){
+void apps (auto&){}
+void apps (auto& e,auto t,auto...ts){
   e<<t;
   apps(e,ts...);
 }
 
-template<class E=Failure,class...T>[[noreturn]]void raise (char const *s,T...t){
+template<class E=Failure>[[noreturn]]void raise (char const *s,auto...t){
   E e{s};
   apps(e,t...);
   throw e;
