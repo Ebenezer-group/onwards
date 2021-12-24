@@ -311,7 +311,7 @@ template<class R>class ReceiveBuffer{
 template<class T,class R>T give (ReceiveBuffer<R>& b)
 {return b.template give<T>();}
 
-template<class R>bool giveBool (ReceiveBuffer<R>& b){
+bool giveBool (auto& b){
   switch(b.giveOne()){
     case 0:return false;
     case 1:return true;
@@ -509,7 +509,7 @@ template<int N>class FixedString{
     str[len()]=0;
   }
 
-  template<class R>explicit FixedString (ReceiveBuffer<R>& b):len(b){
+  explicit FixedString (auto& b):len(b){
     if(len()>=N)raise("FixedString stream ctor");
     b.give(str,len());
     str[len()]=0;
