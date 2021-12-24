@@ -22,7 +22,7 @@ static void give (auto& buf
 
 static ::int32_t mar (auto& buf
          ,::std::set<::int32_t> const& a){
-  buf.receive<int32_t>(a.size());
+  buf.template receive<int32_t>(a.size());
   for(auto const& e1:a){
     buf.receive(e1);
   }
