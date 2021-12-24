@@ -307,8 +307,7 @@ template<class R>class ReceiveBuffer{
   }
 };
 
-template<class T,class R>T give (ReceiveBuffer<R>& b)
-{return b.template give<T>();}
+template<class T>T give (auto& b){return b.template give<T>();}
 
 bool giveBool (auto& b){
   switch(b.giveOne()){
@@ -363,7 +362,7 @@ class SendBuffer{
   unsigned char* data (){return buf;}
   int getIndex (){return index;}
   int getSize (){return bufsize;}
-  template<class...T>void receiveMulti (char const*,T...);
+  void receiveMulti (char const*,auto...);
 };
 
 void receiveBool (SendBuffer&,bool);
