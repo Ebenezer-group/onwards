@@ -8,7 +8,7 @@ cmwAccount::marshalMembers (::cmw::SendBuffer& buf)const{
 }
 
 struct back{
-static ::int32_t mar (::cmw::SendBuffer& buf
+static ::int32_t mar (auto& buf
          ,::std::vector<cmwAccount> const& a
          ,::int32_t b){
   receiveBlock(buf,a);
@@ -16,7 +16,7 @@ static ::int32_t mar (::cmw::SendBuffer& buf
   return 10000;
 }
 
-static ::int32_t mar (::cmw::SendBuffer& buf
+static ::int32_t mar (auto& buf
          ,cmwRequest const& a){
   a.marshal(buf);
   return 700000;
@@ -32,7 +32,7 @@ static void marshal (::cmw::SendBuffer& buf,T&&...t)try{
 
 struct front{
 template<bool res>
-static void marshal (::cmw::SendBuffer& buf
+static void marshal (auto& buf
          ,::cmw::stringPlus const& a={}
          ,::int8_t b={})try{
   buf.reserveBytes(4);

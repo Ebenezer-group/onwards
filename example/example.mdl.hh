@@ -2,7 +2,7 @@
 #ifndef example_mdl_hh
 #define example_mdl_hh
 struct exampleMessages{
-static ::int32_t mar (::cmw::SendBuffer& buf
+static ::int32_t mar (auto& buf
          ,::std::vector<::int32_t> const& a
          ,::std::string const& b){
   receiveBlock(buf,a);
@@ -10,7 +10,7 @@ static ::int32_t mar (::cmw::SendBuffer& buf
   return 10000;
 }
 
-template<class R>static void give (::cmw::ReceiveBuffer<R>& buf
+static void give (auto& buf
          ,::std::vector<::int32_t>& a
          ,::std::string& b){
   if(int32_t ca=::cmw::give<uint32_t>(buf);ca>0){
@@ -20,7 +20,7 @@ template<class R>static void give (::cmw::ReceiveBuffer<R>& buf
   b=buf.giveStringView();
 }
 
-static ::int32_t mar (::cmw::SendBuffer& buf
+static ::int32_t mar (auto& buf
          ,::std::set<::int32_t> const& a){
   buf.receive<int32_t>(a.size());
   for(auto const& e1:a){
@@ -29,7 +29,7 @@ static ::int32_t mar (::cmw::SendBuffer& buf
   return 10000;
 }
 
-template<class R>static void give (::cmw::ReceiveBuffer<R>& buf
+static void give (auto& buf
          ,::std::set<::int32_t>& a){
   auto z3=a.end();
   for(int32_t ca=::cmw::give<uint32_t>(buf);ca>0;--ca){
@@ -37,13 +37,13 @@ template<class R>static void give (::cmw::ReceiveBuffer<R>& buf
   }
 }
 
-static ::int32_t mar (::cmw::SendBuffer& buf
+static ::int32_t mar (auto& buf
          ,::std::array<float,6> const& a){
   buf.receive(&a,sizeof a);
   return 10000;
 }
 
-template<class R>static void give (::cmw::ReceiveBuffer<R>& buf
+static void give (auto& buf
          ,::std::array<float,6>& a){
   buf.giveBlock(&a[0],sizeof a/sizeof(float));
 }

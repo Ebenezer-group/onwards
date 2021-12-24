@@ -2,7 +2,7 @@
 #ifndef genz_mdl_hh
 #define genz_mdl_hh
 struct middle{
-static void marshal (::cmw::SendBuffer& buf
+static void marshal (auto& buf
          ,::cmw::MarshallingInt const& a
          ,char const* b)try{
   buf.reserveBytes(4);
