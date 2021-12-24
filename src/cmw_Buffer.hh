@@ -127,7 +127,8 @@ class File{
  public:
   explicit File (char const *n):nam{n}{}
 
-  explicit File (ReceiveBuffer<auto>& b):nam{b.giveStringView().data()}{
+  template<class R>
+  explicit File (ReceiveBuffer<R>& b):nam{b.giveStringView().data()}{
     getFile(nam,b);
   }
 
