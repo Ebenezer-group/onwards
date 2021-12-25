@@ -501,7 +501,8 @@ template<int N>class FixedString{
     str[len()]=0;
   }
 
-  explicit FixedString (auto& b):len(b){
+  template<class R>
+  explicit FixedString (ReceiveBuffer<R>& b):len(b){
     if(len()>=N)raise("FixedString stream ctor");
     b.give(str,len());
     str[len()]=0;

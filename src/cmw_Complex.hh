@@ -12,7 +12,7 @@ void complexMarshal (auto& buf,auto const& c){
 template<class T>
 auto complexGive (auto& buf){
   //The following has an order of evaluation problem:
-  //return ::std::complex<T>(give<T>(buf),give<T>(buf));
+  //::std::complex<T>(give<T>(buf),give<T>(buf));
   T rl=give<T>(buf);
   return ::std::complex<T>(rl,give<T>(buf));
 }
@@ -54,18 +54,16 @@ void buildCollection (auto& c,auto& buf,auto f){
 
 #ifdef CMW_VALARRAY_MARSHALLING
 #include<valarray>
-template<class B, class T>
-void valarrayMarshal (B& buf,::std::valarray<T> const& va){
-  int32_t count=va.size();
+void valarrayMarshal (auto& buf,auto const& varray){
+  int32_t count=varray.size();
   buf.receive(count);
-  buf->receive(&va[0],count*sizeof(T));
+  buf->receive(&varray[0],count*sizeof(T));
 }
 
-template<class B,class T>
-void valarrayReceive (B& buf,::std::valarray<T>& va){
+void valarrayGive (auto& buf,auto& varray){
   int32_t count=give<uint32_t>(buf);
-  va.resize(count);
-  buf.give(&va,count*sizeof(T));
+  varray.resize(count);
+  buf.give(&varray,count*sizeof(T));
 }
 #endif
 }
