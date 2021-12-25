@@ -299,12 +299,6 @@ template<class R>class ReceiveBuffer{
     rindex+=len();
     return s;
   }
-
-  template<class T>void giveRbtree (T& rbt){
-    auto it=rbt.end();
-    for(int c=give<::uint32_t>();c>0;--c)
-      rbt.insert_unique(it,*T::value_type::buildPolyInstance(*this));
-  }
 };
 
 template<class T>T give (auto& b){return b.template give<T>();}

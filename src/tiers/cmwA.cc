@@ -134,8 +134,8 @@ bool toBack ()try{return cmwBuf.flush();
   return true;
 }
 
-template<bool res,class...T>
-void toFront (Socky const& s,T...t){
+template<bool res>
+void toFront (Socky const& s,auto...t){
   frntBuf.reset();
   ::front::marshal<res>(frntBuf,{t...});
   frntBuf.send((::sockaddr*)&s.addr,s.len);
