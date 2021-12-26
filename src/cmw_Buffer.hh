@@ -176,10 +176,7 @@ struct SameFormat{
   {b.give(data,elements*sizeof(*data));}
 };
 
-struct LeastSignificantFirst{
-  static void read (auto& b,auto& val)
-  {for(auto c=0;c<sizeof(val);++c)val|=b.giveOne()<<8*c;}
-
+struct MixedEndian{
   static void read (auto& b,float& f){
     ::uint32_t tmp;
     read(b,tmp);
@@ -197,25 +194,14 @@ struct LeastSignificantFirst{
   }
 };
 
-struct MostSignificantFirst{
+struct LeastSignificantFirst:MixedEndian{
+  static void read (auto& b,auto& val)
+  {for(auto c=0;c<sizeof(val);++c)val|=b.giveOne()<<8*c;}
+};
+
+struct MostSignificantFirst:MixedEndian{
   static void read (auto& b,auto& val)
   {for(auto c=sizeof(val);c>0;--c)val|=b.giveOne()<<8*(c-1);}
-
-  static void read (auto& b,float& f){
-    ::uint32_t tmp;
-    read(b,tmp);
-    ::std::memcpy(&f,&tmp,sizeof f);
-  }
-
-  static void read (auto& b,double& d){
-    ::uint64_t tmp;
-    read(b,tmp);
-    ::std::memcpy(&d,&tmp,sizeof d);
-  }
-
-  static void readBlock (auto& b,auto data,int elements){
-    for(;elements>0;--elements){read(b,*data++);}
-  }
 };
 
 template<class R>class ReceiveBuffer{
