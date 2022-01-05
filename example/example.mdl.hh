@@ -48,11 +48,11 @@ static void give (auto& buf
   buf.giveBlock(&a[0],sizeof a/sizeof(float));
 }
 
-template<messageID id,class...T>
-static void marshal (::cmw::SendBuffer& buf,T&&...t)try{
+template<messageID id>
+static void marshal (auto& buf,auto&&...t)try{
   buf.reserveBytes(4);
   buf.receive(id);
-  buf.fillInSize(mar(buf,::std::forward<T>(t)...));
+  buf.fillInSize(mar(buf,::std::forward<decltype(t)>(t)...));
 }catch(...){buf.rollback();throw;}
 };
 #endif

@@ -25,7 +25,7 @@ static ::int32_t mar (auto& buf
 template<messageID id>
 static void marshal (auto& buf,auto&&...t)try{
   buf.reserveBytes(4);
-  buf.receive<messageID>(id);
+  buf.template receive<messageID>(id);
   buf.fillInSize(mar(buf,::std::forward<decltype(t)>(t)...));
 }catch(...){buf.rollback();throw;}
 };
