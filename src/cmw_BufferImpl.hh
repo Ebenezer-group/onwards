@@ -7,6 +7,7 @@
 #include<quicklz.c>
 #include<charconv>
 #include<limits>
+#include<utility>
 #include<cstdio>//snprintf
 #include<cstdlib>//exit
 static_assert(::std::numeric_limits<unsigned char>::digits==8);
