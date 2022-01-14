@@ -32,7 +32,7 @@ an exampleMessages struct in a file called {middle file name}.h.
 One or more functions are created within the struct for each of 
 the lines with matching parentheses.
 
-The available options are: out, in, inLine, maxLength and yeaNay.
+The available options are: out, in, inLine and yeaNay.
 
 The out and in options are used to tailor the output.  If you
 specify only -out, only a message-building/sending function is
@@ -41,12 +41,6 @@ receiving function is output.
 
 The inLine option indicates that a generated function should
 be marked as inline.
-
-The maxLength option allows you to specify the maximum length
-for a message.  If the length of the message exceeds the value
-specified, an exception will be thrown. If this option isn't used,
-the CMW supplies a default value of 10,000.  Here's an example of
-how to use this option: -maxLength=::cmw::udp_packet_max
 
 The yeaNay option is used to support a messaging idiom where
 a response to a request is a bool followed by optional data.

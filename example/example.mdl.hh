@@ -2,12 +2,11 @@
 #ifndef example_mdl_hh
 #define example_mdl_hh
 struct exampleMessages{
-static ::int32_t mar (auto& buf
+static void mar (auto& buf
          ,::std::vector<::int32_t> const& a
          ,::std::string const& b){
   receiveBlock(buf,a);
   receive(buf,b);
-  return 10000;
 }
 
 static void give (auto& buf
@@ -20,13 +19,12 @@ static void give (auto& buf
   b=buf.giveStringView();
 }
 
-static ::int32_t mar (auto& buf
+static void mar (auto& buf
          ,::std::set<::int32_t> const& a){
   buf.template receive<int32_t>(a.size());
   for(auto const& e1:a){
     buf.receive(e1);
   }
-  return 10000;
 }
 
 static void give (auto& buf
@@ -37,10 +35,9 @@ static void give (auto& buf
   }
 }
 
-static ::int32_t mar (auto& buf
+static void mar (auto& buf
          ,::std::array<float,6> const& a){
   buf.receive(&a,sizeof a);
-  return 10000;
 }
 
 static void give (auto& buf
@@ -48,11 +45,12 @@ static void give (auto& buf
   buf.giveBlock(&a[0],sizeof a/sizeof(float));
 }
 
-template<messageID id>
+template<messageID id,int maxLength=10000>
 static void marshal (auto& buf,auto&&...t)try{
   buf.reserveBytes(4);
   buf.receive(id);
-  buf.fillInSize(mar(buf,::std::forward<decltype(t)>(t)...));
+  mar(buf,::std::forward<decltype(t)>(t)...);
+  buf.fillInSize(maxLength);
 }catch(...){buf.rollback();throw;}
 };
 #endif

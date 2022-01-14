@@ -119,7 +119,7 @@ BufferStack<SameFormat> frntBuf;
 void reset (char const *context,char const *detail=""){
   ::syslog(LOG_ERR,"%s:%s",context,detail);
   frntBuf.reset();
-  ::front::marshal<false>(frntBuf,{context," ",detail});
+  ::front::marshal<false,udpPacketMax>(frntBuf,{context," ",detail});
   for(auto& r:pendingRequests){
     frntBuf.send((::sockaddr*)&r.frnt.addr,r.frnt.len);
   }
@@ -137,7 +137,7 @@ bool toBack ()try{return cmwBuf.flush();
 template<bool res>
 void toFront (Socky const& s,auto...t){
   frntBuf.reset();
-  ::front::marshal<res>(frntBuf,{t...});
+  ::front::marshal<res,udpPacketMax>(frntBuf,{t...});
   frntBuf.send((::sockaddr*)&s.addr,s.len);
 }
 
@@ -194,7 +194,7 @@ int main (int ac,char **av)try{
       try{
         gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
         req=&pendingRequests.emplace_back(frnt,frntBuf);
-        back::marshal<messageID::generate>(cmwBuf,*req);
+        back::marshal<messageID::generate,700000>(cmwBuf,*req);
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)toFront<false>(frnt,e.what());

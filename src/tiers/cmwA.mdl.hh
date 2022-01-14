@@ -8,30 +8,29 @@ cmwAccount::marshalMembers (::cmw::SendBuffer& buf)const{
 }
 
 struct back{
-static ::int32_t mar (auto& buf
+static void mar (auto& buf
          ,::std::vector<cmwAccount> const& a
          ,::int32_t b){
   receiveBlock(buf,a);
   buf.receive(b);
-  return 10000;
 }
 
-static ::int32_t mar (auto& buf
+static void mar (auto& buf
          ,cmwRequest const& a){
   a.marshal(buf);
-  return 700000;
 }
 
-template<messageID id>
+template<messageID id,int maxLength=10000>
 static void marshal (auto& buf,auto&&...t)try{
   buf.reserveBytes(4);
   buf.template receive<messageID>(id);
-  buf.fillInSize(mar(buf,::std::forward<decltype(t)>(t)...));
+  mar(buf,::std::forward<decltype(t)>(t)...);
+  buf.fillInSize(maxLength);
 }catch(...){buf.rollback();throw;}
 };
 
 struct front{
-template<bool res>
+template<bool res,int maxLength=10000>
 static void marshal (auto& buf
          ,::cmw::stringPlus const& a={}
          ,::int8_t b={})try{
@@ -41,7 +40,7 @@ static void marshal (auto& buf
     receive(buf,a);
     buf.receive(b);
   }
-  buf.fillInSize(udpPacketMax);
+  buf.fillInSize(maxLength);
 }catch(...){buf.rollback();throw;}
 };
 #endif

@@ -2,13 +2,14 @@
 #ifndef genz_mdl_hh
 #define genz_mdl_hh
 struct middle{
+template<int maxLength=10000>
 static void marshal (auto& buf
          ,::cmw::MarshallingInt const& a
          ,char const* b)try{
   buf.reserveBytes(4);
   a.marshal(buf);
   receive(buf,b);
-  buf.fillInSize(::cmw::udpPacketMax);
+  buf.fillInSize(maxLength);
 }catch(...){buf.rollback();throw;}
 };
 #endif
