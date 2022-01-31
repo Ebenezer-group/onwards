@@ -5,7 +5,7 @@ support for messaging and serialization.  Here's an example
 of the [input](https://github.com/Ebenezer-group/onwards/blob/master/example/example.mdl)
 and [output](https://github.com/Ebenezer-group/onwards/blob/master/example/example.mdl.hh).
 
-A compiler with 2020 C++ or newer is required to use the CMW.
+A compiler with C++ 2020 or newer is required to use the CMW.
 
 #### License
 The software is under the BSD license.  Two of the files,

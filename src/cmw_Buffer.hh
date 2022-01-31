@@ -506,11 +506,12 @@ template<int N>class FixedString{
 
   unsigned int bytesAvailable ()const{return N-(len()+1);}
 
-  void append (::std::string_view s){
+  char const* append (::std::string_view s){
     if(bytesAvailable()>=s.size()){
       ::std::memcpy(str+len(),s.data(),s.size());
       len+=s.size();
       str[len()]=0;
+      return str;
     }
   }
 

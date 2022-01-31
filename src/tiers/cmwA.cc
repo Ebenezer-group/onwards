@@ -73,8 +73,7 @@ struct cmwRequest{
 
   auto getFileName (){
     Write(fl(),&bday,sizeof bday);
-    path.append(".hh");
-    return path.data();
+    return path.append(".hh");
   }
 };
 #include"cmwA.mdl.hh"
@@ -128,7 +127,8 @@ void reset (char const *context,char const *detail=""){
   login();
 }
 
-bool toBack ()try{return cmwBuf.flush();
+bool toBack ()try{
+  return cmwBuf.flush();
 }catch(::std::exception& e){
   reset("toBack",e.what());
   return true;
