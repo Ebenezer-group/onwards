@@ -26,7 +26,7 @@ customization being done.
 
 The stream ctor and the marshalMembers() functions can be generated/
 maintained by the CMW.  The CMW's implementation of marshalMembers() can
-be seen in the cmwA.mdl.h file in the tiers directory.
+be seen in the cmwA.mdl.hh file in the tiers directory.
 
 If the CMW isn't able yet to correctly generate code for a given type,
 you may have to add a comment, shown below, within the body of the type.
