@@ -28,19 +28,16 @@ where "messageId" is the name of the type that you want to use
 for message Ids.
 
 Based on that input, the C++ Middleware Writer (CMW) creates
-an exampleMessages struct in a file called {middle file name}.h.
+an exampleMessages struct in a file called {middle file name}.hh.
 One or more functions are created within the struct for each of 
 the lines with matching parentheses.
 
-The available options are: out, in, inLine and yeaNay.
+The available options are: out, in and yeaNay.
 
 The out and in options are used to tailor the output.  If you
 specify only -out, only a message-building/sending function is
 generated.  If you specify only -in, only a message-parsing/
 receiving function is output.
-
-The inLine option indicates that a generated function should
-be marked as inline.
 
 The yeaNay option is used to support a messaging idiom where
 a response to a request is a bool followed by optional data.
