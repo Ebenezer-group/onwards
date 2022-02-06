@@ -511,8 +511,8 @@ template<int N>class FixedString{
       ::std::memcpy(str+len(),s.data(),s.size());
       len+=s.size();
       str[len()]=0;
-      return str;
     }
+    return str;
   }
 
   char* operator() (){return str;}
