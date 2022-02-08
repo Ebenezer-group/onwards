@@ -268,8 +268,8 @@ template<class R>class ReceiveBuffer{
     }
   }
 
-  template<class T>auto giveSpan (){
-    static_assert(::std::is_arithmetic_v<T>);
+  template<class T>requires ::std::is_arithmetic_v<T>
+  auto giveSpan (){
     ::int32_t sz=give<::uint32_t>();
     ::int32_t serLen=sizeof(T)*sz;
     checkLen(serLen);
@@ -316,13 +316,15 @@ class SendBuffer{
     ::std::memcpy(buf+reserveBytes(size),data,size);
   }
 
-  template<class T>void receive (T t){
-    static_assert(::std::is_arithmetic_v<T>||::std::is_enum_v<T>);
+  template<class T>
+  requires (::std::is_arithmetic_v<T>||::std::is_enum_v<T>)
+  void receive (T t){
     receive(&t,sizeof t);
   }
 
-  template<class T>T receive (int where,T t){
-    static_assert(::std::is_arithmetic_v<T>);
+  template<class T>
+  requires ::std::is_arithmetic_v<T>
+  T receive (int where,T t){
     ::std::memcpy(buf+where,&t,sizeof t);
     return t;
   }
