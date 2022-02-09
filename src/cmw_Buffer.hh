@@ -20,6 +20,7 @@
 
 struct pollfd;
 struct addrinfo;
+template<class T>concept arithmetic=::std::is_arithmetic_v<T>;
 namespace cmw{
 class Failure:public ::std::exception{
   ::std::string s;
@@ -268,7 +269,7 @@ template<class R>class ReceiveBuffer{
     }
   }
 
-  template<class T>requires ::std::is_arithmetic_v<T>
+  template<class T>requires arithmetic
   auto giveSpan (){
     ::int32_t sz=give<::uint32_t>();
     ::int32_t serLen=sizeof(T)*sz;
@@ -316,15 +317,12 @@ class SendBuffer{
     ::std::memcpy(buf+reserveBytes(size),data,size);
   }
 
-  template<class T>
-  requires (::std::is_arithmetic_v<T>||::std::is_enum_v<T>)
+  template<class T>requires ::std::is_arithmetic_v<T>||::std::is_enum_v<T>
   void receive (T t){
     receive(&t,sizeof t);
   }
 
-  template<class T>
-  requires ::std::is_arithmetic_v<T>
-  T receive (int where,T t){
+  auto receive (int where,arithmetic auto t){
     ::std::memcpy(buf+where,&t,sizeof t);
     return t;
   }
