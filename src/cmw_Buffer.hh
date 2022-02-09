@@ -355,7 +355,7 @@ template<template<class...>class C,class T>
 void receiveBlock (SendBuffer& b,C<T>const& c){
   ::int32_t n=c.size();
   b.receive(n);
-  if constexpr(::std::is_arithmetic_v<T>){
+  if constexpr(arithmetic<T>){
     if(n>0)b.receive(c.data(),n*sizeof(T));
   }else if constexpr(::std::is_pointer_v<T>)for(auto e:c)e->marshal(b);
   else for(auto const& e:c)e.marshal(b);
