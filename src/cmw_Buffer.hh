@@ -269,7 +269,7 @@ template<class R>class ReceiveBuffer{
     }
   }
 
-  template<class T>requires arithmetic
+  template<class T>requires arithmetic<T>
   auto giveSpan (){
     ::int32_t sz=give<::uint32_t>();
     ::int32_t serLen=sizeof(T)*sz;
@@ -317,7 +317,7 @@ class SendBuffer{
     ::std::memcpy(buf+reserveBytes(size),data,size);
   }
 
-  template<class T>requires ::std::is_arithmetic_v<T>||::std::is_enum_v<T>
+  template<class T>requires arithmetic<T>||::std::is_enum_v<T>
   void receive (T t){
     receive(&t,sizeof t);
   }
