@@ -17,8 +17,6 @@ auto complexGive (auto& buf){
   return ::std::complex<T>(rl,give<T>(buf));
 }
 
-::int32_t marshalSegments (auto&,SendBuffer&,uint8_t){return 0;}
-
 template<class T,class... Ts>
 ::int32_t marshalSegments (auto& c,SendBuffer& buf,uint8_t& segs){
   ::int32_t n;
@@ -31,7 +29,8 @@ template<class T,class... Ts>
       for(T const& t:c.template segment<T>()){t.marshal(buf);}
     }
   }else n=0;
-  return n+marshalSegments<Ts...>(c,buf,segs);
+  if constexpr(sizeof...(Ts)==0)return n;
+  else return n+marshalSegments<Ts...>(c,buf,segs);
 }
 
 template<class...Ts>void marshalCollection (auto& c,SendBuffer& buf){
