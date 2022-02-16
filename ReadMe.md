@@ -13,7 +13,9 @@ and quicklz.c, are from another developer and should only be used in
 conjunction with the CMW.
 
 #### Building
-The library is header-only.
+The
+[library](https://github.com/Ebenezer-group/onwards/blob/master/src)
+is header-only.
 
 The [front tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/front/genz.cc)
 of the CMW, called "genz", is built on all platforms.  The
