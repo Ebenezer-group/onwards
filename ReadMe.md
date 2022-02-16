@@ -15,8 +15,6 @@ conjunction with the CMW.
 #### Building
 The library is header-only.
 
-The example programs are built on all platforms.
-
 The [front tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/front/genz.cc)
 of the CMW, called "genz", is built on all platforms.
 
@@ -26,7 +24,7 @@ only runs on POSIX platforms.  Windows users can use the CMW by
 running the middle tier on a \*nix system.
 
 #### Accounts
-An account is needed to use the CMW.  Before running the middle tier,
+An account is needed to use the CMW.  In order to use the middle tier,
 you have to get an account and modify your cmwA.cfg file to include
 your account number(s) and password(s).  To get an account send an
 email to support@webEbenezer.net with "CMW account" as the subject.
