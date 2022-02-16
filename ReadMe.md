@@ -16,9 +16,8 @@ conjunction with the CMW.
 The library is header-only.
 
 The [front tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/front/genz.cc)
-of the CMW, called "genz", is built on all platforms.
-
-The [middle tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/cmwA.cc)
+of the CMW, called "genz", is built on all platforms.  The
+[middle tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/cmwA.cc)
 of the CMW is called "cmwA" and it only runs on POSIX systems.  Windows
 users can use the CMW by running the middle tier on a \*nix system.
 
