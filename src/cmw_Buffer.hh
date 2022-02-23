@@ -21,6 +21,7 @@
 struct pollfd;
 struct addrinfo;
 template<class T>concept arithmetic=::std::is_arithmetic_v<T>;
+
 namespace cmw{
 class Failure:public ::std::exception{
   ::std::string s;
