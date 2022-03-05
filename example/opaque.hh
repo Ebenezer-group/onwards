@@ -1,1 +1,1 @@
-enum messageID:uint8_t;
+enum class messageID:uint8_t;

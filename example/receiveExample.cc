@@ -18,7 +18,7 @@ int main ()try{
     auto const msgid=::cmw::give<messageID>(buf);
     ::std::cout<<"Message id: "<<static_cast<unsigned>(msgid)<<'\n';
     switch(msgid){
-      case messageID::id1:
+    case messageID::id1:
       {
         ::std::vector<::int32_t> vec;
         ::std::string str;
@@ -28,7 +28,7 @@ int main ()try{
       }
       break;
 
-      case messageID::id2:
+    case messageID::id2:
       {
         ::std::set<::int32_t> iset;
 	exampleMessages::give(buf,iset);
@@ -36,7 +36,7 @@ int main ()try{
       }
       break;
 
-      case messageID::id3:
+    case messageID::id3:
       {
         ::std::array<float,6> a;
 	exampleMessages::give(buf,a);
@@ -47,8 +47,8 @@ int main ()try{
       }
       break;
 
-      default:
-        ::std::cout<<"Unexpected message id: "<<msgid;
+    default:
+      ::std::cout<<"Unexpected message id: ";
     }
     ::std::cout<<::std::endl;
   }

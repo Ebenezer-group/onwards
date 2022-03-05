@@ -25,30 +25,30 @@ int main ()try{
   int msgID;
   ::std::cin>>msgID;
   switch(msgID){
-    case messageID::id1:
+  case static_cast<::std::underlying_type_t<messageID>>(messageID::id1):
     {
       ::std::vector<int32_t> vec {100,97,94,91,88,85};
       exampleMessages::marshal<messageID::id1>(buf,vec,"Proverbs 24:27");
     }
     break;
 
-    case messageID::id2:
+  case static_cast<::std::underlying_type_t<messageID>>(messageID::id2):
     {
       ::std::set<int32_t> iset {100,97,94,91,88,85};
       exampleMessages::marshal<messageID::id2>(buf,iset);
     }
     break;
 
-    case messageID::id3:
+  case static_cast<::std::underlying_type_t<messageID>>(messageID::id3):
     {
       ::std::array<float,6> ar {{ 1.1f, 2.2f ,3.3f, 4.4f,5.5f, 6.6f }};
       exampleMessages::marshal<messageID::id3>(buf,ar);
     }
     break;
 
-    default:
-      std::cout<<"unknown message id\n";
-      return 0;
+  default:
+    std::cout<<"unknown message id\n";
+    return 0;
   }
   buf.send(ai().ai_addr,ai().ai_addrlen);
 }catch(::std::exception& e){::std::cout<<"failure: "<<e.what()<<"\n";}
