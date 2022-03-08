@@ -24,12 +24,12 @@ template<class T>concept arithmetic=::std::is_arithmetic_v<T>;
 
 namespace cmw{
 class Failure:public ::std::exception{
-  ::std::string s;
+  ::std::string st;
  public:
-  explicit Failure (char const *s):s(s){}
+  explicit Failure (char const *s):st(s){}
   void operator<< (::std::string_view);
   void operator<< (int);
-  char const* what ()const noexcept{return s.data();}
+  char const* what ()const noexcept{return st.data();}
 };
 
 struct Fiasco:Failure{

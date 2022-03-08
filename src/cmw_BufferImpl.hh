@@ -26,8 +26,8 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 
 namespace cmw{
 void Failure::operator<< (::std::string_view v){
-  s.append(" ");
-  s.append(v);
+  st.append(" ");
+  st.append(v);
 }
 
 void Failure::operator<< (int i){
