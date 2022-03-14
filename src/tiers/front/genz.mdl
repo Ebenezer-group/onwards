@@ -1,4 +1,4 @@
 --
 middle
   -out (::cmw::MarshallingInt,char const*)
-}
+!

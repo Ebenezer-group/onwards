@@ -7,22 +7,22 @@ Lines like this:
 are the basis of Middle Code.  Options start with a dash (-) symbol.
 After any options, a list of C++ types is enclosed in a pair of
 parentheses.  One or more of these lines are wrapped by a name and
-a closing brace like this:
+an exclamation point like this:
 
 exampleMessages
    -out (messageId, ::std::vector<int32_t>, ::std::string)
    -out (messageId, ::std::array<float,3>)
    -out (messageId, ::plf::colony<::std::string>)
-}
+!
 
 Rather than repeating a message Id type for each message,
-you can rewrite the above like this:
+you can write the above like this:
 
 exampleMessages <messageID_t=messageId>
    -out (::std::vector<int32_t>, ::std::string)
    -out (::std::array<float,3>)
    -out (::plf::colony<::std::string>)
-}
+!
 
 where "messageId" is the name of the type that you want to use
 for message Ids.

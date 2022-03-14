@@ -2,4 +2,4 @@ base.hh
 --
 testing
  -out -in (::boost::base_collection<base>)
-}
+!
