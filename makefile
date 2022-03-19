@@ -1,26 +1,26 @@
 CXXFLAGS=$(CXX) -std=c++20 -Isrc -Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
 
+EXAMPLES:=example/sendExample example/receiveExample
 BASE:=src/tiers/
 TIERS:=$(BASE)front/genz $(BASE)cmwA
-EXAMPLES:=example/sendExample example/receiveExample
-all:$(TIERS) $(EXAMPLES)
+all:$(EXAMPLES) $(TIERS)
 .PHONY:all clean
 
 #cmwA.mdl.h: account.h $(BASE)cmwA.mdl
 #	genz 2 $(BASE)cmwA.mdl
+
+example/sendExample:example/sendExample.cc
+	$(CXXFLAGS)
+	size $@
+example/receiveExample:example/receiveExample.cc
+	$(CXXFLAGS)
+	size $@
 
 $(BASE)front/genz:$(BASE)front/genz.cc
 	$(CXXFLAGS)
 	size $@
 
 $(BASE)cmwA:$(BASE)cmwA.cc
-	$(CXXFLAGS)
-	size $@
-
-example/sendExample:example/sendExample.cc
-	$(CXXFLAGS)
-	size $@
-example/receiveExample:example/receiveExample.cc
 	$(CXXFLAGS)
 	size $@
 
