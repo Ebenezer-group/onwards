@@ -6,7 +6,11 @@
 #include<vector>
 #include<cassert>
 #include<ctime>
-#include<netinet/sctp.h>//May need libsctp-dev
+#ifdef __linux__
+#include<linux/sctp.h>//May need libsctp-dev
+#else
+#include<netinet/sctp.h>
+#endif
 using namespace ::cmw;
 
 struct Socky{
