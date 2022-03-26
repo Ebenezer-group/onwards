@@ -26,9 +26,8 @@ can use the CMW by running the middle tier on a \*nix system.
 An account is needed to use the CMW.  In order to use the middle tier,
 you have to get an account and modify your cmwA.cfg file to include
 your account number(s) and password(s).  To get an account send an
-email to support@webEbenezer.net with "CMW account" as the subject.
-After receiving an account number, update your cmwA.cfg file
-accordingly.
+email to support@webEbenezer.net with "Account" as the subject.  After
+receiving an account number, update your cmwA.cfg file accordingly.
 
 
 #### Running the cmwA (after installing)

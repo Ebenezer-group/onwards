@@ -13,6 +13,6 @@ int main (){
 
   ::cmw::GetaddrinfoWrapper res("127.0.0.1" ,"13579",SOCK_DGRAM); //may need ::1
   ::cmw::BufferStack<::cmw::SameFormat> buf(res.getSock());
-  testing::marshal(buf,c);
+  ::testing::marshal(buf,c);
   buf.send(res().ai_addr,res().ai_addrlen);
 }
