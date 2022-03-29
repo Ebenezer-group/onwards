@@ -123,18 +123,6 @@ struct FileBuffer{
 void getFile (char const *n,auto& b){
   b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}());
 }
-
-class File{
-  char const *nam;
- public:
-  explicit File (char const *n):nam{n}{}
-
-  explicit File (auto& b):nam{b.giveStringView().data()}{
-    getFile(nam,b);
-  }
-
-  auto name ()const{return nam;}
-};
 #endif
 
 auto setsockWrapper (sockType s,int opt,auto t){
