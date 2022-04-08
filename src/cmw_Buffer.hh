@@ -110,7 +110,7 @@ class FileWrapper{
 
 struct FileBuffer{
   FileWrapper fl;
-  char buf[400];
+  char buf[4096];
   char line[120];
   int ind=0;
   int bytes=0;

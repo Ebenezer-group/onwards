@@ -29,9 +29,11 @@ clean:
 
 INSTALL_DIR=/usr/local/
 install:
-	cp -f src/*.h  $(INSTALL_DIR)include
+	cp -f src/*.hh src/quicklz.* $(INSTALL_DIR)include
 	cp -f $(TIERS) $(INSTALL_DIR)bin
+	cp -f $(BASE)cmwA.cfg $(INSTALL_DIR)etc
 
 uninstall:
-	cd $(INSTALL_DIR)include && rm -f $(includes)
+	cd $(INSTALL_DIR)include && rm -f cmw_*.hh
+	cd $(INSTALL_DIR)bin && rm -f cmwA genz
 
