@@ -1,9 +1,10 @@
 CXXFLAGS=$(CXX) -std=c++20 -Isrc -Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
 
 EXAMPLES:=example/sendExample example/receiveExample
-BASE:=src/tiers/
-TIERS:=$(BASE)front/genz $(BASE)cmwA
-all:$(EXAMPLES) $(TIERS)
+FRONT:=src/tiers/front/genz
+MIDDLE:=src/tiers/cmwA
+BINARIES:=$(EXAMPLES) $(FRONT) $(MIDDLE)
+all:$(BINARIES)
 .PHONY:all clean
 
 #cmwA.mdl.h: account.h $(BASE)cmwA.mdl
@@ -16,16 +17,16 @@ example/receiveExample:example/receiveExample.cc
 	$(CXXFLAGS)
 	size $@
 
-$(BASE)front/genz:$(BASE)front/genz.cc
+$(FRONT):$(FRONT).cc
 	$(CXXFLAGS)
 	size $@
 
-$(BASE)cmwA:$(BASE)cmwA.cc
+$(MIDDLE):$(MIDDLE).cc
 	$(CXXFLAGS)
 	size $@
 
 clean:
-	rm -f $(TIERS) $(EXAMPLES)
+	rm -f $(BINARIES)
 
 INSTALL_DIR=/usr/local/
 install:
