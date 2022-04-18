@@ -418,7 +418,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     if(index>0){
       if(index+(index>>3)+400>compSize-compIndex)
         raise("Not enough room in compressed buf");
-      compIndex+=::qlz_compress(buf,compBuf+compIndex,index,qlz->compress);
+      compIndex+=::qlz_compress(buf,compBuf+compIndex,index,&qlz->compress);
       reset();
       if(rc)rc=doFlush();
     }
@@ -448,7 +448,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
       }
       bytesRead+=Read(sock_,compressedStart+bytesRead,compPacketSize-bytesRead);
       if(bytesRead<compPacketSize)return false;
-      ::qlz_decompress(compressedStart,rbuf,qlz->decomp);
+      ::qlz_decompress(compressedStart,rbuf,&qlz->decomp);
       bytesRead=0;
       this->update();
       return true;
