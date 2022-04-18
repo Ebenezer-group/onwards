@@ -371,19 +371,22 @@ struct SendBufferHeap:SendBuffer{
 
 #ifndef CMW_WINDOWS
 template<class T>T const& myMin (T const& a,T const& b){return a<b?a:b;}
+struct qlzState{
+  ::qlz_state_compress compress;
+  ::qlz_state_decompress decomp;
+};
 
 template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
  private:
-  ::qlz_state_compress *compress=nullptr;
+  qlzState *qlz=nullptr;
+  char *compressedStart;
+  char *compBuf=nullptr;
   int const compSize;
   int compPacketSize;
   int compIndex=0;
-  char *compBuf=nullptr;
+  int bytesRead=0;
   bool kosher=true;
 
-  ::qlz_state_decompress *decomp=nullptr;
-  int bytesRead=0;
-  char *compressedStart;
 
   bool doFlush (){
     int const bytes=Write(sock_,compBuf,compIndex);
@@ -397,17 +400,15 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
                      ,compSize(sz+(sz>>3)+400){}
 
   explicit BufferCompressed (int sz):BufferCompressed(sz,0){
-    compress=new ::qlz_state_compress();
+    qlz=new qlzState();
     compBuf=new char[compSize];
-    decomp=new ::qlz_state_decompress();
   }
 
   using ReceiveBuffer<R>::rbuf;
   ~BufferCompressed (){
     delete[]rbuf;
-    delete compress;
+    delete qlz;
     delete[]compBuf;
-    delete decomp;
   }
 
   bool flush (){
@@ -417,7 +418,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     if(index>0){
       if(index+(index>>3)+400>compSize-compIndex)
         raise("Not enough room in compressed buf");
-      compIndex+=::qlz_compress(buf,compBuf+compIndex,index,compress);
+      compIndex+=::qlz_compress(buf,compBuf+compIndex,index,qlz->compress);
       reset();
       if(rc)rc=doFlush();
     }
@@ -426,8 +427,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 
   void compressedReset (){
     reset();
-    *compress={};
-    *decomp={};
+    *qlz={};
     compIndex=bytesRead=0;
     kosher=true;
     closeSocket(sock_);
@@ -448,7 +448,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
       }
       bytesRead+=Read(sock_,compressedStart+bytesRead,compPacketSize-bytesRead);
       if(bytesRead<compPacketSize)return false;
-      ::qlz_decompress(compressedStart,rbuf,decomp);
+      ::qlz_decompress(compressedStart,rbuf,qlz->decomp);
       bytesRead=0;
       this->update();
       return true;
