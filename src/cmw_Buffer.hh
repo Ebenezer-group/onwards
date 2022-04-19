@@ -243,8 +243,8 @@ template<class R>class ReceiveBuffer{
     return nextMessage();
   }
 
-  template<class T>void giveBlock (T *data,unsigned int elements){
-    if(sizeof(T)==1)give(data,elements);
+  void giveBlock (auto *data,unsigned int elements){
+    if(sizeof(*data)==1)give(data,elements);
     else R::readBlock(*this,data,elements);
   }
 
