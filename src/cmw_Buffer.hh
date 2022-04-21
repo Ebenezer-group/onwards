@@ -370,7 +370,7 @@ struct SendBufferHeap:SendBuffer{
 };
 
 #ifndef CMW_WINDOWS
-template<class T>T const& myMin (T const& a,T const& b){return a<b?a:b;}
+auto myMin (auto const a,auto const b){return a<b?a:b;}
 struct qlzState{
   ::qlz_state_compress compress;
   ::qlz_state_decompress decomp;
