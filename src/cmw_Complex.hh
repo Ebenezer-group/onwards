@@ -18,7 +18,7 @@ auto complexGive (auto& buf){
 }
 
 template<class T,class... Ts>
-::int32_t marshalSegments (auto& c,SendBuffer& buf,uint8_t& segs){
+::int32_t marshalSegments (auto& c,auto& buf,uint8_t& segs){
   ::int32_t n;
   if(c.template is_registered<T>()){
     n=c.template size<T>();
