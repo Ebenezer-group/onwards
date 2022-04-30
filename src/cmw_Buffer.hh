@@ -328,7 +328,7 @@ class SendBuffer{
   void send (::sockaddr *addr=nullptr,::socklen_t len=0)
   {sockWrite(sock_,buf,index,addr,len);}
 
-  unsigned char* data (){return buf;}
+  auto data (){return buf;}
   int getIndex (){return index;}
   int getSize (){return bufsize;}
   void receiveMulti (char const*,auto...);
@@ -370,7 +370,7 @@ struct SendBufferHeap:SendBuffer{
 };
 
 #ifndef CMW_WINDOWS
-auto myMin (auto const a,auto const b){return a<b?a:b;}
+auto myMin (auto a,auto b){return a<b?a:b;}
 struct qlzState{
   ::qlz_state_compress compress;
   ::qlz_state_decompress decomp;
