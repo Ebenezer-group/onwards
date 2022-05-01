@@ -43,11 +43,10 @@ void winStart (){
 }
 
 int getError (){
-  return
 #ifdef CMW_WINDOWS
-    WSAGetLastError();
+  return WSAGetLastError();
 #else
-    errno;
+  return errno;
 #endif
 }
 
