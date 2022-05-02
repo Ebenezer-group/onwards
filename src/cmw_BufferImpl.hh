@@ -31,8 +31,7 @@ void Failure::operator<< (::std::string_view v){
 
 void Failure::operator<< (int i){
   char b[12];
-  ::std::snprintf(b,sizeof b,"%d",i);
-  *this<<b;
+  *this<<::std::string_view(b,::std::snprintf(b,sizeof b,"%d",i));
 }
 
 void winStart (){
