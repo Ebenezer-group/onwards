@@ -1,4 +1,4 @@
-#include<cmw_BufferImpl.hh>
+#include<cmw_Buffer.hh>
 #include"account.hh"
 #include"messageIDs.hh"
 
