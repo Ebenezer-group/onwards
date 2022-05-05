@@ -270,11 +270,7 @@ int preserveError (sockType s){
   return e;
 }
 
-<<<<<<< HEAD
 int pollWrapper (::pollfd *fds,int n,int timeout=-1){
-=======
-int pollWrapper (::pollfd *fds,int n,int timeout){
->>>>>>> 6b0186975578d01a7c35412fb22ee718287ba838
   if(int r=::poll(fds,n,timeout);r>=0)return r;
   raise("poll",getError());
 }
@@ -312,7 +308,6 @@ sockType connectWrapper (char const *node,char const *port){
   errno=preserveError(s);
   return -1;
 }
-<<<<<<< HEAD
 
 sockType udpServer (char const *port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
@@ -331,26 +326,6 @@ sockType tcpServer (char const *port){
   raise("tcpServer",preserveError(s));
 }
 
-=======
-
-sockType udpServer (char const *port){
-  GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
-  auto s=ai.getSock();
-  if(0==::bind(s,ai().ai_addr,ai().ai_addrlen))return s;
-  raise("udpServer",preserveError(s));
-}
-
-sockType tcpServer (char const *port){
-  GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
-  auto s=ai.getSock();
-
-  if(int on=1;setsockWrapper(s,SO_REUSEADDR,on)==0
-    &&::bind(s,ai().ai_addr,ai().ai_addrlen)==0
-    &&::listen(s,SOMAXCONN)==0)return s;
-  raise("tcpServer",preserveError(s));
-}
-
->>>>>>> 6b0186975578d01a7c35412fb22ee718287ba838
 int acceptWrapper (sockType s){
   if(int n=::accept(s,nullptr,nullptr);n>=0)return n;
   auto e=getError();
@@ -755,27 +730,6 @@ template<int N>class FixedString{
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
 
-<<<<<<< HEAD
-=======
-GetaddrinfoWrapper::GetaddrinfoWrapper (char const *node,char const *port
-                                        ,int type,int flags){
-  ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
-  if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
-    raise("getaddrinfo",::gai_strerror(r));
-  addr=head;
-}
-
-GetaddrinfoWrapper::~GetaddrinfoWrapper (){::freeaddrinfo(head);}
-void GetaddrinfoWrapper::inc (){if(addr!=nullptr)addr=addr->ai_next;}
-
-sockType GetaddrinfoWrapper::getSock (){
-  for(;addr!=nullptr;addr=addr->ai_next){
-    if(auto s=::socket(addr->ai_family,addr->ai_socktype,0);-1!=s)return s;
-  }
-  raise("getaddrinfo getSock");
-}
-
->>>>>>> 6b0186975578d01a7c35412fb22ee718287ba838
 int SendBuffer::reserveBytes (int n){
   if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
   auto i=index;
