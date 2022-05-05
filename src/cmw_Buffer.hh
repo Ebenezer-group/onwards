@@ -279,13 +279,25 @@ int pollWrapper (::pollfd *fds,int n,int timeout=-1){
 class GetaddrinfoWrapper{
   ::addrinfo *head,*addr;
  public:
-  GetaddrinfoWrapper (char const *node,char const *port,int type,int flags=0);
+  GetaddrinfoWrapper (char const *node,char const *port
+                      ,int type,int flags=0){
+    ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
+    if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
+      raise("getaddrinfo",::gai_strerror(r));
+    addr=head;
+  }
 
-  ~GetaddrinfoWrapper ();
+  ~GetaddrinfoWrapper (){::freeaddrinfo(head);}
   auto& operator() (){return *addr;}
-  void inc ();
+  void inc (){if(addr!=nullptr)addr=addr->ai_next;}
 
-  sockType getSock ();
+  sockType getSock (){
+    for(;addr!=nullptr;addr=addr->ai_next){
+      if(auto s=::socket(addr->ai_family,addr->ai_socktype,0);-1!=s)return s;
+    }
+    raise("getaddrinfo getSock");
+  }
+
   GetaddrinfoWrapper (GetaddrinfoWrapper&)=delete;
   GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
 };
@@ -584,7 +596,7 @@ struct qlzState{
 };
 
 template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
-// private:
+ private:
   qlzState *qlz=nullptr;
   char *compressedStart;
   char *compBuf=nullptr;
@@ -719,24 +731,6 @@ template<int N>class FixedString{
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
 
-GetaddrinfoWrapper::GetaddrinfoWrapper (char const *node,char const *port
-                                        ,int type,int flags){
-  ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
-  if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
-    raise("getaddrinfo",::gai_strerror(r));
-  addr=head;
-}
-
-GetaddrinfoWrapper::~GetaddrinfoWrapper (){::freeaddrinfo(head);}
-void GetaddrinfoWrapper::inc (){if(addr!=nullptr)addr=addr->ai_next;}
-
-sockType GetaddrinfoWrapper::getSock (){
-  for(;addr!=nullptr;addr=addr->ai_next){
-    if(auto s=::socket(addr->ai_family,addr->ai_socktype,0);-1!=s)return s;
-  }
-  raise("getaddrinfo getSock");
-}
-
 int SendBuffer::reserveBytes (int n){
   if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
   auto i=index;
@@ -769,6 +763,5 @@ bool SendBuffer::flush (){
   ::std::memmove(buf,buf+bytes,index);
   return false;
 }
-
 }
 #endif
