@@ -1,25 +1,38 @@
 #ifndef CMW_BUFFER_HH
 #define CMW_BUFFER_HH
-#include<quicklz.h>
+#include<quicklz.c>
+#include<charconv>
+#include<cstdint>
+#include<cstring>//memcpy,memmove
+#include<cstdio>//snprintf
+#include<cstdlib>//exit
 #include<exception>
 #include<initializer_list>
+#include<limits>
 #include<span>
 #include<string>
 #include<string_view>
 #include<type_traits>
-#include<cstdint>
-#include<cstring>//memcpy,memmove
+#include<utility>
+static_assert(::std::numeric_limits<unsigned char>::digits==8);
+static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #include<ws2tcpip.h>
 #define CMW_WINDOWS
+#define poll WSAPoll
 #else
+#include<errno.h>
+#include<fcntl.h>//fcntl,open
+#include<netdb.h>
+#include<poll.h>
 #include<sys/socket.h>
 #include<sys/stat.h>//open
+#include<sys/types.h>
+#include<syslog.h>
+#include<unistd.h>//chdir
 #endif
 
-struct pollfd;
-struct addrinfo;
 template<class T>concept arithmetic=::std::is_arithmetic_v<T>;
 
 namespace cmw{
@@ -27,8 +40,15 @@ class Failure:public ::std::exception{
   ::std::string st;
  public:
   explicit Failure (char const *s):st(s){}
-  void operator<< (::std::string_view);
-  void operator<< (int);
+  void operator<< (::std::string_view v){
+    (st+=" ")+=v;
+  }
+
+  void operator<< (int i){
+    char b[16];
+    *this<<::std::string_view(b,::std::snprintf(b,sizeof b,"%d",i));
+  }
+
   char const* what ()const noexcept{return st.data();}
 };
 
@@ -48,9 +68,36 @@ template<class E=Failure>[[noreturn]]void raise (char const *s,auto...t){
   throw e;
 }
 
-int getError ();
-int fromChars (::std::string_view);
-void setDirectory (char const*);
+void winStart (){
+#ifdef CMW_WINDOWS
+  WSADATA w;
+  if(auto r=::WSAStartup(MAKEWORD(2,2),&w);0!=r)raise("WSAStartup",r);
+#endif
+}
+
+int getError (){
+#ifdef CMW_WINDOWS
+  return WSAGetLastError();
+#else
+  return errno;
+#endif
+}
+
+int fromChars (::std::string_view s){
+  int n;
+  ::std::from_chars(s.data(),s.data()+s.size(),n);
+  return n;
+}
+
+void setDirectory (char const *d){
+#ifdef CMW_WINDOWS
+  if(!::SetCurrentDirectory(d))
+#else
+  if(::chdir(d)==-1)
+#endif
+    raise("setDirectory",d,getError());
+}
+
 
 class SendBuffer;
 template<class>class ReceiveBuffer;
@@ -79,21 +126,45 @@ class MarshallingInt{
   void operator= (::int32_t r){val=r;}
   void operator+= (::int32_t r){val+=r;}
   auto operator() ()const{return val;}
-  void marshal (SendBuffer&)const;
+  void marshal (SendBuffer& b)const;
+
 };
 inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
 inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
 
+void exitFailure (){::std::exit(EXIT_FAILURE);}
 #ifdef CMW_WINDOWS
 using sockType=SOCKET;
 using fileType=HANDLE;
-DWORD Write (HANDLE,void const*,int);
-DWORD Read (HANDLE,void*,int);
+
+DWORD Write (HANDLE h,void const *data,int len){
+  DWORD bytesWritten;
+  if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
+    raise("Write",GetLastError());
+  return bytesWritten;
+}
+
+DWORD Read (HANDLE h,void *data,int len){
+  DWORD bytesRead;
+  if(!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
+    raise("Read",GetLastError());
+  return bytesRead;
+}
 #else
 using sockType=int;
 using fileType=int;
-int Write (int,void const*,int);
-int Read (int,void*,int);
+int Write (int fd,void const *data,int len){
+  if(int r=::write(fd,data,len);r>=0)return r;
+  raise("Write",errno);
+}
+
+int Read (int fd,void *data,int len){
+  int r=::read(fd,data,len);
+  if(r>0)return r;
+  if(r==0)raise<Fiasco>("Read eof",len);
+  if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
+  raise("Read",len,errno);
+}
 
 class FileWrapper{
   int d;
@@ -123,17 +194,87 @@ struct FileBuffer{
 void getFile (char const *n,auto& b){
   b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}());
 }
+FileWrapper::FileWrapper (char const *name,int flags,mode_t mode):
+        d{::open(name,flags,mode)} {if(d<0)raise("FileWrapper",name,errno);}
+
+FileWrapper::FileWrapper (char const *name,mode_t mode):
+        FileWrapper(name,O_CREAT|O_WRONLY|O_TRUNC,mode){}
+
+FileWrapper::FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
+
+FileWrapper& FileWrapper::operator= (FileWrapper&& o)noexcept{
+  d=o.d;
+  o.d=-2;
+  return *this;
+}
+
+FileWrapper::~FileWrapper (){::close(d);}
+
+char FileBuffer::getc (){
+  if(ind>=bytes){
+    bytes=Read(fl(),buf,sizeof buf);
+    ind=0;
+  }
+  return buf[ind++];
+}
+
+char* FileBuffer::getline (char delim){
+  ::std::size_t idx=0;
+  while((line[idx]=getc())!=delim){
+    if(line[idx]=='\r')raise("getline carriage return");
+    if(++idx>=sizeof line)raise("getline line too long");
+  }
+  line[idx]=0;
+  return line;
+}
+
+void bail (char const *fmt,auto... t)noexcept{
+  ::syslog(LOG_ERR,fmt,t...);
+  exitFailure();
+}
 #endif
 
 auto setsockWrapper (sockType s,int opt,auto t){
   return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
 }
 
-void setRcvTimeout (sockType,int);
-int setNonblocking (sockType);
-void closeSocket (sockType);
-int preserveError (sockType);
-int pollWrapper (::pollfd*,int,int=-1);
+void setRcvTimeout (sockType s,int time){
+#ifdef CMW_WINDOWS
+  DWORD t=time*1000;
+#else
+  ::timeval t{time,0};
+#endif
+  if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
+}
+
+int setNonblocking (sockType s){
+#ifdef CMW_WINDOWS
+  DWORD e=1;
+  return ::ioctlsocket(s,FIONBIO,&e);
+#else
+  return ::fcntl(s,F_SETFL,O_NONBLOCK);
+#endif
+}
+
+void closeSocket (sockType s){
+#ifdef CMW_WINDOWS
+  if(::closesocket(s)==SOCKET_ERROR)
+#else
+  if(::close(s)==-1)
+#endif
+    raise("closeSocket",getError());
+}
+
+int preserveError (sockType s){
+  auto e=getError();
+  closeSocket(s);
+  return e;
+}
+
+int pollWrapper (::pollfd *fds,int n,int timeout=-1){
+  if(int r=::poll(fds,n,timeout);r>=0)return r;
+  raise("poll",getError());
+}
 
 class GetaddrinfoWrapper{
   ::addrinfo *head,*addr;
@@ -149,15 +290,59 @@ class GetaddrinfoWrapper{
   GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
 };
 
-sockType connectWrapper (char const *node,char const *port);
-sockType udpServer (char const *port);
-sockType tcpServer (char const *port);
-int acceptWrapper (sockType);
+sockType connectWrapper (char const *node,char const *port){
+  GetaddrinfoWrapper ai{node,port,SOCK_STREAM};
+  auto s=ai.getSock();
+  if(0==::connect(s,ai().ai_addr,ai().ai_addrlen))return s;
+  errno=preserveError(s);
+  return -1;
+}
 
-int sockWrite (sockType,void const *data,int len
-               ,::sockaddr const* =nullptr,::socklen_t=0);
+sockType udpServer (char const *port){
+  GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
+  auto s=ai.getSock();
+  if(0==::bind(s,ai().ai_addr,ai().ai_addrlen))return s;
+  raise("udpServer",preserveError(s));
+}
 
-int sockRead (sockType,void *data,int len,::sockaddr*,::socklen_t*);
+sockType tcpServer (char const *port){
+  GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
+  auto s=ai.getSock();
+
+  if(int on=1;setsockWrapper(s,SO_REUSEADDR,on)==0
+    &&::bind(s,ai().ai_addr,ai().ai_addrlen)==0
+    &&::listen(s,SOMAXCONN)==0)return s;
+  raise("tcpServer",preserveError(s));
+}
+
+int acceptWrapper (sockType s){
+  if(int n=::accept(s,nullptr,nullptr);n>=0)return n;
+  auto e=getError();
+  if(ECONNABORTED==e)return 0;
+  raise("acceptWrapper",e);
+}
+
+int sockWrite (sockType s,void const *data,int len
+               ,sockaddr const *addr=nullptr,socklen_t toLen=0){
+  if(int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);r>0)
+    return r;
+  auto e=getError();
+  if(EAGAIN==e||EWOULDBLOCK==e)return 0;
+  raise("sockWrite",s,e);
+}
+
+int sockRead (sockType s,void *data,int len,sockaddr *addr,socklen_t *fromLen){
+  int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
+  if(r>0)return r;
+  auto e=getError();
+  if(0==r||ECONNRESET==e)raise<Fiasco>("sockRead eof",s,len,e);
+  if(EAGAIN==e||EWOULDBLOCK==e
+#ifdef CMW_WINDOWS
+     ||WSAETIMEDOUT==e
+#endif
+  )return 0;
+  raise("sockRead",s,len,e);
+}
 
 struct SameFormat{
   static void read (auto& b,auto& data){b.give(&data,sizeof(data));}
@@ -334,11 +519,21 @@ class SendBuffer{
   void receiveMulti (char const*,auto...);
 };
 
-void receiveBool (SendBuffer&,bool);
-void receive (SendBuffer&,::std::string_view,int=0);
+void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
+
+void receive (SendBuffer& b,::std::string_view s,int a=0){
+  MarshallingInt(s.size()+a).marshal(b);
+  b.receive(s.data(),s.size()+a);
+}
 
 using stringPlus=::std::initializer_list<::std::string_view>;
-void receive (SendBuffer&,stringPlus);
+void receive (SendBuffer& b,stringPlus lst){
+  ::int32_t t=0;
+  for(auto s:lst)t+=s.size();
+  MarshallingInt{t}.marshal(b);
+  for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
+}
+
 
 template<template<class...>class C,class T>
 void receiveBlock (SendBuffer& b,C<T>const& c){
@@ -348,6 +543,18 @@ void receiveBlock (SendBuffer& b,C<T>const& c){
     if(n>0)b.receive(c.data(),n*sizeof(T));
   }else if constexpr(::std::is_pointer_v<T>)for(auto e:c)e->marshal(b);
   else for(auto const& e:c)e.marshal(b);
+}
+
+//Encode integer into variable-length format.
+void MarshallingInt::marshal (SendBuffer& b)const{
+  ::uint32_t n=val;
+  for(;;){
+    ::uint8_t a=n&127;
+    n>>=7;
+    if(0==n){b.receive(a);return;}
+    b.receive(a|=128);
+    --n;
+  }
 }
 
 inline constexpr auto udpPacketMax=1500;
@@ -377,7 +584,7 @@ struct qlzState{
 };
 
 template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
- private:
+// private:
   qlzState *qlz=nullptr;
   char *compressedStart;
   char *compBuf=nullptr;
@@ -386,7 +593,6 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
   int compIndex=0;
   int bytesRead=0;
   bool kosher=true;
-
 
   bool doFlush (){
     int const bytes=Write(sock_,compBuf,compIndex);
@@ -460,7 +666,6 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     }
     return false;
   }
-
   bool leftovers (int);
   void compress ();
 };
@@ -513,5 +718,57 @@ template<int N>class FixedString{
 };
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
+
+GetaddrinfoWrapper::GetaddrinfoWrapper (char const *node,char const *port
+                                        ,int type,int flags){
+  ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
+  if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
+    raise("getaddrinfo",::gai_strerror(r));
+  addr=head;
+}
+
+GetaddrinfoWrapper::~GetaddrinfoWrapper (){::freeaddrinfo(head);}
+void GetaddrinfoWrapper::inc (){if(addr!=nullptr)addr=addr->ai_next;}
+
+sockType GetaddrinfoWrapper::getSock (){
+  for(;addr!=nullptr;addr=addr->ai_next){
+    if(auto s=::socket(addr->ai_family,addr->ai_socktype,0);-1!=s)return s;
+  }
+  raise("getaddrinfo getSock");
+}
+
+int SendBuffer::reserveBytes (int n){
+  if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
+  auto i=index;
+  index+=n;
+  return i;
+}
+
+void SendBuffer::fillInSize (::int32_t max){
+  ::int32_t marshalledBytes=index-savedSize;
+  if(marshalledBytes>max)raise("fillInSize",max);
+  receive(savedSize,marshalledBytes);
+  savedSize=index;
+}
+
+#ifndef CMW_WINDOWS
+void SendBuffer::receiveFile (char const* n,::int32_t sz){
+  receive(sz);
+  auto prev=reserveBytes(sz);
+  FileWrapper fl{n,O_RDONLY,0};
+  if(Read(fl(),buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
+}
+#endif
+
+bool SendBuffer::flush (){
+  int const bytes=sockWrite(sock_,buf,index);
+  if(bytes==index){reset();return true;}
+
+  index-=bytes;
+  savedSize=index;
+  ::std::memmove(buf,buf+bytes,index);
+  return false;
+}
+
 }
 #endif

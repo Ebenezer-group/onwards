@@ -1,5 +1,5 @@
 #include"base.hh"
-#include<cmw_BufferImpl.hh>
+#include<cmw_Buffer.hh>
 #include<boost/poly_collection/base_collection.hpp>
 #include"testing.mdl.hh"
 #include<iostream>

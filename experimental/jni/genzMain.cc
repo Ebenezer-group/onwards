@@ -1,4 +1,4 @@
-#include<cmw_BufferImpl.hh>
+#include<cmw_Buffer.hh>
 #include"genz.mdl.hh"
 #include"jniGenz.h"
 
