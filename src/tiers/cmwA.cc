@@ -32,8 +32,7 @@ struct cmwRequest{
     struct ::stat sb;
     if(::stat(name,&sb)<0)raise("stat",name,errno);
     if(sb.st_mtime<=prevTime)return false;
-    if('.'==name[0]||name[0]=='/')receive(buf,::std::strrchr(name,'/')+1,1);
-    else receive(buf,name,1);
+    receive(buf, '.'==name[0]||name[0]=='/'?::std::strrchr(name,'/')+1:name, 1);
 
     buf.receiveFile(name,sb.st_size);
     return true;
