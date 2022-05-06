@@ -532,9 +532,9 @@ class SendBuffer{
 
 void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
 
-void receive (SendBuffer& b,::std::string_view s,int a=0){
-  MarshallingInt(s.size()+a).marshal(b);
-  b.receive(s.data(),s.size()+a);
+void receive (SendBuffer& b,::std::string_view s){
+  MarshallingInt(s.size()).marshal(b);
+  b.receive(s.data(),s.size());
 }
 
 using stringPlus=::std::initializer_list<::std::string_view>;
@@ -544,7 +544,6 @@ void receive (SendBuffer& b,stringPlus lst){
   MarshallingInt{t}.marshal(b);
   for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
 }
-
 
 template<template<class...>class C,class T>
 void receiveBlock (SendBuffer& b,C<T>const& c){
