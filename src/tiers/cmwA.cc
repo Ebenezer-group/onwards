@@ -44,14 +44,13 @@ struct cmwRequest{
   cmwRequest (Socky const& ft,ReceiveBuffer<R>& buf):frnt{ft}
      ,bday{static_cast<::int32_t>(::std::time(nullptr))},acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
-    char* const pos=::std::strrchr(path(),'/');
-    if(nullptr==pos)raise("cmwRequest didn't find /");
-    *pos=0;
+    mdlFile=::std::strrchr(path(),'/');
+    if(nullptr==mdlFile)raise("cmwRequest didn't find /");
+    *mdlFile=0;
     setDirectory(path());
-    *pos='/';
-    mdlFile=pos+1;
+    *mdlFile='/';
     char last[60];
-    ::std::snprintf(last,sizeof last,".%s.last",mdlFile);
+    ::std::snprintf(last,sizeof last,".%s.last",++mdlFile);
     ::new(&fl)FileWrapper(last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP);
     switch(::pread(fl(),&prevTime,sizeof prevTime,0)){
       case 0:prevTime=0;break;
