@@ -40,8 +40,7 @@ struct cmwRequest{
   }
 
  public:
-  template<class R>
-  cmwRequest (Socky const& ft,ReceiveBuffer<R>& buf):frnt{ft}
+  cmwRequest (Socky const& ft,auto& buf):frnt{ft}
      ,bday{static_cast<::int32_t>(::std::time(nullptr))},acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     mdlFile=::std::strrchr(path(),'/');
