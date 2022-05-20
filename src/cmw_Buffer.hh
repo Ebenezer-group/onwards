@@ -326,13 +326,6 @@ sockType tcpServer (char const *port){
   raise("tcpServer",preserveError(s));
 }
 
-int acceptWrapper (sockType s){
-  if(int n=::accept(s,nullptr,nullptr);n>=0)return n;
-  auto e=getError();
-  if(ECONNABORTED==e)return 0;
-  raise("acceptWrapper",e);
-}
-
 int sockWrite (sockType s,void const *data,int len
                ,sockaddr const *addr=nullptr,socklen_t toLen=0){
   if(int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);r>0)
