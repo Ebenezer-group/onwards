@@ -423,6 +423,7 @@ template<class R>class ReceiveBuffer{
     else R::readBlock(*this,data,elements);
   }
 
+#ifndef CMW_WINDOWS
   void giveFile (fileType d){
     int sz=give<::uint32_t>();
     checkLen(sz);
@@ -432,6 +433,7 @@ template<class R>class ReceiveBuffer{
       rindex+=r;
     }
   }
+#endif
 
   template<class T>requires arithmetic<T>
   auto giveSpan (){
