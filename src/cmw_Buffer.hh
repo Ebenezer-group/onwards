@@ -135,20 +135,6 @@ inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
 void exitFailure (){::std::exit(EXIT_FAILURE);}
 #ifdef CMW_WINDOWS
 using sockType=SOCKET;
-using fileType=HANDLE;
-DWORD Write (HANDLE h,void const *data,int len){
-  DWORD bytesWritten;
-  if(!WriteFile(h,static_cast<char const*>(data),len,&bytesWritten,nullptr))
-    raise("Write",GetLastError());
-  return bytesWritten;
-}
-
-DWORD Read (HANDLE h,void *data,int len){
-  DWORD bytesRead;
-  if(!ReadFile(h,static_cast<char*>(data),len,&bytesRead,nullptr))
-    raise("Read",GetLastError());
-  return bytesRead;
-}
 #else
 using sockType=int;
 using fileType=int;
