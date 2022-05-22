@@ -137,7 +137,6 @@ void exitFailure (){::std::exit(EXIT_FAILURE);}
 using sockType=SOCKET;
 #else
 using sockType=int;
-using fileType=int;
 int Write (int fd,void const *data,int len){
   if(int r=::write(fd,data,len);r>=0)return r;
   raise("Write",errno);
@@ -424,7 +423,7 @@ template<class R>class ReceiveBuffer{
   }
 
 #ifndef CMW_WINDOWS
-  void giveFile (fileType d){
+  void giveFile (int d){
     int sz=give<::uint32_t>();
     checkLen(sz);
     while(sz>0){
