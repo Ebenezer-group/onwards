@@ -102,7 +102,7 @@ void login (){
 
   while(!cmwBuf.flush());
   fds[0].fd=cmwBuf.sock_;
-  fds[0].events=POLLIN;
+  fds[0].events=POLLIN|POLLRDHUP;
   ::sctp_paddrparams pad{};
   pad.spp_address.ss_family=AF_INET;
   pad.spp_hbinterval=240000;
@@ -164,6 +164,10 @@ int main (int ac,char **av)try{
 
   for(;;){
     pollWrapper(fds,2);
+    if(fds[0].revents&POLLRDHUP||fds[0].revents&POLLERR){
+      reset("Back tier disappeared");
+      continue;
+    }
     try{
       if(fds[0].revents&POLLIN&&cmwBuf.gotPacket()){
         do{
@@ -176,9 +180,6 @@ int main (int ac,char **av)try{
           pendingRequests.pop_front();
         }while(cmwBuf.nextMessage());
       }
-    }catch(Fiasco& e){
-      reset("Fiasco",e.what());
-      continue;
     }catch(::std::exception& e){
       ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
@@ -187,7 +188,6 @@ int main (int ac,char **av)try{
     }
 
     if(fds[0].revents&POLLOUT&&toBack())fds[0].events=POLLIN;
-    if(fds[0].revents&POLLERR)reset("Lost contact");
 
     if(fds[1].revents&POLLIN){
       Socky frnt;
