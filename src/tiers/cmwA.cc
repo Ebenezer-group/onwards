@@ -186,7 +186,7 @@ int main (int ac,char **av)try{
       pendingRequests.pop_front();
     }
 
-    if(fds[0].revents&POLLOUT&&toBack())fds[0].events=(POLLIN|POLLRDHUP);
+    if(fds[0].revents&POLLOUT&&toBack())fds[0].events&=~POLLOUT;
 
     if(fds[1].revents&POLLIN){
       Socky frnt;
