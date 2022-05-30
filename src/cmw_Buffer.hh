@@ -23,7 +23,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #define poll WSAPoll
 #else
 #include<errno.h>
-#include<fcntl.h>//fcntl,open
+#include<fcntl.h>//open
 #include<netdb.h>
 #include<poll.h>
 #include<sys/socket.h>
@@ -229,15 +229,6 @@ void setRcvTimeout (sockType s,int time){
   ::timeval t{time,0};
 #endif
   if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
-}
-
-int setNonblocking (sockType s){
-#ifdef CMW_WINDOWS
-  DWORD e=1;
-  return ::ioctlsocket(s,FIONBIO,&e);
-#else
-  return ::fcntl(s,F_SETFL,O_NONBLOCK);
-#endif
 }
 
 void closeSocket (sockType s){

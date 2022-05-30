@@ -111,7 +111,6 @@ void login (){
                   ,&pad,sizeof pad)==-1)bail("setsockopt",errno);
   while(!cmwBuf.gotPacket());
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
-  if(setNonblocking(fds[0].fd)==-1)bail("setNonb:%d",errno);
 }
 
 ::std::deque<cmwRequest> pendingRequests;
@@ -187,7 +186,7 @@ int main (int ac,char **av)try{
       pendingRequests.pop_front();
     }
 
-    if(fds[0].revents&POLLOUT&&toBack())fds[0].events=POLLIN;
+    if(fds[0].revents&POLLOUT&&toBack())fds[0].events=(POLLIN|POLLRDHUP);
 
     if(fds[1].revents&POLLIN){
       Socky frnt;
@@ -197,13 +196,12 @@ int main (int ac,char **av)try{
         gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
         req=&pendingRequests.emplace_back(frnt,frntBuf);
         back::marshal<messageID::generate,700000>(cmwBuf,*req);
+        fds[0].events|=POLLOUT;
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)toFront<false>(frnt,e.what());
         if(req)pendingRequests.pop_back();
-        continue;
       }
-      if(!toBack())fds[0].events|=POLLOUT;
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
