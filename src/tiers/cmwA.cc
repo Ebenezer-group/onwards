@@ -164,8 +164,8 @@ int main (int ac,char **av)try{
 
   for(;;){
     pollWrapper(fds,2);
-    if(fds[0].revents&POLLRDHUP||fds[0].revents&POLLERR){
-      reset("Back tier disappeared");
+    if(fds[0].revents&(POLLRDHUP|POLLERR)){
+      reset("Back tier vanished");
       continue;
     }
     try{
