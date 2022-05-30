@@ -315,9 +315,7 @@ int sockWrite (sockType s,void const *data,int len
                ,sockaddr const *addr=nullptr,socklen_t toLen=0){
   if(int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);r>0)
     return r;
-  auto e=getError();
-  if(EAGAIN==e||EWOULDBLOCK==e)return 0;
-  raise("sockWrite",s,e);
+  raise("sockWrite",s,getError());
 }
 
 int sockRead (sockType s,void *data,int len,sockaddr *addr,socklen_t *fromLen){
