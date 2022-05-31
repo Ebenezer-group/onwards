@@ -128,13 +128,6 @@ void reset (char const *context,char const *detail=""){
   login();
 }
 
-bool toBack ()try{
-  return cmwBuf.flush();
-}catch(::std::exception& e){
-  reset("toBack",e.what());
-  return true;
-}
-
 template<bool res>
 void toFront (Socky const& s,auto...t){
   frntBuf.reset();
@@ -186,7 +179,11 @@ int main (int ac,char **av)try{
       pendingRequests.pop_front();
     }
 
-    if(fds[0].revents&POLLOUT&&toBack())fds[0].events&=~POLLOUT;
+    try{
+      if(fds[0].revents&POLLOUT&&cmwBuf.flush())fds[0].events&=~POLLOUT;
+    }catch(::std::exception& e){
+      reset("toBack",e.what());
+    }
 
     if(fds[1].revents&POLLIN){
       Socky frnt;
