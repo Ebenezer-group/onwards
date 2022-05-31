@@ -14,14 +14,14 @@ jobs:
       fail-fast: false
       matrix:
         name: [
-          ubuntu-20.04-clang-12
+          ubuntu-22.04-clang-12
         ]
 
         include:
-          - name: ubuntu-20.04-clang-12
-            os: ubuntu-20.04
+          - name: ubuntu-22.04-clang-13
+            os: ubuntu-22.04
             compiler: clang
-            version: "12"
+            version: "13"
 
     steps:
     - uses: actions/checkout@v1
