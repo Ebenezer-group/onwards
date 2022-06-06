@@ -645,8 +645,6 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     }
     return false;
   }
-  bool leftovers (int);
-  void compress ();
 };
 #endif
 
