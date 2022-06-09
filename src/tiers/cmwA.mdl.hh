@@ -2,16 +2,16 @@
 #ifndef cmwA_mdl_hh
 #define cmwA_mdl_hh
 inline void
-cmwAccount::marshalMembers (::cmw::SendBuffer& buf)const{
-  number.marshal(buf);
+cmwCredentials::marshalMembers (::cmw::SendBuffer& buf)const{
+  userID.marshal(buf);
   password.marshal(buf);
 }
 
 struct back{
 static void mar (auto& buf
-         ,::std::vector<cmwAccount> const& a
+         ,cmwCredentials const& a
          ,::int32_t b){
-  receiveBlock(buf,a);
+  a.marshal(buf);
   buf.receive(b);
 }
 

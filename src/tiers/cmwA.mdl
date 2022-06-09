@@ -1,8 +1,8 @@
-account.hh
+credentials.hh
 --
 //Messages the middle tier sends to the back and front tiers
 back <messageID_t=messageID>
-  -out (::std::vector<cmwAccount>,::int32_t)
+  -out (cmwCredentials,::int32_t)
   -out (cmwRequest)
 !
 

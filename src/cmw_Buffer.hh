@@ -122,6 +122,7 @@ class MarshallingInt{
   }
 
   MarshallingInt (MarshallingInt const&)=default;
+  MarshallingInt& operator= (MarshallingInt&&)=default;
 
   void operator= (::int32_t r){val=r;}
   void operator+= (::int32_t r){val+=r;}
@@ -530,7 +531,7 @@ void MarshallingInt::marshal (SendBuffer& b)const{
   for(;;){
     ::uint8_t a=n&127;
     n>>=7;
-    if(0==n){b.receive(a);return;}
+    if(0==n){b.receive(a);break;}
     b.receive(a|=128);
     --n;
   }
@@ -673,6 +674,15 @@ template<int N>class FixedString{
     str[len()]=0;
   }
 
+  FixedString& operator= (FixedString&&)=default;
+  FixedString& operator= (::std::string_view s){
+    len=s.size();
+    if(len()>=N)raise("FixedString operator=");
+    ::std::memcpy(str,s.data(),len());
+    str[len()]=0;
+    return *this;
+  }
+
   void marshal (SendBuffer& b)const{
     len.marshal(b);
     b.receive(str,len());
@@ -693,6 +703,7 @@ template<int N>class FixedString{
   char const* data ()const{return str;}
   char operator[] (int i)const{return str[i];}
 };
+using FixedString16=FixedString<16>;
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
 

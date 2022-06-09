@@ -1,9 +1,8 @@
 #include<cmw_Buffer.hh>
-#include"account.hh"
+#include"credentials.hh"
 #include"messageIDs.hh"
 
 #include<deque>
-#include<vector>
 #include<cassert>
 #include<ctime>
 #ifdef __linux__
@@ -87,7 +86,7 @@ void checkField (char const *fld,char const *actl){
 GetaddrinfoWrapper gai("75.23.62.38","56789",SOCK_STREAM);
 ::pollfd fds[2];
 int loginPause;
-::std::vector<cmwAccount> accounts;
+cmwCredentials cred;
 BufferCompressed<SameFormat> cmwBuf{1101000};
 
 void login (){
@@ -139,14 +138,11 @@ int main (int ac,char **av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac!=2)bail("Usage: cmwA config-file");
   FileBuffer cfg{av[1],O_RDONLY};
-  char const *tok;
-  while((tok=cfg.getline(' '))&&!::std::strcmp("Account-number",tok)){
-    auto num=fromChars(cfg.getline());
-    checkField("Password",cfg.getline(' '));
-    accounts.emplace_back(num,cfg.getline());
-  }
-  if(accounts.empty())bail("An account number is required.");
-  checkField("UDP-port-number",tok);
+  checkField("UserID",cfg.getline(' '));
+  cred.userID=cfg.getline();
+  checkField("Password",cfg.getline(' '));
+  cred.password=cfg.getline();
+  checkField("UDP-port-number",cfg.getline(' '));
   fds[1].fd=frntBuf.sock_=udpServer(cfg.getline());
   fds[1].events=POLLIN;
 

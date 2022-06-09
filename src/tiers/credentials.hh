@@ -1,8 +1,8 @@
-struct cmwAccount{
-  ::cmw::MarshallingInt number;
+struct cmwCredentials{
+  ::cmw::FixedString16 userID;
   ::cmw::FixedString60 password;
 
-  cmwAccount (int n,::std::string_view p):number(n),password(p){}
+  cmwCredentials()=default;
   template<class R>explicit cmwAccount (::cmw::ReceiveBuffer<R>&);
 
   void marshalMembers (::cmw::SendBuffer&)const;
