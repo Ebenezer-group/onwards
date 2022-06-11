@@ -674,13 +674,11 @@ template<int N>class FixedString{
     str[len()]=0;
   }
 
-  FixedString& operator= (FixedString&&)=default;
-  FixedString& operator= (::std::string_view s){
+  void operator= (::std::string_view s){
     len=s.size();
     if(len()>=N)raise("FixedString operator=");
     ::std::memcpy(str,s.data(),len());
     str[len()]=0;
-    return *this;
   }
 
   void marshal (SendBuffer& b)const{

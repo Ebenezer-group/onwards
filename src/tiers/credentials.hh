@@ -2,7 +2,7 @@ struct cmwCredentials{
   ::cmw::FixedString16 userID;
   ::cmw::FixedString60 password;
 
-  cmwCredentials()=default;
+  cmwCredentials ()=default;
   template<class R>explicit cmwCredentials (::cmw::ReceiveBuffer<R>&);
 
   void marshalMembers (::cmw::SendBuffer&)const;
