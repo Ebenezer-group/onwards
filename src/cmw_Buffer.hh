@@ -650,8 +650,8 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 #endif
 
 template<int N>class FixedString{
-  MarshallingInt len{};
   char str[N];
+  MarshallingInt len{};
 
  public:
   FixedString ()=default;
@@ -701,7 +701,7 @@ template<int N>class FixedString{
   char const* data ()const{return str;}
   char operator[] (int i)const{return str[i];}
 };
-using FixedString16=FixedString<16>;
+using FixedString20=FixedString<20>;
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
 
