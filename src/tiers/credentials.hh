@@ -1,5 +1,5 @@
 struct cmwCredentials{
-  ::cmw::FixedString16 userID;
+  ::cmw::FixedString20 userID;
   ::cmw::FixedString60 password;
 
   cmwCredentials ()=default;
