@@ -107,7 +107,7 @@ void login (){
   pad.spp_hbinterval=240000;
   pad.spp_flags=SPP_HB_ENABLE;
   if(::setsockopt(fds[0].fd,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
-                  ,&pad,sizeof pad)==-1)bail("setsockopt",errno);
+                  ,&pad,sizeof pad)==-1)bail("setsockopt %d",errno);
   while(!cmwBuf.gotPacket());
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
 }
