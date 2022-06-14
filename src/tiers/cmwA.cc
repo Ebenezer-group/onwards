@@ -9,8 +9,8 @@
 #include<linux/sctp.h>//May need libsctp-dev
 #else
 #include<netinet/sctp.h>
-#include<signal.h>
 #endif
+#include<signal.h>
 using namespace ::cmw;
 
 struct Socky{
