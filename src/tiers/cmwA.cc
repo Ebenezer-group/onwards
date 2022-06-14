@@ -9,6 +9,7 @@
 #include<linux/sctp.h>//May need libsctp-dev
 #else
 #include<netinet/sctp.h>
+#include<signal.h>
 #endif
 using namespace ::cmw;
 
@@ -148,6 +149,7 @@ int main (int ac,char **av)try{
 
   checkField("Login-interval-in-seconds",cfg.getline(' '));
   loginPause=fromChars(cfg.getline());
+  ::signal(SIGPIPE,SIG_IGN);
   login();
 
   for(;;){
