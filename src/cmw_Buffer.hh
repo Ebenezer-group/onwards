@@ -130,8 +130,7 @@ using sockType=SOCKET;
 #else
 using sockType=int;
 void setDirectory (char const *d){
-  if(::chdir(d)==-1)
-    raise("setDirectory",d,errno);
+  if(::chdir(d)==-1)raise("setDirectory",d,errno);
 }
 
 int Write (int fd,void const *data,int len){
@@ -154,10 +153,11 @@ class FileWrapper{
   FileWrapper (char const*,int flags,mode_t);
   FileWrapper (char const*,mode_t);
   FileWrapper (FileWrapper const&)=delete;
-  FileWrapper (FileWrapper&&)noexcept;
+  FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
+
   FileWrapper& operator= (FileWrapper&&)noexcept;
   auto operator() (){return d;}
-  ~FileWrapper ();
+  ~FileWrapper (){::close(d);}
 };
 
 struct FileBuffer{
@@ -181,15 +181,11 @@ FileWrapper::FileWrapper (char const *name,int flags,mode_t mode):
 FileWrapper::FileWrapper (char const *name,mode_t mode):
         FileWrapper(name,O_CREAT|O_WRONLY|O_TRUNC,mode){}
 
-FileWrapper::FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
-
 FileWrapper& FileWrapper::operator= (FileWrapper&& o)noexcept{
   d=o.d;
   o.d=-2;
   return *this;
 }
-
-FileWrapper::~FileWrapper (){::close(d);}
 
 char FileBuffer::getc (){
   if(ind>=bytes){
