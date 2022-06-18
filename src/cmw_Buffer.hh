@@ -89,15 +89,6 @@ int fromChars (::std::string_view s){
   return n;
 }
 
-void setDirectory (char const *d){
-#ifdef CMW_WINDOWS
-  if(!::SetCurrentDirectory(d))
-#else
-  if(::chdir(d)==-1)
-#endif
-    raise("setDirectory",d,getError());
-}
-
 
 class SendBuffer;
 template<class>class ReceiveBuffer;
@@ -138,6 +129,11 @@ void exitFailure (){::std::exit(EXIT_FAILURE);}
 using sockType=SOCKET;
 #else
 using sockType=int;
+void setDirectory (char const *d){
+  if(::chdir(d)==-1)
+    raise("setDirectory",d,errno);
+}
+
 int Write (int fd,void const *data,int len){
   if(int r=::write(fd,data,len);r>=0)return r;
   raise("Write",errno);
