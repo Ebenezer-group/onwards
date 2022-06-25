@@ -160,18 +160,6 @@ class FileWrapper{
   ~FileWrapper (){::close(d);}
 };
 
-struct FileBuffer{
-  FileWrapper fl;
-  char buf[4096];
-  char line[120];
-  int ind=0;
-  int bytes=0;
-
-  FileBuffer (char const* name,int flags):fl(name,flags,0){}
-  char getc ();
-  char* getline (char='\n');
-};
-
 void getFile (char const *n,auto& b){
   b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}());
 }
@@ -186,6 +174,18 @@ FileWrapper& FileWrapper::operator= (FileWrapper&& o)noexcept{
   o.d=-2;
   return *this;
 }
+
+struct FileBuffer{
+  FileWrapper fl;
+  char buf[4096];
+  char line[120];
+  int ind=0;
+  int bytes=0;
+
+  FileBuffer (char const* name,int flags):fl(name,flags,0){}
+  char getc ();
+  char* getline (char='\n');
+};
 
 char FileBuffer::getc (){
   if(ind>=bytes){
