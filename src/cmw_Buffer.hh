@@ -112,9 +112,6 @@ class MarshallingInt{
     }
   }
 
-  MarshallingInt (MarshallingInt const&)=default;
-  MarshallingInt& operator= (MarshallingInt&&)=default;
-
   void operator= (::int32_t r){val=r;}
   void operator+= (::int32_t r){val+=r;}
   auto operator() ()const{return val;}
