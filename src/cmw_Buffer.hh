@@ -695,7 +695,6 @@ template<int N>class FixedString{
   char const* data ()const{return str;}
   char operator[] (int i)const{return str[i];}
 };
-using FixedString20=FixedString<20>;
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
 
