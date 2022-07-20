@@ -546,14 +546,11 @@ struct SendBufferHeap:SendBuffer{
 
 #ifndef CMW_WINDOWS
 auto myMin (auto a,auto b){return a<b?a:b;}
-struct qlzState{
-  ::qlz_state_compress compress;
-  ::qlz_state_decompress decomp;
-};
 
 template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
  private:
-  qlzState qlz;
+  ::qlz_state_compress comp;
+  ::qlz_state_decompress decomp;
   char *compressedStart;
   char *compBuf=nullptr;
   int const compSize;
@@ -590,7 +587,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     if(index>0){
       if(index+(index>>3)+400>compSize-compIndex)
         raise("Not enough room in compressed buf");
-      compIndex+=::qlz_compress(buf,compBuf+compIndex,index,&qlz.compress);
+      compIndex+=::qlz_compress(buf,compBuf+compIndex,index,&comp);
       reset();
       if(rc)rc=doFlush();
     }
@@ -599,7 +596,8 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 
   void compressedReset (){
     reset();
-    qlz={};
+    comp={};
+    decomp={};
     compIndex=bytesRead=0;
     kosher=true;
     closeSocket(sock_);
@@ -620,7 +618,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
       }
       bytesRead+=Read(sock_,compressedStart+bytesRead,compPacketSize-bytesRead);
       if(bytesRead<compPacketSize)return false;
-      ::qlz_decompress(compressedStart,rbuf,&qlz.decomp);
+      ::qlz_decompress(compressedStart,rbuf,&decomp);
       bytesRead=0;
       this->update();
       return true;
