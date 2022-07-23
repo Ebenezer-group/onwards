@@ -632,8 +632,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
   }
 
   bool gotIt (int);
-  auto getAddr ();
-  auto getLen ();
+  auto getDuo ();
   bool leftovers (int);
   void compress ();
 };
