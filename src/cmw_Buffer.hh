@@ -44,9 +44,9 @@ class Failure:public ::std::exception{
     (st+=" ")+=v;
   }
 
-  void operator<< (int i){
-    char b[16];
-    *this<<::std::string_view(b,::std::snprintf(b,sizeof b,"%d",i));
+  void operator<< (::uint64_t i){
+    char b[32];
+    *this<<::std::string_view(b,::std::snprintf(b,sizeof b,"%lu",i));
   }
 
   char const* what ()const noexcept{return st.data();}
