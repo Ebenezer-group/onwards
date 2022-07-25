@@ -559,12 +559,18 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
   int bytesRead=0;
   bool kosher=true;
 
-  bool doFlush (){
-    int const bytes=Write(sock_,compBuf,compIndex);
-    if(bytes==compIndex){compIndex=0;return true;}
+  bool all (int bytes){
+    if(bytes==compIndex){
+      compIndex=0;
+      return true;
+    }
     compIndex-=bytes;
     ::std::memmove(compBuf,compBuf+bytes,compIndex);
     return false;
+  }
+
+  bool doFlush (){
+    return all(Write(sock_,compBuf,compIndex));
   }
  public:
   BufferCompressed (int sz,int):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz])
@@ -637,7 +643,6 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
 
   bool gotIt (int);
   auto getDuo ();
-  bool leftovers (int);
 };
 #endif
 
