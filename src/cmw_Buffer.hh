@@ -580,15 +580,19 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     delete[]compBuf;
   }
 
+  void compress (){
+    if((index+(index>>3)+400)>(compSize-compIndex))
+      raise("Not enough room in compressed buf");
+    compIndex+=::qlz_compress(buf,compBuf+compIndex,index,&comp);
+    reset();
+  }
+
   bool flush (){
     bool rc=true;
     if(compIndex>0)rc=doFlush();
 
     if(index>0){
-      if(index+(index>>3)+400>compSize-compIndex)
-        raise("Not enough room in compressed buf");
-      compIndex+=::qlz_compress(buf,compBuf+compIndex,index,&comp);
-      reset();
+      compress();
       if(rc)rc=doFlush();
     }
     return rc;
@@ -634,7 +638,6 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
   bool gotIt (int);
   auto getDuo ();
   bool leftovers (int);
-  void compress ();
 };
 #endif
 
