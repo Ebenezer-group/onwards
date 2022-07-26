@@ -613,25 +613,34 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     closeSocket(sock_);
   }
 
+  bool gotIt (int rc){
+    if((bytesRead+=rc)<9)return false;
+    if(bytesRead==9){
+      if((compPacketSize=::qlz_size_compressed(rbuf))>bufsize||
+         (this->packetLength=::qlz_size_decompressed(rbuf))>bufsize){
+        kosher=false;
+        raise("gotPacket too big",compPacketSize,this->packetLength,bufsize);
+      }
+      compressedStart=rbuf+bufsize-compPacketSize;
+      ::std::memmove(compressedStart,rbuf,9);
+      return false;
+    }
+
+    if(bytesRead<compPacketSize)return false;
+    ::qlz_decompress(compressedStart,rbuf,&decomp);
+    bytesRead=0;
+    this->update();
+    return true;
+  }
+
   bool gotPacket (){
     if(kosher){
-      if(bytesRead<9){
-        bytesRead+=Read(sock_,rbuf+bytesRead,9-bytesRead);
-        if(bytesRead<9)return false;
-        if((compPacketSize=::qlz_size_compressed(rbuf))>bufsize||
-           (this->packetLength=::qlz_size_decompressed(rbuf))>bufsize){
-          kosher=false;
-          raise("gotPacket too big",compPacketSize,this->packetLength,bufsize);
-        }
-        compressedStart=rbuf+bufsize-compPacketSize;
-        ::std::memmove(compressedStart,rbuf,9);
-      }
-      bytesRead+=Read(sock_,compressedStart+bytesRead,compPacketSize-bytesRead);
-      if(bytesRead<compPacketSize)return false;
-      ::qlz_decompress(compressedStart,rbuf,&decomp);
-      bytesRead=0;
-      this->update();
-      return true;
+      int rc;
+      if(bytesRead<9)
+        rc=Read(sock_,rbuf+bytesRead,9-bytesRead);
+      else
+        rc=Read(sock_,compressedStart+bytesRead,compPacketSize-bytesRead);
+      return gotIt(rc);
     }
     bytesRead+=Read(sock_,rbuf,myMin(bufsize,compPacketSize-bytesRead));
     if(bytesRead==compPacketSize){
@@ -641,7 +650,6 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     return false;
   }
 
-  bool gotIt (int);
   auto getDuo ();
 };
 #endif
