@@ -633,14 +633,15 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     return true;
   }
 
+  auto getDuo (){
+    return bytesRead<9?::std::span<char>(rbuf+bytesRead,9-bytesRead):
+	::std::span<char>(compressedStart+bytesRead,compPacketSize-bytesRead);
+  }
+
   bool gotPacket (){
     if(kosher){
-      int rc;
-      if(bytesRead<9)
-        rc=Read(sock_,rbuf+bytesRead,9-bytesRead);
-      else
-        rc=Read(sock_,compressedStart+bytesRead,compPacketSize-bytesRead);
-      return gotIt(rc);
+      auto sp=getDuo();
+      return gotIt(Read(sock_,sp.data(),sp.size());
     }
     bytesRead+=Read(sock_,rbuf,myMin(bufsize,compPacketSize-bytesRead));
     if(bytesRead==compPacketSize){
@@ -649,8 +650,6 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     }
     return false;
   }
-
-  auto getDuo ();
 };
 #endif
 
