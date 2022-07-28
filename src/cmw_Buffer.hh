@@ -641,7 +641,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
   bool gotPacket (){
     if(kosher){
       auto sp=getDuo();
-      return gotIt(Read(sock_,sp.data(),sp.size());
+      return gotIt(Read(sock_,sp.data(),sp.size()));
     }
     bytesRead+=Read(sock_,rbuf,myMin(bufsize,compPacketSize-bytesRead));
     if(bytesRead==compPacketSize){
