@@ -619,7 +619,7 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
       if((compPacketSize=::qlz_size_compressed(rbuf))>bufsize||
          (this->packetLength=::qlz_size_decompressed(rbuf))>bufsize){
         kosher=false;
-        raise("gotPacket too big",compPacketSize,this->packetLength,bufsize);
+        raise("gotIt too big",compPacketSize,this->packetLength,bufsize);
       }
       compressedStart=rbuf+bufsize-compPacketSize;
       ::std::memmove(compressedStart,rbuf,9);
