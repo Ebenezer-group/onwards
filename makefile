@@ -31,7 +31,7 @@ clean:
 INSTALL_DIR=/usr/local/
 install:
 	cp -f src/*.hh src/quicklz.* $(INSTALL_DIR)include
-	cp -f $(TIERS) $(INSTALL_DIR)bin
+	cp -f $(FRONT) $(MIDDLE) $(INSTALL_DIR)bin
 	cp -f $(BASE)cmwA.cfg $(INSTALL_DIR)etc
 
 uninstall:

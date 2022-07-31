@@ -153,51 +153,51 @@ int main (int ac,char **av)try{
   ::signal(SIGPIPE,SIG_IGN);
   login();
 
-  for(;;){
-    pollWrapper(fds,2);
-    if(fds[0].revents&(POLLRDHUP|POLLERR)){
-      reset("Back tier vanished");
-      continue;
+loop:
+  pollWrapper(fds,2);
+  if(fds[0].revents&(POLLRDHUP|POLLERR)){
+    reset("Back tier vanished");
+    goto loop;
+  }
+  try{
+    if(fds[0].revents&POLLIN&&cmwBuf.gotPacket()){
+      do{
+        assert(!pendingRequests.empty());
+        auto& req=pendingRequests.front();
+        if(giveBool(cmwBuf)){
+          getFile(req.getFileName(),cmwBuf);
+          toFront<true>(req.frnt);
+        }else toFront<false>(req.frnt,"CMW:",cmwBuf.giveStringView());
+        pendingRequests.pop_front();
+      }while(cmwBuf.nextMessage());
     }
-    try{
-      if(fds[0].revents&POLLIN&&cmwBuf.gotPacket()){
-        do{
-          assert(!pendingRequests.empty());
-          auto& req=pendingRequests.front();
-          if(giveBool(cmwBuf)){
-            getFile(req.getFileName(),cmwBuf);
-            toFront<true>(req.frnt);
-          }else toFront<false>(req.frnt,"CMW:",cmwBuf.giveStringView());
-          pendingRequests.pop_front();
-        }while(cmwBuf.nextMessage());
-      }
-    }catch(::std::exception& e){
-      ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
-      assert(!pendingRequests.empty());
-      toFront<false>(pendingRequests.front().frnt,e.what());
-      pendingRequests.pop_front();
-    }
+  }catch(::std::exception& e){
+    ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
+    assert(!pendingRequests.empty());
+    toFront<false>(pendingRequests.front().frnt,e.what());
+    pendingRequests.pop_front();
+  }
 
-    try{
-      if(fds[0].revents&POLLOUT&&cmwBuf.flush())fds[0].events&=~POLLOUT;
-    }catch(::std::exception& e){
-      reset("toBack",e.what());
-    }
+  try{
+    if(fds[0].revents&POLLOUT&&cmwBuf.flush())fds[0].events&=~POLLOUT;
+  }catch(::std::exception& e){
+    reset("toBack",e.what());
+  }
 
-    if(fds[1].revents&POLLIN){
-      Socky frnt;
-      bool gotAddr=false;
-      cmwRequest *req=nullptr;
-      try{
-        gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
-        req=&pendingRequests.emplace_back(frnt,frntBuf);
-        back::marshal<messageID::generate,700000>(cmwBuf,*req);
-        fds[0].events|=POLLOUT;
-      }catch(::std::exception& e){
-        ::syslog(LOG_ERR,"Accept request:%s",e.what());
-        if(gotAddr)toFront<false>(frnt,e.what());
-        if(req)pendingRequests.pop_back();
-      }
+  if(fds[1].revents&POLLIN){
+    Socky frnt;
+    bool gotAddr=false;
+    cmwRequest *req=nullptr;
+    try{
+      gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
+      req=&pendingRequests.emplace_back(frnt,frntBuf);
+      back::marshal<messageID::generate,700000>(cmwBuf,*req);
+      fds[0].events|=POLLOUT;
+    }catch(::std::exception& e){
+      ::syslog(LOG_ERR,"Accept request:%s",e.what());
+      if(gotAddr)toFront<false>(frnt,e.what());
+      if(req)pendingRequests.pop_back();
     }
   }
+  goto loop;
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
