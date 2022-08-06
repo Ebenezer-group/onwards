@@ -546,14 +546,14 @@ struct SendBufferHeap:SendBuffer{
 
 #ifndef CMW_WINDOWS
 auto myMin (auto a,auto b){return a<b?a:b;}
+constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 
 template<class R,int sz>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
  private:
   ::qlz_state_compress comp;
   ::qlz_state_decompress decomp;
   char *compressedStart;
-  char compBuf[sz+(sz>>3)+400];
-  int const compSize=sz+(sz>>3)+400;
+  char compBuf[qlzFormula(sz)];
   int compPacketSize;
   int compIndex=0;
   int bytesRead=0;
@@ -581,7 +581,7 @@ template<class R,int sz>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
   }
 
   void compress (){
-    if((index+(index>>3)+400)>(compSize-compIndex))
+    if(qlzFormula(index)>(qlzFormula(sz)-compIndex))
       raise("Not enough room in compressed buf");
     compIndex+=::qlz_compress(buf,compBuf+compIndex,index,&comp);
     reset();
