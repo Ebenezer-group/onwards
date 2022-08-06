@@ -573,9 +573,7 @@ template<class R,int sz>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     return all(Write(sock_,compBuf,compIndex));
   }
  public:
-  BufferCompressed (int):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz]){}
-
-  explicit BufferCompressed ():BufferCompressed(0){}
+  explicit BufferCompressed ():SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz]){}
 
   using ReceiveBuffer<R>::rbuf;
   ~BufferCompressed (){
