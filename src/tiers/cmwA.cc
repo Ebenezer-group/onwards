@@ -88,7 +88,7 @@ GetaddrinfoWrapper gai("75.23.62.38","56789",SOCK_STREAM);
 ::pollfd fds[2];
 int loginPause;
 cmwCredentials cred;
-BufferCompressed<SameFormat> cmwBuf{1101000};
+BufferCompressed<SameFormat,1101000> cmwBuf{};
 
 void login (){
   ::back::marshal<messageID::login>(cmwBuf,cred,cmwBuf.getSize());

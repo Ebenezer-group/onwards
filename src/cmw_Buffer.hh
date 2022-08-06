@@ -547,13 +547,13 @@ struct SendBufferHeap:SendBuffer{
 #ifndef CMW_WINDOWS
 auto myMin (auto a,auto b){return a<b?a:b;}
 
-template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
+template<class R,int sz>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
  private:
   ::qlz_state_compress comp;
   ::qlz_state_decompress decomp;
   char *compressedStart;
-  char *compBuf=nullptr;
-  int const compSize;
+  char compBuf[sz+(sz>>3)+400];
+  int const compSize=sz+(sz>>3)+400;
   int compPacketSize;
   int compIndex=0;
   int bytesRead=0;
@@ -573,17 +573,13 @@ template<class R>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     return all(Write(sock_,compBuf,compIndex));
   }
  public:
-  BufferCompressed (int sz,int):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz])
-                     ,compSize(sz+(sz>>3)+400){}
+  BufferCompressed (int):SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz]){}
 
-  explicit BufferCompressed (int sz):BufferCompressed(sz,0){
-    compBuf=new char[compSize];
-  }
+  explicit BufferCompressed (int sz):BufferCompressed(0){}
 
   using ReceiveBuffer<R>::rbuf;
   ~BufferCompressed (){
     delete[]rbuf;
-    delete[]compBuf;
   }
 
   void compress (){
