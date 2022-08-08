@@ -46,7 +46,7 @@ class Failure:public ::std::exception{
 
   void operator<< (::int64_t i){
     char b[32];
-    *this<<::std::string_view(b,::std::snprintf(b,sizeof b,"%lld",i));
+    *this<<::std::string_view(b,::std::snprintf(b,sizeof b,"%ld",i));
   }
 
   char const* what ()const noexcept{return st.data();}
@@ -554,6 +554,7 @@ template<class R,int sz>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
   ::qlz_state_decompress decomp;
   char *compressedStart;
   char compBuf[qlzFormula(sz)];
+  char recBuf[sz];
   int compPacketSize;
   int compIndex=0;
   int bytesRead=0;
@@ -573,12 +574,7 @@ template<class R,int sz>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     return all(Write(sock_,compBuf,compIndex));
   }
  public:
-  explicit BufferCompressed ():SendBufferHeap(sz),ReceiveBuffer<R>(new char[sz]){}
-
-  using ReceiveBuffer<R>::rbuf;
-  ~BufferCompressed (){
-    delete[]rbuf;
-  }
+  explicit BufferCompressed ():SendBufferHeap(sz),ReceiveBuffer<R>(recBuf){}
 
   void compress (){
     if(qlzFormula(index)>(qlzFormula(sz)-compIndex))
@@ -607,6 +603,7 @@ template<class R,int sz>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     closeSocket(sock_);
   }
 
+  using ReceiveBuffer<R>::rbuf;
   bool gotIt (int rc){
     if((bytesRead+=rc)<9)return false;
     if(bytesRead==9){
