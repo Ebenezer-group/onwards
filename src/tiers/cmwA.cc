@@ -85,12 +85,11 @@ void checkField (char const *fld,char const *actl){
 }
 
 GetaddrinfoWrapper gai("75.23.62.38","56789",SOCK_STREAM);
-::pollfd fds[2];
 int loginPause;
 cmwCredentials cred;
 BufferCompressed<SameFormat,1101000> cmwBuf{};
 
-void login (){
+auto login (){
   ::back::marshal<messageID::login>(cmwBuf,cred,cmwBuf.getSize());
   for(;;){
     cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
@@ -101,8 +100,6 @@ void login (){
   }
 
   while(!cmwBuf.flush());
-  fds[0].fd=cmwBuf.sock_;
-  fds[0].events=POLLIN|POLLRDHUP;
   ::sctp_paddrparams pad{};
   pad.spp_address.ss_family=AF_INET;
   pad.spp_hbinterval=240000;
@@ -111,12 +108,13 @@ void login (){
                   ,&pad,sizeof pad)==-1)bail("setsockopt %d",errno);
   while(!cmwBuf.gotPacket());
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
+  return cmwBuf.sock_;
 }
 
 ::std::deque<cmwRequest> pendingRequests;
 BufferStack<SameFormat> frntBuf;
 
-void reset (char const *context,char const *detail=""){
+auto reset (char const *context,char const *detail=""){
   ::syslog(LOG_ERR,"%s:%s",context,detail);
   frntBuf.reset();
   ::front::marshal<false,udpPacketMax>(frntBuf,{context," ",detail});
@@ -125,7 +123,7 @@ void reset (char const *context,char const *detail=""){
   }
   pendingRequests.clear();
   cmwBuf.compressedReset();
-  login();
+  return login();
 }
 
 template<bool res>
@@ -145,18 +143,20 @@ int main (int ac,char **av)try{
   checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   checkField("UDP-port-number",cfg.getline(' '));
+  ::pollfd fds[2];
   fds[1].fd=frntBuf.sock_=udpServer(cfg.getline());
   fds[1].events=POLLIN;
 
   checkField("Login-interval-in-seconds",cfg.getline(' '));
   loginPause=fromChars(cfg.getline());
   ::signal(SIGPIPE,SIG_IGN);
-  login();
+  fds[0].fd=login();
+  fds[0].events=POLLIN|POLLRDHUP;
 
 loop:
   pollWrapper(fds,2);
   if(fds[0].revents&(POLLRDHUP|POLLERR)){
-    reset("Back tier vanished");
+    fds[0].fd=reset("Back tier vanished");
     goto loop;
   }
   try{
@@ -181,7 +181,7 @@ loop:
   try{
     if(fds[0].revents&POLLOUT&&cmwBuf.flush())fds[0].events&=~POLLOUT;
   }catch(::std::exception& e){
-    reset("toBack",e.what());
+    fds[0].fd=reset("toBack",e.what());
   }
 
   if(fds[1].revents&POLLIN){
