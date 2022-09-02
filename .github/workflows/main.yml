@@ -21,10 +21,10 @@ jobs:
           - name: ubuntu-22.04-clang-13
             os: ubuntu-22.04
             compiler: clang
-            version: "11"
+            version: "13"
 
     steps:
     - uses: actions/checkout@v1
     - name:
       run: sudo apt-get -y install libsctp-dev;
-           make
+           make CXX=clang++
