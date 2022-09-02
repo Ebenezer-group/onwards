@@ -1,4 +1,4 @@
-CXXFLAGS=$(CXX) -std=c++20 -Isrc -Os -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
+CXXFLAGS=$(CXX) -std=c++20 -Isrc -Oz -flto -Wundef -W -Wall -Wextra -Wpedantic -Wreorder -o $@ $@.cc
 
 EXAMPLES:=example/sendExample example/receiveExample
 FRONT:=src/tiers/front/genz
