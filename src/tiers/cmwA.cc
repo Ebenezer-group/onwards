@@ -86,7 +86,6 @@ void checkField (char const *fld,char const *actl){
 
 GetaddrinfoWrapper gai("75.23.62.38","56789",SOCK_STREAM);
 ::pollfd fds[2];
-int loginPause;
 cmwCredentials cred;
 BufferCompressed<SameFormat,1101000> cmwBuf{};
 
@@ -97,7 +96,7 @@ void login (){
     if(0==::connect(cmwBuf.sock_,gai().ai_addr,gai().ai_addrlen))break;
     ::std::printf("connect %d\n",errno);
     ::close(cmwBuf.sock_);
-    ::sleep(loginPause);
+    ::sleep(30);
   }
 
   while(!cmwBuf.flush());
@@ -148,8 +147,6 @@ int main (int ac,char **av)try{
   fds[1].fd=frntBuf.sock_=udpServer(cfg.getline());
   fds[1].events=POLLIN;
 
-  checkField("Login-interval-in-seconds",cfg.getline(' '));
-  loginPause=fromChars(cfg.getline());
   ::signal(SIGPIPE,SIG_IGN);
   login();
 
@@ -159,6 +156,7 @@ loop:
     reset("Back tier vanished");
     goto loop;
   }
+
   try{
     if(fds[0].revents&POLLIN&&cmwBuf.gotPacket()){
       do{
