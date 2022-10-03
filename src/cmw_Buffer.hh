@@ -539,16 +539,11 @@ class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
   }
 };
 
-struct SendBufferHeap:SendBuffer{
-  SendBufferHeap (int n):SendBuffer(new unsigned char[n],n){}
-  ~SendBufferHeap (){delete[]buf;}
-};
-
 #ifndef CMW_WINDOWS
 auto myMin (auto a,auto b){return a<b?a:b;}
 constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 
-template<class R,int sz>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
+template<class R,int sz>struct BufferCompressed:SendBuffer,ReceiveBuffer<R>{
  private:
   ::qlz_state_compress comp;
   ::qlz_state_decompress decomp;
@@ -574,7 +569,8 @@ template<class R,int sz>struct BufferCompressed:SendBufferHeap,ReceiveBuffer<R>{
     return all(Write(sock_,compBuf,compIndex));
   }
  public:
-  explicit BufferCompressed ():SendBufferHeap(sz),ReceiveBuffer<R>(recBuf){}
+  explicit BufferCompressed ():SendBuffer(new unsigned char[sz],sz),ReceiveBuffer<R>(recBuf){}
+  ~BufferCompressed (){delete[]buf;}
 
   void compress (){
     if(qlzFormula(index)>(qlzFormula(sz)-compIndex))
