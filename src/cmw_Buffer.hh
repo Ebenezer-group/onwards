@@ -39,7 +39,7 @@ namespace cmw{
 class Failure:public ::std::exception{
   ::std::string st;
  public:
-  explicit Failure (char const *s):st(s){}
+  explicit Failure (auto s):st(s){}
   void operator<< (::std::string_view v){
     (st+=" ")+=v;
   }
@@ -53,7 +53,7 @@ class Failure:public ::std::exception{
 };
 
 struct Fiasco:Failure{
-  explicit Fiasco (char const *s):Failure{s}{}
+  explicit Fiasco (auto s):Failure{s}{}
 };
 
 void apps (auto&){}
