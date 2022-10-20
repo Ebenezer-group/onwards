@@ -87,7 +87,7 @@ void checkField (char const *fld,char const *actl){
 GetaddrinfoWrapper gai("75.23.62.38","56789",SOCK_STREAM);
 ::pollfd fds[2];
 cmwCredentials cred;
-BufferCompressed<SameFormat,1101000> cmwBuf{};
+BufferCompressed<SameFormat,1101000> cmwBuf;
 
 void login (){
   ::back::marshal<messageID::login>(cmwBuf,cred,cmwBuf.getSize());
