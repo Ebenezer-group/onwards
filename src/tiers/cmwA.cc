@@ -87,7 +87,7 @@ void checkField (char const *fld,char const *actl){
 GetaddrinfoWrapper gai("75.23.62.38","56789",SOCK_STREAM);
 ::pollfd fds[2];
 cmwCredentials cred;
-BufferCompressed<SameFormat,1101000> cmwBuf;
+BufferCompressed<SameFormat,1001000> cmwBuf;
 
 void login (){
   ::back::marshal<messageID::login>(cmwBuf,cred,cmwBuf.getSize());
@@ -189,7 +189,7 @@ loop:
     try{
       gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
       req=&pendingRequests.emplace_back(frnt,frntBuf);
-      back::marshal<messageID::generate,700000>(cmwBuf,*req);
+      ::back::marshal<messageID::generate,700000>(cmwBuf,*req);
       fds[0].events|=POLLOUT;
     }catch(::std::exception& e){
       ::syslog(LOG_ERR,"Accept request:%s",e.what());
