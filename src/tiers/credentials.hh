@@ -5,7 +5,7 @@ struct cmwCredentials{
   cmwCredentials ()=default;
   template<class R>explicit cmwCredentials (::cmw::ReceiveBuffer<R>&);
 
-  void marshalMembers (::cmw::SendBuffer&)const;
+  void marshalMembers (auto&)const;
   void marshal (::cmw::SendBuffer& b)const{marshalMembers(b);}
 };
 

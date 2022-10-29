@@ -10,7 +10,7 @@ serializable.
 5    cmwAccount (int n,char const* p):number(n),password(p){}
 6    template<class R>explicit cmwAccount (::cmw::ReceiveBuffer<R>&);
 7
-8    void marshalMembers (::cmw::SendBuffer&)const;
+8    void marshalMembers (auto&)const;
 9    void marshal (::cmw::SendBuffer& b)const{marshalMembers(b);}
 10 };
 
