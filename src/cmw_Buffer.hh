@@ -662,14 +662,12 @@ template<int N>class FixedString{
 
   FixedString (FixedString const& o):len(o.len()){
     ::std::memcpy(str,o.str,len());
-    str[len()]=0;
   }
 
   void operator= (::std::string_view s){
     len=s.size();
     if(len()>=N)raise("FixedString operator=");
     ::std::memcpy(str,s.data(),len());
-    str[len()]=0;
   }
 
   void marshal (SendBuffer& b)const{
