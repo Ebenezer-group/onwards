@@ -154,7 +154,7 @@ int main (int ac,char **av)try{
     pollWrapper(fds,2);
     if(fds[0].revents&(POLLRDHUP|POLLERR)){
       reset("Back tier vanished");
-      goto loop;
+      continue;
     }
 
     try{
