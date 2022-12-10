@@ -143,9 +143,9 @@ int Read (int fd,void *data,int len){
 }
 
 class FileWrapper{
-  int d;
+  int d=-2;
  public:
-  FileWrapper ():d{-2}{}
+  FileWrapper (){}
   FileWrapper (char const*,int flags,mode_t);
   FileWrapper (char const*,mode_t);
   FileWrapper (FileWrapper const&)=delete;
