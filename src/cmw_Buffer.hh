@@ -93,7 +93,7 @@ int fromChars (::std::string_view s){
 class SendBuffer;
 template<class>class ReceiveBuffer;
 class MarshallingInt{
-  ::int32_t val;
+  ::int32_t val=0;
  public:
   MarshallingInt ()=default;
   explicit MarshallingInt (::int32_t v):val{v}{}
@@ -101,7 +101,7 @@ class MarshallingInt{
 
   //Reads a sequence of bytes in variable-length format and
   //builds a 32 bit integer.
-  template<class R>explicit MarshallingInt (ReceiveBuffer<R>& b):val(0){
+  template<class R>explicit MarshallingInt (ReceiveBuffer<R>& b){
     ::uint32_t shift=1;
     for(;;){
       ::uint8_t a=b.giveOne();
