@@ -543,8 +543,7 @@ class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
 auto myMin (auto a,auto b){return a<b?a:b;}
 constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 
-template<class R,int sz>struct BufferCompressed:SendBuffer,ReceiveBuffer<R>{
- private:
+template<class R,int sz>class BufferCompressed:SendBuffer,ReceiveBuffer<R>{
   ::qlz_state_compress comp;
   ::qlz_state_decompress decomp;
   char *compressedStart;
