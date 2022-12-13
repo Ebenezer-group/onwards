@@ -151,24 +151,23 @@ class FileWrapper{
   FileWrapper (FileWrapper const&)=delete;
   FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
 
-  FileWrapper& operator= (FileWrapper&&)noexcept;
+  FileWrapper& operator= (FileWrapper&& o)noexcept{
+    d=o.d;
+    o.d=-2;
+    return *this;
+  }
   auto operator() (){return d;}
   ~FileWrapper (){::close(d);}
 };
 
-void getFile (char const *n,auto& b){
-  b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}());
-}
 FileWrapper::FileWrapper (char const *name,int flags,mode_t mode):
         d{::open(name,flags,mode)} {if(d<0)raise("FileWrapper",name,errno);}
 
 FileWrapper::FileWrapper (char const *name,mode_t mode):
         FileWrapper(name,O_CREAT|O_WRONLY|O_TRUNC,mode){}
 
-FileWrapper& FileWrapper::operator= (FileWrapper&& o)noexcept{
-  d=o.d;
-  o.d=-2;
-  return *this;
+void getFile (char const *n,auto& b){
+  b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}());
 }
 
 struct FileBuffer{
