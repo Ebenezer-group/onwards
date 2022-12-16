@@ -146,8 +146,12 @@ class FileWrapper{
   int d=-2;
  public:
   FileWrapper (){}
-  FileWrapper (char const*,int flags,mode_t);
-  FileWrapper (char const*,mode_t);
+  FileWrapper (char const *name,int flags,mode_t mode):
+        d{::open(name,flags,mode)} {if(d<0)raise("FileWrapper",name,errno);}
+
+  FileWrapper (char const *name,mode_t mode):
+        FileWrapper(name,O_CREAT|O_WRONLY|O_TRUNC,mode){}
+
   FileWrapper (FileWrapper const&)=delete;
   FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
 
@@ -159,12 +163,6 @@ class FileWrapper{
   auto operator() (){return d;}
   ~FileWrapper (){::close(d);}
 };
-
-FileWrapper::FileWrapper (char const *name,int flags,mode_t mode):
-        d{::open(name,flags,mode)} {if(d<0)raise("FileWrapper",name,errno);}
-
-FileWrapper::FileWrapper (char const *name,mode_t mode):
-        FileWrapper(name,O_CREAT|O_WRONLY|O_TRUNC,mode){}
 
 void getFile (char const *n,auto& b){
   b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}());
@@ -178,17 +176,17 @@ struct FileBuffer{
   int bytes=0;
 
   FileBuffer (char const* name,int flags):fl(name,flags,0){}
-  char getc ();
+
+  char getc (){
+    if(ind>=bytes){
+      bytes=Read(fl(),buf,sizeof buf);
+      ind=0;
+    }
+    return buf[ind++];
+  }
+
   char* getline (char='\n');
 };
-
-char FileBuffer::getc (){
-  if(ind>=bytes){
-    bytes=Read(fl(),buf,sizeof buf);
-    ind=0;
-  }
-  return buf[ind++];
-}
 
 char* FileBuffer::getline (char delim){
   ::std::size_t idx=0;
