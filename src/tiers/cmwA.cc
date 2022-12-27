@@ -5,6 +5,7 @@
 #include<deque>
 #include<cassert>
 #include<ctime>
+#include<poll.h>
 #ifdef __linux__
 #include<linux/sctp.h>//May need libsctp-dev
 #else
@@ -151,7 +152,8 @@ int main (int ac,char **av)try{
   login();
 
   for(;;){
-    pollWrapper(fds,2);
+    if(int r=::poll(fds,2,-1);r<0)raise("poll",errno);
+
     if(fds[0].revents&(POLLRDHUP|POLLERR)){
       reset("Back tier vanished");
       continue;

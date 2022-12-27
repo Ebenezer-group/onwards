@@ -20,12 +20,10 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #include<ws2tcpip.h>
 #define CMW_WINDOWS
-#define poll WSAPoll
 #else
 #include<errno.h>
 #include<fcntl.h>//open
 #include<netdb.h>
-#include<poll.h>
 #include<sys/socket.h>
 #include<sys/stat.h>//open
 #include<sys/types.h>
@@ -230,11 +228,6 @@ int preserveError (sockType s){
   auto e=getError();
   closeSocket(s);
   return e;
-}
-
-int pollWrapper (::pollfd *fds,int n,int timeout=-1){
-  if(int r=::poll(fds,n,timeout);r>=0)return r;
-  raise("poll",getError());
 }
 
 class GetaddrinfoWrapper{
