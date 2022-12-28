@@ -27,7 +27,4 @@ jobs:
     - uses: actions/checkout@v1
     - name:
       run: sudo apt-get -y install liburing-dev;
-           sudo cd liburing-dev;
-           sudo ./configure;
-           sudo make & make install;
            make CXX=clang++
