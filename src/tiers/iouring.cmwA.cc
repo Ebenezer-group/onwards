@@ -154,7 +154,7 @@ template<class T>class ioUring{
     if(int rc=::io_uring_queue_init(16,&rng,0);rc<0)raise("ioUring",rc);
     auto e=getSqe();
     ::io_uring_prep_poll_multishot(e,sock,POLLIN);
-    ::io_uring_sqe_set_data64(e,0);
+    ::io_uring_sqe_set_data(e,nullptr);
     reed();
   }
 
@@ -173,7 +173,7 @@ a:  if(int rc=io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0)
     auto e=getSqe();
     auto sp=buf.getDuo();
     ::io_uring_prep_recv(e,buf.sock_,sp.data(),sp.size(),0);
-    ::io_uring_sqe_set_data64(e,turnOn<readTag>(&buf));
+    ::io_uring_sqe_set_data(e,(T*)turnOn<readTag>(&buf));
   }
 
   void writ (){
