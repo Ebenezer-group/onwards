@@ -160,7 +160,7 @@ template<class T>class ioUring{
 
   auto submit (){
     ::io_uring_cqe *cq;
-a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
+a:  if(int rc=io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
       if(-EINTR==rc)goto a;
       raise("waitCqe",rc);
     }
