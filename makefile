@@ -4,7 +4,7 @@ EXAMPLES:=example/sendExample example/receiveExample
 FRONT:=src/tiers/front/genz
 MIDDLE:=src/tiers/cmwA
 NMIDDLE:=src/tiers/iouring.cmwA
-BINARIES:=$(EXAMPLES) $(FRONT) $(MIDDLE) $(NMIDDLE)
+BINARIES:=$(EXAMPLES) $(FRONT) $(MIDDLE)
 all:$(BINARIES)
 .PHONY:all clean
 

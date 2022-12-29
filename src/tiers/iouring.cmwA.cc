@@ -160,7 +160,7 @@ template<class T>class ioUring{
 
   auto submit (){
     ::io_uring_cqe *cq;
-a:  if(int rc=io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
+a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
       if(-EINTR==rc)goto a;
       raise("waitCqe",rc);
     }
@@ -173,7 +173,7 @@ a:  if(int rc=io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0)
     auto e=getSqe();
     auto sp=buf.getDuo();
     ::io_uring_prep_recv(e,buf.sock_,sp.data(),sp.size(),0);
-    ::io_uring_sqe_set_data(e,(T*)turnOn<readTag>(&buf));
+    ::io_uring_sqe_set_data64(e,turnOn<readTag>(&buf));
   }
 
   void writ (){
