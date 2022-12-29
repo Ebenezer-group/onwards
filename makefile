@@ -27,7 +27,7 @@ $(MIDDLE):$(MIDDLE).cc
 	size $@
 
 $(NMIDDLE):$(NMIDDLE).cc
-	$(CXXFLAGS) /usr/local/lib/liburing.a
+	$(CXXFLAGS) -luring
 	size $@
 
 clean:
