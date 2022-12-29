@@ -200,7 +200,6 @@ int main (int ac,char **av)try{
 
   for(;;){
     auto const[buf,rc]=ring.submit();
-    ::printf("cq->res: %d\n",rc);
     if(rc<=0){
       if(-EPIPE==rc||0==rc){
         reset("Back tier vanished");
@@ -249,6 +248,6 @@ int main (int ac,char **av)try{
       toFront<false>(pendingRequests.front().frnt,e.what());
       pendingRequests.pop_front();
     }
-  } 
+  }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
 
