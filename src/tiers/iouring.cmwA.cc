@@ -10,7 +10,14 @@
 #include<poll.h>
 #include<linux/sctp.h>
 #include<signal.h>
+#include<syslog.h>
+
 using namespace ::cmw;
+
+void bail (char const *fmt,auto... t){
+  ::syslog(LOG_ERR,fmt,t...);
+  exitFailure();
+}
 
 struct Socky{
   ::sockaddr_in6 addr;
@@ -250,4 +257,3 @@ int main (int ac,char **av)try{
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
-

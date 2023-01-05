@@ -27,7 +27,6 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<sys/socket.h>
 #include<sys/stat.h>//open
 #include<sys/types.h>
-#include<syslog.h>
 #include<unistd.h>//chdir
 #endif
 
@@ -194,11 +193,6 @@ char* FileBuffer::getline (char delim){
   }
   line[idx]=0;
   return line;
-}
-
-void bail (char const *fmt,auto... t){
-  ::syslog(LOG_ERR,fmt,t...);
-  exitFailure();
 }
 #endif
 

@@ -12,7 +12,14 @@
 #include<netinet/sctp.h>
 #endif
 #include<signal.h>
+#include<syslog.h>
+
 using namespace ::cmw;
+
+void bail (char const *fmt,auto... t){
+  ::syslog(LOG_ERR,fmt,t...);
+  exitFailure();
+}
 
 struct Socky{
   ::sockaddr_in6 addr;
