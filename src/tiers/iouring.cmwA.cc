@@ -137,19 +137,9 @@ void toFront (Socky const& s,auto...t){
   frntBuf.send((::sockaddr*)&s.addr,s.len);
 }
 
-template<auto rep>auto turnOn (auto *t){
-  static_assert(sizeof(t)==sizeof(rep));
-  return ((decltype(rep))t)|rep;
-}
-
-template<auto rep>auto turnOff (auto *t){
-  return ((decltype(rep))t)&~rep;
-}
-
 ::uint64_t const readTag=0x1000000000000000;
-template<class T>class ioUring{
+class ioUring{
   ::io_uring rng;
-  T& buf;
 
   auto getSqe (){
     if(auto e=::io_uring_get_sqe(&rng);e!=0)return e;
@@ -157,7 +147,7 @@ template<class T>class ioUring{
   }
 
  public:
-  ioUring (T& b,int sock):buf{b}{
+  ioUring (int sock){
     if(int rc=::io_uring_queue_init(16,&rng,0);rc<0)raise("ioUring",rc);
     auto e=getSqe();
     ::io_uring_prep_poll_multishot(e,sock,POLLIN);
@@ -171,22 +161,22 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
       if(-EINTR==rc)goto a;
       raise("waitCqe",rc);
     }
-    auto pr=::std::make_pair((T*)::io_uring_cqe_get_data(cq),cq->res);
+    auto pr=::std::make_pair(::io_uring_cqe_get_data(cq),cq->res);
     ::io_uring_cqe_seen(&rng,cq);
     return pr;
   }
 
   void reed (){
     auto e=getSqe();
-    auto sp=buf.getDuo();
-    ::io_uring_prep_recv(e,buf.sock_,sp.data(),sp.size(),0);
-    ::io_uring_sqe_set_data64(e,turnOn<readTag>(&buf));
+    auto sp=cmwBuf.getDuo();
+    ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
+    ::io_uring_sqe_set_data64(e,readTag);
   }
 
   void writ (){
     auto e=getSqe();
-    ::io_uring_prep_send(e,buf.sock_,buf.compBuf,buf.compIndex,0);
-    ::io_uring_sqe_set_data(e,&buf);
+    ::io_uring_prep_send(e,cmwBuf.sock_,cmwBuf.compBuf,cmwBuf.compIndex,0);
+    ::io_uring_sqe_set_data(e,~readTag);
   }
 };
 
@@ -203,7 +193,7 @@ int main (int ac,char **av)try{
   login();
 
   checkField("UDP-port-number",cfg.getline(' '));
-  ioUring ring{cmwBuf,frntBuf.sock_=udpServer(cfg.getline())};
+  ioUring ring{frntBuf.sock_=udpServer(cfg.getline())};
 
   for(;;){
     auto const[buf,rc]=ring.submit();
