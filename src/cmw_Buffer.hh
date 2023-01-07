@@ -472,6 +472,39 @@ class SendBuffer{
   void receiveMulti (char const*,auto...);
 };
 
+int SendBuffer::reserveBytes (int n){
+  if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
+  auto i=index;
+  index+=n;
+  return i;
+}
+
+void SendBuffer::fillInSize (::int32_t max){
+  ::int32_t marshalledBytes=index-savedSize;
+  if(marshalledBytes>max)raise("fillInSize",max);
+  receive(savedSize,marshalledBytes);
+  savedSize=index;
+}
+
+#ifndef CMW_WINDOWS
+void SendBuffer::receiveFile (char const* n,::int32_t sz){
+  receive(sz);
+  auto prev=reserveBytes(sz);
+  FileWrapper fl{n,O_RDONLY,0};
+  if(Read(fl(),buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
+}
+#endif
+
+bool SendBuffer::flush (){
+  int const bytes=sockWrite(sock_,buf,index);
+  if(bytes==index){reset();return true;}
+
+  index-=bytes;
+  savedSize=index;
+  ::std::memmove(buf,buf+bytes,index);
+  return false;
+}
+
 void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
 
 void receive (SendBuffer& b,::std::string_view s){
@@ -675,38 +708,5 @@ template<int N>class FixedString{
 };
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
-
-int SendBuffer::reserveBytes (int n){
-  if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
-  auto i=index;
-  index+=n;
-  return i;
-}
-
-void SendBuffer::fillInSize (::int32_t max){
-  ::int32_t marshalledBytes=index-savedSize;
-  if(marshalledBytes>max)raise("fillInSize",max);
-  receive(savedSize,marshalledBytes);
-  savedSize=index;
-}
-
-#ifndef CMW_WINDOWS
-void SendBuffer::receiveFile (char const* n,::int32_t sz){
-  receive(sz);
-  auto prev=reserveBytes(sz);
-  FileWrapper fl{n,O_RDONLY,0};
-  if(Read(fl(),buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
-}
-#endif
-
-bool SendBuffer::flush (){
-  int const bytes=sockWrite(sock_,buf,index);
-  if(bytes==index){reset();return true;}
-
-  index-=bytes;
-  savedSize=index;
-  ::std::memmove(buf,buf+bytes,index);
-  return false;
-}
 }
 #endif

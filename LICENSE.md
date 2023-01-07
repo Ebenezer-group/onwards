@@ -1,6 +1,6 @@
 BSD License
 
-Copyright (c) 2016-2022, Brian Wood
+Copyright (c) 2016-2023, Brian Wood
 All rights reserved.
 https://webEbenezer.net
 
