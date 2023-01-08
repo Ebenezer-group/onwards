@@ -176,7 +176,7 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
   void writ (){
     auto e=getSqe();
     ::io_uring_prep_send(e,cmwBuf.sock_,cmwBuf.compBuf,cmwBuf.compIndex,0);
-    ::io_uring_sqe_set_data(e,~reedTag);
+    ::io_uring_sqe_set_data64(e,~reedTag);
   }
 };
 
