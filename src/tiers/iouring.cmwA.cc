@@ -137,7 +137,7 @@ void toFront (Socky const& s,auto...t){
   frntBuf.send((::sockaddr*)&s.addr,s.len);
 }
 
-::uint64_t const readTag=0x1000000000000000;
+::uint64_t const reedTag=1;
 class ioUring{
   ::io_uring rng;
 
@@ -170,13 +170,13 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
     auto e=getSqe();
     auto sp=cmwBuf.getDuo();
     ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
-    ::io_uring_sqe_set_data64(e,readTag);
+    ::io_uring_sqe_set_data64(e,reedTag);
   }
 
   void writ (){
     auto e=getSqe();
     ::io_uring_prep_send(e,cmwBuf.sock_,cmwBuf.compBuf,cmwBuf.compIndex,0);
-    ::io_uring_sqe_set_data(e,~readTag);
+    ::io_uring_sqe_set_data(e,~reedTag);
   }
 };
 
@@ -224,7 +224,7 @@ int main (int ac,char **av)try{
       continue;
     }
     try{
-      if((::uint64_t)buf&readTag){
+      if((::uint64_t)buf&reedTag){
         if(cmwBuf.gotIt(rc)){
           do{
             assert(!pendingRequests.empty());
