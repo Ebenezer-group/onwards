@@ -1,14 +1,16 @@
 #include<cmw_Buffer.hh>
-#define CMW_MIDDLE
 #include"credentials.hh"
 #include"messageIDs.hh"
 
 #include<deque>
 #include<cassert>
 #include<ctime>
-#include<liburing.h>
 #include<poll.h>
-#include<linux/sctp.h>
+#ifdef __linux__
+#include<linux/sctp.h>//May need libsctp-dev
+#else
+#include<netinet/sctp.h>
+#endif
 #include<signal.h>
 #include<syslog.h>
 
@@ -72,7 +74,7 @@ struct cmwRequest{
     auto const idx=buf.reserveBytes(sizeof updatedFiles);
     FileBuffer f{mdlFile,O_RDONLY};
     while(auto tok=f.getline()){
-      if(!::std::strncmp(tok,"//",2)||!::std::strncmp(tok,"define",6))continue;
+      if(!::std::strncmp(tok,"//",2))continue;
       if(!::std::strcmp(tok,"--"))break;
       if(marshalFile(tok,buf))++updatedFiles;
     }
@@ -90,9 +92,10 @@ void checkField (char const *fld,char const *actl){
   if(::std::strcmp(fld,actl))bail("Expected %s",fld);
 }
 
-GetaddrinfoWrapper gai("127.0.0.1","56789",SOCK_STREAM);
+GetaddrinfoWrapper gai("75.23.62.38","56789",SOCK_STREAM);
+::pollfd fds[2];
 cmwCredentials cred;
-BufferCompressed<SameFormat,1101000> cmwBuf{};
+BufferCompressed<SameFormat,1001000> cmwBuf;
 
 void login (){
   ::back::marshal<messageID::login>(cmwBuf,cred,cmwBuf.getSize());
@@ -105,6 +108,8 @@ void login (){
   }
 
   while(!cmwBuf.flush());
+  fds[0].fd=cmwBuf.sock_;
+  fds[0].events=POLLIN|POLLRDHUP;
   ::sctp_paddrparams pad{};
   pad.spp_address.ss_family=AF_INET;
   pad.spp_hbinterval=240000;
@@ -137,49 +142,6 @@ void toFront (Socky const& s,auto...t){
   frntBuf.send((::sockaddr*)&s.addr,s.len);
 }
 
-::uint64_t const reedTag=1;
-class ioUring{
-  ::io_uring rng;
-
-  auto getSqe (){
-    if(auto e=::io_uring_get_sqe(&rng);e!=0)return e;
-    raise("getSqe");
-  }
-
- public:
-  ioUring (int sock){
-    if(int rc=::io_uring_queue_init(16,&rng,0);rc<0)raise("ioUring",rc);
-    auto e=getSqe();
-    ::io_uring_prep_poll_multishot(e,sock,POLLIN);
-    ::io_uring_sqe_set_data(e,nullptr);
-    reed();
-  }
-
-  auto submit (){
-    ::io_uring_cqe *cq;
-a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
-      if(-EINTR==rc)goto a;
-      raise("waitCqe",rc);
-    }
-    auto pr=::std::make_pair(::io_uring_cqe_get_data(cq),cq->res);
-    ::io_uring_cqe_seen(&rng,cq);
-    return pr;
-  }
-
-  void reed (){
-    auto e=getSqe();
-    auto sp=cmwBuf.getDuo();
-    ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
-    ::io_uring_sqe_set_data64(e,reedTag);
-  }
-
-  void writ (){
-    auto e=getSqe();
-    ::io_uring_prep_send(e,cmwBuf.sock_,cmwBuf.compBuf,cmwBuf.compIndex,0);
-    ::io_uring_sqe_set_data64(e,~reedTag);
-  }
-};
-
 int main (int ac,char **av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac!=2)bail("Usage: cmwA config-file");
@@ -189,24 +151,47 @@ int main (int ac,char **av)try{
   if(cred.userID.size()>20)bail("UserID is too long");
   checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
+  checkField("UDP-port-number",cfg.getline(' '));
+  fds[1].fd=frntBuf.sock_=udpServer(cfg.getline());
+  fds[1].events=POLLIN;
+
   ::signal(SIGPIPE,SIG_IGN);
   login();
 
-  checkField("UDP-port-number",cfg.getline(' '));
-  ioUring ring{frntBuf.sock_=udpServer(cfg.getline())};
-
   for(;;){
-    auto const[buf,rc]=ring.submit();
-    if(rc<=0){
-      if(-EPIPE==rc||0==rc){
-        reset("Back tier vanished");
-        ring.reed();
-        continue;
-      }
-      bail("op failed: %d",rc);
+    if(int r=::poll(fds,2,-1);r<0)raise("poll",errno);
+
+    if(fds[0].revents&(POLLRDHUP|POLLERR)){
+      reset("Back tier vanished");
+      continue;
     }
 
-    if(nullptr==buf){
+    try{
+      if(fds[0].revents&POLLIN&&cmwBuf.gotPacket()){
+        do{
+          assert(!pendingRequests.empty());
+          auto& req=pendingRequests.front();
+          if(giveBool(cmwBuf)){
+            getFile(req.getFileName(),cmwBuf);
+            toFront<true>(req.frnt);
+          }else toFront<false>(req.frnt,"CMW:",cmwBuf.giveStringView());
+          pendingRequests.pop_front();
+        }while(cmwBuf.nextMessage());
+      }
+    }catch(::std::exception& e){
+      ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
+      assert(!pendingRequests.empty());
+      toFront<false>(pendingRequests.front().frnt,e.what());
+      pendingRequests.pop_front();
+    }
+
+    try{
+      if(fds[0].revents&POLLOUT&&cmwBuf.flush())fds[0].events&=~POLLOUT;
+    }catch(::std::exception& e){
+      reset("toBack",e.what());
+    }
+
+    if(fds[1].revents&POLLIN){
       Socky frnt;
       bool gotAddr=false;
       cmwRequest *req=nullptr;
@@ -214,36 +199,12 @@ int main (int ac,char **av)try{
         gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
         req=&pendingRequests.emplace_back(frnt,frntBuf);
         ::back::marshal<messageID::generate,700000>(cmwBuf,*req);
-        cmwBuf.compress();
-        ring.writ();
+        fds[0].events|=POLLOUT;
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)toFront<false>(frnt,e.what());
         if(req)pendingRequests.pop_back();
       }
-      continue;
-    }
-    try{
-      if((::uint64_t)buf&reedTag){
-        if(cmwBuf.gotIt(rc)){
-          do{
-            assert(!pendingRequests.empty());
-            auto& req=pendingRequests.front();
-            if(giveBool(cmwBuf)){
-              getFile(req.getFileName(),cmwBuf);
-              toFront<true>(req.frnt);
-            }else toFront<false>(req.frnt,"CMW:",cmwBuf.giveStringView());
-            pendingRequests.pop_front();
-          }while(cmwBuf.nextMessage());
-        }
-        ring.reed();
-      }else
-        if(!cmwBuf.all(rc))ring.writ();
-    }catch(::std::exception& e){
-      ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
-      assert(!pendingRequests.empty());
-      toFront<false>(pendingRequests.front().frnt,e.what());
-      pendingRequests.pop_front();
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
