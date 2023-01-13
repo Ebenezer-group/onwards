@@ -10,12 +10,6 @@ else()
     message(FATAL_ERROR "Unsupported compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
-include(FetchContent)
-FetchContent_Declare(liburing
-	GIT_REPOSITORY https://github.com/axboe/liburing.git
-	GIT_TAG 0df8a379e929641699c2ab1f42de1efd2515b908)
-FetchContent_MakeAvailable(liburing)
-
 add_executable(sendExample example/sendExample.cc)
 add_executable(receiveExample example/receiveExample.cc)
 add_executable(genz src/tiers/front/genz.cc)
@@ -24,6 +18,12 @@ if(WIN32)
     target_link_libraries(receiveExample ws2_32)
     target_link_libraries(genz ws2_32)
 else()
+    include(FetchContent)
+    FetchContent_Declare(liburing
+	GIT_REPOSITORY https://github.com/axboe/liburing.git
+	GIT_TAG 0df8a379e929641699c2ab1f42de1efd2515b908)
+    FetchContent_MakeAvailable(liburing)
+
     add_executable(posix.cmwA src/tiers/posix.cmwA.cc)
     add_executable(cmwA src/tiers/cmwA.cc)
     target_link_libraries(cmwA uring)
