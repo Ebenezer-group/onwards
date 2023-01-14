@@ -203,7 +203,7 @@ int main (int ac,char **av)try{
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)toFront<false>(frnt,e.what());
-        if(req)pendingRequests.pop_back();
+        if(req!=nullptr)pendingRequests.pop_back();
       }
     }
   }
