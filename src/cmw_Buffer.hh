@@ -62,7 +62,7 @@ void apps (auto& e,auto t,auto...ts){
 template<class E=Failure>[[noreturn]]void raise (char const *s,auto...t){
   E e{s};
   apps(e,t...);
-  throw e;
+  throw ::std::move(e);
 }
 
 inline void winStart (){
