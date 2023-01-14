@@ -65,14 +65,14 @@ template<class E=Failure>[[noreturn]]void raise (char const *s,auto...t){
   throw e;
 }
 
-void winStart (){
+inline void winStart (){
 #ifdef CMW_WINDOWS
   WSADATA w;
   if(auto r=::WSAStartup(MAKEWORD(2,2),&w);0!=r)raise("WSAStartup",r);
 #endif
 }
 
-int getError (){
+inline int getError (){
 #ifdef CMW_WINDOWS
   return WSAGetLastError();
 #else
@@ -80,7 +80,7 @@ int getError (){
 #endif
 }
 
-int fromChars (::std::string_view s){
+inline int fromChars (::std::string_view s){
   int n;
   ::std::from_chars(s.data(),s.data()+s.size(),n);
   return n;
@@ -117,21 +117,21 @@ class MarshallingInt{
 inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
 inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
 
-void exitFailure (){::std::exit(EXIT_FAILURE);}
+inline void exitFailure (){::std::exit(EXIT_FAILURE);}
 #ifdef CMW_WINDOWS
 using sockType=SOCKET;
 #else
 using sockType=int;
-void setDirectory (char const *d){
+inline void setDirectory (char const *d){
   if(::chdir(d)==-1)raise("setDirectory",d,errno);
 }
 
-int Write (int fd,void const *data,int len){
+inline int Write (int fd,void const *data,int len){
   if(int r=::write(fd,data,len);r>=0)return r;
   raise("Write",errno);
 }
 
-int Read (int fd,void *data,int len){
+inline int Read (int fd,void *data,int len){
   int r=::read(fd,data,len);
   if(r>0)return r;
   if(r==0)raise<Fiasco>("Read eof",len);
@@ -185,7 +185,7 @@ struct FileBuffer{
   char* getline (char='\n');
 };
 
-char* FileBuffer::getline (char delim){
+inline char* FileBuffer::getline (char delim){
   ::std::size_t idx=0;
   while((line[idx]=getc())!=delim){
     if(line[idx]=='\r')raise("getline carriage return");
@@ -200,7 +200,7 @@ auto setsockWrapper (sockType s,int opt,auto t){
   return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
 }
 
-void setRcvTimeout (sockType s,int time){
+inline void setRcvTimeout (sockType s,int time){
 #ifdef CMW_WINDOWS
   DWORD t=time*1000;
 #else
@@ -209,7 +209,7 @@ void setRcvTimeout (sockType s,int time){
   if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
 }
 
-void closeSocket (sockType s){
+inline void closeSocket (sockType s){
 #ifdef CMW_WINDOWS
   if(::closesocket(s)==SOCKET_ERROR)
 #else
@@ -218,7 +218,7 @@ void closeSocket (sockType s){
     raise("closeSocket",getError());
 }
 
-int preserveError (sockType s){
+inline int preserveError (sockType s){
   auto e=getError();
   closeSocket(s);
   return e;
@@ -229,7 +229,7 @@ class GetaddrinfoWrapper{
  public:
   GetaddrinfoWrapper (char const *node,char const *port
                       ,int type,int flags=0){
-    ::addrinfo hints{flags,AF_UNSPEC,type,0,0,0,0,0};
+    ::addrinfo const hints{flags,AF_UNSPEC,type,0,0,0,0,0};
     if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
       raise("getaddrinfo",::gai_strerror(r));
     addr=head;
@@ -250,7 +250,7 @@ class GetaddrinfoWrapper{
   GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
 };
 
-sockType connectWrapper (char const *node,char const *port){
+inline sockType connectWrapper (char const *node,char const *port){
   GetaddrinfoWrapper ai{node,port,SOCK_STREAM};
   auto s=ai.getSock();
   if(0==::connect(s,ai().ai_addr,ai().ai_addrlen))return s;
@@ -258,14 +258,14 @@ sockType connectWrapper (char const *node,char const *port){
   return -1;
 }
 
-sockType udpServer (char const *port){
+inline sockType udpServer (char const *port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
   auto s=ai.getSock();
   if(0==::bind(s,ai().ai_addr,ai().ai_addrlen))return s;
   raise("udpServer",preserveError(s));
 }
 
-sockType tcpServer (char const *port){
+inline sockType tcpServer (char const *port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
   auto s=ai.getSock();
 
@@ -275,14 +275,14 @@ sockType tcpServer (char const *port){
   raise("tcpServer",preserveError(s));
 }
 
-int sockWrite (sockType s,void const *data,int len
+inline int sockWrite (sockType s,void const *data,int len
                ,sockaddr const *addr=nullptr,socklen_t toLen=0){
   if(int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);r>0)
     return r;
   raise("sockWrite",s,getError());
 }
 
-int sockRead (sockType s,void *data,int len,sockaddr *addr,socklen_t *fromLen){
+inline int sockRead (sockType s,void *data,int len,sockaddr *addr,socklen_t *fromLen){
   int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(r>0)return r;
   auto e=getError();
