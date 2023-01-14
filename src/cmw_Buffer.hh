@@ -472,14 +472,14 @@ class SendBuffer{
   void receiveMulti (char const*,auto...);
 };
 
-int SendBuffer::reserveBytes (int n){
+inline int SendBuffer::reserveBytes (int n){
   if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
   auto i=index;
   index+=n;
   return i;
 }
 
-void SendBuffer::fillInSize (::int32_t max){
+inline void SendBuffer::fillInSize (::int32_t max){
   ::int32_t marshalledBytes=index-savedSize;
   if(marshalledBytes>max)raise("fillInSize",max);
   receive(savedSize,marshalledBytes);
@@ -487,7 +487,7 @@ void SendBuffer::fillInSize (::int32_t max){
 }
 
 #ifndef CMW_WINDOWS
-void SendBuffer::receiveFile (char const* n,::int32_t sz){
+inline void SendBuffer::receiveFile (char const* n,::int32_t sz){
   receive(sz);
   auto prev=reserveBytes(sz);
   FileWrapper fl{n,O_RDONLY,0};
@@ -495,7 +495,7 @@ void SendBuffer::receiveFile (char const* n,::int32_t sz){
 }
 #endif
 
-bool SendBuffer::flush (){
+inline bool SendBuffer::flush (){
   int const bytes=sockWrite(sock_,buf,index);
   if(bytes==index){reset();return true;}
 
@@ -505,15 +505,15 @@ bool SendBuffer::flush (){
   return false;
 }
 
-void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
+inline void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
 
-void receive (SendBuffer& b,::std::string_view s){
+inline void receive (SendBuffer& b,::std::string_view s){
   MarshallingInt(s.size()).marshal(b);
   b.receive(s.data(),s.size());
 }
 
 using stringPlus=::std::initializer_list<::std::string_view>;
-void receive (SendBuffer& b,stringPlus lst){
+inline void receive (SendBuffer& b,stringPlus lst){
   ::int32_t t=0;
   for(auto s:lst)t+=s.size();
   MarshallingInt{t}.marshal(b);
@@ -531,7 +531,7 @@ void receiveBlock (SendBuffer& b,C<T>const& c){
 }
 
 //Encode integer into variable-length format.
-void MarshallingInt::marshal (SendBuffer& b)const{
+inline void MarshallingInt::marshal (SendBuffer& b)const{
   ::uint32_t n=val;
   for(;;){
     ::uint8_t a=n&127;
