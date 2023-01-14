@@ -95,7 +95,7 @@ cmwCredentials cred;
 BufferCompressed<SameFormat,1101000> cmwBuf{};
 
 void login (){
-  ::back::marshal<messageID::login>(cmwBuf,cred,cmwBuf.getSize());
+  ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
   for(;;){
     cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
     if(0==::connect(cmwBuf.sock_,gai().ai_addr,gai().ai_addrlen))break;
@@ -213,7 +213,7 @@ int main (int ac,char **av)try{
       try{
         gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
         req=&pendingRequests.emplace_back(frnt,frntBuf);
-        ::back::marshal<messageID::generate,700000>(cmwBuf,*req);
+        ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
         cmwBuf.compress();
         ring.writ();
       }catch(::std::exception& e){
