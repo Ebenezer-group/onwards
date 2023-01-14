@@ -1,6 +1,6 @@
 #ifndef CMW_BUFFER_HH
 #define CMW_BUFFER_HH
-#include<quicklz.c>
+#include"quicklz.c"
 #include<charconv>
 #include<cstdint>
 #include<cstring>//memcpy,memmove
