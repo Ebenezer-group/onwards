@@ -30,13 +30,13 @@ static void marshal (auto& buf,auto&&...t)try{
 };
 
 struct front{
-template<bool res,int maxLength=10000>
+template<int maxLength=10000>
 static void marshal (auto& buf
          ,::cmw::stringPlus const& a={}
          ,::int8_t b={})try{
   buf.reserveBytes(4);
-  receiveBool(buf,res);
-  if(!res){
+  receiveBool(buf,a.size()==0);
+  if(a.size()>0){
     receive(buf,a);
     buf.receive(b);
   }

@@ -121,7 +121,7 @@ BufferStack<SameFormat> frntBuf;
 void reset (char const *context,char const *detail=""){
   ::syslog(LOG_ERR,"%s:%s",context,detail);
   frntBuf.reset();
-  ::front::marshal<false,udpPacketMax>(frntBuf,{context," ",detail});
+  ::front::marshal<udpPacketMax>(frntBuf,{context," ",detail});
   for(auto& r:pendingRequests){
     frntBuf.send((::sockaddr*)&r.frnt.addr,r.frnt.len);
   }
@@ -130,10 +130,9 @@ void reset (char const *context,char const *detail=""){
   login();
 }
 
-template<bool res>
 void toFront (Socky const& s,auto...t){
   frntBuf.reset();
-  ::front::marshal<res,udpPacketMax>(frntBuf,{t...});
+  ::front::marshal<udpPacketMax>(frntBuf,{t...});
   frntBuf.send((::sockaddr*)&s.addr,s.len);
 }
 
@@ -218,7 +217,7 @@ int main (int ac,char **av)try{
         ring.writ();
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
-        if(gotAddr)toFront<false>(frnt,e.what());
+        if(gotAddr)toFront(frnt,e.what());
         if(req!=nullptr)pendingRequests.pop_back();
       }
       continue;
@@ -231,8 +230,8 @@ int main (int ac,char **av)try{
             auto& req=pendingRequests.front();
             if(giveBool(cmwBuf)){
               getFile(req.getFileName(),cmwBuf);
-              toFront<true>(req.frnt);
-            }else toFront<false>(req.frnt,"CMW:",cmwBuf.giveStringView());
+              toFront(req.frnt);
+            }else toFront(req.frnt,"CMW:",cmwBuf.giveStringView());
             pendingRequests.pop_front();
           }while(cmwBuf.nextMessage());
         }
@@ -242,7 +241,7 @@ int main (int ac,char **av)try{
     }catch(::std::exception& e){
       ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
-      toFront<false>(pendingRequests.front().frnt,e.what());
+      toFront(pendingRequests.front().frnt,e.what());
       pendingRequests.pop_front();
     }
   }
