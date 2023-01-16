@@ -96,11 +96,9 @@ BufferCompressed<SameFormat,1101000> cmwBuf{};
 
 void login (){
   ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
-  for(;;){
-    cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-    if(0==::connect(cmwBuf.sock_,gai().ai_addr,gai().ai_addrlen))break;
+  cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
+  while(0!=::connect(cmwBuf.sock_,gai().ai_addr,gai().ai_addrlen)){
     ::std::printf("connect %d\n",errno);
-    ::close(cmwBuf.sock_);
     ::sleep(30);
   }
 
