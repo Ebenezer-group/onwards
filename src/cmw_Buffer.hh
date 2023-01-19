@@ -537,7 +537,8 @@ inline void MarshallingInt::marshal (SendBuffer& b)const{
     ::uint8_t a=n&127;
     n>>=7;
     if(0==n){b.receive(a);break;}
-    b.receive(a|=128);
+    a|=128;
+    b.receive(a);
     --n;
   }
 }
