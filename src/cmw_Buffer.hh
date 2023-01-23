@@ -14,7 +14,6 @@
 #include<string_view>
 #include<type_traits>
 #include<utility>
-static_assert(::std::numeric_limits<unsigned char>::digits==8);
 static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
