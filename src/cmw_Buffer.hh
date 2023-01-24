@@ -36,9 +36,7 @@ class Failure:public ::std::exception{
   ::std::string st;
  public:
   explicit Failure (auto s):st(s){}
-  void operator<< (::std::string_view v){
-    (st+=" ")+=v;
-  }
+  void operator<< (::std::string_view v){(st+=" ")+=v;}
 
   void operator<< (::int64_t i){
     char b[32];
