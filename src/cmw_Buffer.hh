@@ -554,7 +554,6 @@ class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
   }
 };
 
-#ifndef CMW_WINDOWS
 auto myMin (auto a,auto b){return a<b?a:b;}
 constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 
@@ -652,7 +651,6 @@ template<class R,int sz>class BufferCompressed:public SendBuffer,public ReceiveB
     return false;
   }
 };
-#endif
 
 template<int N>class FixedString{
   char str[N];
