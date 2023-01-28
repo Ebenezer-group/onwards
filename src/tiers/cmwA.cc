@@ -92,7 +92,7 @@ void checkField (char const *fld,char const *actl){
 
 GetaddrinfoWrapper gai("127.0.0.1","56789",SOCK_STREAM);
 cmwCredentials cred;
-BufferCompressed<SameFormat,1101000> cmwBuf{};
+BufferCompressed<SameFormat,1101000> cmwBuf;
 
 void login (){
   ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
