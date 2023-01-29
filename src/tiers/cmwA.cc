@@ -181,7 +181,7 @@ int main (int ac,char **av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac!=2)bail("Usage: cmwA config-file");
   FileBuffer cfg{av[1],O_RDONLY};
-  checkField("UserID",cfg.getline(' '));
+  checkField("AmbassadorID",cfg.getline(' '));
   cred.ambassadorID=cfg.getline();
   if(cred.ambassadorID.size()>20)bail("AmbassadorID is too long");
   checkField("Password",cfg.getline(' '));
