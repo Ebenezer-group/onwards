@@ -48,9 +48,9 @@ Rather than having two messages like this:
 , this can be used:
   -out -yeaNay (::std::string_view)
 
-.  When yeaNay is used, the bool is passed as a template
-argument and the remainder of the message is only marshalled if
-the value of the bool is false.  This option leads to less output
+.  When yeaNay is used, the generated function first marshals a
+bool based on the size of the string input.  'True' if it's 
+zero, 'false' otherwise.  This option leads to less output
 from the CMW.
 
 By convention, Middle files have a .mdl suffix.
