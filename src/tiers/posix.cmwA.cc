@@ -146,8 +146,8 @@ int main (int ac,char **av)try{
   if(ac!=2)bail("Usage: cmwA config-file");
   FileBuffer cfg{av[1],O_RDONLY};
   checkField("UserID",cfg.getline(' '));
-  cred.userID=cfg.getline();
-  if(cred.userID.size()>20)bail("UserID is too long");
+  cred.ambassadorID=cfg.getline();
+  if(cred.ambassadorID.size()>20)bail("AmbassadorID is too long");
   checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   checkField("UDP-port-number",cfg.getline(' '));
