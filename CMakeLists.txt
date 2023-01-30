@@ -18,13 +18,6 @@ if(WIN32)
     target_link_libraries(receiveExample ws2_32)
     target_link_libraries(genz ws2_32)
 else()
-    include(FetchContent)
-    FetchContent_Declare(liburing
-	GIT_REPOSITORY https://github.com/axboe/liburing.git
-	GIT_TAG 0df8a379e929641699c2ab1f42de1efd2515b908)
-    FetchContent_MakeAvailable(liburing)
-
-    add_executable(posix.cmwA src/tiers/posix.cmwA.cc)
     add_executable(cmwA src/tiers/cmwA.cc)
     target_link_libraries(cmwA uring)
 endif()

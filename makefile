@@ -2,9 +2,8 @@ CXXFLAGS=$(CXX) -std=c++20 -Isrc -Oz -flto -Wundef -W -Wall -Wextra -Wpedantic -
 
 EXAMPLES:=example/sendExample example/receiveExample
 FRONT:=src/tiers/front/genz
-MIDDLE:=src/tiers/posix.cmwA
-NMIDDLE:=src/tiers/cmwA
-BINARIES:=$(EXAMPLES) $(FRONT) $(MIDDLE)
+MIDDLE:=src/tiers/cmwA
+BINARIES:=$(EXAMPLES) $(FRONT)
 all:$(BINARIES)
 .PHONY:all clean
 
@@ -23,10 +22,6 @@ $(FRONT):$(FRONT).cc
 	size $@
 
 $(MIDDLE):$(MIDDLE).cc
-	$(CXXFLAGS)
-	size $@
-
-$(NMIDDLE):$(NMIDDLE).cc
 	$(CXXFLAGS) -luring
 	size $@
 
