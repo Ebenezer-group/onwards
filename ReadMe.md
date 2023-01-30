@@ -19,15 +19,19 @@ is header-only.
 The [front tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/front/genz.cc)
 of the CMW, called "genz", is built on all platforms.  The
 [middle tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/cmwA.cc)
-of the CMW, called "cmwA", only runs on POSIX systems.  Windows users
-can use the CMW by running the middle tier on a \*nix system.
+of the CMW, called "cmwA", only runs on Linux.  Non-Linux developers
+can use the CMW by running the middle tier on a Linux system.
+
+#### Configuration
+In order to use the middle tier, you have to modify your cmwA.cfg file
+to include your ambassador ID and password. The maximum length of an
+ambassador ID is 20.
 
 #### Accounts
-An account is needed to use the CMW.  In order to use the middle tier,
-you have to get an account and modify your cmwA.cfg file to include
-your account number(s) and password(s).  To get an account send an
-email to support@webEbenezer.net with "Account" as the subject.  After
-receiving an account number, update your cmwA.cfg file accordingly.
+An account is needed to use the CMW.  One or more account numbers can
+be associated with your ambassador.  To get an account send an
+email to support@webEbenezer.net with "Account" as the subject, and
+include the ambassador ID that you have chosen.
 
 
 #### Running the cmwA (after installing)
@@ -40,7 +44,7 @@ genz 11 /home/brian/onwards/example/example.mdl
 
 11 is an account number.  Substitute your account number there.
 
-The path for a Middle file (.mdl) is next.  Zero or more header
+The path to a Middle file (.mdl) is next.  Zero or more header
 files are listed in a Middle file to specify a request.  There's
 more info on Middle files here:
 https://github.com/Ebenezer-group/onwards/blob/master/doc/middleFiles
