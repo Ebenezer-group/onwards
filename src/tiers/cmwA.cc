@@ -94,8 +94,8 @@ GetaddrinfoWrapper gai("127.0.0.1","56789",SOCK_STREAM);
 cmwCredentials cred;
 BufferCompressed<SameFormat,1101000> cmwBuf;
 
-void login (){
-  ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
+void login (bool first=false){
+  ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize(),first);
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(0!=::connect(cmwBuf.sock_,gai().ai_addr,gai().ai_addrlen)){
     ::std::printf("connect %d\n",errno);
@@ -179,7 +179,7 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
 
 int main (int ac,char **av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
-  if(ac!=2)bail("Usage: cmwA config-file");
+  if(ac<2||ac>3)bail("Usage: cmwA [-signup] config-file");
   FileBuffer cfg{av[1],O_RDONLY};
   checkField("AmbassadorID",cfg.getline(' '));
   cred.ambassadorID=cfg.getline();
@@ -187,7 +187,7 @@ int main (int ac,char **av)try{
   checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  login();
+  login(ac==3);
 
   checkField("UDP-port-number",cfg.getline(' '));
   ioUring ring{frntBuf.sock_=udpServer(cfg.getline())};

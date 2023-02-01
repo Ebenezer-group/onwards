@@ -2,7 +2,7 @@ credentials.hh
 --
 //Messages the middle tier sends to the back and front tiers
 back <messageID_t=messageID>
-  -out (cmwCredentials,::int32_t)
+  -out (cmwCredentials,::int32_t,bool)
   -out (cmwRequest)
 !
 
