@@ -36,7 +36,12 @@ include the ambassador ID that you have chosen.
 
 #### Running the cmwA (after installing)
 
-nohup cmwA cmwA.cfg
+Run with -signup first.  The program exits when run this way.
+cmwA cmwA.cfg -signup
+
+Then 
+
+nohup cmwA cmwA.cfg &
 
 After starting the cmwA, run genz like this:
 
