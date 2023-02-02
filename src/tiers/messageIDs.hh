@@ -1,1 +1,1 @@
-enum class messageID:uint8_t{login,generate};
+enum class messageID:uint8_t{signup,login,generate};

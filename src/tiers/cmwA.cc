@@ -95,7 +95,8 @@ cmwCredentials cred;
 BufferCompressed<SameFormat,1101000> cmwBuf;
 
 void login (bool first=false){
-  ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize(),first);
+  first? ::back::marshal<::messageID::signup>(cmwBuf,cred,cmwBuf.getSize());
+  : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(0!=::connect(cmwBuf.sock_,gai().ai_addr,gai().ai_addrlen)){
     ::std::printf("connect %d\n",errno);
@@ -179,7 +180,7 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
 
 int main (int ac,char **av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
-  if(ac<2||ac>3)bail("Usage: cmwA [-signup] config-file");
+  if(ac<2||ac>3)bail("Usage: cmwA config-file [-signup]");
   FileBuffer cfg{av[1],O_RDONLY};
   checkField("AmbassadorID",cfg.getline(' '));
   cred.ambassadorID=cfg.getline();

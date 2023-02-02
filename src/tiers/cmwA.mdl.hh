@@ -10,11 +10,9 @@ cmwCredentials::marshalMembers (auto& buf)const{
 struct back{
 static void mar (auto& buf
          ,cmwCredentials const& a
-         ,::int32_t b
-         ,bool c){
+         ,::int32_t b){
   a.marshal(buf);
   buf.receive(b);
-  receiveBool(buf,c);
 }
 
 static void mar (auto& buf
