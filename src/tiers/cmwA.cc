@@ -94,9 +94,9 @@ GetaddrinfoWrapper gai("127.0.0.1","56789",SOCK_STREAM);
 cmwCredentials cred;
 BufferCompressed<SameFormat,1101000> cmwBuf;
 
-void login (bool first=false){
-  first? ::back::marshal<::messageID::signup>(cmwBuf,cred,cmwBuf.getSize())
-  : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
+template<::messageID id=::messageID::login>
+void login (){
+  ::back::marshal<id>(cmwBuf,cred,cmwBuf.getSize());
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(0!=::connect(cmwBuf.sock_,gai().ai_addr,gai().ai_addrlen)){
     ::std::printf("connect %d\n",errno);
@@ -112,7 +112,7 @@ void login (bool first=false){
                   ,&pad,sizeof pad)==-1)bail("setsockopt %d",errno);
   while(!cmwBuf.gotPacket());
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
-  if(first)::std::exit(0);
+  if(::messageID::signup==id)::std::exit(0);
 }
 
 ::std::deque<cmwRequest> pendingRequests;
@@ -189,7 +189,7 @@ int main (int ac,char **av)try{
   checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  login(ac==3);
+  ac==3?login<::messageID::signup>():login();
 
   checkField("UDP-port-number",cfg.getline(' '));
   ioUring ring{frntBuf.sock_=udpServer(cfg.getline())};
