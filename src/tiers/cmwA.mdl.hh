@@ -9,6 +9,11 @@ cmwCredentials::marshalMembers (auto& buf)const{
 
 struct back{
 static void mar (auto& buf
+         ,cmwCredentials const& a){
+  a.marshal(buf);
+}
+
+static void mar (auto& buf
          ,cmwCredentials const& a
          ,::int32_t b){
   a.marshal(buf);
