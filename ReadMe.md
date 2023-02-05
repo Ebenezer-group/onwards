@@ -23,9 +23,8 @@ of the CMW, called "cmwA", only runs on Linux.  Non-Linux developers
 can use the CMW by running the middle tier on a Linux system.
 
 #### Configuration
-In order to use the middle tier, you have to modify your cmwA.cfg file
-to include your ambassador ID and password. The maximum length of an
-ambassador ID is 20.
+Before running the middle tier, modify your cmwA.cfg file to include your
+ambassador ID and password. The maximum length of an ambassador ID is 20.
 
 #### Accounts
 An account is needed to use the CMW.  One or more account numbers can
