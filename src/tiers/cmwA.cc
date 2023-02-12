@@ -243,6 +243,7 @@ int main (int ac,char **av)try{
       assert(!pendingRequests.empty());
       toFront(pendingRequests.front().frnt,e.what());
       pendingRequests.pop_front();
+      if((::uint64_t)buf&reedTag)ring.reed();
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
