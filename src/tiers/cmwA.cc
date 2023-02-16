@@ -167,6 +167,7 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
 
   void reed (){
     auto e=getSqe();
+    e->ioprio=IORING_RECVSEND_POLL_FIRST;
     auto sp=cmwBuf.getDuo();
     ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
     ::io_uring_sqe_set_data64(e,reedTag);
