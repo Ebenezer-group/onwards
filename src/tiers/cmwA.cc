@@ -147,7 +147,8 @@ class ioUring{
 
  public:
   ioUring (int sock){
-    if(int const rc=::io_uring_queue_init(16,&rng,0);rc<0)raise("ioUring",rc);
+    if(int const rc=::io_uring_queue_init(16,&rng,IORING_SETUP_SINGLE_ISSUER);
+                 rc<0)raise("ioUring",rc);
     auto e=getSqe();
     ::io_uring_prep_poll_multishot(e,sock,POLLIN);
     ::io_uring_sqe_set_data(e,nullptr);
