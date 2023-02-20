@@ -71,9 +71,9 @@ struct cmwRequest{
     ::int8_t updatedFiles=0;
     auto const idx=buf.reserveBytes(sizeof updatedFiles);
     FileBuffer f{mdlFile,O_RDONLY};
-    while(auto tok=f.getline()){
+    while(auto tok=f.getline().data()){
       if(!::std::strncmp(tok,"//",2)||!::std::strncmp(tok,"define",6))continue;
-      if(!::std::strcmp(tok,"--"))break;
+      if(!::std::strncmp(tok,"--",2))break;
       if(marshalFile(tok,buf))++updatedFiles;
     }
     buf.receive(idx,updatedFiles);
@@ -86,8 +86,8 @@ struct cmwRequest{
 };
 #include"cmwA.mdl.hh"
 
-void checkField (char const *fld,char const *actl){
-  if(::std::strcmp(fld,actl))bail("Expected %s",fld);
+void checkField (char const *fld,::std::string_view actl){
+  if(actl!=fld)bail("Expected %s",fld);
 }
 
 GetaddrinfoWrapper gai("127.0.0.1","56789",SOCK_STREAM);
@@ -194,7 +194,7 @@ int main (int ac,char **av)try{
   login(ac==3);
 
   checkField("UDP-port-number",cfg.getline(' '));
-  ioUring ring{frntBuf.sock_=udpServer(cfg.getline())};
+  ioUring ring{frntBuf.sock_=udpServer(cfg.getline().data())};
 
   for(;;){
     auto const[buf,rc]=ring.submit();

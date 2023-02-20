@@ -179,17 +179,17 @@ struct FileBuffer{
     return buf[ind++];
   }
 
-  char* getline (char='\n');
+  auto getline (char='\n');
 };
 
-inline char* FileBuffer::getline (char delim){
+inline auto FileBuffer::getline (char delim){
   ::std::size_t idx=0;
   while((line[idx]=getc())!=delim){
     if(line[idx]=='\r')raise("getline carriage return");
     if(++idx>=sizeof line)raise("getline line too long");
   }
   line[idx]=0;
-  return line;
+  return ::std::string_view{line,idx};
 }
 #endif
 
@@ -634,7 +634,7 @@ template<class R,int sz>class BufferCompressed:public SendBuffer,public ReceiveB
 
   auto getDuo (){
     return bytesRead<9?::std::span<char>(rbuf+bytesRead,9-bytesRead):
-	::std::span<char>(compressedStart+bytesRead,compPacketSize-bytesRead);
+                       ::std::span<char>(compressedStart+bytesRead,compPacketSize-bytesRead);
   }
 
   bool gotPacket (){
