@@ -36,6 +36,7 @@ include the ambassador ID that you have chosen.
 #### Running the cmwA (after installing)
 
 Run with -signup first.  The program exits when run this way.
+
 cmwA cmwA.cfg -signup
 
 Then 
