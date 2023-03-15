@@ -115,6 +115,50 @@ void login (bool signUp=false){
   if(signUp)::std::exit(0);
 }
 
+::uint64_t const reedTag=1;
+class ioUring{
+  ::io_uring rng;
+
+  auto getSqe (){
+    if(auto e=::io_uring_get_sqe(&rng);e!=0)return e;
+    raise("getSqe");
+  }
+
+ public:
+  ioUring (int sock){
+    if(int const rc=::io_uring_queue_init(16,&rng,IORING_SETUP_SINGLE_ISSUER);
+                 rc<0)raise("ioUring",rc);
+    auto e=getSqe();
+    ::io_uring_prep_poll_multishot(e,sock,POLLIN);
+    ::io_uring_sqe_set_data(e,nullptr);
+  }
+
+  auto submit (){
+    ::io_uring_cqe *cq;
+a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
+      if(-EINTR==rc)goto a;
+      raise("waitCqe",rc);
+    }
+    auto pr=::std::make_pair(::io_uring_cqe_get_data(cq),cq->res);
+    ::io_uring_cqe_seen(&rng,cq);
+    return pr;
+  }
+
+  void reed (){
+    auto e=getSqe();
+    auto sp=cmwBuf.getDuo();
+    ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
+    ::io_uring_sqe_set_data64(e,reedTag);
+    e->ioprio=IORING_RECVSEND_POLL_FIRST;
+  }
+
+  void writ (){
+    auto e=getSqe();
+    ::io_uring_prep_send(e,cmwBuf.sock_,cmwBuf.compBuf,cmwBuf.compIndex,0);
+    ::io_uring_sqe_set_data64(e,~reedTag);
+  }
+};
+
 ::std::deque<cmwRequest> pendingRequests;
 BufferStack<SameFormat> frntBuf;
 
@@ -136,51 +180,6 @@ void toFront (Socky const& s,auto...t){
   frntBuf.send((::sockaddr*)&s.addr,s.len);
 }
 
-::uint64_t const reedTag=1;
-class ioUring{
-  ::io_uring rng;
-
-  auto getSqe (){
-    if(auto e=::io_uring_get_sqe(&rng);e!=0)return e;
-    raise("getSqe");
-  }
-
- public:
-  ioUring (int sock){
-    if(int const rc=::io_uring_queue_init(16,&rng,IORING_SETUP_SINGLE_ISSUER);
-                 rc<0)raise("ioUring",rc);
-    auto e=getSqe();
-    ::io_uring_prep_poll_multishot(e,sock,POLLIN);
-    ::io_uring_sqe_set_data(e,nullptr);
-    reed();
-  }
-
-  auto submit (){
-    ::io_uring_cqe *cq;
-a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
-      if(-EINTR==rc)goto a;
-      raise("waitCqe",rc);
-    }
-    auto pr=::std::make_pair(::io_uring_cqe_get_data(cq),cq->res);
-    ::io_uring_cqe_seen(&rng,cq);
-    return pr;
-  }
-
-  void reed (){
-    auto e=getSqe();
-    auto sp=cmwBuf.getDuo();
-    ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
-    e->ioprio=IORING_RECVSEND_POLL_FIRST;
-    ::io_uring_sqe_set_data64(e,reedTag);
-  }
-
-  void writ (){
-    auto e=getSqe();
-    ::io_uring_prep_send(e,cmwBuf.sock_,cmwBuf.compBuf,cmwBuf.compIndex,0);
-    ::io_uring_sqe_set_data64(e,~reedTag);
-  }
-};
-
 int main (int ac,char **av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac<2||ac>3)bail("Usage: cmwA config-file [-signup]");
@@ -195,6 +194,7 @@ int main (int ac,char **av)try{
 
   checkField("UDP-port-number",cfg.getline(' '));
   ioUring ring{frntBuf.sock_=udpServer(cfg.getline().data())};
+  ring.reed();
 
   for(;;){
     auto const[buf,rc]=ring.submit();
