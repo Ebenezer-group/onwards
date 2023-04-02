@@ -112,7 +112,10 @@ void login (bool signUp=false){
                   ,&pad,sizeof pad)==-1)bail("setsockopt %d",errno);
   while(!cmwBuf.gotPacket());
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
-  if(signUp)::std::exit(0);
+  if(signUp){
+    ::std::printf("Signup was successful\n");
+    ::std::exit(0);
+  }
 }
 
 ::uint64_t const reedTag=1;
