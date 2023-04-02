@@ -22,9 +22,12 @@ can use the CMW by running the middle tier on a Linux system.
 The [front tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/front/genz.cc)
 of the CMW, called "genz", is built on all platforms.
 
-From an onwards/build subdirectory, the following can be run
+The following can be used:
+
+mkdir build; cd build
 
 cmake -S .. -G "Unix Makefiles"
+
 make
 
 #### Configuration
@@ -32,16 +35,16 @@ Before running the middle tier, modify your cmwA.cfg file to include your
 ambassador ID and password. The maximum length of an ambassador ID is 20.
 
 #### Running the middle tier -- cmwA (after installing)
-Before running the middle tier "normally", it needs to be run one time 
-with a -signup flag:
+Before running the middle tier "normally", it needs to be run once 
+with the -signup flag:
 
 cmwA cmwA.cfg -signup
 
-The program exits when run this way.  If this step is successful a
-message is output to the terminal indicating so.  If the step fails,
-an error message is logged.
+The program exits when run this way.  If this step worked, a message 
+is output to the terminal indicating so.  Otherwise, an error message 
+is logged.
 
-After that the middle tier can be run normally:
+After registering, the cmwA can be run normally:
 
 nohup cmwA cmwA.cfg &
 
