@@ -276,16 +276,15 @@ inline int sockWrite (sockType s,void const *data,int len
 }
 
 inline int sockRead (sockType s,void *data,int len,sockaddr *addr,socklen_t *fromLen){
-  int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
-  if(r>0)return r;
+  int r=::recvfrom(s,data,len,0,addr,fromLen);
+  if(r>=0)return r;
   auto e=getError();
-  if(0==r||ECONNRESET==e)raise("sockRead eof",s,len,e);
   if(EAGAIN==e||EWOULDBLOCK==e
 #ifdef CMW_WINDOWS
      ||WSAETIMEDOUT==e
 #endif
   )return 0;
-  raise("sockRead",s,len,e);
+  raise("sockRead",len,e);
 }
 
 struct SameFormat{
