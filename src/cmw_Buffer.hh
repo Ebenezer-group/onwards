@@ -3,9 +3,9 @@
 #include"quicklz.c"
 #include<charconv>
 #include<cstdint>
-#include<cstring>//memcpy,memmove
 #include<cstdio>//snprintf
 #include<cstdlib>//exit
+#include<cstring>//memcpy,memmove
 #include<exception>
 #include<initializer_list>
 #include<limits>
@@ -44,10 +44,6 @@ class Failure:public ::std::exception{
   }
 
   char const* what ()const noexcept{return st.data();}
-};
-
-struct Fiasco:Failure{
-  explicit Fiasco (auto s):Failure{s}{}
 };
 
 void apps (auto&){}
@@ -131,7 +127,7 @@ inline int Write (int fd,void const *data,int len){
 inline int Read (int fd,void *data,int len){
   int r=::read(fd,data,len);
   if(r>0)return r;
-  if(r==0)raise<Fiasco>("Read eof",len);
+  if(r==0)raise("Read eof",len);
   if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
   raise("Read",len,errno);
 }
@@ -283,7 +279,7 @@ inline int sockRead (sockType s,void *data,int len,sockaddr *addr,socklen_t *fro
   int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(r>0)return r;
   auto e=getError();
-  if(0==r||ECONNRESET==e)raise<Fiasco>("sockRead eof",s,len,e);
+  if(0==r||ECONNRESET==e)raise("sockRead eof",s,len,e);
   if(EAGAIN==e||EWOULDBLOCK==e
 #ifdef CMW_WINDOWS
      ||WSAETIMEDOUT==e
