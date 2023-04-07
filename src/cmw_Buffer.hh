@@ -276,7 +276,7 @@ inline int sockWrite (sockType s,void const *data,int len
 }
 
 inline int sockRead (sockType s,void *data,int len,sockaddr *addr,socklen_t *fromLen){
-  int r=::recvfrom(s,data,len,0,addr,fromLen);
+  int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
   if(r>=0)return r;
   auto e=getError();
   if(EAGAIN==e||EWOULDBLOCK==e
