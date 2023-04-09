@@ -276,14 +276,15 @@ inline int sockWrite (sockType s,void const *data,int len
 }
 
 inline int sockRead (sockType s,void *data,int len,sockaddr *addr,socklen_t *fromLen){
-  int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);
-  if(r>=0)return r;
+  if(int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);r>=0)
+    return r;
   auto e=getError();
-  if(EAGAIN==e||EWOULDBLOCK==e
 #ifdef CMW_WINDOWS
-     ||WSAETIMEDOUT==e
+  if(WSAETIMEDOUT==e)
+#else
+  if(EAGAIN==e||EWOULDBLOCK==e)
 #endif
-  )return 0;
+    return 0;
   raise("sockRead",len,e);
 }
 
