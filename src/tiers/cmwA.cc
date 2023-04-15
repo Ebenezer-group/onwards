@@ -34,7 +34,7 @@ struct cmwRequest{
   char *mdlFile;
   FileWrapper fl;
 
-  bool marshalFile (char const *name,SendBuffer& buf)const{
+  bool marshalFile (char const *name,auto& buf)const{
     struct ::stat sb;
     if(::stat(name,&sb)<0)raise("stat",name,errno);
     if(sb.st_mtime<=prevTime)return false;
@@ -63,7 +63,7 @@ struct cmwRequest{
     }
   }
 
-  void marshal (SendBuffer& buf)const{
+  void marshal (auto& buf)const{
     acctNbr.marshal(buf);
     if(auto ind=buf.reserveBytes(1);!buf.receive(ind,marshalFile(mdlFile,buf)))
       receive(buf,{mdlFile,{"\0",1}});
@@ -92,7 +92,7 @@ void checkField (char const *fld,::std::string_view actl){
 
 GetaddrinfoWrapper gai("127.0.0.1","56789",SOCK_STREAM);
 cmwCredentials cred;
-BufferCompressed<SameFormat,1101000> cmwBuf;
+BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 
 void login (bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)

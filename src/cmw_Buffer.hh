@@ -80,8 +80,8 @@ inline int fromChars (::std::string_view s){
 }
 
 
-class SendBuffer;
-template<class>class ReceiveBuffer;
+template<class>class SendBuffer;
+template<class,class>class ReceiveBuffer;
 class MarshallingInt{
   ::int32_t val=0;
  public:
@@ -91,7 +91,7 @@ class MarshallingInt{
 
   //Reads a sequence of bytes in variable-length format and
   //builds a 32 bit integer.
-  template<class R>explicit MarshallingInt (ReceiveBuffer<R>& b){
+  template<class R,class Z>explicit MarshallingInt (ReceiveBuffer<R,Z>& b){
     ::uint32_t shift=1;
     for(;;){
       ::uint8_t a=b.giveOne();
@@ -105,7 +105,18 @@ class MarshallingInt{
   void operator= (::int32_t r){val=r;}
   void operator+= (::int32_t r){val+=r;}
   auto operator() ()const{return val;}
-  void marshal (SendBuffer& b)const;
+//Encode integer into variable-length format.
+  void marshal (auto& b)const{
+    ::uint32_t n=val;
+    for(;;){
+      ::uint8_t a=n&127;
+      n>>=7;
+      if(0==n){b.receive(a);break;}
+      a|=128;
+      b.receive(a);
+      --n;
+    }
+  }
 };
 inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
 inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
@@ -323,7 +334,7 @@ struct MostSignificantFirst:MixedEndian{
   {for(auto c=sizeof(val);c>0;--c)val|=b.giveOne()<<8*(c-1);}
 };
 
-template<class R>class ReceiveBuffer{
+template<class R,class Z=int32_t>class ReceiveBuffer{
   int msgLength=0;
   int subTotal=0;
  protected:
@@ -360,8 +371,8 @@ template<class R>class ReceiveBuffer{
     subTotal+=msgLength;
     if(subTotal<packetLength){
       rindex=0;
-      msgLength=sizeof(::int32_t);
-      msgLength=give<::uint32_t>();
+      msgLength=sizeof(Z);
+      msgLength=give<::std::make_unsigned_t<Z>>();
       return true;
     }
     return false;
@@ -418,20 +429,21 @@ bool giveBool (auto& b){
   }
 }
 
+template<class Z=::int32_t>
 class SendBuffer{
   SendBuffer (SendBuffer const&)=delete;
   SendBuffer& operator= (SendBuffer);
-  ::int32_t savedSize=0;
+  Z savedSize=0;
  protected:
-  int index=0;
-  int const bufsize;
+  Z index=0;
+  Z const bufsize;
   unsigned char* const buf;
  public:
   sockType sock_=-1;
 
-  SendBuffer (unsigned char *addr,int sz):bufsize(sz),buf(addr){}
+  SendBuffer (unsigned char *addr,Z sz):bufsize(sz),buf(addr){}
 
-  int reserveBytes (int n);
+  int reserveBytes (Z n=sizeof(Z));
 
   void receive (void const *data,int size){
     ::std::memcpy(buf+reserveBytes(size),data,size);
@@ -465,22 +477,25 @@ class SendBuffer{
   void receiveMulti (char const*,auto...);
 };
 
-inline int SendBuffer::reserveBytes (int n){
+template<class Z>
+int SendBuffer<Z>::reserveBytes (Z n){
   if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
   auto i=index;
   index+=n;
   return i;
 }
 
-inline void SendBuffer::fillInSize (::int32_t max){
-  ::int32_t marshalledBytes=index-savedSize;
+template<class Z>
+void SendBuffer<Z>::fillInSize (::int32_t max){
+  Z marshalledBytes=index-savedSize;
   if(marshalledBytes>max)raise("fillInSize",max);
   receive(savedSize,marshalledBytes);
   savedSize=index;
 }
 
 #ifndef CMW_WINDOWS
-inline void SendBuffer::receiveFile (char const* n,::int32_t sz){
+template<class Z>
+void SendBuffer<Z>::receiveFile (char const* n,::int32_t sz){
   receive(sz);
   auto prev=reserveBytes(sz);
   FileWrapper fl{n,O_RDONLY,0};
@@ -488,7 +503,8 @@ inline void SendBuffer::receiveFile (char const* n,::int32_t sz){
 }
 #endif
 
-inline bool SendBuffer::flush (){
+template<class Z>
+bool SendBuffer<Z>::flush (){
   int const bytes=sockWrite(sock_,buf,index);
   if(bytes==index){reset();return true;}
 
@@ -498,15 +514,15 @@ inline bool SendBuffer::flush (){
   return false;
 }
 
-inline void receiveBool (SendBuffer&b,bool bl){b.receive<unsigned char>(bl);}
+inline void receiveBool (auto&b,bool bl){b.template receive<unsigned char>(bl);}
 
-inline void receive (SendBuffer& b,::std::string_view s){
+inline void receive (auto& b,::std::string_view s){
   MarshallingInt(s.size()).marshal(b);
   b.receive(s.data(),s.size());
 }
 
 using stringPlus=::std::initializer_list<::std::string_view>;
-inline void receive (SendBuffer& b,stringPlus lst){
+inline void receive (auto& b,stringPlus lst){
   ::int32_t t=0;
   for(auto s:lst)t+=s.size();
   MarshallingInt{t}.marshal(b);
@@ -514,7 +530,7 @@ inline void receive (SendBuffer& b,stringPlus lst){
 }
 
 template<template<class...>class C,class T>
-void receiveBlock (SendBuffer& b,C<T>const& c){
+void receiveBlock (auto& b,C<T>const& c){
   ::int32_t n=c.size();
   b.receive(n);
   if constexpr(arithmetic<T>){
@@ -523,29 +539,16 @@ void receiveBlock (SendBuffer& b,C<T>const& c){
   else for(auto const& e:c)e.marshal(b);
 }
 
-//Encode integer into variable-length format.
-inline void MarshallingInt::marshal (SendBuffer& b)const{
-  ::uint32_t n=val;
-  for(;;){
-    ::uint8_t a=n&127;
-    n>>=7;
-    if(0==n){b.receive(a);break;}
-    a|=128;
-    b.receive(a);
-    --n;
-  }
-}
-
 inline constexpr auto udpPacketMax=1500;
-template<class R,int N=udpPacketMax>
-class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
+template<class R,class Z=int16_t,int N=udpPacketMax>
+class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   unsigned char ar[N];
  public:
-  BufferStack ():SendBuffer(ar,N),ReceiveBuffer<R>((char*)ar){}
-  explicit BufferStack (int s):BufferStack(){sock_=s;}
+  BufferStack ():SendBuffer<Z>(ar,N),ReceiveBuffer<R,Z>((char*)ar){}
+  explicit BufferStack (int s):BufferStack(){this->sock_=s;}
 
   bool getPacket (::sockaddr *addr=nullptr,::socklen_t *len=nullptr){
-    this->packetLength=sockRead(sock_,ar,N,addr,len);
+    this->packetLength=sockRead(this->sock_,ar,N,addr,len);
     return this->update();
   }
 };
@@ -554,7 +557,7 @@ class BufferStack:public SendBuffer,public ReceiveBuffer<R>{
 auto myMin (auto a,auto b){return a<b?a:b;}
 constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 
-template<class R,int sz>class BufferCompressed:public SendBuffer,public ReceiveBuffer<R>{
+template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
  public:
   ::qlz_state_compress comp;
   ::qlz_state_decompress decomp;
@@ -577,24 +580,24 @@ template<class R,int sz>class BufferCompressed:public SendBuffer,public ReceiveB
   }
 
   bool doFlush (){
-    return all(Write(sock_,compBuf,compIndex));
+    return all(Write(this->sock_,compBuf,compIndex));
   }
  public:
-  explicit BufferCompressed ():SendBuffer(new unsigned char[sz],sz),ReceiveBuffer<R>(recBuf){}
-  ~BufferCompressed (){delete[]buf;}
+  explicit BufferCompressed ():SendBuffer<Z>(new unsigned char[sz],sz),ReceiveBuffer<R,Z>(recBuf){}
+  ~BufferCompressed (){delete[]this->buf;}
 
   void compress (){
-    if(qlzFormula(index)>(qlzFormula(sz)-compIndex))
+    if(qlzFormula(this->index)>(qlzFormula(sz)-compIndex))
       raise("Not enough room in compressed buf");
-    compIndex+=::qlz_compress(buf,compBuf+compIndex,index,&comp);
-    reset();
+    compIndex+=::qlz_compress(this->buf,compBuf+compIndex,this->index,&comp);
+    this->reset();
   }
 
   bool flush (){
     bool rc=true;
     if(compIndex>0)rc=doFlush();
 
-    if(index>0){
+    if(this->index>0){
       compress();
       if(rc)rc=doFlush();
     }
@@ -602,24 +605,24 @@ template<class R,int sz>class BufferCompressed:public SendBuffer,public ReceiveB
   }
 
   void compressedReset (){
-    reset();
+    this->reset();
     comp={};
     decomp={};
     compIndex=bytesRead=0;
     kosher=true;
-    closeSocket(sock_);
+    closeSocket(this->sock_);
   }
 
-  using ReceiveBuffer<R>::rbuf;
+  using ReceiveBuffer<R,Z>::rbuf;
   bool gotIt (int rc){
     if((bytesRead+=rc)<9)return false;
     if(bytesRead==9){
-      if((compPacketSize=::qlz_size_compressed(rbuf))>bufsize||
-         (this->packetLength=::qlz_size_decompressed(rbuf))>bufsize){
+      if((compPacketSize=::qlz_size_compressed(rbuf))>this->bufsize||
+         (this->packetLength=::qlz_size_decompressed(rbuf))>this->bufsize){
         kosher=false;
-        raise("gotIt too big",compPacketSize,this->packetLength,bufsize);
+        raise("gotIt too big",compPacketSize,this->packetLength,this->bufsize);
       }
-      compressedStart=rbuf+bufsize-compPacketSize;
+      compressedStart=rbuf+this->bufsize-compPacketSize;
       ::std::memmove(compressedStart,rbuf,9);
       return false;
     }
@@ -639,9 +642,9 @@ template<class R,int sz>class BufferCompressed:public SendBuffer,public ReceiveB
   bool gotPacket (){
     if(kosher){
       auto sp=getDuo();
-      return gotIt(Read(sock_,sp.data(),sp.size()));
+      return gotIt(Read(this->sock_,sp.data(),sp.size()));
     }
-    bytesRead+=Read(sock_,rbuf,myMin(bufsize,compPacketSize-bytesRead));
+    bytesRead+=Read(this->sock_,rbuf,myMin(this->bufsize,compPacketSize-bytesRead));
     if(bytesRead==compPacketSize){
       kosher=true;
       bytesRead=0;
@@ -664,8 +667,8 @@ template<int N>class FixedString{
     str[len()]=0;
   }
 
-  template<class R>
-  explicit FixedString (ReceiveBuffer<R>& b):len(b){
+  template<class R,class Z>
+  explicit FixedString (ReceiveBuffer<R,Z>& b):len(b){
     if(len()>=N)raise("FixedString stream ctor");
     b.give(str,len());
     str[len()]=0;
@@ -681,7 +684,7 @@ template<int N>class FixedString{
     ::std::memcpy(str,s.data(),len());
   }
 
-  void marshal (SendBuffer& b)const{
+  void marshal (auto& b)const{
     len.marshal(b);
     b.receive(str,len());
   }

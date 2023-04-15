@@ -59,7 +59,7 @@ derived3::derived3 (::cmw::ReceiveBuffer<R>& buf):
 struct testing{
 static void marshal (auto& buf
          ,::boost::base_collection<base> const& a)try{
-  buf.reserveBytes(4);
+  buf.reserveBytes();
   ::cmw::marshalCollection<base,derived1,derived3,derived2>(a,buf);
   buf.fillInSize(10000);
 }catch(...){buf.rollback();throw;}

@@ -6,7 +6,7 @@ template<int maxLength=10000>
 static void marshal (auto& buf
          ,::cmw::MarshallingInt const& a
          ,char const* b)try{
-  buf.reserveBytes(4);
+  buf.reserveBytes();
   a.marshal(buf);
   receive(buf,b);
   buf.fillInSize(maxLength);

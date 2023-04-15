@@ -27,7 +27,7 @@ static void mar (auto& buf
 
 template<messageID id,int maxLength=10000>
 static void marshal (auto& buf,auto&&...t)try{
-  buf.reserveBytes(4);
+  buf.reserveBytes();
   buf.template receive<messageID>(id);
   mar(buf,::std::forward<decltype(t)>(t)...);
   buf.fillInSize(maxLength);
@@ -39,7 +39,7 @@ template<int maxLength=10000>
 static void marshal (auto& buf
          ,::cmw::stringPlus const& a={}
          ,::int8_t b={})try{
-  buf.reserveBytes(4);
+  buf.reserveBytes();
   receiveBool(buf,a.size()==0);
   if(a.size()>0){
     receive(buf,a);
