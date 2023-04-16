@@ -8,10 +8,10 @@ struct base{
   base ()=default;
   virtual ~base(){}
 
-  template<class R>explicit base (::cmw::ReceiveBuffer<R>&);
+  template<class R,class Z>explicit base (::cmw::ReceiveBuffer<R,Z>&);
 
-  void marshalMembers (::cmw::SendBuffer&)const;
-  void marshal (::cmw::SendBuffer& b)const{marshalMembers(b);}
+  void marshalMembers (auto&)const;
+  void marshal (auto& b)const{marshalMembers(b);}
 };
 
 class derived1:public base{
@@ -20,10 +20,10 @@ public:
   static uint8_t const typeNum=1;
   derived1 ()=default;
 
-  template<class R>explicit derived1 (::cmw::ReceiveBuffer<R>&);
+  template<class R,class Z>explicit derived1 (::cmw::ReceiveBuffer<R,Z>&);
 
-  void marshalMembers (::cmw::SendBuffer&)const;
-  void marshal (::cmw::SendBuffer& b)const{marshalMembers(b);}
+  void marshalMembers (auto&)const;
+  void marshal (auto& b)const{marshalMembers(b);}
 };
 
 class derived2:public base{
@@ -32,10 +32,10 @@ public:
   static uint8_t const typeNum=2;
   derived2 ()=default;
 
-  template<class R>explicit derived2 (::cmw::ReceiveBuffer<R>&);
+  template<class R,class Z>explicit derived2 (::cmw::ReceiveBuffer<R,Z>&);
 
-  void marshalMembers (::cmw::SendBuffer&)const;
-  void marshal (::cmw::SendBuffer& b)const{marshalMembers(b);}
+  void marshalMembers (auto&)const;
+  void marshal (auto& b)const{marshalMembers(b);}
 };
 
 class derived3:public derived1{
@@ -44,9 +44,9 @@ public:
   static uint8_t const typeNum=3;
   derived3 ()=default;
 
-  template<class R>explicit derived3 (::cmw::ReceiveBuffer<R>&);
+  template<class R,class Z>explicit derived3 (::cmw::ReceiveBuffer<R,Z>&);
 
-  void marshalMembers (::cmw::SendBuffer&)const;
-  void marshal (::cmw::SendBuffer& b)const{marshalMembers(b);}
+  void marshalMembers (auto&)const;
+  void marshal (auto& b)const{marshalMembers(b);}
 };
 #endif

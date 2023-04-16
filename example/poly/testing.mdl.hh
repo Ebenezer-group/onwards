@@ -2,11 +2,11 @@
 #ifndef testing_mdl_hh
 #define testing_mdl_hh
 inline void
-base::marshalMembers (::cmw::SendBuffer& buf)const{
+base::marshalMembers (auto& buf)const{
 }
 
-template<class R>
-base::base (::cmw::ReceiveBuffer<R>& buf)
+template<class R,class Z>
+base::base (::cmw::ReceiveBuffer<R,Z>& buf)
 {}
 
 void baseSwitch (auto& c,auto& buf){
@@ -24,35 +24,35 @@ void baseSwitch (auto& c,auto& buf){
 }
 
 inline void
-derived1::marshalMembers (::cmw::SendBuffer& buf)const{
+derived1::marshalMembers (auto& buf)const{
   base::marshalMembers(buf);
   buf.receive(a);
 }
 
-template<class R>
-derived1::derived1 (::cmw::ReceiveBuffer<R>& buf):
+template<class R,class Z>
+derived1::derived1 (::cmw::ReceiveBuffer<R,Z>& buf):
    base(buf),a(::cmw::give<uint32_t>(buf))
 {}
 
 inline void
-derived2::marshalMembers (::cmw::SendBuffer& buf)const{
+derived2::marshalMembers (auto& buf)const{
   base::marshalMembers(buf);
   buf.receive(b);
 }
 
-template<class R>
-derived2::derived2 (::cmw::ReceiveBuffer<R>& buf):
+template<class R,class Z>
+derived2::derived2 (::cmw::ReceiveBuffer<R,Z>& buf):
    base(buf),b(::cmw::give<uint32_t>(buf))
 {}
 
 inline void
-derived3::marshalMembers (::cmw::SendBuffer& buf)const{
+derived3::marshalMembers (auto& buf)const{
   derived1::marshalMembers(buf);
   buf.receive(c);
 }
 
-template<class R>
-derived3::derived3 (::cmw::ReceiveBuffer<R>& buf):
+template<class R,class Z>
+derived3::derived3 (::cmw::ReceiveBuffer<R,Z>& buf):
    derived1(buf),c(::cmw::give<double>(buf))
 {}
 

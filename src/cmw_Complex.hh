@@ -33,7 +33,7 @@ template<class T,class... Ts>
   else return n+marshalSegments<Ts...>(c,buf,segs);
 }
 
-template<class...Ts>void marshalCollection (auto& c,SendBuffer& buf){
+template<class...Ts>void marshalCollection (auto& c,auto& buf){
   auto const ind=buf.reserveBytes(1);
   ::uint8_t segs=0;
   if(c.size()!=marshalSegments<Ts...>(c,buf,segs))raise("marshalCollection");
