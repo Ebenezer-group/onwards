@@ -1,4 +1,3 @@
 
-Two exception classes are used.  The primary class is called 'Failure'
-and the other one is 'Fiasco'.  Both of them are derived from
-std::exception.  Only the sockRead and Read functions throw Fiasco exceptions.
+One exception class is used.  The class is called 'Failure'
+and is derived from std::exception. 
