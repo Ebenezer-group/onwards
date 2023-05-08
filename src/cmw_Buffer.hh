@@ -3,7 +3,6 @@
 #include"quicklz.c"
 #include<charconv>
 #include<cstdint>
-#include<cstdio>//snprintf
 #include<cstdlib>//exit
 #include<cstring>//memcpy,memmove
 #include<exception>
@@ -40,7 +39,8 @@ class Failure:public ::std::exception{
 
   void operator<< (::int64_t i){
     char b[32];
-    *this<<::std::string_view(b,::std::snprintf(b,sizeof b,"%ld",i));
+    auto [ptr,ec]=::std::to_chars(b,b+sizeof b,i);
+    *this<<::std::string_view(b,ptr);
   }
 
   char const* what ()const noexcept{return st.data();}

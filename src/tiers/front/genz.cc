@@ -1,5 +1,6 @@
 #include<cmw_Buffer.hh>
 #include"genz.mdl.hh"
+#include<cstdio>
 using namespace ::cmw;
 
 void leave (char const *fmt,auto...t)noexcept{

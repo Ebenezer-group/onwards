@@ -5,6 +5,7 @@
 
 #include<deque>
 #include<cassert>
+#include<cstdio>
 #include<ctime>
 #include<liburing.h>
 #include<poll.h>
