@@ -162,7 +162,7 @@ class FileWrapper{
     return *this;
   }
   auto operator() (){return d;}
-  ~FileWrapper (){::close(d);}
+  ~FileWrapper (){if(d>0)::close(d);}
 };
 
 void getFile (char const *n,auto& b){
