@@ -334,7 +334,7 @@ struct MostSignificantFirst:MixedEndian{
   {for(auto c=sizeof(val);c>0;--c)val|=b.giveOne()<<8*(c-1);}
 };
 
-template<class R,class Z=int32_t>class ReceiveBuffer{
+template<class R,class Z>class ReceiveBuffer{
   int msgLength=0;
   int subTotal=0;
  protected:
@@ -429,7 +429,7 @@ bool giveBool (auto& b){
   }
 }
 
-template<class Z=::int32_t>
+template<class Z>
 class SendBuffer{
   SendBuffer (SendBuffer const&)=delete;
   SendBuffer& operator= (SendBuffer);
@@ -514,15 +514,15 @@ bool SendBuffer<Z>::flush (){
   return false;
 }
 
-inline void receiveBool (auto&b,bool bl){b.template receive<unsigned char>(bl);}
+void receiveBool (auto&b,bool bl){b.template receive<unsigned char>(bl);}
 
-inline void receive (auto& b,::std::string_view s){
+void receive (auto& b,::std::string_view s){
   MarshallingInt(s.size()).marshal(b);
   b.receive(s.data(),s.size());
 }
 
 using stringPlus=::std::initializer_list<::std::string_view>;
-inline void receive (auto& b,stringPlus lst){
+void receive (auto& b,stringPlus lst){
   ::int32_t t=0;
   for(auto s:lst)t+=s.size();
   MarshallingInt{t}.marshal(b);
