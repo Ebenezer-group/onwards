@@ -201,7 +201,7 @@ int main (int ac,char **av)try{
   ring.reed();
 
   for(;;){
-    auto const[buf,rc]=ring.submit();
+    auto const[tag,rc]=ring.submit();
     if(rc<=0){
       if(-EPIPE==rc||0==rc){
         reset("Back tier vanished");
@@ -211,7 +211,7 @@ int main (int ac,char **av)try{
       bail("op failed: %d",rc);
     }
 
-    if(nullptr==buf){
+    if(nullptr==tag){
       Socky frnt;
       bool gotAddr=false;
       cmwRequest *req=nullptr;
@@ -229,7 +229,7 @@ int main (int ac,char **av)try{
       continue;
     }
     try{
-      if((::uint64_t)buf&reedTag){
+      if((::uint64_t)tag&reedTag){
         if(cmwBuf.gotIt(rc)){
           do{
             assert(!pendingRequests.empty());
@@ -249,7 +249,7 @@ int main (int ac,char **av)try{
       assert(!pendingRequests.empty());
       toFront(pendingRequests.front().frnt,e.what());
       pendingRequests.pop_front();
-      if((::uint64_t)buf&reedTag)ring.reed();
+      if((::uint64_t)tag&reedTag)ring.reed();
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
