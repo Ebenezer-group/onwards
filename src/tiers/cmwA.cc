@@ -57,7 +57,7 @@ struct cmwRequest{
     *mdlFile='/';
     char last[60];
     ::std::snprintf(last,sizeof last,".%s.last",++mdlFile);
-    fl=FileWrapper(last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP);
+    fl=FileWrapper{last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP};
     switch(::pread(fl(),&prevTime,sizeof prevTime,0)){
       case 0:prevTime=0;break;
       case -1:raise("pread",errno);
@@ -67,7 +67,7 @@ struct cmwRequest{
   void marshal (auto& buf)const{
     acctNbr.marshal(buf);
     if(auto ind=buf.reserveBytes(1);!buf.receive(ind,marshalFile(mdlFile,buf)))
-      receive(buf,{mdlFile,{"\0",1}});
+      receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
 
     ::int8_t updatedFiles=0;
     auto const idx=buf.reserveBytes(sizeof updatedFiles);
