@@ -134,7 +134,7 @@ class ioUring{
                  rc<0)raise("ioUring",rc);
     auto e=getSqe();
     ::io_uring_prep_poll_multishot(e,sock,POLLIN);
-    ::io_uring_sqe_set_data(e,nullptr);
+    ::io_uring_sqe_set_data64(e,0);
   }
 
   auto submit (){
@@ -143,7 +143,7 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
       if(-EINTR==rc)goto a;
       raise("waitCqe",rc);
     }
-    auto pr=::std::make_pair(::io_uring_cqe_get_data(cq),cq->res);
+    auto pr=::std::make_pair(::io_uring_cqe_get_data64(cq),cq->res);
     ::io_uring_cqe_seen(&rng,cq);
     return pr;
   }
@@ -211,7 +211,7 @@ int main (int ac,char **av)try{
       bail("op failed: %d",rc);
     }
 
-    if(nullptr==tag){
+    if(0==tag){
       Socky frnt;
       bool gotAddr=false;
       cmwRequest *req=nullptr;
@@ -229,7 +229,7 @@ int main (int ac,char **av)try{
       continue;
     }
     try{
-      if((::uint64_t)tag&reedTag){
+      if(tag&reedTag){
         if(cmwBuf.gotIt(rc)){
           do{
             assert(!pendingRequests.empty());
@@ -249,7 +249,7 @@ int main (int ac,char **av)try{
       assert(!pendingRequests.empty());
       toFront(pendingRequests.front().frnt,e.what());
       pendingRequests.pop_front();
-      if((::uint64_t)tag&reedTag)ring.reed();
+      if(tag&reedTag)ring.reed();
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
