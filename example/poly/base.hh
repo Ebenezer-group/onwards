@@ -1,7 +1,7 @@
 #ifndef BASE_HH
 #define BASE_HH
-#include<cmw_Buffer.hh>
-#include<cmw_Complex.hh>
+#include<cmwBuffer.hh>
+#include<cmwComplex.hh>
 
 struct base{
   static uint8_t const typeNum=0;

@@ -1,5 +1,4 @@
-#include<cmw_Buffer.hh>
-#define CMW_MIDDLE
+#include<cmwBuffer.hh>
 #include"credentials.hh"
 #include"messageIDs.hh"
 

@@ -1,5 +1,6 @@
-#include<cmw_Buffer.hh>
+#include<cmwBuffer.hh>
 #include"genz.mdl.hh"
+#include<cstdio>
 #include"jniGenz.h"
 
 using namespace ::cmw;
