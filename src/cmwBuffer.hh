@@ -240,8 +240,7 @@ class GetaddrinfoWrapper{
   }
 
   ~GetaddrinfoWrapper (){::freeaddrinfo(head);}
-  auto& operator() (){return *addr;}
-  void inc (){if(addr!=nullptr)addr=addr->ai_next;}
+  auto const& operator() ()const{return *addr;}
 
   sockType getSock (){
     for(;addr!=nullptr;addr=addr->ai_next){

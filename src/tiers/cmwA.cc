@@ -90,7 +90,7 @@ void checkField (char const *fld,::std::string_view actl){
   if(actl!=fld)bail("Expected %s",fld);
 }
 
-GetaddrinfoWrapper gai("127.0.0.1","56789",SOCK_STREAM);
+GetaddrinfoWrapper const gai("127.0.0.1","56789",SOCK_STREAM);
 cmwCredentials cred;
 BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 
@@ -134,6 +134,7 @@ class ioUring{
     auto e=getSqe();
     ::io_uring_prep_poll_multishot(e,sock,POLLIN);
     ::io_uring_sqe_set_data64(e,0);
+    reed();
   }
 
   auto submit (){
@@ -197,7 +198,6 @@ int main (int ac,char **av)try{
 
   checkField("UDP-port-number",cfg.getline(' '));
   ioUring ring{frntBuf.sock_=udpServer(cfg.getline().data())};
-  ring.reed();
 
   for(;;){
     auto const[tag,rc]=ring.submit();
