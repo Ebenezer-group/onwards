@@ -166,10 +166,10 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
 ::std::deque<cmwRequest> pendingRequests;
 BufferStack<SameFormat> frntBuf;
 
-void reset (char const *context,char const *detail=""){
-  ::syslog(LOG_ERR,"%s:%s",context,detail);
+void reset (char const *context){
+  ::syslog(LOG_ERR,"%s",context);
   frntBuf.reset();
-  ::front::marshal<udpPacketMax>(frntBuf,{context," ",detail});
+  ::front::marshal<udpPacketMax>(frntBuf,{context});
   for(auto& r:pendingRequests){
     frntBuf.send((::sockaddr*)&r.frnt.addr,r.frnt.len);
   }
