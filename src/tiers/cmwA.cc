@@ -163,20 +163,7 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
   }
 };
 
-::std::deque<cmwRequest> pendingRequests;
 BufferStack<SameFormat> frntBuf;
-
-void reset (char const *context){
-  ::syslog(LOG_ERR,"%s",context);
-  frntBuf.reset();
-  ::front::marshal<udpPacketMax>(frntBuf,{context});
-  for(auto& r:pendingRequests){
-    frntBuf.send((::sockaddr*)&r.frnt.addr,r.frnt.len);
-  }
-  pendingRequests.clear();
-  cmwBuf.compressedReset();
-  login();
-}
 
 void toFront (Socky const& s,auto...t){
   frntBuf.reset();
@@ -198,12 +185,21 @@ int main (int ac,char **av)try{
 
   checkField("UDP-port-number",cfg.getline(' '));
   ioUring ring{frntBuf.sock_=udpServer(cfg.getline().data())};
+  ::std::deque<cmwRequest> pendingRequests;
 
   for(;;){
     auto const[tag,rc]=ring.submit();
     if(rc<=0){
       if(-EPIPE==rc||0==rc){
-        reset("Back tier vanished");
+        ::syslog(LOG_ERR,"Back tier vanished");
+        frntBuf.reset();
+        ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
+        for(auto& r:pendingRequests){
+          frntBuf.send((::sockaddr*)&r.frnt.addr,r.frnt.len);
+        }
+        pendingRequests.clear();
+        cmwBuf.compressedReset();
+        login();
         ring.reed();
         continue;
       }
