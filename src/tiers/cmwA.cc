@@ -91,10 +91,9 @@ void checkField (char const *fld,::std::string_view actl){
 }
 
 GetaddrinfoWrapper const gai("127.0.0.1","56789",SOCK_STREAM);
-cmwCredentials cred;
 BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 
-void login (bool signUp=false){
+void login (cmwCredentials const& cred,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
@@ -176,12 +175,11 @@ int main (int ac,char **av)try{
   if(ac<2||ac>3)bail("Usage: cmwA config-file [-signup]");
   FileBuffer cfg{av[1],O_RDONLY};
   checkField("AmbassadorID",cfg.getline(' '));
-  cred.ambassadorID=cfg.getline();
-  if(cred.ambassadorID.size()>20)bail("AmbassadorID is too long");
+  cmwCredentials cred(cfg.getline());
   checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  login(ac==3);
+  login(cred,ac==3);
 
   checkField("UDP-port-number",cfg.getline(' '));
   ioUring ring{frntBuf.sock_=udpServer(cfg.getline().data())};
@@ -199,7 +197,7 @@ int main (int ac,char **av)try{
         }
         pendingRequests.clear();
         cmwBuf.compressedReset();
-        login();
+        login(cred);
         ring.reed();
         continue;
       }
@@ -223,6 +221,7 @@ int main (int ac,char **av)try{
       }
       continue;
     }
+
     try{
       if(tag&reedTag){
         if(cmwBuf.gotIt(rc)){
