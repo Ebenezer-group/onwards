@@ -1,4 +1,4 @@
-#include<cmwBuffer.hh>
+#include<cmwComplex.hh>
 #include<boost/poly_collection/base_collection.hpp>
 #include"base.hh"
 #include"testing.mdl.hh"
