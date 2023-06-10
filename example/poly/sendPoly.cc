@@ -1,15 +1,13 @@
-#include<base.hh>
-#include<cmwBuffer.hh>
+#include<cmwComplex.hh>
 #include<boost/poly_collection/base_collection.hpp>
+#include"base.hh"
 #include"testing.mdl.hh"
 
 int main (){
   ::boost::base_collection<base> c;
 
-  derived1 d1;
-  derived3 d3;
-  c.insert(d1);
-  c.insert(d3);
+  c.insert(derived1{});
+  c.insert(derived3{});
 
   ::cmw::GetaddrinfoWrapper res("127.0.0.1" ,"13579",SOCK_DGRAM); //may need ::1
   ::cmw::BufferStack<::cmw::SameFormat> buf(res.getSock());
