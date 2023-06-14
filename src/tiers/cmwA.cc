@@ -120,6 +120,7 @@ void login (cmwCredentials const& cred,bool signUp=false){
 ::uint64_t const reedTag=1;
 class ioUring{
   ::io_uring rng;
+  int sock;
 
   auto getSqe (){
     if(auto e=::io_uring_get_sqe(&rng);e!=0)return e;
@@ -127,10 +128,14 @@ class ioUring{
   }
 
  public:
-  ioUring (int sock){
+  void multishot (){
+    ::io_uring_prep_poll_multishot(getSqe(),sock,POLLIN);
+  }
+
+  ioUring (int s):sock{s}{
     if(int const rc=::io_uring_queue_init(16,&rng,IORING_SETUP_SINGLE_ISSUER);
                  rc<0)raise("ioUring",rc);
-    ::io_uring_prep_poll_multishot(getSqe(),sock,POLLIN);
+    multishot();
     reed();
   }
 
@@ -141,6 +146,7 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
       raise("waitCqe",rc);
     }
     auto pr=::std::make_pair(::io_uring_cqe_get_data64(cq),cq->res);
+    if(!(cq->flags&IORING_CQE_F_MORE))multishot();
     ::io_uring_cqe_seen(&rng,cq);
     return pr;
   }
