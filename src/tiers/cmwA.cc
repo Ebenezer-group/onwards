@@ -132,7 +132,6 @@ class ioUring{
                  rc<0)raise("ioUring",rc);
     auto e=getSqe();
     ::io_uring_prep_poll_multishot(e,sock,POLLIN);
-    ::io_uring_sqe_set_data64(e,0);
     reed();
   }
 
