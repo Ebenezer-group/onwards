@@ -120,7 +120,6 @@ void login (cmwCredentials const& cred,bool signUp=false){
 ::uint64_t const reedTag=1;
 class ioUring{
   ::io_uring rng;
-  int sock;
 
   auto getSqe (){
     if(auto e=::io_uring_get_sqe(&rng);e!=0)return e;
@@ -128,14 +127,14 @@ class ioUring{
   }
 
  public:
-  void multishot (){
+  void multishot (int sock){
     ::io_uring_prep_poll_multishot(getSqe(),sock,POLLIN);
   }
 
-  ioUring (int s):sock{s}{
+  ioUring (int sock){
     if(int const rc=::io_uring_queue_init(16,&rng,IORING_SETUP_SINGLE_ISSUER);
                  rc<0)raise("ioUring",rc);
-    multishot();
+    multishot(sock);
     reed();
   }
 
@@ -145,10 +144,9 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
       if(-EINTR==rc)goto a;
       raise("waitCqe",rc);
     }
-    auto pr=::std::make_pair(::io_uring_cqe_get_data64(cq),cq->res);
-    if(pr.first==0&&!(cq->flags&IORING_CQE_F_MORE))multishot();
+    auto cqe=*cq;
     ::io_uring_cqe_seen(&rng,cq);
-    return pr;
+    return cqe;
   }
 
   void reed (){
@@ -190,9 +188,9 @@ int main (int ac,char **av)try{
   ::std::deque<cmwRequest> pendingRequests;
 
   for(;;){
-    auto const[tag,rc]=ring.submit();
-    if(rc<=0){
-      if(-EPIPE==rc||0==rc){
+    auto const cq=ring.submit();
+    if(cq.res<=0){
+      if(-EPIPE==cq.res||0==cq.res){
         ::syslog(LOG_ERR,"Back tier vanished");
         frntBuf.reset();
         ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
@@ -205,10 +203,11 @@ int main (int ac,char **av)try{
         ring.reed();
         continue;
       }
-      bail("op failed: %d",rc);
+      bail("op failed: %d",cq.res);
     }
 
-    if(0==tag){
+    if(0==cq.user_data){
+      if(!(cq.flags&IORING_CQE_F_MORE))ring.multishot(frntBuf.sock_);
       Socky frnt;
       bool gotAddr=false;
       cmwRequest *req=nullptr;
@@ -227,8 +226,8 @@ int main (int ac,char **av)try{
     }
 
     try{
-      if(tag&reedTag){
-        if(cmwBuf.gotIt(rc)){
+      if(cq.user_data&reedTag){
+        if(cmwBuf.gotIt(cq.res)){
           do{
             assert(!pendingRequests.empty());
             auto& req=pendingRequests.front();
@@ -241,13 +240,13 @@ int main (int ac,char **av)try{
         }
         ring.reed();
       }else
-        if(!cmwBuf.all(rc))ring.writ();
+        if(!cmwBuf.all(cq.res))ring.writ();
     }catch(::std::exception& e){
       ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
       assert(!pendingRequests.empty());
       toFront(pendingRequests.front().frnt,e.what());
       pendingRequests.pop_front();
-      if(tag&reedTag)ring.reed();
+      if(cq.user_data&reedTag)ring.reed();
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
