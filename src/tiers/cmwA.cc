@@ -146,7 +146,7 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
       raise("waitCqe",rc);
     }
     auto pr=::std::make_pair(::io_uring_cqe_get_data64(cq),cq->res);
-    if(!(cq->flags&IORING_CQE_F_MORE))multishot();
+    if(pr.first==0&&!(cq->flags&IORING_CQE_F_MORE))multishot();
     ::io_uring_cqe_seen(&rng,cq);
     return pr;
   }
