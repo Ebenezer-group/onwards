@@ -34,7 +34,7 @@ struct cmwRequest{
   char *mdlFile;
   FileWrapper fl;
 
-  bool marshalFile (char const *name,auto& buf)const{
+  static bool marshalFile (char const *name,auto& buf){
     struct ::stat sb;
     if(::stat(name,&sb)<0)raise("stat",name,errno);
     if(sb.st_mtime<=prevTime)return false;
@@ -47,7 +47,7 @@ struct cmwRequest{
 
  public:
   cmwRequest (Socky const& ft,auto& buf):frnt{ft}
-     ,bday{static_cast<::int32_t>(::std::time(nullptr))},acctNbr{buf},path{buf}{
+      ,bday(::std::time(nullptr)),acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     mdlFile=::std::strrchr(path(),'/');
     if(nullptr==mdlFile)raise("cmwRequest didn't find /");
