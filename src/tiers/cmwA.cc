@@ -14,11 +14,6 @@
 
 using namespace ::cmw;
 
-void bail (char const *fmt,auto... t){
-  ::syslog(LOG_ERR,fmt,t...);
-  exitFailure();
-}
-
 struct Socky{
   ::sockaddr_in6 addr;
   ::socklen_t len=sizeof addr;
@@ -85,6 +80,11 @@ struct cmwRequest{
   }
 };
 #include"cmwA.mdl.hh"
+
+void bail (char const *fmt,auto... t){
+  ::syslog(LOG_ERR,fmt,t...);
+  exitFailure();
+}
 
 void checkField (char const *fld,::std::string_view actl){
   if(actl!=fld)bail("Expected %s",fld);
