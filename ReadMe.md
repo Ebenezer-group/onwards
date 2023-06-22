@@ -7,7 +7,7 @@ and [output](https://github.com/Ebenezer-group/onwards/blob/master/example/examp
  A compiler with support for C++ 2020 or newer is required to use the CMW.
 
 #### License
-The software is under the BSD license.  One of the files, quicklz.c, is from another 
+The software is under the BSD license.  One of the files, quicklz.c, is from another
 developer and should only be used in conjunction with the CMW.
 
 #### Building

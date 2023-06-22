@@ -29,7 +29,7 @@ for message Ids.
 
 Based on that input, the C++ Middleware Writer (CMW) creates
 an exampleMessages struct in a file called {middle file name}.hh.
-One or more functions are created within the struct for each of 
+One or more functions are created within the struct for each of
 the lines with matching parentheses.
 
 The available options are: out, in and yeaNay.
@@ -49,7 +49,7 @@ Rather than having two messages like this:
   -out -yeaNay (::std::string_view)
 
 .  When yeaNay is used, the generated function first marshals a
-bool based on the size of the string input.  'True' if it's 
+bool based on the size of the string input.  'True' if it's
 zero, 'false' otherwise.  This option leads to less output
 from the CMW.
 

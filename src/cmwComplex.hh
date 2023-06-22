@@ -17,26 +17,24 @@ auto complexGive (auto& buf){
   return ::std::complex<T>(rl,give<T>(buf));
 }
 
-template<class T,class... Ts>
-::int32_t marshalSegments (auto& c,auto& buf,uint8_t& segs){
-  ::int32_t n;
+template<class T,class...Ts>
+void marshalSegments (auto& c,auto& buf,auto& segs){
   if(c.template is_registered<T>()){
-    n=c.template size<T>();
-    if(n>0){
+    if(::int32_t n=c.template size<T>();n>0){
       ++segs;
       buf.receive(T::typeNum);
       buf.receive(n);
       for(T const& t:c.template segment<T>()){t.marshal(buf);}
     }
-  }else n=0;
-  if constexpr(sizeof...(Ts)==0)return n;
-  else return n+marshalSegments<Ts...>(c,buf,segs);
+  }
+  if constexpr(sizeof...(Ts)==0)return;
+  else return marshalSegments<Ts...>(c,buf,segs);
 }
 
 template<class...Ts>void marshalCollection (auto& c,auto& buf){
   auto const ind=buf.reserveBytes(1);
   ::uint8_t segs=0;
-  if(c.size()!=marshalSegments<Ts...>(c,buf,segs))raise("marshalCollection");
+  marshalSegments<Ts...>(c,buf,segs);
   buf.receive(ind,segs);
 }
 
