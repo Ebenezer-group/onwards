@@ -60,7 +60,7 @@ struct cmwRequest{
 
   void marshal (auto& buf)const{
     acctNbr.marshal(buf);
-    if(auto ind=buf.reserveBytes(1);!buf.receive(ind,marshalFile(mdlFile,buf)))
+    if(auto ind=buf.reserveBytes(1);!buf.receiveAt(ind,marshalFile(mdlFile,buf)))
       receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
 
     ::int8_t updatedFiles=0;
@@ -71,7 +71,7 @@ struct cmwRequest{
       if(!::std::strncmp(tok,"--",2))break;
       if(marshalFile(tok,buf))++updatedFiles;
     }
-    buf.receive(idx,updatedFiles);
+    buf.receiveAt(idx,updatedFiles);
   }
 
   auto getFileName (){

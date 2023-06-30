@@ -453,7 +453,7 @@ class SendBuffer{
     receive(&t,sizeof t);
   }
 
-  auto receive (int where,arithmetic auto t){
+  auto receiveAt (int where,arithmetic auto t){
     ::std::memcpy(buf+where,&t,sizeof t);
     return t;
   }
@@ -488,7 +488,7 @@ template<class Z>
 void SendBuffer<Z>::fillInSize (::int32_t max){
   Z marshalledBytes=index-savedSize;
   if(marshalledBytes>max)raise("fillInSize",max);
-  receive(savedSize,marshalledBytes);
+  receiveAt(savedSize,marshalledBytes);
   savedSize=index;
 }
 
