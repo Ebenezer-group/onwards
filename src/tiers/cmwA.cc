@@ -120,6 +120,7 @@ void login (cmwCredentials const& cred,bool signUp=false){
 ::uint64_t const reedTag=1;
 class ioUring{
   ::io_uring rng;
+  ::io_uring_cqe *cq=nullptr;
 
   auto getSqe (){
     if(auto e=::io_uring_get_sqe(&rng);e!=0)return e;
@@ -141,14 +142,12 @@ class ioUring{
   }
 
   auto submit (){
-    ::io_uring_cqe *cq;
+    if(cq!=nullptr)::io_uring_cq_advance(&rng,1);
 a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
       if(-EINTR==rc)goto a;
       raise("waitCqe",rc);
     }
-    auto cqe=*cq;
-    ::io_uring_cqe_seen(&rng,cq);
-    return cqe;
+    return *cq;
   }
 
   void reed (){
