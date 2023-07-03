@@ -132,9 +132,10 @@ class ioUring{
   }
 
   ioUring (int sock){
-    if(int const rc=::io_uring_queue_init(16,&rng,IORING_SETUP_SINGLE_ISSUER
-                            |IORING_SETUP_COOP_TASKRUN);
-                 rc<0)raise("ioUring",rc);
+    ::io_uring_params ps{};
+    ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_COOP_TASKRUN|IORING_SETUP_DEFER_TASKRUN;
+    if(int const rc=::io_uring_queue_init_params(16,&rng,&ps);rc<0)
+      raise("ioUring",rc);
     multishot(sock);
     reed();
   }
