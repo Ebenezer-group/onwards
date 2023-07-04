@@ -134,7 +134,7 @@ class ioUring{
 
   ioUring (int sock){
     ::io_uring_params ps{};
-    ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_COOP_TASKRUN|IORING_SETUP_DEFER_TASKRUN;
+    ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     if(int const rc=::io_uring_queue_init_params(16,&rng,&ps);rc<0)
       raise("ioUring",rc);
     multishot(sock);
@@ -208,7 +208,10 @@ int main (int ac,char **av)try{
     }
 
     if(0==cq.user_data){
-      if(!(cq.flags&IORING_CQE_F_MORE))ring.multishot(frntBuf.sock_);
+      if(!(cq.flags&IORING_CQE_F_MORE)){
+        ::syslog(LOG_ERR,"Multishot");
+        ring.multishot(frntBuf.sock_);
+      }
       Socky frnt;
       bool gotAddr=false;
       cmwRequest *req=nullptr;
