@@ -229,8 +229,8 @@ int main (int ac,char **av)try{
       continue;
     }
 
-    try{
-      if(cq.user_data&reedTag){
+    if(cq.user_data&reedTag){
+      try{
         if(cmwBuf.gotIt(cq.res)){
           do{
             assert(!pendingRequests.empty());
@@ -242,15 +242,14 @@ int main (int ac,char **av)try{
             pendingRequests.pop_front();
           }while(cmwBuf.nextMessage());
         }
-        ring.reed();
-      }else
-        if(!cmwBuf.all(cq.res))ring.writ();
-    }catch(::std::exception& e){
-      ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
-      assert(!pendingRequests.empty());
-      toFront(pendingRequests.front().frnt,e.what());
-      pendingRequests.pop_front();
-      if(cq.user_data&reedTag)ring.reed();
-    }
+      }catch(::std::exception& e){
+        ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
+        assert(!pendingRequests.empty());
+        toFront(pendingRequests.front().frnt,e.what());
+        pendingRequests.pop_front();
+      }
+      ring.reed();
+    }else
+      if(!cmwBuf.all(cq.res))ring.writ();
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
