@@ -6,6 +6,7 @@
 #include<cassert>
 #include<cstdio>
 #include<ctime>
+#include<arpa/inet.h>
 #include<liburing.h>
 #include<poll.h>
 #include<linux/sctp.h>
@@ -90,14 +91,17 @@ void checkField (char const *fld,::std::string_view actl){
   if(actl!=fld)bail("Expected %s",fld);
 }
 
-GetaddrinfoWrapper const gai("127.0.0.1","56789",SOCK_STREAM);
 BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 
 void login (cmwCredentials const& cred,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
+  ::sockaddr_in sa{AF_INET,::htons(56789),{0},{0}};
+  if(int rc=::inet_pton(AF_INET,"127.0.0.1",&sa.sin_addr);rc!=1)
+    bail("inet_pton %d",rc);
+
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-  while(0!=::connect(cmwBuf.sock_,gai().ai_addr,gai().ai_addrlen)){
+  while(0!=::connect(cmwBuf.sock_,(sockaddr*)&sa,sizeof(sa))){
     ::std::printf("connect %d\n",errno);
     ::sleep(30);
   }
