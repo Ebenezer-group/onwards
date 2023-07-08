@@ -3,11 +3,11 @@ CXXFLAGS=$(CXX) -std=c++20 -Isrc -Oz -flto -Wundef -W -Wall -Wextra -Wpedantic -
 EXAMPLES:=example/sendExample example/receiveExample
 FRONT:=src/tiers/front/genz
 MIDDLE:=src/tiers/cmwA
-BINARIES:=$(EXAMPLES) $(FRONT)
+BINARIES:=$(EXAMPLES) $(MIDDLE) $(FRONT)
 all:$(BINARIES)
 .PHONY:all clean
 
-#cmwA.mdl.h: account.h $(BASE)cmwA.mdl
+#cmwA.mdl.hh: credentials.hh $(BASE)cmwA.mdl
 #	genz 2 $(BASE)cmwA.mdl
 
 example/sendExample:example/sendExample.cc
