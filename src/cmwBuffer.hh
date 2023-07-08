@@ -21,6 +21,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #else
 #include<errno.h>
 #include<fcntl.h>//open
+#include<arpa/inet.h>
 #include<netdb.h>
 #include<sys/socket.h>
 #include<sys/stat.h>//open
@@ -251,6 +252,14 @@ class GetaddrinfoWrapper{
 
   GetaddrinfoWrapper (GetaddrinfoWrapper&)=delete;
   GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
+};
+
+struct sockaddrWrapper{
+  ::sockaddr_in sa;
+  sockaddrWrapper (char const *node,::uint16_t port):sa{AF_INET,::htons(port),{0},{0}}{
+    if(int rc=::inet_pton(AF_INET,node,&sa.sin_addr);rc!=1)
+      raise("inet_pton",rc);
+  }
 };
 
 inline sockType connectWrapper (char const *node,char const *port){
