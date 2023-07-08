@@ -3,7 +3,7 @@ CXXFLAGS=$(CXX) -std=c++20 -Isrc -Oz -flto -Wundef -W -Wall -Wextra -Wpedantic -
 EXAMPLES:=example/sendExample example/receiveExample
 FRONT:=src/tiers/front/genz
 MIDDLE:=src/tiers/cmwA
-BINARIES:=$(EXAMPLES) $(MIDDLE) $(FRONT)
+BINARIES:=$(EXAMPLES) $(FRONT)
 all:$(BINARIES)
 .PHONY:all clean
 
