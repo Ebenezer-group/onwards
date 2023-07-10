@@ -2,7 +2,6 @@ struct cmwCredentials{
   ::std::string ambassadorID;
   ::cmw::FixedString60 password;
 
-  cmwCredentials ()=default;
   explicit cmwCredentials (::std::string_view id):ambassadorID(id){
     if(ambassadorID.size()>20)::cmw::raise("ambassadorID is too long");
   }
