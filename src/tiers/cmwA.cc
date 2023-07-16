@@ -236,7 +236,7 @@ int main (int ac,char **av)try{
             assert(!pendingRequests.empty());
             auto& req=pendingRequests.front();
             if(giveBool(cmwBuf)){
-              getFile(req.getFileName(),cmwBuf);
+              cmwBuf.giveFile(req.getFileName());
               toFront(req.frnt);
             }else toFront(req.frnt,"CMW:",cmwBuf.giveStringView());
             pendingRequests.pop_front();

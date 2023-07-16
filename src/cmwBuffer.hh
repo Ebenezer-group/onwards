@@ -166,10 +166,6 @@ class FileWrapper{
   ~FileWrapper (){if(d>0)::close(d);}
 };
 
-void getFile (char const *n,auto& b){
-  b.giveFile(FileWrapper{n,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH}());
-}
-
 struct FileBuffer{
   FileWrapper fl;
   char buf[4096];
@@ -397,11 +393,12 @@ template<class R,class Z>class ReceiveBuffer{
   }
 
 #ifndef CMW_WINDOWS
-  void giveFile (int d){
+  void giveFile (auto nm){
     int sz=give<::uint32_t>();
     checkLen(sz);
+    FileWrapper fl{nm,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH};
     while(sz>0){
-      int r=Write(d,rbuf+subTotal+rindex,sz);
+      int r=Write(fl(),rbuf+subTotal+rindex,sz);
       sz-=r;
       rindex+=r;
     }
