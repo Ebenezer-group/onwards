@@ -81,7 +81,7 @@ struct cmwRequest{
 };
 #include"cmwA.mdl.hh"
 
-void bail (char const *fmt,auto... t){
+void bail (char const *fmt,auto...t){
   ::syslog(LOG_ERR,fmt,t...);
   exitFailure();
 }
@@ -90,7 +90,7 @@ void checkField (char const *fld,::std::string_view actl){
   if(actl!=fld)bail("Expected %s",fld);
 }
 
-sockaddrWrapper const sa("127.0.0.1",56789);
+SockaddrWrapper const sa("127.0.0.1",56789);
 BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 
 void login (cmwCredentials const& cred,bool signUp=false){

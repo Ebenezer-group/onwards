@@ -250,21 +250,13 @@ class GetaddrinfoWrapper{
   GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
 };
 
-struct sockaddrWrapper{
+struct SockaddrWrapper{
   ::sockaddr_in sa;
-  sockaddrWrapper (char const *node,::uint16_t port):sa{AF_INET,::htons(port),{0},{0}}{
+  SockaddrWrapper (char const *node,::uint16_t port):sa{AF_INET,::htons(port),{0},{0}}{
     if(int rc=::inet_pton(AF_INET,node,&sa.sin_addr);rc!=1)
       raise("inet_pton",rc);
   }
 };
-
-inline sockType connectWrapper (char const *node,char const *port){
-  GetaddrinfoWrapper ai{node,port,SOCK_STREAM};
-  auto s=ai.getSock();
-  if(0==::connect(s,ai().ai_addr,ai().ai_addrlen))return s;
-  errno=preserveError(s);
-  return -1;
-}
 
 inline sockType udpServer (char const *port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
@@ -545,7 +537,7 @@ void receiveBlock (auto& b,C<T>const& c){
 }
 
 inline constexpr auto udpPacketMax=1500;
-template<class R,class Z=int16_t,int N=udpPacketMax>
+template<class R,class Z=::std::int16_t,int N=udpPacketMax>
 class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   unsigned char ar[N];
  public:
