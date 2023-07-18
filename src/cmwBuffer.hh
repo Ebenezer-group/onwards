@@ -24,7 +24,6 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<arpa/inet.h>
 #include<netdb.h>
 #include<sys/socket.h>
-#include<sys/stat.h>//open
 #include<sys/types.h>
 #include<unistd.h>//chdir
 #endif
@@ -106,7 +105,7 @@ class MarshallingInt{
   void operator= (::int32_t r){val=r;}
   void operator+= (::int32_t r){val+=r;}
   auto operator() ()const{return val;}
-//Encode integer into variable-length format.
+  //Encode integer into variable-length format.
   void marshal (auto& b)const{
     ::uint32_t n=val;
     for(;;){
@@ -210,21 +209,6 @@ inline void setRcvTimeout (sockType s,int time){
   if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
 }
 
-inline void closeSocket (sockType s){
-#ifdef CMW_WINDOWS
-  if(::closesocket(s)==SOCKET_ERROR)
-#else
-  if(::close(s)==-1)
-#endif
-    raise("closeSocket",getError());
-}
-
-inline int preserveError (sockType s){
-  auto e=getError();
-  closeSocket(s);
-  return e;
-}
-
 class GetaddrinfoWrapper{
   ::addrinfo *head,*addr;
  public:
@@ -257,6 +241,21 @@ struct SockaddrWrapper{
       raise("inet_pton",rc);
   }
 };
+
+inline void closeSocket (sockType s){
+#ifdef CMW_WINDOWS
+  if(::closesocket(s)==SOCKET_ERROR)
+#else
+  if(::close(s)==-1)
+#endif
+    raise("closeSocket",getError());
+}
+
+inline int preserveError (sockType s){
+  auto e=getError();
+  closeSocket(s);
+  return e;
+}
 
 inline sockType udpServer (char const *port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
