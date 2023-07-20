@@ -111,10 +111,6 @@ void login (cmwCredentials const& cred,bool signUp=false){
                   ,&pad,sizeof pad)==-1)bail("setsockopt %d",errno);
   while(!cmwBuf.gotPacket());
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
-  if(signUp){
-    ::std::printf("Signup was successful\n");
-    ::std::exit(0);
-  }
 }
 
 ::uint64_t const reedTag=1;
@@ -183,6 +179,10 @@ int main (int ac,char **av)try{
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
   login(cred,ac==3);
+  if(ac==3){
+    ::std::printf("Signup was successful\n");
+    ::std::exit(0);
+  }
 
   checkField("UDP-port-number",cfg.getline(' '));
   ioUring ring{frntBuf.sock_=udpServer(cfg.getline().data())};
