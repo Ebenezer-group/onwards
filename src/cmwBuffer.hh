@@ -470,7 +470,7 @@ class SendBuffer{
   auto data (){return buf;}
   int getIndex (){return index;}
   int getSize (){return bufsize;}
-  void receiveMulti (char const*,auto...);
+  void receiveMulti (auto*,auto...);
 };
 
 template<class Z>
