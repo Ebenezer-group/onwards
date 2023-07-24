@@ -90,10 +90,10 @@ void checkField (char const *fld,::std::string_view actl){
   if(actl!=fld)bail("Expected %s",fld);
 }
 
-SockaddrWrapper const sa("127.0.0.1",56789);
 BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 
 void login (cmwCredentials const& cred,bool signUp=false){
+  static SockaddrWrapper const sa("127.0.0.1",56789);
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
