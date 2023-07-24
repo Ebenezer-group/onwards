@@ -30,7 +30,7 @@ for message Ids.
 Based on that input, the C++ Middleware Writer (CMW) creates
 an exampleMessages struct in a file called {middle file name}.hh.
 One or more functions are created within the struct for each of
-the lines with matching parentheses.
+the parenthesized lines of input.
 
 The available options are: out, in and yeaNay.
 

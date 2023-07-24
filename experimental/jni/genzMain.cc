@@ -21,7 +21,7 @@ int genzMain (int ac,char **av)try{
     buf.send(res().ai_addr,res().ai_addrlen);
     setRcvTimeout(buf.sock_,tm);
     if(buf.getPacket()){
-      if(giveBool(buf))::exit(EXIT_SUCCESS);
+      if(giveBool(buf))::std::exit(EXIT_SUCCESS);
       leave("cmwA:%s\n",buf.giveStringView().data());
     }
   }
