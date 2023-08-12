@@ -460,7 +460,6 @@ class SendBuffer{
   void reset (){savedSize=index=0;}
   void rollback (){index=savedSize;}
 
-  void receiveFile (char const*,::int32_t sz);
   bool flush ();
 
   //UDP-friendly alternative to flush
@@ -470,6 +469,16 @@ class SendBuffer{
   auto data (){return buf;}
   int getIndex (){return index;}
   int getSize (){return bufsize;}
+
+#ifndef CMW_WINDOWS
+  void receiveFile (char const* n,::int32_t sz){
+    receive(sz);
+    auto prev=reserveBytes(sz);
+    FileWrapper fl{n,O_RDONLY,0};
+    if(Read(fl(),buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
+  }
+#endif
+
   void receiveMulti (auto*,auto...);
 };
 
@@ -488,16 +497,6 @@ void SendBuffer<Z>::fillInSize (::int32_t max){
   receiveAt(savedSize,marshalledBytes);
   savedSize=index;
 }
-
-#ifndef CMW_WINDOWS
-template<class Z>
-void SendBuffer<Z>::receiveFile (char const* n,::int32_t sz){
-  receive(sz);
-  auto prev=reserveBytes(sz);
-  FileWrapper fl{n,O_RDONLY,0};
-  if(Read(fl(),buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
-}
-#endif
 
 template<class Z>
 bool SendBuffer<Z>::flush (){
