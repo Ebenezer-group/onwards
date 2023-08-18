@@ -578,7 +578,8 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     return all(Write(this->sock_,compBuf,compIndex));
   }
  public:
-  explicit BufferCompressed ():SendBuffer<Z>(new unsigned char[sz],sz),ReceiveBuffer<R,Z>(recBuf){}
+  explicit BufferCompressed ():SendBuffer<Z>(new unsigned char[sz],sz)
+                               ,ReceiveBuffer<R,Z>(recBuf),comp{},decomp{}{}
   ~BufferCompressed (){delete[]this->buf;}
 
   void compress (){
