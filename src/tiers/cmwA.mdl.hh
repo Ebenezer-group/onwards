@@ -27,10 +27,9 @@ static void mar (auto& buf
 
 template<messageID id,int maxLength=10000>
 static void marshal (auto& buf,auto&&...t)try{
-  buf.reserveBytes();
-  buf.receive(id);
+  buf.reserveBytes(buf.getZ()+sizeof id);
   mar(buf,::std::forward<decltype(t)>(t)...);
-  buf.fillInSize(maxLength);
+  buf.fillInHdr(maxLength,id);
 }catch(...){buf.rollback();throw;}
 };
 
