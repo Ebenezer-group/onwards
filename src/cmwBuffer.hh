@@ -28,7 +28,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<unistd.h>//chdir
 #endif
 
-template<class T>concept arithmetic=::std::is_arithmetic_v<T>;
+template<class T>concept arithmetic=::std::is_arithmetic_v<T>||::std::is_enum_v<T>;
 
 namespace cmw{
 class Failure:public ::std::exception{
@@ -439,14 +439,14 @@ class SendBuffer{
 
   SendBuffer (unsigned char *addr,Z sz):bufsize(sz),buf(addr){}
 
+  constexpr int getZ (){return sizeof(Z);}
   int reserveBytes (Z n=sizeof(Z));
 
   void receive (void const *data,int size){
     ::std::memcpy(buf+reserveBytes(size),data,size);
   }
 
-  template<class T>requires arithmetic<T>||::std::is_enum_v<T>
-  void receive (T t){
+  void receive (arithmetic auto t){
     receive(&t,sizeof t);
   }
 
@@ -455,7 +455,17 @@ class SendBuffer{
     return t;
   }
 
-  void fillInSize (::int32_t max);
+  void fillInSize (::int32_t max){
+    Z marshalledBytes=index-savedSize;
+    if(marshalledBytes>max)raise("fillInSize",max);
+    receiveAt(savedSize,marshalledBytes);
+    savedSize=index;
+  }
+
+  void fillInHdr (::int32_t max,auto id){
+    receiveAt(savedSize+sizeof(Z),id);
+    fillInSize(max);
+  }
 
   void reset (){savedSize=index=0;}
   void rollback (){index=savedSize;}
@@ -488,14 +498,6 @@ int SendBuffer<Z>::reserveBytes (Z n){
   auto i=index;
   index+=n;
   return i;
-}
-
-template<class Z>
-void SendBuffer<Z>::fillInSize (::int32_t max){
-  Z marshalledBytes=index-savedSize;
-  if(marshalledBytes>max)raise("fillInSize",max);
-  receiveAt(savedSize,marshalledBytes);
-  savedSize=index;
 }
 
 template<class Z>
