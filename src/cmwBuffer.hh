@@ -463,7 +463,6 @@ class SendBuffer{
   }
 
   void fillInHdr (::int32_t max,auto id){
-    receiveAt(savedSize+sizeof(Z),id);
     receiveAt(savedSize+getZ(),id);
     fillInSize(max);
   }
