@@ -439,7 +439,7 @@ class SendBuffer{
 
   SendBuffer (unsigned char *addr,Z sz):bufsize(sz),buf(addr){}
 
-  constexpr int getZ (){return sizeof(Z);}
+  int getZ (){return sizeof(Z);}
   int reserveBytes (Z n=sizeof(Z));
 
   void receive (void const *data,int size){
