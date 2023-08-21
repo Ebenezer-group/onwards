@@ -80,7 +80,6 @@ inline int fromChars (::std::string_view s){
 }
 
 
-template<class>class SendBuffer;
 template<class,class>class ReceiveBuffer;
 class MarshallingInt{
   ::int32_t val=0;
