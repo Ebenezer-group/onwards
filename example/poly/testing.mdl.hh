@@ -6,8 +6,7 @@ base::marshalMembers (auto& buf)const{
 }
 
 template<class R,class Z>
-base::base (::cmw::ReceiveBuffer<R,Z>& buf)
-{}
+base::base (::cmw::ReceiveBuffer<R,Z>& buf){}
 
 void baseSwitch (auto& c,auto& buf){
   switch(auto typeNum=::cmw::give<::uint8_t>(buf);typeNum){
@@ -57,11 +56,12 @@ derived3::derived3 (::cmw::ReceiveBuffer<R,Z>& buf):
 {}
 
 struct testing{
+template<int maxLength=10000>
 static void marshal (auto& buf
          ,::boost::base_collection<base> const& a)try{
   buf.reserveBytes();
   ::cmw::marshalCollection<base,derived1,derived3,derived2>(a,buf);
-  buf.fillInSize(10000);
+  buf.fillInSize(maxLength);
 }catch(...){buf.rollback();throw;}
 
 static void give (auto& buf
