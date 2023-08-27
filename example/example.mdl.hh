@@ -12,10 +12,9 @@ static void mar (auto& buf
 static void give (auto& buf
          ,::std::vector<::int32_t>& a
          ,::std::string& b){
-  if(int32_t ca=::cmw::give<uint32_t>(buf);ca>0){
-    a.resize(a.size()+ca);
-    buf.giveBlock(&*(a.end()-ca),ca);
-  }
+  int32_t ca=::cmw::give<uint32_t>(buf);
+  a.resize(a.size()+ca);
+  buf.giveBlock(&*(a.end()-ca),ca);
   b=buf.giveStringView();
 }
 
