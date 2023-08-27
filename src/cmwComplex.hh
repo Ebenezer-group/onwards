@@ -35,7 +35,7 @@ template<class...Ts>void marshalCollection (auto& c,auto& buf){
   auto const ind=buf.reserveBytes(1);
   ::uint8_t segs=0;
   marshalSegments<Ts...>(c,buf,segs);
-  buf.receive(ind,segs);
+  buf.receiveAt(ind,segs);
 }
 
 template<class T>
