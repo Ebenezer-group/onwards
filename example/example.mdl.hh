@@ -12,9 +12,7 @@ static void mar (auto& buf
 static void give (auto& buf
          ,::std::vector<::int32_t>& a
          ,::std::string& b){
-  int32_t ca=::cmw::give<uint32_t>(buf);
-  a.resize(a.size()+ca);
-  buf.giveBlock(&*(a.end()-ca),ca);
+  ::cmw::giveVec(buf,a);
   b=buf.giveStringView();
 }
 
