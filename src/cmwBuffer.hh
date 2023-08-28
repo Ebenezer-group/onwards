@@ -535,10 +535,11 @@ template<template<class...>class C,class T>
 void receiveBlock (auto& b,C<T>const& c){
   ::int32_t n=c.size();
   b.receive(n);
-  if constexpr(arithmetic<T>){
-    if(n>0)b.receive(c.data(),n*sizeof(T));
-  }else if constexpr(::std::is_pointer_v<T>)for(auto e:c)e->marshal(b);
-  else for(auto const& e:c)e.marshal(b);
+  if constexpr(arithmetic<T>)b.receive(c.data(),n*sizeof(T));
+  else
+    for(auto const& e:c)
+      if constexpr(::std::is_pointer_v<T>)e->marshal(b);
+      else e.marshal(b);
 }
 
 inline constexpr auto udpPacketMax=1500;
