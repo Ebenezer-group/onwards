@@ -12,4 +12,4 @@ struct cmwCredentials{
   void marshal (auto& b)const{marshalMembers(b);}
 };
 
-enum class messageID:uint8_t;
+enum class messageID:uint8_t{signup,login,generate};
