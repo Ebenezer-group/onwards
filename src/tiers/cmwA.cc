@@ -44,7 +44,7 @@ struct cmwRequest{
       ,bday(::std::time(nullptr)),acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     mdlFile=::std::strrchr(path(),'/');
-    if(nullptr==mdlFile)raise("cmwRequest didn't find /");
+    if(!mdlFile)raise("cmwRequest didn't find /");
     *mdlFile=0;
     setDirectory(path());
     *mdlFile='/';
@@ -118,7 +118,7 @@ class ioUring{
   ::io_uring_cqe *cq=nullptr;
 
   auto getSqe (){
-    if(auto e=::io_uring_get_sqe(&rng);e!=0)return e;
+    if(auto e=::io_uring_get_sqe(&rng);e)return e;
     raise("getSqe");
   }
 
@@ -137,7 +137,7 @@ class ioUring{
   }
 
   auto submit (){
-    if(cq!=nullptr)::io_uring_cq_advance(&rng,1);
+    if(cq)::io_uring_cq_advance(&rng,1);
 a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
       if(-EINTR==rc)goto a;
       raise("waitCqe",rc);
@@ -223,7 +223,7 @@ int main (int ac,char **av)try{
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
         if(gotAddr)toFront(frnt,e.what());
-        if(req!=nullptr)pendingRequests.pop_back();
+        if(req)pendingRequests.pop_back();
       }
       continue;
     }
