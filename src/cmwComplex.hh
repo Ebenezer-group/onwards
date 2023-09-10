@@ -27,8 +27,8 @@ void marshalSegments (auto& c,auto& buf,auto& segs){
       for(T const& t:c.template segment<T>()){t.marshal(buf);}
     }
   }
-  if constexpr(sizeof...(Ts)==0)return;
-  else return marshalSegments<Ts...>(c,buf,segs);
+  if constexpr(sizeof...(Ts)>0)return marshalSegments<Ts...>(c,buf,segs);
+  return;
 }
 
 template<class...Ts>void marshalCollection (auto& c,auto& buf){
