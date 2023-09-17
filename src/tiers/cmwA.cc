@@ -91,8 +91,8 @@ void checkField (char const *fld,::std::string_view actl){
 
 BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 
-void login (cmwCredentials const& cred,bool signUp=false){
-  static SockaddrWrapper const sa("127.0.0.1",56789);
+void login (cmwCredentials const& cred,::std::string ipaddr="",bool signUp=false){
+  static SockaddrWrapper const sa(ipaddr,56789);
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
@@ -172,12 +172,14 @@ int main (int ac,char **av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac<2||ac>3)bail("Usage: cmwA config-file [-signup]");
   FileBuffer cfg{av[1],O_RDONLY};
+  checkField("CMW-IP",cfg.getline(' '));
+  ::std::string ipaddr(cfg.getline());
   checkField("AmbassadorID",cfg.getline(' '));
   cmwCredentials cred(cfg.getline());
   checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  login(cred,ac==3);
+  login(cred,ipaddr,ac==3);
   if(ac==3){
     ::std::printf("Signup was successful\n");
     ::std::exit(0);
