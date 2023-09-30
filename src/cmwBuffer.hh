@@ -154,10 +154,9 @@ class FileWrapper{
 
   FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
 
-  FileWrapper& operator= (FileWrapper&& o)noexcept{
+  void operator= (FileWrapper&& o)noexcept{
     d=o.d;
     o.d=-2;
-    return *this;
   }
   auto operator() (){return d;}
   ~FileWrapper (){if(d>0)::close(d);}
