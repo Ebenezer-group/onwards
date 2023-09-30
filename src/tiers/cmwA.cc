@@ -91,8 +91,8 @@ void checkField (char const *fld,::std::string_view actl){
 
 BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 
-void login (cmwCredentials const& cred,::std::string ipaddr="",bool signUp=false){
-  static SockaddrWrapper const sa(ipaddr.data(),56789);
+void login (cmwCredentials const& cred,::std::string_view ip="",bool signUp=false){
+  static SockaddrWrapper const sa(ip.data(),56789);
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
