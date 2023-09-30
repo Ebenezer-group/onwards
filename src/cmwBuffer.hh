@@ -58,13 +58,6 @@ template<class E=Failure>[[noreturn]]void raise (char const *s,auto...t){
   throw ::std::move(e);
 }
 
-inline void winStart (){
-#ifdef CMW_WINDOWS
-  WSADATA w;
-  if(auto r=::WSAStartup(MAKEWORD(2,2),&w);0!=r)raise("WSAStartup",r);
-#endif
-}
-
 inline int getError (){
 #ifdef CMW_WINDOWS
   return WSAGetLastError();
@@ -193,19 +186,6 @@ inline auto FileBuffer::getline (char delim){
 }
 #endif
 
-auto setsockWrapper (sockType s,int opt,auto t){
-  return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
-}
-
-inline void setRcvTimeout (sockType s,int time){
-#ifdef CMW_WINDOWS
-  DWORD t=time*1000;
-#else
-  ::timeval t{time,0};
-#endif
-  if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
-}
-
 class GetaddrinfoWrapper{
   ::addrinfo *head,*addr;
  public:
@@ -239,6 +219,19 @@ struct SockaddrWrapper{
   }
 };
 
+auto setsockWrapper (sockType s,int opt,auto t){
+  return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
+}
+
+inline void setRcvTimeout (sockType s,int time){
+#ifdef CMW_WINDOWS
+  DWORD t=time*1000;
+#else
+  ::timeval t{time,0};
+#endif
+  if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
+}
+
 inline void closeSocket (sockType s){
 #ifdef CMW_WINDOWS
   if(::closesocket(s)==SOCKET_ERROR)
@@ -246,29 +239,6 @@ inline void closeSocket (sockType s){
   if(::close(s)==-1)
 #endif
     raise("closeSocket",getError());
-}
-
-inline int preserveError (sockType s){
-  auto e=getError();
-  closeSocket(s);
-  return e;
-}
-
-inline sockType udpServer (char const *port){
-  GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
-  auto s=ai.getSock();
-  if(0==::bind(s,ai().ai_addr,ai().ai_addrlen))return s;
-  raise("udpServer",preserveError(s));
-}
-
-inline sockType tcpServer (char const *port){
-  GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
-  auto s=ai.getSock();
-
-  if(int on=1;setsockWrapper(s,SO_REUSEADDR,on)==0
-    &&::bind(s,ai().ai_addr,ai().ai_addrlen)==0
-    &&::listen(s,SOMAXCONN)==0)return s;
-  raise("tcpServer",preserveError(s));
 }
 
 inline int sockWrite (sockType s,void const *data,int len
@@ -708,5 +678,35 @@ template<int N>class FixedString{
 };
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
+
+inline int preserveError (sockType s){
+  auto e=getError();
+  closeSocket(s);
+  return e;
+}
+
+inline sockType udpServer (char const *port){
+  GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
+  auto s=ai.getSock();
+  if(0==::bind(s,ai().ai_addr,ai().ai_addrlen))return s;
+  raise("udpServer",preserveError(s));
+}
+
+inline sockType tcpServer (char const *port){
+  GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
+  auto s=ai.getSock();
+
+  if(int on=1;setsockWrapper(s,SO_REUSEADDR,on)==0
+    &&::bind(s,ai().ai_addr,ai().ai_addrlen)==0
+    &&::listen(s,SOMAXCONN)==0)return s;
+  raise("tcpServer",preserveError(s));
+}
+
+inline void winStart (){
+#ifdef CMW_WINDOWS
+  WSADATA w;
+  if(auto r=::WSAStartup(MAKEWORD(2,2),&w);0!=r)raise("WSAStartup",r);
+#endif
+}
 }
 #endif
