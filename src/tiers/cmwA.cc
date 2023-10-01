@@ -172,13 +172,12 @@ int main (int ac,char **av)try{
   if(ac<2||ac>3)bail("Usage: cmwA config-file [-signup]");
   FileBuffer cfg{av[1],O_RDONLY};
   checkField("CMW-IP",cfg.getline(' '));
-  ::std::string ipaddr(cfg.getline());
+  SockaddrWrapper const sa(cfg.getline().data(),56789);
   checkField("AmbassadorID",cfg.getline(' '));
   cmwCredentials cred(cfg.getline());
   checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  SockaddrWrapper const sa(ipaddr.data(),56789);
   login(cred,sa,ac==3);
   if(ac==3){
     ::std::printf("Signup was successful\n");

@@ -172,18 +172,16 @@ struct FileBuffer{
     return buf[ind++];
   }
 
-  auto getline (char='\n');
-};
-
-inline auto FileBuffer::getline (char delim){
-  ::std::size_t idx=0;
-  while((line[idx]=getc())!=delim){
-    if(line[idx]=='\r')raise("getline carriage return");
-    if(++idx>=sizeof line)raise("getline line too long");
+  auto getline (char delim='\n'){
+    ::std::size_t idx=0;
+    while((line[idx]=getc())!=delim){
+      if(line[idx]=='\r')raise("getline carriage return");
+      if(++idx>=sizeof line)raise("getline line too long");
+    }
+    line[idx]=0;
+    return ::std::string_view{line,idx};
   }
-  line[idx]=0;
-  return ::std::string_view{line,idx};
-}
+};
 #endif
 
 class GetaddrinfoWrapper{
