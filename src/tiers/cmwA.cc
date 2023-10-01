@@ -91,8 +91,7 @@ void checkField (char const *fld,::std::string_view actl){
 
 BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 
-void login (cmwCredentials const& cred,::std::string_view ip="",bool signUp=false){
-  static SockaddrWrapper const sa(ip.data(),56789);
+void login (cmwCredentials const& cred,SockaddrWrapper const &sa,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
@@ -179,7 +178,8 @@ int main (int ac,char **av)try{
   checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  login(cred,ipaddr,ac==3);
+  SockaddrWrapper const sa(ipaddr.data(),56789);
+  login(cred,sa,ac==3);
   if(ac==3){
     ::std::printf("Signup was successful\n");
     ::std::exit(0);
@@ -201,7 +201,7 @@ int main (int ac,char **av)try{
         }
         pendingRequests.clear();
         cmwBuf.compressedReset();
-        login(cred);
+        login(cred,sa);
         ring.reed();
         continue;
       }

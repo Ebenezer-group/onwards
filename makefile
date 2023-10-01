@@ -22,7 +22,7 @@ $(FRONT):$(FRONT).cc
 	size $@
 
 $(MIDDLE):$(MIDDLE).cc
-	$(CXXFLAGS) -fno-threadsafe-statics -luring
+	$(CXXFLAGS) -luring
 	size $@
 
 clean:
