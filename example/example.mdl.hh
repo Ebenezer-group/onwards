@@ -39,7 +39,7 @@ static void mar (auto& buf
 
 static void give (auto& buf
          ,::std::array<float,6>& a){
-  buf.giveBlock(&a[0],sizeof a/sizeof(float));
+  buf.giveBlock(&a[0],::std::size(a));
 }
 
 template<messageID id,int maxLength=10000>
