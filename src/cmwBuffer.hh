@@ -396,8 +396,7 @@ void giveVec (auto &buf,auto &v){
   buf.giveBlock(&*(v.end()-n),n);
 }
 
-template<class Z>
-class SendBuffer{
+template<class Z>class SendBuffer{
   SendBuffer (SendBuffer const&)=delete;
   SendBuffer& operator= (SendBuffer);
   Z savedSize=0;

@@ -1,9 +1,9 @@
 struct cmwCredentials{
-  ::std::string ambassadorID;
+  ::std::string ambassID;
   ::cmw::FixedString60 password;
 
-  explicit cmwCredentials (::std::string_view id):ambassadorID(id){
-    if(ambassadorID.size()>20)::cmw::raise("ambassadorID is too long");
+  explicit cmwCredentials (::std::string_view id):ambassID(id){
+    if(ambassID.size()>20)::cmw::raise("ambassID is too long");
   }
 
   template<class R,class Z>explicit cmwCredentials (::cmw::ReceiveBuffer<R,Z>&);

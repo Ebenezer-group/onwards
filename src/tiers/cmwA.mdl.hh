@@ -3,7 +3,7 @@
 #define cmwA_mdl_hh
 inline void
 cmwCredentials::marshalMembers (auto& buf)const{
-  receive(buf,ambassadorID);
+  receive(buf,ambassID);
   password.marshal(buf);
 }
 
