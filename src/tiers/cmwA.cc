@@ -191,20 +191,18 @@ int main (int ac,char **av)try{
   for(;;){
     auto const cq=ring.submit();
     if(cq.res<=0){
-      if(-EPIPE==cq.res||0==cq.res){
-        ::syslog(LOG_ERR,"Back tier vanished");
-        frntBuf.reset();
-        ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
-        for(auto& r:pendingRequests){
-          frntBuf.send((::sockaddr*)&r.frnt.addr,r.frnt.len);
-        }
-        pendingRequests.clear();
-        cmwBuf.compressedReset();
-        login(cred,sa);
-        ring.reed();
-        continue;
+      if(-EPIPE!=cq.res&&0!=cq.res)bail("op failed: %d",cq.res);
+      ::syslog(LOG_ERR,"Back tier vanished");
+      frntBuf.reset();
+      ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
+      for(auto& r:pendingRequests){
+        frntBuf.send((::sockaddr*)&r.frnt.addr,r.frnt.len);
       }
-      bail("op failed: %d",cq.res);
+      pendingRequests.clear();
+      cmwBuf.compressedReset();
+      login(cred,sa);
+      ring.reed();
+      continue;
     }
 
     if(0==cq.user_data){
