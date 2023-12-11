@@ -55,7 +55,7 @@ void apps (auto& e,auto t,auto...ts){
 template<class E=Failure>[[noreturn]]void raise (char const *s,auto...t){
   E e{s};
   apps(e,t...);
-  throw ::std::move(e);
+  throw e;
 }
 
 inline int getError (){
