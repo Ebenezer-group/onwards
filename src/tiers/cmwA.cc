@@ -94,13 +94,13 @@ BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 void login (cmwCredentials const& cred,SockaddrWrapper const &sa,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
+  cmwBuf.compress();
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(0!=::connect(cmwBuf.sock_,(sockaddr*)&sa,sizeof(sa))){
     ::std::printf("connect %d\n",errno);
     ::sleep(30);
   }
 
-  cmwBuf.compress();
   while(!cmwBuf.flush());
   ::sctp_paddrparams pad{};
   pad.spp_address.ss_family=AF_INET;
