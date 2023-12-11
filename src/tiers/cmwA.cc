@@ -100,6 +100,7 @@ void login (cmwCredentials const& cred,SockaddrWrapper const &sa,bool signUp=fal
     ::sleep(30);
   }
 
+  cmwBuf.compress();
   while(!cmwBuf.flush());
   ::sctp_paddrparams pad{};
   pad.spp_address.ss_family=AF_INET;

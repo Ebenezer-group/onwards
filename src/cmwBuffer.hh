@@ -560,7 +560,6 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   }
 
   bool flush (){
-    if(this->index>0)compress();
     return all(Write(this->sock_,compBuf,compIndex));
   }
 
