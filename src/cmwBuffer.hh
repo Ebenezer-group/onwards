@@ -547,9 +547,6 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     return false;
   }
 
-  bool doFlush (){
-    return all(Write(this->sock_,compBuf,compIndex));
-  }
  public:
   explicit BufferCompressed ():SendBuffer<Z>(new unsigned char[sz],sz)
                                ,ReceiveBuffer<R,Z>(recBuf),comp{},decomp{}{}
@@ -564,11 +561,11 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
 
   bool flush (){
     bool rc=true;
-    if(compIndex>0)rc=doFlush();
+    if(compIndex>0)rc=all(Write(this->sock_,compBuf,compIndex));
 
     if(this->index>0){
       compress();
-      if(rc)rc=doFlush();
+      if(rc)rc=all(Write(this->sock_,compBuf,compIndex));
     }
     return rc;
   }
