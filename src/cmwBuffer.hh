@@ -410,7 +410,13 @@ template<class Z>class SendBuffer{
   SendBuffer (unsigned char *addr,Z sz):bufsize(sz),buf(addr){}
 
   int getZ (){return sizeof(Z);}
-  int reserveBytes (Z n=sizeof(Z));
+
+  int reserveBytes (Z n=sizeof(Z)){
+    if(n>bufsize-index)raise("SendBuffer reserveBytes",n,index);
+    auto i=index;
+    index+=n;
+    return i;
+  }
 
   void receive (void const *data,int size){
     ::std::memcpy(buf+reserveBytes(size),data,size);
@@ -461,14 +467,6 @@ template<class Z>class SendBuffer{
 
   void receiveMulti (auto*,auto...);
 };
-
-template<class Z>
-int SendBuffer<Z>::reserveBytes (Z n){
-  if(n>bufsize-index)raise("SendBuffer checkSpace",n,index);
-  auto i=index;
-  index+=n;
-  return i;
-}
 
 template<class Z>
 bool SendBuffer<Z>::flush (){
