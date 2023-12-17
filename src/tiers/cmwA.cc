@@ -115,7 +115,6 @@ void login (cmwCredentials const& cred,SockaddrWrapper const &sa,bool signUp=fal
 ::uint64_t const reedTag=1;
 class ioUring{
   ::io_uring rng;
-  ::io_uring_cqe *cq=nullptr;
 
   auto getSqe (){
     if(auto e=::io_uring_get_sqe(&rng);e)return e;
@@ -136,13 +135,12 @@ class ioUring{
     reed();
   }
 
-  auto submit (){
+  void submit (::io_uring_cqe *&cq){
     if(cq)::io_uring_cq_advance(&rng,1);
 a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
       if(-EINTR==rc)goto a;
       raise("waitCqe",rc);
     }
-    return *cq;
   }
 
   void reed (){
@@ -187,12 +185,13 @@ int main (int ac,char **av)try{
 
   checkField("UDP-port-number",cfg.getline(' '));
   ioUring ring{frntBuf.sock_=udpServer(cfg.getline().data())};
+  ::io_uring_cqe cq=nullptr;
   ::std::deque<cmwRequest> pendingRequests;
 
   for(;;){
-    auto const cq=ring.submit();
-    if(cq.res<=0){
-      if(-EPIPE!=cq.res&&0!=cq.res)bail("op failed: %d",cq.res);
+    ring.submit(cq);
+    if(cq->res<=0){
+      if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed: %d",cq->res);
       ::syslog(LOG_ERR,"Back tier vanished");
       frntBuf.reset();
       ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
@@ -206,8 +205,8 @@ int main (int ac,char **av)try{
       continue;
     }
 
-    if(0==cq.user_data){
-      if(!(cq.flags&IORING_CQE_F_MORE)){
+    if(0==cq->user_data){
+      if(!(cq->flags&IORING_CQE_F_MORE)){
         ::syslog(LOG_ERR,"Multishot");
         ring.multishot(frntBuf.sock_);
       }
@@ -228,9 +227,9 @@ int main (int ac,char **av)try{
       continue;
     }
 
-    if(cq.user_data&reedTag){
+    if(cq->user_data&reedTag){
       try{
-        if(cmwBuf.gotIt(cq.res)){
+        if(cmwBuf.gotIt(cq->res)){
           do{
             assert(!pendingRequests.empty());
             auto& req=pendingRequests.front();
@@ -249,6 +248,6 @@ int main (int ac,char **av)try{
       }
       ring.reed();
     }else
-      if(!cmwBuf.all(cq.res))ring.writ();
+      if(!cmwBuf.all(cq->res))ring.writ();
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}

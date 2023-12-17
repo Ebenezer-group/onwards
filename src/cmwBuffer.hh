@@ -664,20 +664,20 @@ template<int N>class FixedString{
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
 
-inline int preserveError (sockType s){
+inline int preserveError (auto s){
   auto e=getError();
   closeSocket(s);
   return e;
 }
 
-inline sockType udpServer (char const *port){
+inline auto udpServer (char const *port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
   auto s=ai.getSock();
   if(0==::bind(s,ai().ai_addr,ai().ai_addrlen))return s;
   raise("udpServer",preserveError(s));
 }
 
-inline sockType tcpServer (char const *port){
+inline auto tcpServer (char const *port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
   auto s=ai.getSock();
 
