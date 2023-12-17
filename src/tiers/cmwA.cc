@@ -185,7 +185,7 @@ int main (int ac,char **av)try{
 
   checkField("UDP-port-number",cfg.getline(' '));
   ioUring ring{frntBuf.sock_=udpServer(cfg.getline().data())};
-  ::io_uring_cqe cq=nullptr;
+  ::io_uring_cqe *cq=nullptr;
   ::std::deque<cmwRequest> pendingRequests;
 
   for(;;){
