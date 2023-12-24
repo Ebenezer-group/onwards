@@ -34,16 +34,14 @@ Before running the middle tier, modify your cmwA.cfg file to include your
 ambassador ID and password. The maximum length of an ambassador ID is 20.
 
 #### Running the middle tier -- cmwA (after installing)
-Before running the middle tier "normally", it needs to be run once
+Before running the middle tier normally, it needs to be run 
 with the -signup flag:
 
 cmwA cmwA.cfg -signup
 
 The program exits when run this way.  If this step worked, a message
 is output to the terminal indicating so.  Otherwise, an error message
-is logged.
-
-After registering, the cmwA can be run normally:
+is logged.  After registering, the cmwA can be run normally:
 
 nohup cmwA cmwA.cfg &
 
