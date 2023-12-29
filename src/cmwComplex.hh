@@ -18,7 +18,7 @@ auto complexGive (auto& buf){
 }
 
 template<class T,class...Ts>
-::uint8_t marshalSegments (auto& c,auto& buf){
+::uint8_t marshalSegments (auto const& c,auto& buf){
   ::uint8_t segs=0;
   if(c.template is_registered<T>()){
     if(::int32_t n=c.template size<T>();n>0){
@@ -32,7 +32,7 @@ template<class T,class...Ts>
   return segs;
 }
 
-template<class...Ts>void marshalCollection (auto& c,auto& buf){
+template<class...Ts>void marshalCollection (auto const& c,auto& buf){
   auto const ind=buf.reserveBytes(1);
   buf.receiveAt(ind,marshalSegments<Ts...>(c,buf);
 }
