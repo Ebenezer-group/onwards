@@ -21,12 +21,12 @@ struct Socky{
 struct cmwRequest{
   Socky const frnt;
  private:
-  static inline ::int32_t prevTime;
   ::int32_t const bday;
   MarshallingInt const acctNbr;
   FixedString120 path;
   char *mdlFile;
   FileWrapper fl;
+  inline static ::int32_t prevTime;
 
   static bool marshalFile (char const *name,auto& buf){
     struct ::stat sb;
