@@ -471,7 +471,10 @@ template<class Z>class SendBuffer{
 template<class Z>
 bool SendBuffer<Z>::flush (){
   int const bytes=sockWrite(sock_,buf,index);
-  if(bytes==index){reset();return true;}
+  if(bytes==index){
+    reset();
+    return true;
+  }
 
   index-=bytes;
   savedSize=index;
