@@ -52,7 +52,7 @@ void apps (auto& e,auto t,auto...ts){
   apps(e,ts...);
 }
 
-template<class E=Failure>[[noreturn]]void raise (char const *s,auto...t){
+template<class E=Failure>[[noreturn]]void raise (char const* s,auto...t){
   E e{s};
   apps(e,t...);
   throw e;
@@ -118,16 +118,16 @@ inline void exitFailure (){::std::exit(EXIT_FAILURE);}
 using sockType=SOCKET;
 #else
 using sockType=int;
-inline void setDirectory (char const *d){
+inline void setDirectory (char const* d){
   if(::chdir(d)==-1)raise("setDirectory",d,errno);
 }
 
-inline int Write (int fd,void const *data,int len){
+inline int Write (int fd,void const* data,int len){
   if(int r=::write(fd,data,len);r>=0)return r;
   raise("Write",errno);
 }
 
-inline int Read (int fd,void *data,int len){
+inline int Read (int fd,void* data,int len){
   int r=::read(fd,data,len);
   if(r>0)return r;
   if(r==0)raise("Read eof",len);
@@ -139,10 +139,10 @@ class FileWrapper{
   int d=-2;
  public:
   FileWrapper (){}
-  FileWrapper (char const *name,int flags,mode_t mode):
+  FileWrapper (char const* name,int flags,mode_t mode):
         d{::open(name,flags,mode)} {if(d<0)raise("FileWrapper",name,errno);}
 
-  FileWrapper (char const *name,mode_t mode):
+  FileWrapper (char const* name,mode_t mode):
         FileWrapper(name,O_CREAT|O_WRONLY|O_TRUNC,mode){}
 
   FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
@@ -187,7 +187,7 @@ struct FileBuffer{
 class GetaddrinfoWrapper{
   ::addrinfo *head,*addr;
  public:
-  GetaddrinfoWrapper (char const *node,char const *port
+  GetaddrinfoWrapper (char const* node,char const* port
                       ,int type,int flags=0){
     ::addrinfo const hints{flags,AF_UNSPEC,type,0,0,0,0,0};
     if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
@@ -211,7 +211,7 @@ class GetaddrinfoWrapper{
 
 struct SockaddrWrapper{
   ::sockaddr_in sa;
-  SockaddrWrapper (char const *node,::uint16_t port):sa{AF_INET,::htons(port),{0},{0}}{
+  SockaddrWrapper (char const* node,::uint16_t port):sa{AF_INET,::htons(port),{0},{0}}{
     if(int rc=::inet_pton(AF_INET,node,&sa.sin_addr);rc!=1)
       raise("inet_pton",rc);
   }
@@ -239,14 +239,14 @@ inline void closeSocket (sockType s){
     raise("closeSocket",getError());
 }
 
-inline int sockWrite (sockType s,void const *data,int len
-               ,sockaddr const *addr=nullptr,socklen_t toLen=0){
+inline int sockWrite (sockType s,void const* data,int len
+               ,sockaddr const* addr=nullptr,socklen_t toLen=0){
   if(int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);r>0)
     return r;
   raise("sockWrite",s,getError());
 }
 
-inline int sockRead (sockType s,void *data,int len,sockaddr *addr,socklen_t *fromLen){
+inline int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen){
   if(int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);r>=0)
     return r;
   auto e=getError();
@@ -303,13 +303,13 @@ template<class R,class Z>class ReceiveBuffer{
   int rindex=0;
 
  public:
-  explicit ReceiveBuffer (char *addr):rbuf{addr}{}
+  explicit ReceiveBuffer (char* addr):rbuf{addr}{}
 
   void checkLen (int n){
     if(n>msgLength-rindex)raise("ReceiveBuffer checkLen",n,msgLength,rindex);
   }
 
-  void give (void *address,int len){
+  void give (void* address,int len){
     checkLen(len);
     ::std::memcpy(address,rbuf+subTotal+rindex,len);
     rindex+=len;
@@ -343,7 +343,7 @@ template<class R,class Z>class ReceiveBuffer{
     return nextMessage();
   }
 
-  void giveBlock (auto *data,unsigned int elements){
+  void giveBlock (auto* data,unsigned int elements){
     if(sizeof(*data)==1)give(data,elements);
     else R::readBlock(*this,data,elements);
   }
@@ -390,7 +390,7 @@ bool giveBool (auto& b){
   }
 }
 
-void giveVec (auto &buf,auto &v){
+void giveVec (auto& buf,auto& v){
   ::int32_t n=::cmw::give<::uint32_t>(buf);
   v.resize(v.size()+n);
   buf.giveBlock(&*(v.end()-n),n);
@@ -407,7 +407,7 @@ template<class Z>class SendBuffer{
  public:
   sockType sock_=-1;
 
-  SendBuffer (unsigned char *addr,Z sz):bufsize(sz),buf(addr){}
+  SendBuffer (unsigned char* addr,Z sz):bufsize(sz),buf(addr){}
 
   int getZ (){return sizeof(Z);}
 
@@ -418,7 +418,7 @@ template<class Z>class SendBuffer{
     return i;
   }
 
-  void receive (void const *data,int size){
+  void receive (void const* data,int size){
     ::std::memcpy(buf+reserveBytes(size),data,size);
   }
 
@@ -449,7 +449,7 @@ template<class Z>class SendBuffer{
   bool flush ();
 
   //UDP-friendly alternative to flush
-  void send (::sockaddr *addr=nullptr,::socklen_t len=0)
+  void send (::sockaddr* addr=nullptr,::socklen_t len=0)
   {sockWrite(sock_,buf,index,addr,len);}
 
   auto data (){return buf;}
@@ -516,7 +516,7 @@ class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   BufferStack ():SendBuffer<Z>(ar,N),ReceiveBuffer<R,Z>((char*)ar){}
   explicit BufferStack (int s):BufferStack(){this->sock_=s;}
 
-  bool getPacket (::sockaddr *addr=nullptr,::socklen_t *len=nullptr){
+  bool getPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
     this->packetLength=sockRead(this->sock_,ar,N,addr,len);
     return this->update();
   }
@@ -530,7 +530,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
  public:
   ::qlz_state_compress comp;
   ::qlz_state_decompress decomp;
-  char *compressedStart;
+  char* compressedStart;
   char compBuf[qlzFormula(sz)];
   char recBuf[sz];
   int compPacketSize;
@@ -673,14 +673,14 @@ inline int preserveError (auto s){
   return e;
 }
 
-inline auto udpServer (char const *port){
+inline auto udpServer (char const* port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
   auto s=ai.getSock();
   if(0==::bind(s,ai().ai_addr,ai().ai_addrlen))return s;
   raise("udpServer",preserveError(s));
 }
 
-inline auto tcpServer (char const *port){
+inline auto tcpServer (char const* port){
   GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
   auto s=ai.getSock();
 

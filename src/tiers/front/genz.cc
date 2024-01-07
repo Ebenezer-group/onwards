@@ -3,12 +3,12 @@
 #include<cstdio>
 using namespace ::cmw;
 
-void leave (char const *fmt,auto...t)noexcept{
+void leave (char const* fmt,auto...t)noexcept{
   ::std::fprintf(stderr,fmt,t...);
   exitFailure();
 }
 
-int main (int ac,char **av)try{
+int main (int ac,char** av)try{
   if(ac<3||ac>5)
     leave("Usage: genz account-num mdl-file-path [node] [port]\n");
   winStart();

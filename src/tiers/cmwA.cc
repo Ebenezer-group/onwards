@@ -24,11 +24,11 @@ struct cmwRequest{
   ::int32_t const bday;
   MarshallingInt const acctNbr;
   FixedString120 path;
-  char *mdlFile;
+  char* mdlFile;
   FileWrapper fl;
   inline static ::int32_t prevTime;
 
-  static bool marshalFile (char const *name,auto& buf){
+  static bool marshalFile (char const* name,auto& buf){
     struct ::stat sb;
     if(::stat(name,&sb)<0)raise("stat",name,errno);
     if(sb.st_mtime<=prevTime)return false;
@@ -80,18 +80,18 @@ struct cmwRequest{
 };
 #include"cmwA.mdl.hh"
 
-void bail (char const *fmt,auto...t){
+void bail (char const* fmt,auto...t){
   ::syslog(LOG_ERR,fmt,t...);
   exitFailure();
 }
 
-void checkField (char const *fld,::std::string_view actl){
+void checkField (char const* fld,::std::string_view actl){
   if(actl!=fld)bail("Expected %s",fld);
 }
 
 BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 
-void login (cmwCredentials const& cred,SockaddrWrapper const &sa,bool signUp=false){
+void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
   cmwBuf.compress();
@@ -135,7 +135,7 @@ class ioUring{
     reed();
   }
 
-  void submit (::io_uring_cqe *&cq){
+  void submit (::io_uring_cqe*& cq){
     if(cq)::io_uring_cq_advance(&rng,1);
 a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
       if(-EINTR==rc)goto a;
@@ -166,7 +166,7 @@ void toFront (Socky const& s,auto...t){
   frntBuf.send((::sockaddr*)&s.addr,s.len);
 }
 
-int main (int ac,char **av)try{
+int main (int ac,char** av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac<2||ac>3)bail("Usage: cmwA config-file [-signup]");
   FileBuffer cfg{av[1],O_RDONLY};
@@ -185,7 +185,7 @@ int main (int ac,char **av)try{
 
   checkField("UDP-port-number",cfg.getline(' '));
   ioUring ring{frntBuf.sock_=udpServer(cfg.getline().data())};
-  ::io_uring_cqe *cq=nullptr;
+  ::io_uring_cqe* cq=nullptr;
   ::std::deque<cmwRequest> pendingRequests;
 
   for(;;){
@@ -212,7 +212,7 @@ int main (int ac,char **av)try{
       }
       Socky frnt;
       bool gotAddr=false;
-      cmwRequest *req=nullptr;
+      cmwRequest* req=nullptr;
       try{
         gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
         req=&pendingRequests.emplace_back(frnt,frntBuf);
