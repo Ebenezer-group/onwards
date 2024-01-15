@@ -531,6 +531,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   ::qlz_state_compress comp;
   ::qlz_state_decompress decomp;
   char* compressedStart;
+  unsigned char sendBuf[sz];
   char compBuf[qlzFormula(sz)];
   char recBuf[sz];
   int compPacketSize;
@@ -539,19 +540,15 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   bool kosher=true;
 
   bool all (int bytes){
-    if(bytes==compIndex){
-      compIndex=0;
-      return true;
-    }
     compIndex-=bytes;
+    if(0==compIndex)return true;
     ::std::memmove(compBuf,compBuf+bytes,compIndex);
     return false;
   }
 
  public:
-  explicit BufferCompressed ():SendBuffer<Z>(new unsigned char[sz],sz)
+  explicit BufferCompressed ():SendBuffer<Z>(sendBuf,sz)
                                ,ReceiveBuffer<R,Z>(recBuf),comp{},decomp{}{}
-  ~BufferCompressed (){delete[]this->buf;}
 
   void compress (){
     if(qlzFormula(this->index)>(qlzFormula(sz)-compIndex))
