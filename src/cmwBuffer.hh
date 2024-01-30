@@ -67,7 +67,7 @@ inline int getError (){
 }
 
 inline int fromChars (::std::string_view s){
-  int n;
+  int n=0;
   ::std::from_chars(s.data(),s.data()+s.size(),n);
   return n;
 }
@@ -671,9 +671,9 @@ inline int preserveError (auto s){
 }
 
 inline auto udpServer (char const* port){
-  GetaddrinfoWrapper ai{nullptr,port,SOCK_DGRAM,AI_PASSIVE};
-  auto s=ai.getSock();
-  if(0==::bind(s,ai().ai_addr,ai().ai_addrlen))return s;
+  auto s=::socket(AF_INET,SOCK_DGRAM,0);
+  SockaddrWrapper sa("127.0.0.1",fromChars(port));
+  if(0==::bind(s,(sockaddr*)&sa,sizeof(sa)))return s;
   raise("udpServer",preserveError(s));
 }
 
