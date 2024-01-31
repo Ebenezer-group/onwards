@@ -184,39 +184,6 @@ struct FileBuffer{
 };
 #endif
 
-class GetaddrinfoWrapper{
-  ::addrinfo *head,*addr;
- public:
-  GetaddrinfoWrapper (char const* node,char const* port
-                      ,int type,int flags=0){
-    ::addrinfo const hints{flags,AF_UNSPEC,type,0,0,0,0,0};
-    if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
-      raise("getaddrinfo",::gai_strerror(r));
-    addr=head;
-  }
-
-  ~GetaddrinfoWrapper (){::freeaddrinfo(head);}
-  auto const& operator() ()const{return *addr;}
-
-  sockType getSock (){
-    for(;addr!=nullptr;addr=addr->ai_next){
-      if(auto s=::socket(addr->ai_family,addr->ai_socktype,0);-1!=s)return s;
-    }
-    raise("getaddrinfo getSock");
-  }
-
-  GetaddrinfoWrapper (GetaddrinfoWrapper&)=delete;
-  GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
-};
-
-struct SockaddrWrapper{
-  ::sockaddr_in sa;
-  SockaddrWrapper (char const* node,::uint16_t port):sa{AF_INET,::htons(port),{0},{0}}{
-    if(int rc=::inet_pton(AF_INET,node,&sa.sin_addr);rc!=1)
-      raise("inet_pton",rc);
-  }
-};
-
 auto setsockWrapper (sockType s,int opt,auto t){
   return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
 }
@@ -669,6 +636,39 @@ inline int preserveError (auto s){
   closeSocket(s);
   return e;
 }
+
+class GetaddrinfoWrapper{
+  ::addrinfo *head,*addr;
+ public:
+  GetaddrinfoWrapper (char const* node,char const* port
+                      ,int type,int flags=0){
+    ::addrinfo const hints{flags,AF_UNSPEC,type,0,0,0,0,0};
+    if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
+      raise("getaddrinfo",::gai_strerror(r));
+    addr=head;
+  }
+
+  ~GetaddrinfoWrapper (){::freeaddrinfo(head);}
+  auto const& operator() ()const{return *addr;}
+
+  sockType getSock (){
+    for(;addr!=nullptr;addr=addr->ai_next){
+      if(auto s=::socket(addr->ai_family,addr->ai_socktype,0);-1!=s)return s;
+    }
+    raise("getaddrinfo getSock");
+  }
+
+  GetaddrinfoWrapper (GetaddrinfoWrapper&)=delete;
+  GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
+};
+
+struct SockaddrWrapper{
+  ::sockaddr_in sa;
+  SockaddrWrapper (char const* node,::uint16_t port):sa{AF_INET,::htons(port),{0},{0}}{
+    if(int rc=::inet_pton(AF_INET,node,&sa.sin_addr);rc!=1)
+      raise("inet_pton",rc);
+  }
+};
 
 inline auto udpServer (char const* port){
   auto s=::socket(AF_INET,SOCK_DGRAM,0);
