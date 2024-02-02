@@ -22,7 +22,6 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<errno.h>
 #include<fcntl.h>//open
 #include<arpa/inet.h>
-#include<netdb.h>
 #include<sys/socket.h>
 #include<sys/types.h>
 #include<unistd.h>//chdir
@@ -637,31 +636,6 @@ inline int preserveError (auto s){
   return e;
 }
 
-class GetaddrinfoWrapper{
-  ::addrinfo *head,*addr;
- public:
-  GetaddrinfoWrapper (char const* node,char const* port
-                      ,int type,int flags=0){
-    ::addrinfo const hints{flags,AF_UNSPEC,type,0,0,0,0,0};
-    if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
-      raise("getaddrinfo",::gai_strerror(r));
-    addr=head;
-  }
-
-  ~GetaddrinfoWrapper (){::freeaddrinfo(head);}
-  auto const& operator() ()const{return *addr;}
-
-  sockType getSock (){
-    for(;addr!=nullptr;addr=addr->ai_next){
-      if(auto s=::socket(addr->ai_family,addr->ai_socktype,0);-1!=s)return s;
-    }
-    raise("getaddrinfo getSock");
-  }
-
-  GetaddrinfoWrapper (GetaddrinfoWrapper&)=delete;
-  GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
-};
-
 struct SockaddrWrapper{
   ::sockaddr_in sa;
   SockaddrWrapper (char const* node,::uint16_t port):sa{AF_INET,::htons(port),{0},{0}}{
@@ -675,16 +649,6 @@ inline auto udpServer (char const* port){
   SockaddrWrapper sa("127.0.0.1",fromChars(port));
   if(0==::bind(s,(sockaddr*)&sa,sizeof(sa)))return s;
   raise("udpServer",preserveError(s));
-}
-
-inline auto tcpServer (char const* port){
-  GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
-  auto s=ai.getSock();
-
-  if(int on=1;setsockWrapper(s,SO_REUSEADDR,on)==0
-    &&::bind(s,ai().ai_addr,ai().ai_addrlen)==0
-    &&::listen(s,SOMAXCONN)==0)return s;
-  raise("tcpServer",preserveError(s));
 }
 
 inline void winStart (){

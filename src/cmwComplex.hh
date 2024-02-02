@@ -2,6 +2,7 @@
 #define CMW_COMPLEX_HH
 #include<cmwBuffer.hh>
 #include<complex>
+#include<netdb.h>
 
 namespace cmw{
 void complexMarshal (auto& buf,auto const& c){
@@ -46,6 +47,41 @@ void buildSegment (auto& c,auto& buf){
 
 void buildCollection (auto& c,auto& buf,auto f){
   for(auto segs=give<::uint8_t>(buf);segs>0;--segs){f(c,buf);}
+}
+
+class GetaddrinfoWrapper{
+  ::addrinfo *head,*addr;
+ public:
+  GetaddrinfoWrapper (char const* node,char const* port
+                      ,int type,int flags=0){
+    ::addrinfo const hints{flags,AF_UNSPEC,type,0,0,0,0,0};
+    if(int r=::getaddrinfo(node,port,&hints,&head);r!=0)
+      raise("getaddrinfo",::gai_strerror(r));
+    addr=head;
+  }
+
+  ~GetaddrinfoWrapper (){::freeaddrinfo(head);}
+  auto const& operator() ()const{return *addr;}
+
+  sockType getSock (){
+    for(;addr!=nullptr;addr=addr->ai_next){
+      if(auto s=::socket(addr->ai_family,addr->ai_socktype,0);-1!=s)return s;
+    }
+    raise("getaddrinfo getSock");
+  }
+
+  GetaddrinfoWrapper (GetaddrinfoWrapper&)=delete;
+  GetaddrinfoWrapper& operator= (GetaddrinfoWrapper)=delete;
+};
+
+inline auto tcpServer (char const* port){
+  GetaddrinfoWrapper ai{nullptr,port,SOCK_STREAM,AI_PASSIVE};
+  auto s=ai.getSock();
+
+  if(int on=1;setsockWrapper(s,SO_REUSEADDR,on)==0
+    &&::bind(s,ai().ai_addr,ai().ai_addrlen)==0
+    &&::listen(s,SOMAXCONN)==0)return s;
+  raise("tcpServer",preserveError(s));
 }
 
 #ifdef CMW_VALARRAY_MARSHALLING

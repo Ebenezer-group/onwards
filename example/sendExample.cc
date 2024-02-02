@@ -12,14 +12,8 @@
 
 int main ()try{
   ::cmw::winStart();
-  ::cmw::GetaddrinfoWrapper ai(
-#ifdef __linux__
-                    "127.0.0.1"
-#else
-                    "::1"
-#endif
-                    ,"12345",SOCK_DGRAM);
-  ::cmw::BufferStack<::cmw::SameFormat> buf(ai.getSock());
+  ::cmw::SockaddrWrapper sa("127.0.0.1", 12345);
+  ::cmw::BufferStack<::cmw::SameFormat> buf(::socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP));
 
   ::std::cout<<"Enter the ID of the message to send: 0,1 or 2.\n";
   int msgID;
@@ -50,5 +44,5 @@ int main ()try{
     std::cout<<"unknown message id\n";
     return 0;
   }
-  buf.send(ai().ai_addr,ai().ai_addrlen);
+  buf.send((sockaddr*)&sa,sizeof(sa));
 }catch(::std::exception& e){::std::cout<<"failure: "<<e.what()<<"\n";}
