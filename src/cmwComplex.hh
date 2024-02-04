@@ -2,7 +2,9 @@
 #define CMW_COMPLEX_HH
 #include<cmwBuffer.hh>
 #include<complex>
+#if __has_include(<netdb.h>)
 #include<netdb.h>
+#endif
 
 namespace cmw{
 void complexMarshal (auto& buf,auto const& c){
