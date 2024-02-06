@@ -1,8 +1,7 @@
-FROM gcc:11
+from scratch
 
-WORKDIR /onwards
-COPY . . 
-RUN set -ex;\
-    make;\
-    make install
+workdir /app
+add cmwA .
+
+cmd ["./cmwA","cmwA.cfg"]
 
