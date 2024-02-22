@@ -494,8 +494,8 @@ constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 
 template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
  public:
-  ::qlz_state_compress comp;
-  ::qlz_state_decompress decomp;
+  ::qlz_state_compress comp{};
+  ::qlz_state_decompress decomp{};
   char* compressedStart;
   unsigned char sendBuf[sz];
   char compBuf[qlzFormula(sz)];
@@ -514,7 +514,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
 
  public:
   explicit BufferCompressed ():SendBuffer<Z>(sendBuf,sz)
-                               ,ReceiveBuffer<R,Z>(recBuf),comp{},decomp{}{}
+                               ,ReceiveBuffer<R,Z>(recBuf){}
 
   void compress (){
     if(qlzFormula(this->index)>(qlzFormula(sz)-compIndex))
