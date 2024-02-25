@@ -101,7 +101,7 @@ void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=fal
     ::sleep(30);
   }
 
-  while(!cmwBuf.flush());
+  while(!cmwBuf.all(Write(cmwBuf.sock_,cmwBuf.data(),cmwBuf.size())));
   ::sctp_paddrparams pad{};
   pad.spp_address.ss_family=AF_INET;
   pad.spp_hbinterval=240000;
@@ -153,7 +153,7 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
 
   void writ (){
     auto e=getSqe();
-    ::io_uring_prep_send(e,cmwBuf.sock_,cmwBuf.compBuf,cmwBuf.compIndex,0);
+    ::io_uring_prep_send(e,cmwBuf.sock_,cmwBuf.data(),cmwBuf.size(),0);
     ::io_uring_sqe_set_data64(e,~reedTag);
   }
 };

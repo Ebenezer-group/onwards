@@ -493,7 +493,6 @@ auto myMin (auto a,auto b){return a<b?a:b;}
 constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 
 template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
- public:
   ::qlz_state_compress comp{};
   ::qlz_state_decompress decomp{};
   char* compressedStart;
@@ -504,13 +503,6 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   int compIndex=0;
   int bytesRead=0;
   bool kosher=true;
-
-  bool all (int bytes){
-    compIndex-=bytes;
-    if(0==compIndex)return true;
-    ::std::memmove(compBuf,compBuf+bytes,compIndex);
-    return false;
-  }
 
  public:
   explicit BufferCompressed ():SendBuffer<Z>(sendBuf,sz)
@@ -523,9 +515,15 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     this->reset();
   }
 
-  bool flush (){
-    return all(Write(this->sock_,compBuf,compIndex));
+  bool all (int bytes){
+    compIndex-=bytes;
+    if(0==compIndex)return true;
+    ::std::memmove(compBuf,compBuf+bytes,compIndex);
+    return false;
   }
+
+  auto data (){return compBuf;}
+  auto size (){return compIndex;}
 
   void compressedReset (){
     this->reset();
