@@ -495,10 +495,10 @@ constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   ::qlz_state_compress comp{};
   ::qlz_state_decompress decomp{};
-  char* compressedStart;
   unsigned char sendBuf[sz];
   char compBuf[qlzFormula(sz)];
   char recBuf[sz];
+  char* compressedStart;
   int compPacketSize;
   int compIndex=0;
   int bytesRead=0;
