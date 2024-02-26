@@ -505,8 +505,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   bool kosher=true;
 
  public:
-  explicit BufferCompressed ():SendBuffer<Z>(sendBuf,sz)
-                               ,ReceiveBuffer<R,Z>(recBuf){}
+  BufferCompressed ():SendBuffer<Z>(sendBuf,sz),ReceiveBuffer<R,Z>(recBuf){}
 
   void compress (){
     if(qlzFormula(this->index)>(qlzFormula(sz)-compIndex))
