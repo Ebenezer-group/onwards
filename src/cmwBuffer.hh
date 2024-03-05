@@ -524,13 +524,9 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   auto data (){return compBuf;}
   auto size (){return compIndex;}
 
-  void compressedReset (){
-    this->reset();
-    comp={};
-    decomp={};
-    compIndex=bytesRead=0;
-    kosher=true;
-    closeSocket(this->sock_);
+  auto getDuo (){
+    return bytesRead<9?::std::span<char>(rbuf+bytesRead,9-bytesRead):
+                       ::std::span<char>(compressedStart+bytesRead,compPacketSize-bytesRead);
   }
 
   using ReceiveBuffer<R,Z>::rbuf;
@@ -554,11 +550,6 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     return true;
   }
 
-  auto getDuo (){
-    return bytesRead<9?::std::span<char>(rbuf+bytesRead,9-bytesRead):
-                       ::std::span<char>(compressedStart+bytesRead,compPacketSize-bytesRead);
-  }
-
   bool gotPacket (){
     if(kosher){
       auto sp=getDuo();
@@ -570,6 +561,14 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
       bytesRead=0;
     }
     return false;
+  }
+
+  void compressedReset (){
+    this->reset();
+    comp=decomp={};
+    compIndex=bytesRead=0;
+    kosher=true;
+    closeSocket(this->sock_);
   }
 };
 #endif
