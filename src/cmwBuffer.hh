@@ -565,7 +565,8 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
 
   void compressedReset (){
     this->reset();
-    comp=decomp={};
+    comp={};
+    decomp={};
     compIndex=bytesRead=0;
     kosher=true;
     closeSocket(this->sock_);
