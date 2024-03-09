@@ -144,6 +144,8 @@ class FileWrapper{
   FileWrapper (char const* name,mode_t mode):
         FileWrapper(name,O_CREAT|O_WRONLY|O_TRUNC,mode){}
 
+  FileWrapper (FileWrapper const&)=delete;
+  void operator= (FileWrapper&)=delete;
   FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
 
   void operator= (FileWrapper&& o)noexcept{
