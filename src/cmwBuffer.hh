@@ -420,7 +420,6 @@ template<class Z>class SendBuffer{
   void send (::sockaddr* addr=nullptr,::socklen_t len=0)
   {sockWrite(sock_,buf,index,addr,len);}
 
-  auto data (){return buf;}
   int getIndex (){return index;}
   int getSize (){return bufsize;}
 
