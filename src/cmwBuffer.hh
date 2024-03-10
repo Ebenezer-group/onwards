@@ -366,7 +366,7 @@ void giveVec (auto& buf,auto& v){
 
 template<class Z>class SendBuffer{
   SendBuffer (SendBuffer const&)=delete;
-  SendBuffer& operator= (SendBuffer);
+  void operator= (SendBuffer&);
   Z savedSize=0;
  protected:
   Z index=0;
