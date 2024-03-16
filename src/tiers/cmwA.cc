@@ -112,7 +112,7 @@ void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=fal
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
 }
 
-::uint64_t const reedTag=1;
+constexpr ::uint64_t reedTag=1;
 class ioUring{
   ::io_uring rng;
 
@@ -129,7 +129,7 @@ class ioUring{
   ioUring (int sock){
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
-    if(int const rc=::io_uring_queue_init_params(16,&rng,&ps);rc<0)
+    if(int rc=::io_uring_queue_init_params(16,&rng,&ps);rc<0)
       raise("ioUring",rc);
     multishot(sock);
     reed();
