@@ -4,7 +4,8 @@
 using namespace ::cmw;
 
 void leave (char const* fmt,auto...t)noexcept{
-  ::std::fprintf(stderr,fmt,t...);
+  if constexpr(sizeof...(t)==0)::std::fputs(fmt,stderr);
+  else ::std::fprintf(stderr,fmt,t...);
   exitFailure();
 }
 
