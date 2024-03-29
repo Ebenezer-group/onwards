@@ -11,6 +11,9 @@
 #include<signal.h>
 #include<syslog.h>
 
+// There are two global variables declared below.  Their declarations 
+// are delayed to where they are first used.
+
 using namespace ::cmw;
 
 struct Socky{
