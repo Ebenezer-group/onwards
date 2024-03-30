@@ -11,8 +11,8 @@
 #include<signal.h>
 #include<syslog.h>
 
-// Two global variables are declared below.  The declarations 
-// are delayed to where they are first used.
+// A global variable is declared below.  The declaration 
+// is delayed to where it is first used.
 
 using namespace ::cmw;
 
@@ -161,12 +161,10 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
   }
 };
 
-BufferStack<SameFormat> frntBuf;
-
-void toFront (Socky const& s,auto...t){
-  frntBuf.reset();
-  ::front::marshal<udpPacketMax>(frntBuf,{t...});
-  frntBuf.send((::sockaddr*)&s.addr,s.len);
+void toFront (auto& buf,Socky const& s,auto...t){
+  buf.reset();
+  ::front::marshal<udpPacketMax>(buf,{t...});
+  buf.send((::sockaddr*)&s.addr,s.len);
 }
 
 int main (int ac,char** av)try{
@@ -187,6 +185,7 @@ int main (int ac,char** av)try{
   }
 
   checkField("UDP-port-number",cfg.getline(' '));
+  BufferStack<SameFormat> frntBuf;
   ioUring ring{frntBuf.sock_=udpServer(cfg.getline().data())};
   ::io_uring_cqe* cq=nullptr;
   ::std::deque<cmwRequest> pendingRequests;
@@ -224,7 +223,7 @@ int main (int ac,char** av)try{
         ring.writ();
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
-        if(gotAddr)toFront(frnt,e.what());
+        if(gotAddr)toFront(frntBuf,frnt,e.what());
         if(req)pendingRequests.pop_back();
       }
       continue;
@@ -238,15 +237,15 @@ int main (int ac,char** av)try{
             auto& req=pendingRequests.front();
             if(giveBool(cmwBuf)){
               cmwBuf.giveFile(req.getFileName());
-              toFront(req.frnt);
-            }else toFront(req.frnt,"CMW:",cmwBuf.giveStringView());
+              toFront(frntBuf,req.frnt);
+            }else toFront(frntBuf,req.frnt,"CMW:",cmwBuf.giveStringView());
             pendingRequests.pop_front();
           }while(cmwBuf.nextMessage());
         }
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
         assert(!pendingRequests.empty());
-        toFront(pendingRequests.front().frnt,e.what());
+        toFront(frntBuf,pendingRequests.front().frnt,e.what());
         pendingRequests.pop_front();
       }
       ring.reed();
