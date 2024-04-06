@@ -92,6 +92,12 @@ void checkField (char const* fld,::std::string_view actl){
   if(actl!=fld)bail("Expected %s",fld);
 }
 
+void toFront (auto& buf,Socky const& s,auto...t){
+  buf.reset();
+  ::front::marshal<udpPacketMax>(buf,{t...});
+  buf.send((::sockaddr*)&s.addr,s.len);
+}
+
 BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
 
 void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=false){
@@ -160,12 +166,6 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
     ::io_uring_sqe_set_data64(e,~reedTag);
   }
 };
-
-void toFront (auto& buf,Socky const& s,auto...t){
-  buf.reset();
-  ::front::marshal<udpPacketMax>(buf,{t...});
-  buf.send((::sockaddr*)&s.addr,s.len);
-}
 
 int main (int ac,char** av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
