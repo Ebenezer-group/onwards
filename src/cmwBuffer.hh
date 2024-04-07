@@ -480,8 +480,9 @@ template<class R,class Z=::std::int16_t,int N=udpPacketMax>
 class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   unsigned char ar[N];
  public:
-  BufferStack ():SendBuffer<Z>(ar,N),ReceiveBuffer<R,Z>((char*)ar){}
-  explicit BufferStack (int s):BufferStack(){this->sock_=s;}
+  explicit BufferStack (int s):SendBuffer<Z>(ar,N),ReceiveBuffer<R,Z>((char*)ar){
+    this->sock_=s;
+  }
 
   bool getPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
     this->packetLength=sockRead(this->sock_,ar,N,addr,len);
