@@ -1,6 +1,5 @@
 #ifndef CMW_BUFFER_HH
 #define CMW_BUFFER_HH
-#include"quicklz.h"
 #include<charconv>
 #include<cstdint>
 #include<cstdlib>//exit
@@ -19,6 +18,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<ws2tcpip.h>
 #define CMW_WINDOWS
 #else
+#include"quicklz.h"
 #include<errno.h>
 #include<fcntl.h>//open
 #include<arpa/inet.h>
@@ -146,12 +146,13 @@ class FileWrapper{
 
   FileWrapper (FileWrapper const&)=delete;
   void operator= (FileWrapper&)=delete;
-  FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
 
+  FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
   void operator= (FileWrapper&& o)noexcept{
     d=o.d;
     o.d=-2;
   }
+
   auto operator() (){return d;}
   ~FileWrapper (){if(d>0)::close(d);}
 };
