@@ -638,7 +638,7 @@ inline int preserveError (auto s){
 
 struct SockaddrWrapper{
   ::sockaddr_in sa;
-  SockaddrWrapper (char const* node,::uint16_t port):sa{AF_INET,::htons(port),{0},{0}}{
+  SockaddrWrapper (char const* node,::uint16_t port):sa{AF_INET,::htons(port),{},{}}{
     if(int rc=::inet_pton(AF_INET,node,&sa.sin_addr);rc!=1)
       raise("inet_pton",rc);
   }
