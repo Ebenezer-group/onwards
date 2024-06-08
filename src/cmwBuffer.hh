@@ -602,8 +602,8 @@ template<int N>class FixedString{
   }
 
   void operator= (::std::string_view s){
+    if(s.size()>=N)raise("FixedString operator=");
     len=s.size();
-    if(len()>=N)raise("FixedString operator=");
     ::std::memcpy(str,s.data(),len());
   }
 
