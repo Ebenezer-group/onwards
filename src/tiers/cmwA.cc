@@ -204,10 +204,7 @@ int main (int ac,char** av)try{
       cmwBuf.compressedReset();
       login(cred,sa);
       ring.reed();
-      continue;
-    }
-
-    if(0==cq->user_data){
+    }else if(0==cq->user_data){
       if(!(cq->flags&IORING_CQE_F_MORE)){
         ::syslog(LOG_ERR,"Multishot");
         ring.multishot(frntBuf.sock_);
