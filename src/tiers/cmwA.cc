@@ -83,7 +83,7 @@ struct cmwRequest{
 };
 #include"cmwA.mdl.hh"
 
-void bail (char const* fmt,auto...t){
+void bail (char const* fmt,auto...t)noexcept{
   ::syslog(LOG_ERR,fmt,t...);
   exitFailure();
 }
