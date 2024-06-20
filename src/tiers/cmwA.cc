@@ -193,7 +193,7 @@ int main (int ac,char** av)try{
   for(;;){
     ring.submit(cq);
     if(cq->res<=0){
-      if(-EPIPE!=cq->res&&0!=cq->res)raise("op failed",cq->user_data,cq->res);
+      if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed %lu %d",cq->user_data,cq->res);
       ::syslog(LOG_ERR,"Back tier vanished");
       frntBuf.reset();
       ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
