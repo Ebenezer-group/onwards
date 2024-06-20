@@ -193,7 +193,7 @@ int main (int ac,char** av)try{
   for(;;){
     ring.submit(cq);
     if(cq->res<=0){
-      if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed: %d",cq->res);
+      if(-EPIPE!=cq->res&&0!=cq->res)raise("op failed",cq->user_data,cq->res);
       ::syslog(LOG_ERR,"Back tier vanished");
       frntBuf.reset();
       ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
@@ -205,7 +205,7 @@ int main (int ac,char** av)try{
       login(cred,sa);
       ring.reed();
     }else if(0==cq->user_data){
-      if(!(cq->flags&IORING_CQE_F_MORE)){
+      if(~cq->flags&IORING_CQE_F_MORE){
         ::syslog(LOG_ERR,"Multishot");
         ring.multishot(frntBuf.sock_);
       }
