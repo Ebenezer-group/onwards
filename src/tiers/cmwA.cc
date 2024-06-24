@@ -187,7 +187,7 @@ int main (int ac,char** av)try{
   checkField("UDP-port-number",cfg.getline(' '));
   BufferStack<SameFormat> frntBuf{udpServer(cfg.getline().data())};
   ioUring ring{frntBuf.sock_};
-  ::io_uring_cqe* cq=nullptr;
+  ::io_uring_cqe* cq=0;
   ::std::deque<cmwRequest> pendingRequests;
 
   for(;;){
@@ -211,7 +211,7 @@ int main (int ac,char** av)try{
       }
       Socky frnt;
       bool gotAddr=false;
-      cmwRequest* req=nullptr;
+      cmwRequest* req=0;
       try{
         gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
         req=&pendingRequests.emplace_back(frnt,frntBuf);
