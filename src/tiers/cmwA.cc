@@ -106,7 +106,7 @@ void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=fal
   cmwBuf.compress();
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(0!=::connect(cmwBuf.sock_,(sockaddr*)&sa,sizeof(sa))){
-    ::std::printf("connect %d\n",errno);
+    ::std::perror("connect");
     ::sleep(30);
   }
 
@@ -210,7 +210,7 @@ int main (int ac,char** av)try{
         ring.multishot(frntBuf.sock_);
       }
       Socky frnt;
-      bool gotAddr=false;
+      bool gotAddr{};
       cmwRequest* req=0;
       try{
         gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
