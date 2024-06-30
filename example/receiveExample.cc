@@ -11,7 +11,7 @@
 
 int main ()try{
   ::cmw::winStart();
-  ::cmw::BufferStack<::cmw::SameFormat> buf(::cmw::udpServer("12345"));
+  ::cmw::BufferStack<::cmw::SameFormat> buf(::cmw::udpServer(12345));
 
   for(;;){
     buf.getPacket();

@@ -5,7 +5,7 @@
 #include<iostream>
 
 int main ()try{
-  ::cmw::BufferStack<::cmw::SameFormat> buf(::cmw::udpServer("13579"));
+  ::cmw::BufferStack<::cmw::SameFormat> buf(::cmw::udpServer(13579));
 
   for(;;){
     buf.getPacket();
