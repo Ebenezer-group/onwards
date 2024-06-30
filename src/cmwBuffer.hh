@@ -646,7 +646,7 @@ struct SockaddrWrapper{
 
 inline auto udpServer (::uint16_t port){
   auto s=::socket(AF_INET,SOCK_DGRAM,0);
-  SockaddrWrapper sa("127.0.0.1",port);
+  ::sockaddr_in sa{AF_INET,::htons(port),{},{}};
   if(0==::bind(s,(sockaddr*)&sa,sizeof(sa)))return s;
   raise("udpServer",preserveError(s));
 }
