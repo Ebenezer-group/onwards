@@ -63,7 +63,7 @@ struct cmwRequest{
   void marshal (auto& buf)const{
     acctNbr.marshal(buf);
     auto ind=buf.reserveBytes(1);
-    auto res=marshalFile(mdlFile,buf):
+    auto res=marshalFile(mdlFile,buf);
     buf.receiveAt(ind,res);
     if(!res)receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
 
