@@ -62,8 +62,10 @@ struct cmwRequest{
 
   void marshal (auto& buf)const{
     acctNbr.marshal(buf);
-    if(auto ind=buf.reserveBytes(1);!buf.receiveAt(ind,marshalFile(mdlFile,buf)))
-      receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
+    auto ind=buf.reserveBytes(1);
+    auto res=marshalFile(mdlFile,buf):
+    buf.receiveAt(ind,res);
+    if(!res)receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
 
     ::int8_t updatedFiles=0;
     auto const idx=buf.reserveBytes(sizeof updatedFiles);

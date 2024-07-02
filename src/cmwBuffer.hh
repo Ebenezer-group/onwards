@@ -395,9 +395,8 @@ template<class Z>class SendBuffer{
     receive(&t,sizeof t);
   }
 
-  auto receiveAt (int where,arithmetic auto t){
+  void receiveAt (int where,arithmetic auto t){
     ::std::memcpy(buf+where,&t,sizeof t);
-    return t;
   }
 
   void fillInSize (::int32_t max){
@@ -630,7 +629,7 @@ template<int N>class FixedString{
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
 
-inline int preserveError (auto s){
+inline int preserveError (int s){
   auto e=getError();
   closeSocket(s);
   return e;
@@ -644,8 +643,8 @@ struct SockaddrWrapper{
   }
 };
 
-inline auto udpServer (::uint16_t port){
-  auto s=::socket(AF_INET,SOCK_DGRAM,0);
+inline int udpServer (::uint16_t port){
+  int s=::socket(AF_INET,SOCK_DGRAM,0);
   ::sockaddr_in sa{AF_INET,::htons(port),{},{}};
   if(0==::bind(s,(sockaddr*)&sa,sizeof(sa)))return s;
   raise("udpServer",preserveError(s));
