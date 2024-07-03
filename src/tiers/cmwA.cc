@@ -107,7 +107,7 @@ void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=fal
         : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
   cmwBuf.compress();
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-  while(0!=::connect(cmwBuf.sock_,(sockaddr*)&sa,sizeof(sa))){
+  while(0!=::connect(cmwBuf.sock_,(sockaddr*)&sa,sizeof sa)){
     ::std::perror("connect");
     ::sleep(30);
   }

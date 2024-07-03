@@ -18,7 +18,7 @@ int main (int ac,char** av)try{
 
   ::middle::marshal<udpPacketMax>(buf,MarshallingInt(av[1]),av[2]);
   for(int tm=8;tm<13;tm+=4){
-    buf.send((::sockaddr*)&sa,sizeof(sa));
+    buf.send((::sockaddr*)&sa,sizeof sa);
     setRcvTimeout(buf.sock_,tm);
     if(buf.getPacket()){
       if(giveBool(buf))::std::exit(EXIT_SUCCESS);

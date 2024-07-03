@@ -229,7 +229,7 @@ inline int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fro
 }
 
 struct SameFormat{
-  static void read (auto& b,auto& data){b.give(&data,sizeof(data));}
+  static void read (auto& b,auto& data){b.give(&data,sizeof data);}
 
   static void readBlock (auto& b,auto data,int elements)
   {b.give(data,elements*sizeof(*data));}
@@ -255,12 +255,12 @@ struct MixedEndian{
 
 struct LeastSignificantFirst:MixedEndian{
   static void read (auto& b,auto& val)
-  {for(auto c=0;c<sizeof(val);++c)val|=b.giveOne()<<8*c;}
+  {for(auto c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
 };
 
 struct MostSignificantFirst:MixedEndian{
   static void read (auto& b,auto& val)
-  {for(auto c=sizeof(val);c>0;--c)val|=b.giveOne()<<8*(c-1);}
+  {for(auto c=sizeof val;c>0;--c)val|=b.giveOne()<<8*(c-1);}
 };
 
 template<class R,class Z>class ReceiveBuffer{
@@ -291,7 +291,7 @@ template<class R,class Z>class ReceiveBuffer{
 
   template<class T>T give (){
     T t;
-    if(sizeof(T)==1)give(&t,1);
+    if(sizeof t==1)give(&t,1);
     else R::read(*this,t);
     return t;
   }
@@ -646,7 +646,7 @@ struct SockaddrWrapper{
 inline int udpServer (::uint16_t port){
   int s=::socket(AF_INET,SOCK_DGRAM,0);
   ::sockaddr_in sa{AF_INET,::htons(port),{},{}};
-  if(0==::bind(s,(sockaddr*)&sa,sizeof(sa)))return s;
+  if(0==::bind(s,(sockaddr*)&sa,sizeof sa))return s;
   raise("udpServer",preserveError(s));
 }
 
