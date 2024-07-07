@@ -31,9 +31,6 @@
 #define QLZ_VERSION_MINOR 5
 #define QLZ_VERSION_REVISION 0
 
-// Using size_t, memset() and memcpy()
-#include <cstring>
-
 // Verify compression level
 #if QLZ_COMPRESSION_LEVEL != 1 && QLZ_COMPRESSION_LEVEL != 2 && QLZ_COMPRESSION_LEVEL != 3
 #error QLZ_COMPRESSION_LEVEL must be 1, 2 or 3

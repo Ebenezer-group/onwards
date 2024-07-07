@@ -51,8 +51,8 @@ void apps (auto& e,auto t,auto...ts){
   apps(e,ts...);
 }
 
-template<class E=Failure>[[noreturn]]void raise (char const* s,auto...t){
-  E e{s};
+[[noreturn]]void raise (char const* s,auto...t){
+  Failure e{s};
   apps(e,t...);
   throw e;
 }
