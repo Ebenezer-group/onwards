@@ -421,7 +421,6 @@ template<class Z>class SendBuffer{
   {sockWrite(sock_,buf,index,addr,len);}
 
   int getIndex (){return index;}
-  int getSize (){return bufsize;}
 
 #ifndef CMW_WINDOWS
   void receiveFile (char const* n,::int32_t sz){

@@ -100,11 +100,12 @@ void toFront (auto& buf,Socky const& s,auto...t){
   buf.send((::sockaddr*)&s.addr,s.len);
 }
 
-BufferCompressed<SameFormat,::std::int32_t,1101000> cmwBuf;
+constexpr ::int32_t bufSize=1101000;
+BufferCompressed<SameFormat,::std::int32_t,bufSize> cmwBuf;
 
 void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
-        : ::back::marshal<::messageID::login>(cmwBuf,cred,cmwBuf.getSize());
+        : ::back::marshal<::messageID::login>(cmwBuf,cred,bufSize);
   cmwBuf.compress();
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(0!=::connect(cmwBuf.sock_,(sockaddr*)&sa,sizeof sa)){
