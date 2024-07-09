@@ -3,13 +3,13 @@
 
 #include<deque>
 #include<cassert>
-#include<cstdio>
-#include<ctime>
 #include<liburing.h>
 #include<poll.h>
 #include<linux/sctp.h>
 #include<signal.h>
+#include<stdio.h>
 #include<syslog.h>
+#include<time.h>
 
 // A global variable is declared below.  The declaration 
 // is delayed to where it is first used.
@@ -44,7 +44,7 @@ struct cmwRequest{
 
  public:
   cmwRequest (Socky const& ft,auto& buf):frnt{ft}
-      ,bday(::std::time(nullptr)),acctNbr{buf},path{buf}{
+      ,bday(::time(nullptr)),acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     mdlFile=::std::strrchr(path(),'/');
     if(!mdlFile)raise("cmwRequest didn't find /");
@@ -52,7 +52,7 @@ struct cmwRequest{
     setDirectory(path());
     *mdlFile='/';
     char last[60];
-    ::std::snprintf(last,sizeof last,".%s.last",++mdlFile);
+    ::snprintf(last,sizeof last,".%s.last",++mdlFile);
     fl=FileWrapper{last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP};
     switch(::pread(fl(),&prevTime,sizeof prevTime,0)){
       case 0:prevTime=0;break;
@@ -108,7 +108,7 @@ void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=fal
   cmwBuf.compress();
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(0!=::connect(cmwBuf.sock_,(sockaddr*)&sa,sizeof sa)){
-    ::std::perror("connect");
+    ::perror("connect");
     ::sleep(30);
   }
 
@@ -182,7 +182,7 @@ int main (int ac,char** av)try{
   ::signal(SIGPIPE,SIG_IGN);
   login(cred,sa,ac==3);
   if(ac==3){
-    ::std::printf("Signup was successful\n");
+    ::printf("Signup was successful\n");
     ::std::exit(0);
   }
 
