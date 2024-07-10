@@ -307,7 +307,8 @@ template<class R,class Z>class ReceiveBuffer{
     return false;
   }
 
-  bool update (){
+  bool update (size_t pLen){
+    packetLength=pLen;
     msgLength=subTotal=0;
     return nextMessage();
   }
@@ -431,7 +432,7 @@ template<class Z>class SendBuffer{
   }
 #endif
 
-  void receiveMulti (auto*,auto...);
+  void receiveMulti (auto,auto...);
 };
 
 template<class Z>
@@ -484,8 +485,7 @@ class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   }
 
   bool getPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
-    this->packetLength=sockRead(this->sock_,ar,N,addr,len);
-    return this->update();
+    return this->update(sockRead(this->sock_,ar,N,addr,len));
   }
 };
 
@@ -535,9 +535,9 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     if((bytesRead+=rc)<9)return false;
     if(bytesRead==9){
       if((compPacketSize=::qlz_size_compressed(rbuf))>this->bufsize||
-         (this->packetLength=::qlz_size_decompressed(rbuf))>this->bufsize){
+         ::qlz_size_decompressed(rbuf)>this->bufsize){
         kosher=false;
-        raise("gotIt too big",compPacketSize,this->packetLength,this->bufsize);
+        raise("gotIt too big",compPacketSize,this->bufsize);
       }
       compressedStart=rbuf+this->bufsize-compPacketSize;
       ::std::memmove(compressedStart,rbuf,9);
@@ -545,9 +545,8 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     }
 
     if(bytesRead<compPacketSize)return false;
-    ::qlz_decompress(compressedStart,rbuf,&decomp);
     bytesRead=0;
-    this->update();
+    this->update(::qlz_decompress(compressedStart,rbuf,&decomp));
     return true;
   }
 
