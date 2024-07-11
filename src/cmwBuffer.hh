@@ -177,8 +177,8 @@ struct FileBuffer{
   auto getline (char delim='\n'){
     ::std::size_t idx=0;
     while((line[idx]=getc())!=delim){
-      if(line[idx]=='\r')raise("getline carriage return");
-      if(++idx>=sizeof line)raise("getline line too long");
+      if(line[idx]=='\r')raise("getline cr");
+      if(++idx>=sizeof line)raise("getline too long");
     }
     line[idx]=0;
     return ::std::string_view{line,idx};
@@ -415,7 +415,18 @@ template<class Z>class SendBuffer{
   void reset (){savedSize=index=0;}
   void rollback (){index=savedSize;}
 
-  bool flush ();
+  bool flush (){
+    int const bytes=Write(sock_,buf,index);
+    if(bytes==index){
+      reset();
+      return true;
+    }
+
+    index-=bytes;
+    savedSize=index;
+    ::std::memmove(buf,buf+bytes,index);
+    return false;
+  }
 
   //UDP-friendly alternative to flush
   void send (::sockaddr* addr=nullptr,::socklen_t len=0)
@@ -434,20 +445,6 @@ template<class Z>class SendBuffer{
 
   void receiveMulti (auto,auto...);
 };
-
-template<class Z>
-bool SendBuffer<Z>::flush (){
-  int const bytes=sockWrite(sock_,buf,index);
-  if(bytes==index){
-    reset();
-    return true;
-  }
-
-  index-=bytes;
-  savedSize=index;
-  ::std::memmove(buf,buf+bytes,index);
-  return false;
-}
 
 void receiveBool (auto&b,bool bl){b.template receive<unsigned char>(bl);}
 
@@ -510,7 +507,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
 
   void compress (){
     if(qlzFormula(this->index)>(qlzFormula(sz)-compIndex))
-      raise("Not enough room in compressed buf");
+      raise("compress zone");
     compIndex+=::qlz_compress(this->buf,compBuf+compIndex,this->index,&comp);
     this->reset();
   }
@@ -537,7 +534,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
       if((compPacketSize=::qlz_size_compressed(rbuf))>this->bufsize||
          ::qlz_size_decompressed(rbuf)>this->bufsize){
         kosher=false;
-        raise("gotIt too big",compPacketSize,this->bufsize);
+        raise("gotIt size",compPacketSize,this->bufsize);
       }
       compressedStart=rbuf+this->bufsize-compPacketSize;
       ::std::memmove(compressedStart,rbuf,9);
