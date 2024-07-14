@@ -148,11 +148,11 @@ class ioUring{
   }
 
   void submit (::io_uring_cqe*& cq){
+    ::io_uring_cqe_seen(&rng,cq);
 a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
       if(-EINTR==rc)goto a;
       raise("waitCqe",rc);
     }
-    ::io_uring_cq_advance(&rng,1);
   }
 
   void reed (){
@@ -190,7 +190,7 @@ int main (int ac,char** av)try{
   checkField("UDP-port-number",cfg.getline(' '));
   BufferStack<SameFormat> frntBuf{udpServer(fromChars(cfg.getline().data()))};
   ioUring ring{frntBuf.sock_};
-  ::io_uring_cqe* cq;
+  ::io_uring_cqe* cq=0;
   ::std::deque<cmwRequest> pendingRequests;
 
   for(;;){
