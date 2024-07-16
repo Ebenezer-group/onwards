@@ -307,8 +307,8 @@ template<class R,class Z>class ReceiveBuffer{
     return false;
   }
 
-  bool update (size_t pLen){
-    packetLength=pLen;
+  bool update (size_t len){
+    packetLength=len;
     msgLength=subTotal=0;
     return nextMessage();
   }

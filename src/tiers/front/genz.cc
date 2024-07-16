@@ -1,11 +1,11 @@
 #include<cmwBuffer.hh>
 #include"genz.mdl.hh"
-#include<cstdio>
+#include<stdio.h>
 using namespace ::cmw;
 
 void leave (char const* fmt,auto...t)noexcept{
-  if constexpr(sizeof...(t)==0)::std::fputs(fmt,stderr);
-  else ::std::fprintf(stderr,fmt,t...);
+  if constexpr(sizeof...(t)==0)::fputs(fmt,stderr);
+  else ::fprintf(stderr,fmt,t...);
   exitFailure();
 }
 
