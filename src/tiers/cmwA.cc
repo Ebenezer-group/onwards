@@ -43,7 +43,7 @@ struct cmwRequest{
   }
 
  public:
-  cmwRequest (Socky const& ft,auto& buf):frnt{ft}
+  cmwRequest (auto& buf,Socky const& ft):frnt{ft}
       ,bday(::time(nullptr)),acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     mdlFile=::std::strrchr(path(),'/');
@@ -217,7 +217,7 @@ int main (int ac,char** av)try{
       cmwRequest* req=0;
       try{
         gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
-        req=&pendingRequests.emplace_back(frnt,frntBuf);
+        req=&pendingRequests.emplace_back(frntBuf,frnt);
         ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
         cmwBuf.compress();
         ring.writ();
