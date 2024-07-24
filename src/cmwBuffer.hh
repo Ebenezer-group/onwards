@@ -400,6 +400,10 @@ template<class Z>class SendBuffer{
     ::std::memcpy(buf+where,&t,sizeof t);
   }
 
+  void receiveAt (int where){
+    receiveAt(where,index-(where+4));
+  }
+
   void fillInSize (::int32_t max){
     Z marshalledBytes=index-savedSize;
     if(marshalledBytes>max)raise("fillInSize",max);
@@ -431,8 +435,6 @@ template<class Z>class SendBuffer{
   //UDP-friendly alternative to flush
   void send (::sockaddr* addr=nullptr,::socklen_t len=0)
   {sockWrite(sock_,buf,index,addr,len);}
-
-  int getIndex (){return index;}
 
 #ifndef CMW_WINDOWS
   void receiveFile (char const* n,::int32_t sz){

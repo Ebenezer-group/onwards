@@ -172,7 +172,7 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
 
 int main (int ac,char** av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
-  if(ac<2||ac>3)bail("Usage: cmwA config-file [-signup]");
+  if(ac<2||ac>3)bail("Usage: %s config-file [-signup]",av[0]);
   FileBuffer cfg{av[1],O_RDONLY};
   checkField("CMW-IP",cfg.getline(' '));
   SockaddrWrapper const sa(cfg.getline().data(),56789);
