@@ -1,5 +1,4 @@
-#ifndef CMW_BUFFER_HH
-#define CMW_BUFFER_HH
+#pragma once
 #include<charconv>
 #include<cstdint>
 #include<cstdlib>//exit
@@ -654,4 +653,3 @@ inline void winStart (){
 #endif
 }
 }
-#endif

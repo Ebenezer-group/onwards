@@ -1,5 +1,4 @@
-#ifndef CMW_COMPLEX_HH
-#define CMW_COMPLEX_HH
+#pragma once
 #include<cmwBuffer.hh>
 #include<complex>
 #if __has_include(<netdb.h>)
@@ -101,4 +100,3 @@ void valarrayGive (auto& buf,auto& varray){
 }
 #endif
 }
-#endif
