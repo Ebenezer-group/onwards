@@ -1,5 +1,4 @@
-#ifndef BASE_HH
-#define BASE_HH
+#pragma once
 #include<cmwBuffer.hh>
 
 struct base{
@@ -48,4 +47,3 @@ public:
   void marshalMembers (auto&)const;
   void marshal (auto& b)const{marshalMembers(b);}
 };
-#endif
