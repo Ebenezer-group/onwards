@@ -514,8 +514,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   }
 
   bool all (int bytes){
-    compIndex-=bytes;
-    if(0==compIndex)return true;
+    if((compIndex-=bytes)==0)return true;
     ::std::memmove(compBuf,compBuf+bytes,compIndex);
     return false;
   }
