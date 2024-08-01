@@ -360,7 +360,7 @@ bool giveBool (auto& b){
 }
 
 void giveVec (auto& buf,auto& v){
-  ::int32_t n=::cmw::give<::uint32_t>(buf);
+  ::int32_t n=give<::uint32_t>(buf);
   v.resize(v.size()+n);
   buf.giveBlock(&*(v.end()-n),n);
 }
