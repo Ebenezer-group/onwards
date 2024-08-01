@@ -71,6 +71,8 @@ inline int fromChars (::std::string_view s){
 }
 
 
+template<class T>T give (auto& b){return b.template give<T>();}
+
 template<class,class>class ReceiveBuffer;
 class MarshallingInt{
   ::int32_t val=0;
@@ -84,7 +86,7 @@ class MarshallingInt{
   template<class R,class Z>explicit MarshallingInt (ReceiveBuffer<R,Z>& b){
     ::uint32_t shift=1;
     for(;;){
-      ::uint8_t a=b.giveOne();
+      auto a=give<::uint8_t>(b);
       val+=(a&127)*shift;
       if((a&128)==0)return;
       shift<<=7;
@@ -254,12 +256,12 @@ struct MixedEndian{
 
 struct LeastSignificantFirst:MixedEndian{
   static void read (auto& b,auto& val)
-  {for(auto c=0;c<sizeof val;++c)val|=b.giveOne()<<8*c;}
+  {for(auto c=0;c<sizeof val;++c)val|=give<::uint8_t>(b)<<8*c;}
 };
 
 struct MostSignificantFirst:MixedEndian{
   static void read (auto& b,auto& val)
-  {for(auto c=sizeof val;c>0;--c)val|=b.giveOne()<<8*(c-1);}
+  {for(auto c=sizeof val;c>0;--c)val|=give<::uint8_t>(b)<<8*(c-1);}
 };
 
 template<class R,class Z>class ReceiveBuffer{
@@ -281,11 +283,6 @@ template<class R,class Z>class ReceiveBuffer{
     checkLen(len);
     ::std::memcpy(address,rbuf+subTotal+rindex,len);
     rindex+=len;
-  }
-
-  char giveOne (){
-    checkLen(1);
-    return rbuf[subTotal+rindex++];
   }
 
   template<class T>T give (){
@@ -349,10 +346,8 @@ template<class R,class Z>class ReceiveBuffer{
   }
 };
 
-template<class T>T give (auto& b){return b.template give<T>();}
-
 bool giveBool (auto& b){
-  switch(b.giveOne()){
+  switch(give<::uint8_t>(b)){
     case 0:return false;
     case 1:return true;
     default:raise("giveBool");
