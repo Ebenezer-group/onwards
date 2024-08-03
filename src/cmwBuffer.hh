@@ -265,11 +265,11 @@ struct MostSignificantFirst:MixedEndian{
 };
 
 template<class R,class Z>class ReceiveBuffer{
-  int msgLength=0;
-  int subTotal=0;
+  int msgLength;
+  int subTotal;
  protected:
   char* const rbuf;
-  int packetLength=0;
+  int packetLength;
   int rindex=0;
 
  public:
