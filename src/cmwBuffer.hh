@@ -315,15 +315,16 @@ template<class R,class Z>class ReceiveBuffer{
   }
 
 #ifndef CMW_WINDOWS
+  qw2.le
   void giveFile (auto nm){
     int sz=give<::uint32_t>();
     checkLen(sz);
     FileWrapper fl{nm,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH};
-    while(sz>0){
+    do{
       int r=Write(fl(),rbuf+subTotal+rindex,sz);
       sz-=r;
       rindex+=r;
-    }
+    }while(sz>0);
   }
 #endif
 
@@ -338,10 +339,10 @@ template<class R,class Z>class ReceiveBuffer{
   }
 
   auto giveStringView (){
-    MarshallingInt len{*this};
-    checkLen(len());
-    ::std::string_view s(rbuf+subTotal+rindex,len());
-    rindex+=len();
+    auto len=MarshallingInt{*this}();
+    checkLen(len);
+    ::std::string_view s(rbuf+subTotal+rindex,len);
+    rindex+=len;
     return s;
   }
 };
