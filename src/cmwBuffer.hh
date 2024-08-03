@@ -315,7 +315,6 @@ template<class R,class Z>class ReceiveBuffer{
   }
 
 #ifndef CMW_WINDOWS
-  qw2.le
   void giveFile (auto nm){
     int sz=give<::uint32_t>();
     checkLen(sz);
