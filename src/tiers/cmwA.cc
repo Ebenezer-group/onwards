@@ -97,7 +97,7 @@ void checkField (char const* fld,::std::string_view actl){
 void toFront (auto& buf,Socky const& s,auto...t){
   buf.reset();
   ::front::marshal<udpPacketMax>(buf,{t...});
-  buf.send((::sockaddr*)&s.addr,s.len);
+  buf.send(&s.addr,s.len);
 }
 
 constexpr ::int32_t bufSize=1101000;
@@ -201,7 +201,7 @@ int main (int ac,char** av)try{
       frntBuf.reset();
       ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
       for(auto& r:pendingRequests){
-        frntBuf.send((::sockaddr*)&r.frnt.addr,r.frnt.len);
+        frntBuf.send(&r.frnt.addr,r.frnt.len);
       }
       pendingRequests.clear();
       cmwBuf.compressedReset();

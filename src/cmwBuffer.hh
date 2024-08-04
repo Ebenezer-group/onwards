@@ -210,8 +210,9 @@ inline void closeSocket (sockType s){
 }
 
 inline int sockWrite (sockType s,void const* data,int len
-               ,sockaddr const* addr=nullptr,socklen_t toLen=0){
-  if(int r=::sendto(s,static_cast<char const*>(data),len,0,addr,toLen);r>0)
+               ,auto addr=nullptr,socklen_t toLen=0){
+  if(int r=::sendto(s,static_cast<char const*>(data),len,0,
+                    reinterpret_cast<::sockaddr const*>(addr),toLen);r>0)
     return r;
   raise("sockWrite",s,getError());
 }
@@ -427,7 +428,7 @@ template<class Z>class SendBuffer{
   }
 
   //UDP-friendly alternative to flush
-  void send (::sockaddr* addr=nullptr,::socklen_t len=0)
+  void send (auto addr=nullptr,::socklen_t len=0)
   {sockWrite(sock_,buf,index,addr,len);}
 
 #ifndef CMW_WINDOWS
