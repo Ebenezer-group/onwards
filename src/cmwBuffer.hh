@@ -428,7 +428,8 @@ template<class Z>class SendBuffer{
   }
 
   //UDP-friendly alternative to flush
-  void send (auto addr=nullptr,::socklen_t len=0)
+  template<class T=int>
+  void send (T* addr=nullptr,::socklen_t len=0)
   {sockWrite(sock_,buf,index,addr,len);}
 
 #ifndef CMW_WINDOWS
