@@ -108,7 +108,7 @@ void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=fal
         : ::back::marshal<::messageID::login>(cmwBuf,cred,bufSize);
   cmwBuf.compress();
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-  while(0!=::connect(cmwBuf.sock_,(sockaddr*)&sa,sizeof sa)){
+  while(0!=::connect(cmwBuf.sock_,(::sockaddr*)&sa,sizeof sa)){
     ::perror("connect");
     ::sleep(30);
   }
@@ -165,7 +165,8 @@ a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<
 
   void writ (){
     auto e=getSqe();
-    ::io_uring_prep_send(e,cmwBuf.sock_,cmwBuf.data(),cmwBuf.size(),0);
+    auto sp=cmwBuf.outDuo();
+    ::io_uring_prep_send(e,cmwBuf.sock_,sp.data(),sp.size(),0);
     ::io_uring_sqe_set_data64(e,~reedTag);
   }
 };

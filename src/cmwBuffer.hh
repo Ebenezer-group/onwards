@@ -516,8 +516,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     return false;
   }
 
-  auto data (){return compBuf;}
-  auto size (){return compIndex;}
+  auto outDuo (){return ::std::span<char>(compBuf,compIndex);}
 
   auto getDuo (){
     return bytesRead<9?::std::span<char>(rbuf+bytesRead,9-bytesRead):
@@ -528,12 +527,12 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   bool gotIt (int rc){
     if((bytesRead+=rc)<9)return false;
     if(bytesRead==9){
-      if((compPacketSize=::qlz_size_compressed(rbuf))>this->bufsize||
-         ::qlz_size_decompressed(rbuf)>this->bufsize){
+      if((compPacketSize=::qlz_size_compressed(rbuf))>sz||
+         ::qlz_size_decompressed(rbuf)>sz){
         kosher=false;
-        raise("gotIt size",compPacketSize,this->bufsize);
+        raise("gotIt size",compPacketSize,sz);
       }
-      compressedStart=rbuf+this->bufsize-compPacketSize;
+      compressedStart=rbuf+sz-compPacketSize;
       ::std::memmove(compressedStart,rbuf,9);
       return false;
     }
@@ -549,7 +548,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
       auto sp=getDuo();
       return gotIt(Read(this->sock_,sp.data(),sp.size()));
     }
-    bytesRead+=Read(this->sock_,rbuf,myMin(this->bufsize,compPacketSize-bytesRead));
+    bytesRead+=Read(this->sock_,rbuf,myMin(sz,compPacketSize-bytesRead));
     if(bytesRead==compPacketSize){
       kosher=true;
       bytesRead=0;
