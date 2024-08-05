@@ -113,7 +113,7 @@ void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=fal
     ::sleep(30);
   }
 
-  while(!cmwBuf.all(Write(cmwBuf.sock_,cmwBuf.data(),cmwBuf.size())));
+  while(!cmwBuf.flush());
   ::sctp_paddrparams pad{};
   pad.spp_address.ss_family=AF_INET;
   pad.spp_hbinterval=240000;

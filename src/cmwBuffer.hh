@@ -516,6 +516,8 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     return false;
   }
 
+  bool flush (){return all(Write(this->sock_,compBuf,compIndex));}
+
   auto outDuo (){return ::std::span<char>(compBuf,compIndex);}
 
   auto getDuo (){
