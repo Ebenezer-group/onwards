@@ -56,20 +56,11 @@ void apps (auto& e,auto t,auto...ts){
   throw e;
 }
 
-inline int getError (){
-#ifdef CMW_WINDOWS
-  return WSAGetLastError();
-#else
-  return errno;
-#endif
-}
-
 inline int fromChars (::std::string_view s){
   int n=0;
   ::std::from_chars(s.data(),s.data()+s.size(),n);
   return n;
 }
-
 
 template<class T>T give (auto& b){return b.template give<T>();}
 
@@ -119,7 +110,7 @@ using sockType=SOCKET;
 #else
 using sockType=int;
 inline void setDirectory (char const* d){
-  if(::chdir(d)==-1)raise("setDirectory",d,errno);
+  if(::chdir(d)!=0)raise("setDirectory",d,errno);
 }
 
 inline int Write (int fd,void const* data,int len){
@@ -191,6 +182,14 @@ auto setsockWrapper (sockType s,int opt,auto t){
   return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
 }
 
+inline int getError (){
+#ifdef CMW_WINDOWS
+  return WSAGetLastError();
+#else
+  return errno;
+#endif
+}
+
 inline void setRcvTimeout (sockType s,int time){
 #ifdef CMW_WINDOWS
   DWORD t=time*1000;
@@ -198,15 +197,6 @@ inline void setRcvTimeout (sockType s,int time){
   ::timeval t{time,0};
 #endif
   if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
-}
-
-inline void closeSocket (sockType s){
-#ifdef CMW_WINDOWS
-  if(::closesocket(s)==SOCKET_ERROR)
-#else
-  if(::close(s)==-1)
-#endif
-    raise("closeSocket",getError());
 }
 
 inline int sockWrite (sockType s,void const* data,int len
@@ -483,6 +473,15 @@ class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
     return this->update(sockRead(this->sock_,ar,N,addr,len));
   }
 };
+
+inline void closeSocket (sockType s){
+#ifdef CMW_WINDOWS
+  if(::closesocket(s)==SOCKET_ERROR)
+#else
+  if(::close(s)!=0)
+#endif
+    raise("closeSocket",getError());
+}
 
 #ifndef CMW_WINDOWS
 auto myMin (auto a,auto b){return a<b?a:b;}
