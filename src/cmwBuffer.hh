@@ -434,7 +434,7 @@ template<class Z>class SendBuffer{
   void receiveMulti (auto,auto...);
 };
 
-void receiveBool (auto&b,bool bl){b.template receive<unsigned char>(bl);}
+void receiveBool (auto&b,bool bl){b.template receive<::uint8_t>(bl);}
 
 void receive (auto& b,::std::string_view s){
   MarshallingInt(s.size()).marshal(b);
@@ -515,8 +515,6 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     return false;
   }
 
-  bool flush (){return all(Write(this->sock_,compBuf,compIndex));}
-
   auto outDuo (){return ::std::span<char>(compBuf,compIndex);}
 
   auto getDuo (){
@@ -556,6 +554,8 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     }
     return false;
   }
+
+  bool flush (){return all(Write(this->sock_,compBuf,compIndex));}
 
   void compressedReset (){
     this->reset();
