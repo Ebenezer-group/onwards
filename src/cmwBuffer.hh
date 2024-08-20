@@ -417,9 +417,7 @@ template<class Z>class SendBuffer{
     return false;
   }
 
-  //UDP-friendly alternative to flush
-  template<class T=int>
-  void send (T* addr=nullptr,::socklen_t len=0)
+  template<class T=int>void send (T* addr=nullptr,::socklen_t len=0)
   {sockWrite(sock_,buf,index,addr,len);}
 
 #ifndef CMW_WINDOWS
@@ -446,7 +444,7 @@ void receive (auto& b,stringPlus lst){
   ::int32_t t=0;
   for(auto s:lst)t+=s.size();
   MarshallingInt{t}.marshal(b);
-  for(auto s:lst)b.receive(s.data(),s.size());//Use low-level receive
+  for(auto s:lst)b.receive(s.data(),s.size());//Use low-level
 }
 
 template<template<class...>class C,class T>

@@ -44,7 +44,7 @@ struct cmwRequest{
 
  public:
   cmwRequest (auto& buf,Socky const& ft):frnt{ft}
-      ,bday(::time(nullptr)),acctNbr{buf},path{buf}{
+      ,bday(::time(0)),acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     mdlFile=::std::strrchr(path(),'/');
     if(!mdlFile)raise("cmwRequest didn't find /");
@@ -149,7 +149,7 @@ class ioUring{
 
   void submit (::io_uring_cqe*& cq){
     ::io_uring_cqe_seen(&rng,cq);
-a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,nullptr,nullptr);rc<0){
+a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,0,0);rc<0){
       if(-EINTR==rc)goto a;
       raise("waitCqe",rc);
     }
