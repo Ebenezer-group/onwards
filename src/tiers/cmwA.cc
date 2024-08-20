@@ -149,9 +149,9 @@ class ioUring{
 
   void submit (::io_uring_cqe*& cq){
     ::io_uring_cqe_seen(&rng,cq);
-a:  if(int rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,0,0);rc<0){
-      if(-EINTR==rc)goto a;
-      raise("waitCqe",rc);
+    int rc;
+    while((rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,0,0))<0){
+      if(-EINTR!=rc)raise("waitCqe",rc);
     }
   }
 
