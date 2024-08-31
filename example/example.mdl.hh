@@ -18,9 +18,9 @@ static void give (auto& buf
 
 static void mar (auto& buf
          ,::std::set<::int32_t> const& a){
-  buf.template receive<int32_t>(a.size());
+  receive(buf,::cmw::asFour(a.size()));
   for(auto const& e1:a){
-    buf.receive(e1);
+    receive(buf,e1);
   }
 }
 
@@ -39,7 +39,7 @@ static void mar (auto& buf
 
 static void give (auto& buf
          ,::std::array<float,6>& a){
-  buf.giveBlock(&a[0],::std::size(a));
+  buf.giveBlock(&a[0],sizeof a/sizeof(float));
 }
 
 template<messageID id,int maxLength=10000>

@@ -17,7 +17,7 @@ static void mar (auto& buf
          ,cmwCredentials const& a
          ,::int32_t b){
   a.marshal(buf);
-  buf.receive(b);
+  receive(buf,b);
 }
 
 static void mar (auto& buf
@@ -39,10 +39,10 @@ static void marshal (auto& buf
          ,::cmw::stringPlus const& a={}
          ,::int8_t b={})try{
   buf.reserveBytes();
-  buf.receive(a.size()==0);
+  receive(buf,a.size()==0);
   if(a.size()>0){
     receive(buf,a);
-    buf.receive(b);
+    receive(buf,b);
   }
   buf.fillInSize(maxLength);
 }catch(...){buf.rollback();throw;}

@@ -94,9 +94,9 @@ class MarshallingInt{
     for(;;){
       ::uint8_t a=n&127;
       n>>=7;
-      if(0==n){b.receive(a);break;}
+      if(0==n){receive(b,a);break;}
       a|=128;
-      b.receive(a);
+      receive(b,a);
       --n;
     }
   }
@@ -377,10 +377,6 @@ template<class Z>class SendBuffer{
     ::std::memcpy(buf+reserveBytes(size),data,size);
   }
 
-  void receive (arithmetic auto t){
-    receive(&t,sizeof t);
-  }
-
   void receiveAt (int where,arithmetic auto t){
     ::std::memcpy(buf+where,&t,sizeof t);
   }
@@ -422,7 +418,7 @@ template<class Z>class SendBuffer{
 
 #ifndef CMW_WINDOWS
   void receiveFile (char const* n,::int32_t sz){
-    receive(sz);
+    receive(&sz,sizeof sz);
     auto prev=reserveBytes(sz);
     FileWrapper fl{n,O_RDONLY,0};
     if(Read(fl(),buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
@@ -431,6 +427,9 @@ template<class Z>class SendBuffer{
 
   void receiveMulti (auto,auto...);
 };
+
+auto asFour (auto t){return static_cast<::int32_t>(t);}
+void receive (auto& b,arithmetic auto t){b.receive(&t,sizeof t);}
 
 void receive (auto& b,::std::string_view s){
   MarshallingInt(s.size()).marshal(b);
@@ -448,7 +447,7 @@ void receive (auto& b,stringPlus lst){
 template<template<class...>class C,class T>
 void receiveBlock (auto& b,C<T>const& c){
   ::int32_t n=c.size();
-  b.receive(n);
+  receive(b,n);
   if constexpr(arithmetic<T>)b.receive(c.data(),n*sizeof(T));
   else
     for(auto const& e:c)
