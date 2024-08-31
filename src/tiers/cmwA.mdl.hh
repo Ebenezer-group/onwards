@@ -39,7 +39,7 @@ static void marshal (auto& buf
          ,::cmw::stringPlus const& a={}
          ,::int8_t b={})try{
   buf.reserveBytes();
-  receiveBool(buf,a.size()==0);
+  buf.receive(a.size()==0);
   if(a.size()>0){
     receive(buf,a);
     buf.receive(b);
