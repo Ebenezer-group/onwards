@@ -25,7 +25,7 @@ void baseSwitch (auto& c,auto& buf){
 inline void
 derived1::marshalMembers (auto& buf)const{
   base::marshalMembers(buf);
-  buf.receive(a);
+  receive(buf,a);
 }
 
 template<class R,class Z>
@@ -36,7 +36,7 @@ derived1::derived1 (::cmw::ReceiveBuffer<R,Z>& buf):
 inline void
 derived2::marshalMembers (auto& buf)const{
   base::marshalMembers(buf);
-  buf.receive(b);
+  receive(buf,b);
 }
 
 template<class R,class Z>
@@ -47,7 +47,7 @@ derived2::derived2 (::cmw::ReceiveBuffer<R,Z>& buf):
 inline void
 derived3::marshalMembers (auto& buf)const{
   derived1::marshalMembers(buf);
-  buf.receive(c);
+  receive(buf,c);
 }
 
 template<class R,class Z>

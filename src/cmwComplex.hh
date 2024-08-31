@@ -25,8 +25,8 @@ template<class T,class...Ts>
   if(c.template is_registered<T>()){
     if(::int32_t n=c.template size<T>();n>0){
       segs=1;
-      buf.receive(T::typeNum);
-      buf.receive(n);
+      receive(buf,T::typeNum);
+      receive(buf,n);
       for(T const& t:c.template segment<T>()){t.marshal(buf);}
     }
   }
