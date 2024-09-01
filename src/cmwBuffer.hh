@@ -354,15 +354,15 @@ void giveVec (auto& buf,auto& v){
 template<class Z>class SendBuffer{
   SendBuffer (SendBuffer const&)=delete;
   void operator= (SendBuffer&);
+  unsigned char* const buf;
+  Z const bufsize;
   Z savedSize=0;
  protected:
   Z index=0;
-  Z const bufsize;
-  unsigned char* const buf;
  public:
   sockType sock_=-1;
 
-  SendBuffer (unsigned char* addr,Z sz):bufsize(sz),buf(addr){}
+  SendBuffer (unsigned char* addr,Z sz):buf(addr),bufsize(sz){}
 
   int getZ (){return sizeof(Z);}
 
@@ -500,7 +500,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   void compress (){
     if(qlzFormula(this->index)>(qlzFormula(sz)-compIndex))
       raise("compress zone");
-    compIndex+=::qlz_compress(this->buf,compBuf+compIndex,this->index,&comp);
+    compIndex+=::qlz_compress(sendBuf,compBuf+compIndex,this->index,&comp);
     this->reset();
   }
 
