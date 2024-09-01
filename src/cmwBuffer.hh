@@ -354,7 +354,7 @@ void giveVec (auto& buf,auto& v){
 template<class Z>class SendBuffer{
   SendBuffer (SendBuffer const&)=delete;
   void operator= (SendBuffer&);
-  unsigned char* const buf;
+  ::uint8_t* const buf;
   Z const bufsize;
   Z savedSize=0;
  protected:
@@ -362,7 +362,7 @@ template<class Z>class SendBuffer{
  public:
   sockType sock_=-1;
 
-  SendBuffer (unsigned char* addr,Z sz):buf(addr),bufsize(sz){}
+  SendBuffer (::uint8_t* addr,Z sz):buf(addr),bufsize(sz){}
 
   int getZ (){return sizeof(Z);}
 
@@ -458,7 +458,7 @@ void receiveBlock (auto& b,C<T>const& c){
 inline constexpr auto udpPacketMax=1500;
 template<class R,class Z=::std::int16_t,int N=udpPacketMax>
 class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
-  unsigned char ar[N];
+  ::uint8_t ar[N];
  public:
   explicit BufferStack (int s):SendBuffer<Z>(ar,N),ReceiveBuffer<R,Z>((char*)ar){
     this->sock_=s;
@@ -485,7 +485,7 @@ constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   ::qlz_state_compress comp{};
   ::qlz_state_decompress decomp{};
-  unsigned char sendBuf[sz];
+  ::uint8_t sendBuf[sz];
   char compBuf[qlzFormula(sz)];
   char recBuf[sz];
   char* compressedStart;
