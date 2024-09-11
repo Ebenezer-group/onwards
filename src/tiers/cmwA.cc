@@ -205,7 +205,7 @@ int main (int ac,char** av)try{
     ring.submit(cq);
     if(cq->res<0||(cq->res==0&&cq->user_data!=closTag)){
       if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed %llu %d",cq->user_data,cq->res);
-      ::syslog(LOG_ERR,"Back tier vanished %d %d",cq->res,cq->user_data);
+      ::syslog(LOG_ERR,"Back tier vanished %llu %d",cq->user_data,cq->res);
       frntBuf.reset();
       ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
       for(auto& r:pendingRequests){
