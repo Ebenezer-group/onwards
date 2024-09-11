@@ -26,6 +26,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<unistd.h>//chdir
 #endif
 
+static_assert(sizeof(bool)==1);
 template<class T>concept arithmetic=::std::is_arithmetic_v<T>||::std::is_enum_v<T>;
 
 namespace cmw{
@@ -306,15 +307,23 @@ template<class R,class Z>class ReceiveBuffer{
   }
 
 #ifndef CMW_WINDOWS
-  void giveFile (auto nm){
+  int giveFile (auto nm){
     int sz=give<::uint32_t>();
     checkLen(sz);
-    FileWrapper fl{nm,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH};
-    do{
-      int r=Write(fl(),rbuf+subTotal+rindex,sz);
-      sz-=r;
-      rindex+=r;
-    }while(sz>0);
+    int fd;
+    if((fd=::open(nm,O_CREAT|O_WRONLY|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH))<0)
+      raise("giveFile",nm,errno);
+    try{
+      do{
+        int r=Write(fd,rbuf+subTotal+rindex,sz);
+        sz-=r;
+        rindex+=r;
+      }while(sz>0);
+      return fd;
+    }catch(...){
+      ::close(fd);
+      throw;
+    }
   }
 #endif
 
@@ -558,7 +567,6 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     decomp={};
     compIndex=bytesRead=0;
     kosher=true;
-    closeSocket(this->sock_);
   }
 };
 #endif

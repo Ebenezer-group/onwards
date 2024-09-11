@@ -125,6 +125,7 @@ void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=fal
 }
 
 constexpr ::uint64_t reedTag=1;
+constexpr ::uint64_t closTag=2;
 class ioUring{
   ::io_uring rng;
 
@@ -169,6 +170,12 @@ class ioUring{
     ::io_uring_prep_send(e,cmwBuf.sock_,sp.data(),sp.size(),0);
     ::io_uring_sqe_set_data64(e,~reedTag);
   }
+
+  void clos (int fd){
+    auto e=getSqe();
+    ::io_uring_prep_close(e,fd);
+    ::io_uring_sqe_set_data64(e,closTag);
+  }
 };
 
 int main (int ac,char** av)try{
@@ -196,9 +203,9 @@ int main (int ac,char** av)try{
 
   for(;;){
     ring.submit(cq);
-    if(cq->res<=0){
+    if(cq->res<0||(cq->res==0&&cq->user_data!=closTag)){
       if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed %llu %d",cq->user_data,cq->res);
-      ::syslog(LOG_ERR,"Back tier vanished");
+      ::syslog(LOG_ERR,"Back tier vanished %d %d",cq->res,cq->user_data);
       frntBuf.reset();
       ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
       for(auto& r:pendingRequests){
@@ -206,6 +213,7 @@ int main (int ac,char** av)try{
       }
       pendingRequests.clear();
       cmwBuf.compressedReset();
+      ring.clos(cmwBuf.sock_);
       login(cred,sa);
       ring.reed();
     }else if(0==cq->user_data){
@@ -227,6 +235,7 @@ int main (int ac,char** av)try{
         if(gotAddr)toFront(frntBuf,frnt,e.what());
         if(req)pendingRequests.pop_back();
       }
+    }else if(closTag==cq->user_data){
     }else{
       if(reedTag==cq->user_data){
         try{
@@ -235,7 +244,7 @@ int main (int ac,char** av)try{
               assert(!pendingRequests.empty());
               auto& req=pendingRequests.front();
               if(giveBool(cmwBuf)){
-                cmwBuf.giveFile(req.getFileName());
+                ring.clos(cmwBuf.giveFile(req.getFileName()));
                 toFront(frntBuf,req.frnt);
               }else toFront(frntBuf,req.frnt,"CMW:",cmwBuf.giveStringView());
               pendingRequests.pop_front();
