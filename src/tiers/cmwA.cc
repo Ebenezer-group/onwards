@@ -236,29 +236,27 @@ int main (int ac,char** av)try{
         if(req)pendingRequests.pop_back();
       }
     }else if(closTag==cq->user_data){
-    }else{
-      if(reedTag==cq->user_data){
-        try{
-          if(cmwBuf.gotIt(cq->res)){
-            do{
-              assert(!pendingRequests.empty());
-              auto& req=pendingRequests.front();
-              if(giveBool(cmwBuf)){
-                ring.clos(cmwBuf.giveFile(req.getFileName()));
-                toFront(frntBuf,req.frnt);
-              }else toFront(frntBuf,req.frnt,"CMW:",cmwBuf.giveStringView());
-              pendingRequests.pop_front();
-            }while(cmwBuf.nextMessage());
-          }
-        }catch(::std::exception& e){
-          ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
-          assert(!pendingRequests.empty());
-          toFront(frntBuf,pendingRequests.front().frnt,e.what());
-          pendingRequests.pop_front();
+    }else if(reedTag==cq->user_data){
+      try{
+        if(cmwBuf.gotIt(cq->res)){
+          do{
+            assert(!pendingRequests.empty());
+            auto& req=pendingRequests.front();
+            if(giveBool(cmwBuf)){
+              ring.clos(cmwBuf.giveFile(req.getFileName()));
+              toFront(frntBuf,req.frnt);
+            }else toFront(frntBuf,req.frnt,"CMW:",cmwBuf.giveStringView());
+            pendingRequests.pop_front();
+          }while(cmwBuf.nextMessage());
         }
-        ring.reed();
-      }else
-        if(!cmwBuf.all(cq->res))ring.writ();
-    }
+      }catch(::std::exception& e){
+        ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
+        assert(!pendingRequests.empty());
+        toFront(frntBuf,pendingRequests.front().frnt,e.what());
+        pendingRequests.pop_front();
+      }
+      ring.reed();
+    }else
+      if(!cmwBuf.all(cq->res))ring.writ();
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
