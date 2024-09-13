@@ -313,17 +313,16 @@ template<class R,class Z>class ReceiveBuffer{
     int fd;
     if((fd=::open(nm,O_CREAT|O_WRONLY|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH))<0)
       raise("giveFile",nm,errno);
-    try{
-      do{
-        int r=Write(fd,rbuf+subTotal+rindex,sz);
-        sz-=r;
-        rindex+=r;
-      }while(sz>0);
-      return fd;
-    }catch(...){
-      ::close(fd);
-      throw;
-    }
+    do{
+      int r=::write(fd,rbuf+subTotal+rindex,sz);
+      if(r<0){
+        ::close(fd);
+        raise("giveFile",errno);
+      }
+      sz-=r;
+      rindex+=r;
+    }while(sz>0);
+    return fd;
   }
 #endif
 
