@@ -256,6 +256,20 @@ struct MostSignificantFirst:MixedEndian{
   {for(auto c=sizeof val;c>0;--c)val|=give<::uint8_t>(b)<<8*(c-1);}
 };
 
+inline void closeSocket (sockType s){
+#ifdef CMW_WINDOWS
+  ::closesocket(s);
+#else
+  ::close(s);
+#endif
+}
+
+inline int preserveError (int s){
+  auto e=getError();
+  closeSocket(s);
+  return e;
+}
+
 template<class R,class Z>class ReceiveBuffer{
   int msgLength;
   int subTotal;
@@ -315,11 +329,7 @@ template<class R,class Z>class ReceiveBuffer{
       raise("giveFile",nm,errno);
     do{
       int r=::write(fd,rbuf+subTotal+rindex,sz);
-      if(r<0){
-	auto e=errno;
-        ::close(fd);
-        raise("giveFile",e);
-      }
+      if(r<0)raise("giveFile",preserveError(fd));
       sz-=r;
       rindex+=r;
     }while(sz>0);
@@ -478,14 +488,6 @@ class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   }
 };
 
-inline void closeSocket (sockType s){
-#ifdef CMW_WINDOWS
-  ::closesocket(s);
-#else
-  ::close(s);
-#endif
-}
-
 #ifndef CMW_WINDOWS
 auto myMin (auto a,auto b){return a<b?a:b;}
 constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
@@ -622,12 +624,6 @@ template<int N>class FixedString{
 };
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
-
-inline int preserveError (int s){
-  auto e=getError();
-  closeSocket(s);
-  return e;
-}
 
 struct SockaddrWrapper{
   ::sockaddr_in sa;
