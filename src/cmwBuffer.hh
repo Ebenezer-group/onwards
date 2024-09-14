@@ -273,10 +273,10 @@ inline int preserveError (int s){
 template<class R,class Z>class ReceiveBuffer{
   int msgLength;
   int subTotal;
- protected:
-  char* const rbuf;
   int packetLength;
   int rindex=0;
+ protected:
+  char* const rbuf;
 
  public:
   explicit ReceiveBuffer (char* addr):rbuf{addr}{}
