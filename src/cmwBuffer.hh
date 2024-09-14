@@ -316,8 +316,9 @@ template<class R,class Z>class ReceiveBuffer{
     do{
       int r=::write(fd,rbuf+subTotal+rindex,sz);
       if(r<0){
+	auto e=errno;
         ::close(fd);
-        raise("giveFile",errno);
+        raise("giveFile",e);
       }
       sz-=r;
       rindex+=r;
