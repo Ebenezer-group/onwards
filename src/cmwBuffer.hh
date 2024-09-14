@@ -480,11 +480,10 @@ class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
 
 inline void closeSocket (sockType s){
 #ifdef CMW_WINDOWS
-  if(::closesocket(s)==SOCKET_ERROR)
+  ::closesocket(s);
 #else
-  if(::close(s)!=0)
+  ::close(s);
 #endif
-    raise("closeSocket",getError());
 }
 
 #ifndef CMW_WINDOWS
