@@ -78,7 +78,7 @@ struct cmwRequest{
     buf.receiveAt(idx,updatedFiles);
   }
 
-  auto getFileName (){
+  auto fileName (){
     Write(fl(),&bday,sizeof bday);
     return path.append(".hh");
   }
@@ -243,7 +243,7 @@ int main (int ac,char** av)try{
             assert(!pendingRequests.empty());
             auto& req=pendingRequests.front();
             if(giveBool(cmwBuf)){
-              ring.clos(cmwBuf.giveFile(req.getFileName()));
+              ring.clos(cmwBuf.giveFile(req.fileName()));
               toFront(frntBuf,req.frnt);
             }else toFront(frntBuf,req.frnt,"CMW:",cmwBuf.giveStringView());
             pendingRequests.pop_front();

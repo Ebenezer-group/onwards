@@ -200,14 +200,6 @@ inline void setRcvTimeout (sockType s,int time){
   if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
 }
 
-inline int sockWrite (sockType s,void const* data,int len
-               ,auto addr=nullptr,socklen_t toLen=0){
-  if(int r=::sendto(s,static_cast<char const*>(data),len,0,
-                    reinterpret_cast<::sockaddr const*>(addr),toLen);r>0)
-    return r;
-  raise("sockWrite",s,getError());
-}
-
 inline int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen){
   if(int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);r>=0)
     return r;
@@ -431,8 +423,12 @@ template<class Z>class SendBuffer{
     return false;
   }
 
-  template<class T=int>void send (T* addr=nullptr,::socklen_t len=0)
-  {sockWrite(sock_,buf,index,addr,len);}
+  template<class T=int>auto send (T* addr=nullptr,::socklen_t len=0){
+    if(int r=::sendto(sock_,reinterpret_cast<char*>(buf),index,0,
+                      reinterpret_cast<::sockaddr const*>(addr),len);r>0)
+      return r;
+    raise("sockWrite",sock_,getError());
+  }
 
 #ifndef CMW_WINDOWS
   void receiveFile (char const* n,::int32_t sz){
