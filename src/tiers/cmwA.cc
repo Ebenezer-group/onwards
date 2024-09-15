@@ -136,7 +136,9 @@ class ioUring{
 
  public:
   void multishot (int sock){
-    ::io_uring_prep_poll_multishot(getSqe(),sock,POLLIN);
+    auto e=getSqe();
+    ::io_uring_prep_poll_multishot(e,sock,POLLIN);
+    ::io_uring_sqe_set_data64(e,0);
   }
 
   ioUring (int sock){
