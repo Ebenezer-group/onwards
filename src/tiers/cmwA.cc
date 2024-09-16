@@ -4,7 +4,6 @@
 #include<deque>
 #include<cassert>
 #include<liburing.h>
-#include<poll.h>
 #include<linux/sctp.h>
 #include<signal.h>
 #include<stdio.h>
@@ -135,18 +134,18 @@ class ioUring{
   }
 
  public:
-  void multishot (int sock){
+  void recvmsg (int sock,::msghdr& msg){
     auto e=getSqe();
-    ::io_uring_prep_poll_multishot(e,sock,POLLIN);
+    ::io_uring_prep_recvmsg(e,sock,&msg,0);
     ::io_uring_sqe_set_data64(e,0);
   }
 
-  ioUring (int sock){
+  ioUring (int sock,::msghdr& msg){
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     if(int rc=::io_uring_queue_init_params(16,&rng,&ps);rc<0)
       raise("ioUring",rc);
-    multishot(sock);
+    recvmsg(sock,msg);
     reed();
   }
 
@@ -199,7 +198,12 @@ int main (int ac,char** av)try{
 
   checkField("UDP-port-number",cfg.getline(' '));
   BufferStack<SameFormat> frntBuf{udpServer(fromChars(cfg.getline().data()))};
-  ioUring ring{frntBuf.sock_};
+  BufferStack<SameFormat> rfrntBuf{frntBuf.sock_};
+  auto sp=rfrntBuf.getDuo();
+  ::iovec iov{sp.data(),sp.size()};
+  Socky frnt;
+  ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
+  ioUring ring{frntBuf.sock_,mhdr};
   ::io_uring_cqe* cq=0;
   ::std::deque<cmwRequest> pendingRequests;
 
@@ -219,22 +223,17 @@ int main (int ac,char** av)try{
       login(cred,sa);
       ring.reed();
     }else if(0==cq->user_data){
-      if(~cq->flags&IORING_CQE_F_MORE){
-        ::syslog(LOG_ERR,"Multishot");
-        ring.multishot(frntBuf.sock_);
-      }
-      Socky frnt;
-      bool gotAddr{};
+      ring.recvmsg(rfrntBuf.sock_,mhdr);
       cmwRequest* req=0;
       try{
-        gotAddr=frntBuf.getPacket((::sockaddr*)&frnt.addr,&frnt.len);
-        req=&pendingRequests.emplace_back(frntBuf,frnt);
+        rfrntBuf.update(cq->res);
+        req=&pendingRequests.emplace_back(rfrntBuf,frnt);
         ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
         cmwBuf.compress();
         ring.writ();
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
-        if(gotAddr)toFront(frntBuf,frnt,e.what());
+        toFront(frntBuf,frnt,e.what());
         if(req)pendingRequests.pop_back();
       }
     }else if(closTag==cq->user_data){
