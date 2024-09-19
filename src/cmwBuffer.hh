@@ -151,6 +151,7 @@ class FileWrapper{
   }
 
   auto operator() (){return d;}
+  void release (){d=-2;}
   ~FileWrapper (){if(d>0)::close(d);}
 };
 
