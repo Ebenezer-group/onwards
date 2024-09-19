@@ -127,15 +127,19 @@ inline int Read (int fd,void* data,int len){
   raise("Read",len,errno);
 }
 
+inline int openWrapper (auto nm,int flags,mode_t md){
+  if(int d=::open(nm,flags,md);d>0)return d;
+  raise("openWrapper",nm,errno);
+}
+
 class FileWrapper{
   int d=-2;
  public:
   FileWrapper (){}
-  FileWrapper (char const* name,int flags,mode_t mode):
-        d{::open(name,flags,mode)} {if(d<0)raise("FileWrapper",name,errno);}
+  FileWrapper (auto nm,int flags,mode_t md):d{openWrapper(nm,flags,md)}{}
 
-  FileWrapper (char const* name,mode_t mode):
-        FileWrapper(name,O_CREAT|O_WRONLY|O_TRUNC,mode){}
+  FileWrapper (auto nm,mode_t md):
+        FileWrapper(nm,O_CREAT|O_WRONLY|O_TRUNC,md){}
 
   FileWrapper (FileWrapper const&)=delete;
   void operator= (FileWrapper&)=delete;
@@ -315,9 +319,8 @@ template<class R,class Z>class ReceiveBuffer{
   int giveFile (auto nm){
     int sz=give<::uint32_t>();
     checkLen(sz);
-    int fd;
-    if((fd=::open(nm,O_CREAT|O_WRONLY|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH))<0)
-      raise("giveFile",nm,errno);
+    int fd=openWrapper(nm,O_CREAT|O_WRONLY|O_TRUNC|O_DIRECT|O_SYNC
+		       ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     do{
       int r=::write(fd,rbuf+subTotal+rindex,sz);
       if(r<0)raise("giveFile",preserveError(fd));
