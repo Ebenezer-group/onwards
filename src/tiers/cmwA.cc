@@ -243,16 +243,14 @@ int main (int ac,char** av)try{
     }else if(reedTag==cq->user_data){
       try{
         if(cmwBuf.gotIt(cq->res)){
-          do{
-            assert(!pendingRequests.empty());
-            auto& req=pendingRequests.front();
-            if(giveBool(cmwBuf)){
-              ring.clos(cmwBuf.giveFile(req.fileName()));
-              ring.clos(req.updateStamp());
-              toFront(frntBuf,req.frnt);
-            }else toFront(frntBuf,req.frnt,"CMW:",cmwBuf.giveStringView());
-            pendingRequests.pop_front();
-          }while(cmwBuf.nextMessage());
+          assert(!pendingRequests.empty());
+          auto& req=pendingRequests.front();
+          if(giveBool(cmwBuf)){
+            ring.clos(cmwBuf.giveFile(req.fileName()));
+            ring.clos(req.updateStamp());
+            toFront(frntBuf,req.frnt);
+          }else toFront(frntBuf,req.frnt,"CMW:",cmwBuf.giveStringView());
+          pendingRequests.pop_front();
         }
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
