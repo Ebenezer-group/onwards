@@ -35,7 +35,7 @@ class ioUring{
   ioUring (int sock,::msghdr& msg){
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
-    if(int rc=::io_uring_queue_init_params(16,&rng,&ps);rc<0)
+    if(int rc=::io_uring_queue_init_params(128,&rng,&ps);rc<0)
       raise("ioUring",rc);
     recvmsg(sock,msg);
     reed();
@@ -206,7 +206,7 @@ int main (int ac,char** av)try{
   ::iovec iov{sp.data(),sp.size()};
   Socky frnt;
   ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
-  ioUring ring{frntBuf.sock_,mhdr};
+  ioUring ring{rfrntBuf.sock_,mhdr};
   ::io_uring_cqe* cq=0;
   ::std::deque<cmwRequest> pendingRequests;
 
