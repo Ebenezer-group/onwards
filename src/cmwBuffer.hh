@@ -484,6 +484,7 @@ class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
     this->sock_=s;
   }
 
+  auto outDuo (){return ::std::span<::uint8_t>(ar,this->index);}
   auto getDuo (){return ::std::span<::uint8_t>(ar,N);}
 
   bool getPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){

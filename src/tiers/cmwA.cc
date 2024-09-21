@@ -15,10 +15,17 @@ using namespace ::cmw;
 constexpr ::int32_t bufSize=1101000;
 BufferCompressed<SameFormat,::std::int32_t,bufSize> cmwBuf;
 
+struct Socky{
+  ::sockaddr_in6 addr;
+  ::socklen_t len=sizeof addr;
+};
+
 constexpr ::uint64_t reedTag=1;
 constexpr ::uint64_t closTag=2;
+constexpr ::uint64_t sendtoTag=3;
 class ioUring{
   ::io_uring rng;
+  BufferStack<SameFormat> frntBuf;
 
   auto getSqe (){
     if(auto e=::io_uring_get_sqe(&rng);e)return e;
@@ -26,18 +33,18 @@ class ioUring{
   }
 
  public:
-  void recvmsg (int sock,::msghdr& msg){
+  void recvmsg (::msghdr& msg){
     auto e=getSqe();
-    ::io_uring_prep_recvmsg(e,sock,&msg,0);
+    ::io_uring_prep_recvmsg(e,frntBuf.sock_,&msg,0);
     ::io_uring_sqe_set_data64(e,0);
   }
 
-  ioUring (int sock,::msghdr& msg){
+  ioUring (int sock,::msghdr& msg):frntBuf{sock}{
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     if(int rc=::io_uring_queue_init_params(128,&rng,&ps);rc<0)
       raise("ioUring",rc);
-    recvmsg(sock,msg);
+    recvmsg(msg);
     reed();
   }
 
@@ -69,11 +76,8 @@ class ioUring{
     ::io_uring_prep_close(e,fd);
     ::io_uring_sqe_set_data64(e,closTag);
   }
-};
 
-struct Socky{
-  ::sockaddr_in6 addr;
-  ::socklen_t len=sizeof addr;
+  void sendto (Socky const&,auto...);
 };
 
 struct cmwRequest{
@@ -146,6 +150,18 @@ struct cmwRequest{
 };
 #include"cmwA.mdl.hh"
 
+void ioUring::sendto (Socky const& s,auto...t){
+  frntBuf.reset();
+  ::front::marshal<udpPacketMax>(frntBuf,{t...});
+  auto sp=frntBuf.outDuo();
+  auto e=getSqe();
+  static Socky frnt2;
+  frnt2=s;
+  ::io_uring_prep_sendto(e,frntBuf.sock_,sp.data(),sp.size(),0
+                         ,(sockaddr*)&frnt2.addr,frnt2.len);
+  ::io_uring_sqe_set_data64(e,sendtoTag);
+}
+
 void bail (char const* fmt,auto...t)noexcept{
   ::syslog(LOG_ERR,fmt,t...);
   exitFailure();
@@ -153,12 +169,6 @@ void bail (char const* fmt,auto...t)noexcept{
 
 void checkField (char const* fld,::std::string_view actl){
   if(actl!=fld)bail("Expected %s",fld);
-}
-
-void toFront (auto& buf,Socky const& s,auto...t){
-  buf.reset();
-  ::front::marshal<udpPacketMax>(buf,{t...});
-  buf.send(&s.addr,s.len);
 }
 
 void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=false){
@@ -200,8 +210,7 @@ int main (int ac,char** av)try{
   }
 
   checkField("UDP-port-number",cfg.getline(' '));
-  BufferStack<SameFormat> frntBuf{udpServer(fromChars(cfg.getline().data()))};
-  BufferStack<SameFormat> rfrntBuf{frntBuf.sock_};
+  BufferStack<SameFormat> rfrntBuf{udpServer(fromChars(cfg.getline().data()))};
   auto sp=rfrntBuf.getDuo();
   ::iovec iov{sp.data(),sp.size()};
   Socky frnt;
@@ -215,10 +224,10 @@ int main (int ac,char** av)try{
     if(cq->res<0||(cq->res==0&&cq->user_data!=closTag)){
       if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed %llu %d",cq->user_data,cq->res);
       ::syslog(LOG_ERR,"Back tier vanished %llu %d",cq->user_data,cq->res);
-      frntBuf.reset();
-      ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
+      rfrntBuf.reset();
+      ::front::marshal<udpPacketMax>(rfrntBuf,{"Back tier vanished"});
       for(auto& r:pendingRequests){
-        frntBuf.send(&r.frnt.addr,r.frnt.len);
+        rfrntBuf.send(&r.frnt.addr,r.frnt.len);
       }
       pendingRequests.clear();
       cmwBuf.compressedReset();
@@ -226,7 +235,7 @@ int main (int ac,char** av)try{
       login(cred,sa);
       ring.reed();
     }else if(0==cq->user_data){
-      ring.recvmsg(rfrntBuf.sock_,mhdr);
+      ring.recvmsg(mhdr);
       cmwRequest* req=0;
       try{
         rfrntBuf.update(cq->res);
@@ -236,7 +245,7 @@ int main (int ac,char** av)try{
         ring.writ();
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Accept request:%s",e.what());
-        toFront(frntBuf,frnt,e.what());
+        ring.sendto(frnt,e.what());
         if(req)pendingRequests.pop_back();
       }
     }else if(closTag==cq->user_data){
@@ -247,14 +256,14 @@ int main (int ac,char** av)try{
           auto& req=pendingRequests.front();
           if(giveBool(cmwBuf)){
             req.xyz(cmwBuf);
-            toFront(frntBuf,req.frnt);
-          }else toFront(frntBuf,req.frnt,"CMW:",cmwBuf.giveStringView());
+            ring.sendto(req.frnt);
+          }else ring.sendto(req.frnt,"CMW:",cmwBuf.giveStringView());
           pendingRequests.pop_front();
         }
       }catch(::std::exception& e){
         ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
         assert(!pendingRequests.empty());
-        toFront(frntBuf,pendingRequests.front().frnt,e.what());
+        ring.sendto(pendingRequests.front().frnt,e.what());
         pendingRequests.pop_front();
       }
       ring.reed();
