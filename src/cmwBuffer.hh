@@ -435,11 +435,13 @@ template<class Z>class SendBuffer{
   }
 
 #ifndef CMW_WINDOWS
-  void receiveFile (char const* n,::int32_t sz){
+  int receiveFile (char const* nm,::int32_t sz){
     receive(&sz,sizeof sz);
     auto prev=reserveBytes(sz);
-    FileWrapper fl{n,O_RDONLY,0};
-    if(Read(fl(),buf+prev,sz)!=sz)raise("SendBuffer receiveFile");
+    int fd=openWrapper(nm,O_RDONLY,0);
+    if(int r=::read(fd,buf+prev,sz);r<0)
+      raise("receiveFile",preserveError(fd));
+    return fd;
   }
 #endif
 

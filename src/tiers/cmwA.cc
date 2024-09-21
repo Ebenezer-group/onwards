@@ -10,121 +10,10 @@
 #include<syslog.h>
 #include<time.h>
 
-// A global variable is declared below.  The declaration 
-// is delayed to where it is first used.
-
 using namespace ::cmw;
-
-struct Socky{
-  ::sockaddr_in6 addr;
-  ::socklen_t len=sizeof addr;
-};
-
-struct cmwRequest{
-  Socky const frnt;
- private:
-  ::int32_t const bday;
-  MarshallingInt const acctNbr;
-  FixedString120 path;
-  char* mdlFile;
-  FileWrapper fl;
-  inline static ::int32_t prevTime;
-
-  static bool marshalFile (char const* name,auto& buf){
-    struct ::stat sb;
-    if(::stat(name,&sb)<0)raise("stat",name,errno);
-    if(sb.st_mtime<=prevTime)return false;
-
-    receive(buf,{'.'==name[0]||name[0]=='/'?::std::strrchr(name,'/')+1:name,
-                 {"\0",1}});
-    buf.receiveFile(name,sb.st_size);
-    return true;
-  }
-
- public:
-  cmwRequest (auto& buf,Socky const& ft):frnt{ft}
-      ,bday(::time(0)),acctNbr{buf},path{buf}{
-    if(path.bytesAvailable()<3)raise("No room for file suffix");
-    mdlFile=::std::strrchr(path(),'/');
-    if(!mdlFile)raise("cmwRequest didn't find /");
-    *mdlFile=0;
-    setDirectory(path());
-    *mdlFile='/';
-    char last[60];
-    ::snprintf(last,sizeof last,".%s.last",++mdlFile);
-    fl=FileWrapper{last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP};
-    switch(::pread(fl(),&prevTime,sizeof prevTime,0)){
-      case 0:prevTime=0;break;
-      case -1:raise("pread",errno);
-    }
-  }
-
-  void marshal (auto& buf)const{
-    acctNbr.marshal(buf);
-    auto ind=buf.reserveBytes(1);
-    auto res=marshalFile(mdlFile,buf);
-    buf.receiveAt(ind,res);
-    if(!res)receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
-
-    ::int8_t updatedFiles=0;
-    auto const idx=buf.reserveBytes(sizeof updatedFiles);
-    FileBuffer f{mdlFile,O_RDONLY};
-    while(auto tok=f.getline().data()){
-      if(!::std::strncmp(tok,"//",2)||!::std::strncmp(tok,"define",6))continue;
-      if(!::std::strncmp(tok,"--",2))break;
-      if(marshalFile(tok,buf))++updatedFiles;
-    }
-    buf.receiveAt(idx,updatedFiles);
-  }
-
-  auto fileName (){return path.append(".hh");}
-  auto updateStamp (){
-    Write(fl(),&bday,sizeof bday);
-    auto sav=fl();
-    fl.release();
-    return sav;
-  }
-};
-#include"cmwA.mdl.hh"
-
-void bail (char const* fmt,auto...t)noexcept{
-  ::syslog(LOG_ERR,fmt,t...);
-  exitFailure();
-}
-
-void checkField (char const* fld,::std::string_view actl){
-  if(actl!=fld)bail("Expected %s",fld);
-}
-
-void toFront (auto& buf,Socky const& s,auto...t){
-  buf.reset();
-  ::front::marshal<udpPacketMax>(buf,{t...});
-  buf.send(&s.addr,s.len);
-}
 
 constexpr ::int32_t bufSize=1101000;
 BufferCompressed<SameFormat,::std::int32_t,bufSize> cmwBuf;
-
-void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=false){
-  signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
-        : ::back::marshal<::messageID::login>(cmwBuf,cred,bufSize);
-  cmwBuf.compress();
-  cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-  while(::connect(cmwBuf.sock_,(::sockaddr*)&sa,sizeof sa)<0){
-    ::perror("connect");
-    ::sleep(30);
-  }
-
-  while(!cmwBuf.flush());
-  ::sctp_paddrparams pad{};
-  pad.spp_address.ss_family=AF_INET;
-  pad.spp_hbinterval=240000;
-  pad.spp_flags=SPP_HB_ENABLE;
-  if(::setsockopt(cmwBuf.sock_,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
-                  ,&pad,sizeof pad)==-1)bail("setsockopt %d",errno);
-  while(!cmwBuf.gotPacket());
-  if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
-}
 
 constexpr ::uint64_t reedTag=1;
 constexpr ::uint64_t closTag=2;
@@ -182,6 +71,117 @@ class ioUring{
   }
 };
 
+struct Socky{
+  ::sockaddr_in6 addr;
+  ::socklen_t len=sizeof addr;
+};
+
+struct cmwRequest{
+  Socky const frnt;
+ private:
+  ioUring& rng;
+  ::int32_t const bday;
+  MarshallingInt const acctNbr;
+  FixedString120 path;
+  char* mdlFile;
+  FileWrapper fl;
+  inline static ::int32_t prevTime;
+
+  static int marshalFile (char const* name,auto& buf){
+    struct ::stat sb;
+    if(::stat(name,&sb)<0)raise("stat",name,errno);
+    if(sb.st_mtime<=prevTime)return 0;
+
+    receive(buf,{'.'==name[0]||name[0]=='/'?::std::strrchr(name,'/')+1:name,
+                 {"\0",1}});
+    return buf.receiveFile(name,sb.st_size);
+  }
+
+ public:
+  cmwRequest (auto& buf,Socky const& ft,ioUring& io):frnt{ft},rng{io}
+      ,bday(::time(0)),acctNbr{buf},path{buf}{
+    if(path.bytesAvailable()<3)raise("No room for file suffix");
+    mdlFile=::std::strrchr(path(),'/');
+    if(!mdlFile)raise("cmwRequest didn't find /");
+    *mdlFile=0;
+    setDirectory(path());
+    *mdlFile='/';
+    char last[60];
+    ::snprintf(last,sizeof last,".%s.last",++mdlFile);
+    fl=FileWrapper{last,O_RDWR|O_CREAT,S_IRUSR|S_IWUSR|S_IRGRP};
+    switch(::pread(fl(),&prevTime,sizeof prevTime,0)){
+      case 0:prevTime=0;break;
+      case -1:raise("pread",errno);
+    }
+  }
+
+  void marshal (auto& buf)const{
+    acctNbr.marshal(buf);
+    auto ind=buf.reserveBytes(1);
+    auto res=marshalFile(mdlFile,buf);
+    if(res)rng.clos(res);
+    else receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
+    buf.receiveAt(ind,res!=0);
+
+    ::int8_t updatedFiles=0;
+    auto const idx=buf.reserveBytes(sizeof updatedFiles);
+    FileBuffer f{mdlFile,O_RDONLY};
+    while(auto tok=f.getline().data()){
+      if(!::std::strncmp(tok,"//",2)||!::std::strncmp(tok,"define",6))continue;
+      if(!::std::strncmp(tok,"--",2))break;
+      if(int fd=marshalFile(tok,buf);fd>0){
+	++updatedFiles;
+	rng.clos(fd);
+      }
+    }
+    buf.receiveAt(idx,updatedFiles);
+  }
+
+  void xyz (auto& buf){
+    Write(fl(),&bday,sizeof bday);
+    rng.clos(buf.giveFile(path.append(".hh")));
+    rng.clos(fl());
+    fl.release();
+  }
+};
+#include"cmwA.mdl.hh"
+
+void bail (char const* fmt,auto...t)noexcept{
+  ::syslog(LOG_ERR,fmt,t...);
+  exitFailure();
+}
+
+void checkField (char const* fld,::std::string_view actl){
+  if(actl!=fld)bail("Expected %s",fld);
+}
+
+void toFront (auto& buf,Socky const& s,auto...t){
+  buf.reset();
+  ::front::marshal<udpPacketMax>(buf,{t...});
+  buf.send(&s.addr,s.len);
+}
+
+void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=false){
+  signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
+        : ::back::marshal<::messageID::login>(cmwBuf,cred,bufSize);
+  cmwBuf.compress();
+  cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
+  while(::connect(cmwBuf.sock_,(::sockaddr*)&sa,sizeof sa)<0){
+    ::perror("connect");
+    ::sleep(30);
+  }
+
+  while(!cmwBuf.flush());
+  ::sctp_paddrparams pad{};
+  pad.spp_address.ss_family=AF_INET;
+  pad.spp_hbinterval=240000;
+  pad.spp_flags=SPP_HB_ENABLE;
+  if(::setsockopt(cmwBuf.sock_,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
+                  ,&pad,sizeof pad)==-1)bail("setsockopt %d",errno);
+  while(!cmwBuf.gotPacket());
+  if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
+}
+
 int main (int ac,char** av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
   if(ac<2||ac>3)bail("Usage: %s config-file [-signup]",av[0]);
@@ -230,7 +230,7 @@ int main (int ac,char** av)try{
       cmwRequest* req=0;
       try{
         rfrntBuf.update(cq->res);
-        req=&pendingRequests.emplace_back(rfrntBuf,frnt);
+        req=&pendingRequests.emplace_back(rfrntBuf,frnt,ring);
         ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
         cmwBuf.compress();
         ring.writ();
@@ -246,8 +246,7 @@ int main (int ac,char** av)try{
           assert(!pendingRequests.empty());
           auto& req=pendingRequests.front();
           if(giveBool(cmwBuf)){
-            ring.clos(cmwBuf.giveFile(req.fileName()));
-            ring.clos(req.updateStamp());
+            req.xyz(cmwBuf);
             toFront(frntBuf,req.frnt);
           }else toFront(frntBuf,req.frnt,"CMW:",cmwBuf.giveStringView());
           pendingRequests.pop_front();
