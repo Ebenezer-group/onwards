@@ -248,7 +248,7 @@ int main (int ac,char** av)try{
         ring.sendto(frnt,e.what());
         if(req)pendingRequests.pop_back();
       }
-    }else if(closTag==cq->user_data){
+    }else if(closTag==cq->user_data||sendtoTag==cq->user_data){
     }else if(reedTag==cq->user_data){
       try{
         if(cmwBuf.gotIt(cq->res)){
