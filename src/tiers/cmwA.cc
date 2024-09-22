@@ -223,8 +223,7 @@ int main (int ac,char** av)try{
   ::std::deque<cmwRequest> pendingRequests;
 
   for(;;){
-    auto const spn=ring.submit();
-    for(auto cq:spn){
+    for(auto cq:ring.submit()){
       if(cq->res<0||(cq->res==0&&cq->user_data!=closTag)){
         if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed %llu %d",cq->user_data,cq->res);
         ::syslog(LOG_ERR,"Back tier vanished %llu %d",cq->user_data,cq->res);
