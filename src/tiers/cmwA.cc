@@ -42,7 +42,7 @@ class ioUring{
   ioUring (int sock,::msghdr& msg):frntBuf{sock}{
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
-    if(int rc=::io_uring_queue_init_params(128,&rng,&ps);rc<0)
+    if(int rc=::io_uring_queue_init_params(1024,&rng,&ps);rc<0)
       raise("ioUring",rc);
     recvmsg(msg);
     reed();
@@ -57,7 +57,7 @@ class ioUring{
     }
     static ::io_uring_cqe *cqes[10];
     seen=::io_uring_peek_batch_cqe(&rng,&cqes[0],10);
-    return ::std::span<::io_uring_cqe>(cqes[0],seen);
+    return ::std::span<::io_uring_cqe*>(&cqes[0],seen);
   }
 
   void reed (){
@@ -224,8 +224,7 @@ int main (int ac,char** av)try{
 
   for(;;){
     auto const spn=ring.submit();
-    auto cq=spn.data();
-    for(::uint32_t j=0;j<spn.size();++j){
+    for(auto cq:spn){
       if(cq->res<0||(cq->res==0&&cq->user_data!=closTag)){
         if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed %llu %d",cq->user_data,cq->res);
         ::syslog(LOG_ERR,"Back tier vanished %llu %d",cq->user_data,cq->res);
@@ -273,7 +272,6 @@ int main (int ac,char** av)try{
         }
         ring.reed();
       }else if(!cmwBuf.all(cq->res))ring.writ();
-      ++cq;
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
