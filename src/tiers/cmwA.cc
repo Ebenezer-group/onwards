@@ -48,12 +48,16 @@ class ioUring{
     reed();
   }
 
-  void submit (::io_uring_cqe*& cq){
-    ::io_uring_cqe_seen(&rng,cq);
+  auto submit (){
+    static int seen=0;
+    ::io_uring_cq_advance(&rng,seen);
     int rc;
-    while((rc=::io_uring_submit_and_wait_timeout(&rng,&cq,1,0,0))<0){
+    while((rc=::io_uring_submit_and_wait(&rng,1))<0){
       if(-EINTR!=rc)raise("waitCqe",rc);
     }
+    static ::io_uring_cqe *cqes[10];
+    seen=::io_uring_peek_batch_cqe(&rng,&cqes[0],10);
+    return ::std::span<::io_uring_cqe>(cqes[0],seen);
   }
 
   void reed (){
@@ -216,58 +220,60 @@ int main (int ac,char** av)try{
   Socky frnt;
   ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
   ioUring ring{rfrntBuf.sock_,mhdr};
-  ::io_uring_cqe* cq=0;
   ::std::deque<cmwRequest> pendingRequests;
 
   for(;;){
-    ring.submit(cq);
-    if(cq->res<0||(cq->res==0&&cq->user_data!=closTag)){
-      if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed %llu %d",cq->user_data,cq->res);
-      ::syslog(LOG_ERR,"Back tier vanished %llu %d",cq->user_data,cq->res);
-      rfrntBuf.reset();
-      ::front::marshal<udpPacketMax>(rfrntBuf,{"Back tier vanished"});
-      for(auto& r:pendingRequests){
-        rfrntBuf.send(&r.frnt.addr,r.frnt.len);
-      }
-      pendingRequests.clear();
-      cmwBuf.compressedReset();
-      ring.clos(cmwBuf.sock_);
-      login(cred,sa);
-      ring.reed();
-    }else if(0==cq->user_data){
-      ring.recvmsg(mhdr);
-      cmwRequest* req=0;
-      try{
-        rfrntBuf.update(cq->res);
-        req=&pendingRequests.emplace_back(rfrntBuf,frnt,ring);
-        ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
-        cmwBuf.compress();
-        ring.writ();
-      }catch(::std::exception& e){
-        ::syslog(LOG_ERR,"Accept request:%s",e.what());
-        ring.sendto(frnt,e.what());
-        if(req)pendingRequests.pop_back();
-      }
-    }else if(closTag==cq->user_data||sendtoTag==cq->user_data){
-    }else if(reedTag==cq->user_data){
-      try{
-        if(cmwBuf.gotIt(cq->res)){
+    auto const spn=ring.submit();
+    auto cq=spn.data();
+    for(::uint32_t j=0;j<spn.size();++j){
+      if(cq->res<0||(cq->res==0&&cq->user_data!=closTag)){
+        if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed %llu %d",cq->user_data,cq->res);
+        ::syslog(LOG_ERR,"Back tier vanished %llu %d",cq->user_data,cq->res);
+        rfrntBuf.reset();
+        ::front::marshal<udpPacketMax>(rfrntBuf,{"Back tier vanished"});
+        for(auto& r:pendingRequests){
+          rfrntBuf.send(&r.frnt.addr,r.frnt.len);
+        }
+        pendingRequests.clear();
+        cmwBuf.compressedReset();
+        ring.clos(cmwBuf.sock_);
+        login(cred,sa);
+        ring.reed();
+      }else if(0==cq->user_data){
+        ring.recvmsg(mhdr);
+        cmwRequest* req=0;
+        try{
+          rfrntBuf.update(cq->res);
+          req=&pendingRequests.emplace_back(rfrntBuf,frnt,ring);
+          ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
+          cmwBuf.compress();
+          ring.writ();
+        }catch(::std::exception& e){
+          ::syslog(LOG_ERR,"Accept request:%s",e.what());
+          ring.sendto(frnt,e.what());
+          if(req)pendingRequests.pop_back();
+        }
+      }else if(closTag==cq->user_data||sendtoTag==cq->user_data){
+      }else if(reedTag==cq->user_data){
+        try{
+          if(cmwBuf.gotIt(cq->res)){
+            assert(!pendingRequests.empty());
+            auto& req=pendingRequests.front();
+            if(giveBool(cmwBuf)){
+              req.xyz(cmwBuf);
+              ring.sendto(req.frnt);
+            }else ring.sendto(req.frnt,"CMW:",cmwBuf.giveStringView());
+            pendingRequests.pop_front();
+          }
+        }catch(::std::exception& e){
+          ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
           assert(!pendingRequests.empty());
-          auto& req=pendingRequests.front();
-          if(giveBool(cmwBuf)){
-            req.xyz(cmwBuf);
-            ring.sendto(req.frnt);
-          }else ring.sendto(req.frnt,"CMW:",cmwBuf.giveStringView());
+          ring.sendto(pendingRequests.front().frnt,e.what());
           pendingRequests.pop_front();
         }
-      }catch(::std::exception& e){
-        ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
-        assert(!pendingRequests.empty());
-        ring.sendto(pendingRequests.front().frnt,e.what());
-        pendingRequests.pop_front();
-      }
-      ring.reed();
-    }else
-      if(!cmwBuf.all(cq->res))ring.writ();
+        ring.reed();
+      }else if(!cmwBuf.all(cq->res))ring.writ();
+      ++cq;
+    }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
