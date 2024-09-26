@@ -44,6 +44,7 @@ class ioUring{
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     if(int rc=::io_uring_queue_init_params(1024,&rng,&ps);rc<0)
       raise("ioUring",rc);
+    if(::io_uring_register_files(&rng,&sock,1))raise("io reg");
     recvmsg(msg);
     reed();
   }
