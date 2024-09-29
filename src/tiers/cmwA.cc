@@ -144,6 +144,8 @@ struct cmwRequest{
       }
     }
     buf.receiveAt(idx,updatedFiles);
+    rng.clos(f.fl());
+    f.fl.release();
   }
 
   void xyz (auto& buf){
