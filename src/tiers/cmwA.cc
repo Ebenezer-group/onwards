@@ -107,7 +107,7 @@ struct cmwRequest{
   }
 
  public:
-  cmwRequest (auto& buf,Socky const& ft,ioUring& io):frnt{ft}
+  cmwRequest (auto& buf,Socky const& ft):frnt{ft}
       ,bday(::time(0)),acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     mdlFile=::std::strrchr(path(),'/');
