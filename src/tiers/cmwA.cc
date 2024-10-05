@@ -87,8 +87,8 @@ class ioUring{
 
 struct cmwRequest{
   Socky const frnt;
+  inline static ioUring *rng;
  private:
-  ioUring& rng;
   ::int32_t const bday;
   MarshallingInt const acctNbr;
   FixedString120 path;
@@ -107,7 +107,7 @@ struct cmwRequest{
   }
 
  public:
-  cmwRequest (auto& buf,Socky const& ft,ioUring& io):frnt{ft},rng{io}
+  cmwRequest (auto& buf,Socky const& ft,ioUring& io):frnt{ft}
       ,bday(::time(0)),acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     mdlFile=::std::strrchr(path(),'/');
@@ -128,7 +128,7 @@ struct cmwRequest{
     acctNbr.marshal(buf);
     auto ind=buf.reserveBytes(1);
     auto res=marshalFile(mdlFile,buf);
-    if(res)rng.clos(res);
+    if(res)rng->clos(res);
     else receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
     buf.receiveAt(ind,res!=0);
 
@@ -140,18 +140,18 @@ struct cmwRequest{
       if(!::std::strncmp(tok,"--",2))break;
       if(int fd=marshalFile(tok,buf);fd>0){
 	++updatedFiles;
-	rng.clos(fd);
+	rng->clos(fd);
       }
     }
     buf.receiveAt(idx,updatedFiles);
-    rng.clos(f.fl());
+    rng->clos(f.fl());
     f.fl.release();
   }
 
   void xyz (auto& buf){
     Write(fl(),&bday,sizeof bday);
-    rng.clos(buf.giveFile(path.append(".hh")));
-    rng.clos(fl());
+    rng->clos(buf.giveFile(path.append(".hh")));
+    rng->clos(fl());
     fl.release();
   }
 };
@@ -223,6 +223,7 @@ int main (int ac,char** av)try{
   Socky frnt;
   ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
   ioUring ring{rfrntBuf.sock_,mhdr};
+  cmwRequest::rng=&ring;
   ::std::deque<cmwRequest> pendingRequests;
 
   for(;;){
@@ -245,7 +246,7 @@ int main (int ac,char** av)try{
         cmwRequest* req=0;
         try{
           rfrntBuf.update(cq->res);
-          req=&pendingRequests.emplace_back(rfrntBuf,frnt,ring);
+          req=&pendingRequests.emplace_back(rfrntBuf,frnt);
           ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
           cmwBuf.compress();
           ring.writ();
