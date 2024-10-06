@@ -368,7 +368,7 @@ void giveVec (auto& buf,auto& v){
 template<class Z>class SendBuffer{
   SendBuffer (SendBuffer const&)=delete;
   void operator= (SendBuffer&);
-  ::uint8_t* const buf;
+  char* const buf;
   Z const bufsize;
   Z savedSize=0;
  protected:
@@ -376,7 +376,7 @@ template<class Z>class SendBuffer{
  public:
   sockType sock_=-1;
 
-  SendBuffer (::uint8_t* addr,Z sz):buf(addr),bufsize(sz){}
+  SendBuffer (auto addr,Z sz):buf(addr),bufsize(sz){}
 
   int getZ (){return sizeof(Z);}
 
@@ -428,7 +428,7 @@ template<class Z>class SendBuffer{
   }
 
   template<class T=int>auto send (T* addr=nullptr,::socklen_t len=0){
-    if(int r=::sendto(sock_,reinterpret_cast<char*>(buf),index,0,
+    if(int r=::sendto(sock_,buf,index,0,
                       reinterpret_cast<::sockaddr const*>(addr),len);r>0)
       return r;
     raise("sockWrite",sock_,getError());
@@ -478,14 +478,14 @@ void receiveBlock (auto& b,C<T>const& c){
 inline constexpr auto udpPacketMax=1500;
 template<class R,class Z=::std::int16_t,int N=udpPacketMax>
 class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
-  ::uint8_t ar[N];
+  char ar[N];
  public:
-  explicit BufferStack (int s):SendBuffer<Z>(ar,N),ReceiveBuffer<R,Z>((char*)ar){
+  explicit BufferStack (int s):SendBuffer<Z>(ar,N),ReceiveBuffer<R,Z>(ar){
     this->sock_=s;
   }
 
-  auto outDuo (){return ::std::span<::uint8_t>(ar,this->index);}
-  auto getDuo (){return ::std::span<::uint8_t>(ar,N);}
+  auto outDuo (){return ::std::span<char>(ar,this->index);}
+  auto getDuo (){return ::std::span<char>(ar,N);}
 
   bool getPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
     return this->update(sockRead(this->sock_,ar,N,addr,len));
@@ -499,7 +499,7 @@ constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   ::qlz_state_compress comp{};
   ::qlz_state_decompress decomp{};
-  ::uint8_t sendBuf[sz];
+  char sendBuf[sz];
   char compBuf[qlzFormula(sz)];
   char recBuf[sz];
   char* compressedStart;
