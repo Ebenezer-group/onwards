@@ -44,7 +44,8 @@ class ioUring{
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     if(int rc=::io_uring_queue_init_params(1024,&rng,&ps);rc<0)
       raise("ioUring",rc);
-    if(::io_uring_register_files(&rng,&sock,1))raise("io reg");
+    int regfds[]={sock,cmwBuf.sock_};
+    if(::io_uring_register_files(&rng,regfds,2))raise("io reg");
     recvmsg(msg);
     reed();
   }
@@ -61,12 +62,13 @@ class ioUring{
     return ::std::span<::io_uring_cqe*>(&cqes[0],seen);
   }
 
-  void reed (){
+  void reed (bool stale=false){
     auto e=getSqe();
     auto sp=cmwBuf.getDuo();
     ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
     ::io_uring_sqe_set_data64(e,reedTag);
     e->ioprio=IORING_RECVSEND_POLL_FIRST;
+    if(stale)::io_uring_register_files_update(&rng,1,&cmwBuf.sock_,1);
   }
 
   void writ (){
@@ -240,7 +242,7 @@ int main (int ac,char** av)try{
         cmwBuf.compressedReset();
         ring.clos(cmwBuf.sock_);
         login(cred,sa);
-        ring.reed();
+        ring.reed(true);
       }else if(0==cq->user_data){
         ring.recvmsg(mhdr);
         cmwRequest* req=0;
