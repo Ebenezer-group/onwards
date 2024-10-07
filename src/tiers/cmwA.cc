@@ -44,10 +44,9 @@ class ioUring{
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     if(int rc=::io_uring_queue_init_params(1024,&rng,&ps);rc<0)
       raise("ioUring",rc);
-    int regfds[]={sock,cmwBuf.sock_};
+    int regfds[]={sock,0};
     if(::io_uring_register_files(&rng,regfds,2))raise("io reg");
     recvmsg(msg);
-    reed();
   }
 
   auto submit (){
@@ -85,11 +84,10 @@ class ioUring{
   }
 
   void sendto (Socky const&,auto...);
-};
+} *ring;
 
 struct cmwRequest{
   Socky const frnt;
-  inline static ioUring *rng;
  private:
   ::int32_t const bday;
   MarshallingInt const acctNbr;
@@ -130,7 +128,7 @@ struct cmwRequest{
     acctNbr.marshal(buf);
     auto ind=buf.reserveBytes(1);
     auto res=marshalFile(mdlFile,buf);
-    if(res)rng->clos(res);
+    if(res)ring->clos(res);
     else receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
     buf.receiveAt(ind,res!=0);
 
@@ -142,18 +140,18 @@ struct cmwRequest{
       if(!::std::strncmp(tok,"--",2))break;
       if(int fd=marshalFile(tok,buf);fd>0){
 	++updatedFiles;
-	rng->clos(fd);
+	ring->clos(fd);
       }
     }
     buf.receiveAt(idx,updatedFiles);
-    rng->clos(f.fl());
+    ring->clos(f.fl());
     f.fl.release();
   }
 
   void xyz (auto& buf){
     Write(fl(),&bday,sizeof bday);
-    rng->clos(buf.giveFile(path.append(".hh")));
-    rng->clos(fl());
+    ring->clos(buf.giveFile(path.append(".hh")));
+    ring->clos(fl());
     fl.release();
   }
 };
@@ -197,6 +195,7 @@ void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=fal
   pad.spp_flags=SPP_HB_ENABLE;
   if(::setsockopt(cmwBuf.sock_,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
                   ,&pad,sizeof pad)==-1)bail("setsockopt %d",errno);
+  ring->reed(true);
   while(!cmwBuf.gotPacket());
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
 }
@@ -207,6 +206,14 @@ int main (int ac,char** av)try{
   FileBuffer cfg{av[1],O_RDONLY};
   checkField("CMW-IP",cfg.getline(' '));
   SockaddrWrapper const sa(cfg.getline().data(),56789);
+  checkField("UDP-port-number",cfg.getline(' '));
+  BufferStack<SameFormat> rfrntBuf{udpServer(fromChars(cfg.getline().data()))};
+  auto sp=rfrntBuf.getDuo();
+  ::iovec iov{sp.data(),sp.size()};
+  Socky frnt;
+  ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
+  ring=new ioUring{rfrntBuf.sock_,mhdr};
+
   checkField("AmbassadorID",cfg.getline(' '));
   cmwCredentials cred(cfg.getline());
   checkField("Password",cfg.getline(' '));
@@ -217,19 +224,10 @@ int main (int ac,char** av)try{
     ::printf("Signup was successful\n");
     ::std::exit(0);
   }
-
-  checkField("UDP-port-number",cfg.getline(' '));
-  BufferStack<SameFormat> rfrntBuf{udpServer(fromChars(cfg.getline().data()))};
-  auto sp=rfrntBuf.getDuo();
-  ::iovec iov{sp.data(),sp.size()};
-  Socky frnt;
-  ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
-  ioUring ring{rfrntBuf.sock_,mhdr};
-  cmwRequest::rng=&ring;
   ::std::deque<cmwRequest> pendingRequests;
 
   for(;;){
-    for(auto cq:ring.submit()){
+    for(auto cq:ring->submit()){
       if(cq->res<0||(cq->res==0&&cq->user_data!=closTag)){
         if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed %llu %d",cq->user_data,cq->res);
         ::syslog(LOG_ERR,"Back tier vanished %llu %d",cq->user_data,cq->res);
@@ -240,21 +238,20 @@ int main (int ac,char** av)try{
         }
         pendingRequests.clear();
         cmwBuf.compressedReset();
-        ring.clos(cmwBuf.sock_);
+        ring->clos(cmwBuf.sock_);
         login(cred,sa);
-        ring.reed(true);
       }else if(0==cq->user_data){
-        ring.recvmsg(mhdr);
+        ring->recvmsg(mhdr);
         cmwRequest* req=0;
         try{
           rfrntBuf.update(cq->res);
           req=&pendingRequests.emplace_back(rfrntBuf,frnt);
           ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
           cmwBuf.compress();
-          ring.writ();
+          ring->writ();
         }catch(::std::exception& e){
           ::syslog(LOG_ERR,"Accept request:%s",e.what());
-          ring.sendto(frnt,e.what());
+          ring->sendto(frnt,e.what());
           if(req)pendingRequests.pop_back();
         }
       }else if(closTag==cq->user_data||sendtoTag==cq->user_data){
@@ -265,18 +262,18 @@ int main (int ac,char** av)try{
             auto& req=pendingRequests.front();
             if(giveBool(cmwBuf)){
               req.xyz(cmwBuf);
-              ring.sendto(req.frnt);
-            }else ring.sendto(req.frnt,"CMW:",cmwBuf.giveStringView());
+              ring->sendto(req.frnt);
+            }else ring->sendto(req.frnt,"CMW:",cmwBuf.giveStringView());
             pendingRequests.pop_front();
           }
         }catch(::std::exception& e){
           ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
           assert(!pendingRequests.empty());
-          ring.sendto(pendingRequests.front().frnt,e.what());
+          ring->sendto(pendingRequests.front().frnt,e.what());
           pendingRequests.pop_front();
         }
-        ring.reed();
-      }else if(!cmwBuf.all(cq->res))ring.writ();
+        ring->reed();
+      }else if(!cmwBuf.all(cq->res))ring->writ();
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
