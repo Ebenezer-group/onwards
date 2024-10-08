@@ -61,7 +61,7 @@ class ioUring{
     return ::std::span<::io_uring_cqe*>(&cqes[0],seen);
   }
 
-  void reed (bool stale=false){
+  void reed (bool stale){
     auto e=getSqe();
     auto sp=cmwBuf.getDuo();
     ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
@@ -148,9 +148,9 @@ struct cmwRequest{
     f.fl.release();
   }
 
-  void xyz (auto& buf){
+  void xyz (){
     Write(fl(),&bday,sizeof bday);
-    ring->clos(buf.giveFile(path.append(".hh")));
+    ring->clos(cmwBuf.giveFile(path.append(".hh")));
     ring->clos(fl());
     fl.release();
   }
@@ -256,23 +256,22 @@ int main (int ac,char** av)try{
         }
       }else if(closTag==cq->user_data||sendtoTag==cq->user_data){
       }else if(reedTag==cq->user_data){
+        assert(!pendingRequests.empty());
+        auto& req=pendingRequests.front();
         try{
           if(cmwBuf.gotIt(cq->res)){
-            assert(!pendingRequests.empty());
-            auto& req=pendingRequests.front();
             if(giveBool(cmwBuf)){
-              req.xyz(cmwBuf);
+              req.xyz();
               ring->sendto(req.frnt);
             }else ring->sendto(req.frnt,"CMW:",cmwBuf.giveStringView());
             pendingRequests.pop_front();
           }
         }catch(::std::exception& e){
           ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
-          assert(!pendingRequests.empty());
-          ring->sendto(pendingRequests.front().frnt,e.what());
+          ring->sendto(req.frnt,e.what());
           pendingRequests.pop_front();
         }
-        ring->reed();
+        ring->reed(false);
       }else if(!cmwBuf.all(cq->res))ring->writ();
     }
   }
