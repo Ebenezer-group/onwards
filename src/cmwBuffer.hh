@@ -320,8 +320,7 @@ template<class R,class Z>class ReceiveBuffer{
   int giveFile (auto nm){
     int sz=give<::uint32_t>();
     checkLen(sz);
-    int fd=openWrapper(nm,O_CREAT|O_WRONLY|O_TRUNC
-		       ,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    int fd=openWrapper(nm,O_CREAT|O_WRONLY|O_TRUNC,0644);
     do{
       int r=::write(fd,rbuf+subTotal+rindex,sz);
       if(r<0)raise("giveFile",preserveError(fd));
