@@ -127,7 +127,7 @@ inline int Read (int fd,void* data,int len){
   raise("Read",len,errno);
 }
 
-inline int openWrapper (auto nm,int flags,mode_t md){
+inline int openWrapper (auto nm,int flags,mode_t md=0){
   if(int d=::open(nm,flags,md);d>0)return d;
   raise("openWrapper",nm,errno);
 }
@@ -137,9 +137,6 @@ class FileWrapper{
  public:
   FileWrapper (){}
   FileWrapper (auto nm,int flags,mode_t md):d{openWrapper(nm,flags,md)}{}
-
-  FileWrapper (auto nm,mode_t md):
-        FileWrapper(nm,O_CREAT|O_WRONLY|O_TRUNC,md){}
 
   FileWrapper (FileWrapper const&)=delete;
   void operator= (FileWrapper&)=delete;
@@ -438,7 +435,7 @@ template<class Z>class SendBuffer{
   int receiveFile (char const* nm,::int32_t sz){
     receive(&sz,sizeof sz);
     auto prev=reserveBytes(sz);
-    int fd=openWrapper(nm,O_RDONLY,0);
+    int fd=openWrapper(nm,O_RDONLY);
     if(int r=::read(fd,buf+prev,sz);r<0)
       raise("receiveFile",preserveError(fd));
     return fd;
