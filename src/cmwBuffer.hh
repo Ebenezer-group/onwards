@@ -327,6 +327,7 @@ template<class R,class Z>class ReceiveBuffer{
       sz-=r;
       rindex+=r;
     }while(sz>0);
+    ::fsync(fd);
     return fd;
   }
 #endif
