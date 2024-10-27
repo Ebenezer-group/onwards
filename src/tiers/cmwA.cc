@@ -44,9 +44,9 @@ class ioUring{
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
-    auto bff=::mmap(0,108000,PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
+    auto bff=::mmap(0,105000,PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
     if(MAP_FAILED==bff)raise("mmap",errno);
-    if(int rc=::io_uring_queue_init_mem(1024,&rng,&ps,bff,108000);rc<0)
+    if(int rc=::io_uring_queue_init_mem(1024,&rng,&ps,bff,105000);rc<0)
       raise("ioUring",rc);
     int regfds[]={sock,0};
     if(::io_uring_register_files(&rng,regfds,2))raise("io reg");

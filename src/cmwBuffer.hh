@@ -16,6 +16,7 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #include<ws2tcpip.h>
 #define CMW_WINDOWS
+using sockType=SOCKET;
 #else
 #include"quicklz.h"
 #include<errno.h>
@@ -23,7 +24,8 @@ static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 #include<arpa/inet.h>
 #include<sys/socket.h>
 #include<sys/types.h>
-#include<unistd.h>//chdir
+#include<unistd.h>//chdir,fsync
+using sockType=int;
 #endif
 
 static_assert(sizeof(bool)==1);
@@ -106,10 +108,8 @@ inline bool operator== (MarshallingInt l,MarshallingInt r){return l()==r();}
 inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
 
 inline void exitFailure (){::std::exit(EXIT_FAILURE);}
-#ifdef CMW_WINDOWS
-using sockType=SOCKET;
-#else
-using sockType=int;
+
+#ifndef CMW_WINDOWS
 inline void setDirectory (char const* d){
   if(::chdir(d)!=0)raise("setDirectory",d,errno);
 }
@@ -123,7 +123,6 @@ inline int Read (int fd,void* data,int len){
   int r=::read(fd,data,len);
   if(r>0)return r;
   if(r==0)raise("Read eof",len);
-  if(EAGAIN==errno||EWOULDBLOCK==errno)return 0;
   raise("Read",len,errno);
 }
 
@@ -133,22 +132,22 @@ inline int openWrapper (auto nm,int flags,mode_t md=0){
 }
 
 class FileWrapper{
-  int d=-2;
+  int d=-1;
  public:
   FileWrapper (){}
-  FileWrapper (auto nm,int flags,mode_t md):d{openWrapper(nm,flags,md)}{}
+  FileWrapper (auto nm,int flags,mode_t md=0):d{openWrapper(nm,flags,md)}{}
 
   FileWrapper (FileWrapper const&)=delete;
   void operator= (FileWrapper&)=delete;
 
-  FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-2;}
+  FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-1;}
   void operator= (FileWrapper&& o)noexcept{
     d=o.d;
-    o.d=-2;
+    o.d=-1;
   }
 
   auto operator() (){return d;}
-  void release (){d=-2;}
+  void release (){d=-1;}
   ~FileWrapper (){if(d>0)::close(d);}
 };
 
@@ -159,7 +158,7 @@ struct FileBuffer{
   int ind=0;
   int bytes=0;
 
-  FileBuffer (char const* name,int flags):fl(name,flags,0){}
+  FileBuffer (char const* nam,int flags):fl(nam,flags){}
 
   char getc (){
     if(ind>=bytes){
