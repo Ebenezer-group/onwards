@@ -114,10 +114,13 @@ inline void setDirectory (char const* d){
   if(::chdir(d)!=0)raise("setDirectory",d,errno);
 }
 
-inline void Write (int fd,void const* data,int len){
+inline void Write (int fd,auto const* data,int len){
   do{
     if(int r=::write(fd,data,len);r<0)raise("Write",errno);
-    else len-=r;
+    else{
+     data+=r;
+     len-=r;
+    }
   }while(len>0);
 }
 
