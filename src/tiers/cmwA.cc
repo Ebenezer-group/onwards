@@ -153,7 +153,7 @@ struct cmwRequest{
   }
 
   void xyz (){
-    Write(fl(),&bday,sizeof bday);
+    Write(fl(),(char*)&bday,sizeof bday);
     ring->clos(cmwBuf.giveFile(path.append(".hh")));
     ring->clos(fl());
     fl.release();
