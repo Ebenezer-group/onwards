@@ -192,7 +192,7 @@ void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=fal
     ::sleep(30);
   }
 
-  while(!cmwBuf.flush());
+  cmwBuf.flush();
   ::sctp_paddrparams pad{};
   pad.spp_address.ss_family=AF_INET;
   pad.spp_hbinterval=240000;

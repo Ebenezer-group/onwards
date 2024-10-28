@@ -114,9 +114,11 @@ inline void setDirectory (char const* d){
   if(::chdir(d)!=0)raise("setDirectory",d,errno);
 }
 
-inline int Write (int fd,void const* data,int len){
-  if(int r=::write(fd,data,len);r>=0)return r;
-  raise("Write",errno);
+inline void Write (int fd,void const* data,int len){
+  do{
+    if(int r=::write(fd,data,len);r<0)raise("Write",errno);
+    else len-=r;
+  }while(len>0);
 }
 
 inline int Read (int fd,void* data,int len){
@@ -557,7 +559,10 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     return false;
   }
 
-  bool flush (){return all(Write(this->sock_,compBuf,compIndex));}
+  void flush (){
+    Write(this->sock_,compBuf,compIndex);
+    compIndex=0;
+  }
 
   void compressedReset (){
     this->reset();
