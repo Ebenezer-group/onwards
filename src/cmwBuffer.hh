@@ -109,14 +109,37 @@ inline bool operator== (MarshallingInt l,::int32_t r){return l()==r;}
 
 inline void exitFailure (){::std::exit(EXIT_FAILURE);}
 
+inline int getError (){
+#ifdef CMW_WINDOWS
+  return WSAGetLastError();
+#else
+  return errno;
+#endif
+}
+
+inline void closeSocket (sockType s){
+#ifdef CMW_WINDOWS
+  ::closesocket(s);
+#else
+  ::close(s);
+#endif
+}
+
+inline int preserveError (int s){
+  auto e=getError();
+  closeSocket(s);
+  return e;
+}
+
 #ifndef CMW_WINDOWS
 inline void setDirectory (char const* d){
   if(::chdir(d)!=0)raise("setDirectory",d,errno);
 }
 
-inline void Write (int fd,char const* data,int len){
+inline void Write (int fd,char const* data,int len,bool doClose=false){
   for(;;){
-    if(int r=::write(fd,data,len);r<0)raise("Write",errno);
+    if(int r=::write(fd,data,len);r<0)
+      raise("Write",doClose?preserveError(fd):errno);
     else{
      if(0==(len-=r))break;
      data+=r;
@@ -187,14 +210,6 @@ auto setsockWrapper (sockType s,int opt,auto t){
   return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
 }
 
-inline int getError (){
-#ifdef CMW_WINDOWS
-  return WSAGetLastError();
-#else
-  return errno;
-#endif
-}
-
 inline void setRcvTimeout (sockType s,int time){
 #ifdef CMW_WINDOWS
   DWORD t=time*1000;
@@ -252,20 +267,6 @@ struct MostSignificantFirst:MixedEndian{
   {for(auto c=sizeof val;c>0;--c)val|=give<::uint8_t>(b)<<8*(c-1);}
 };
 
-inline void closeSocket (sockType s){
-#ifdef CMW_WINDOWS
-  ::closesocket(s);
-#else
-  ::close(s);
-#endif
-}
-
-inline int preserveError (int s){
-  auto e=getError();
-  closeSocket(s);
-  return e;
-}
-
 template<class R,class Z>class ReceiveBuffer{
   char* const rbuf;
   int msgLength;
@@ -320,12 +321,8 @@ template<class R,class Z>class ReceiveBuffer{
     int sz=give<::uint32_t>();
     checkLen(sz);
     int fd=openWrapper(nm,O_CREAT|O_WRONLY|O_TRUNC,0644);
-    do{
-      int r=::write(fd,rbuf+subTotal+rindex,sz);
-      if(r<0)raise("giveFile",preserveError(fd));
-      sz-=r;
-      rindex+=r;
-    }while(sz>0);
+    Write(fd,rbuf+subTotal+rindex,sz,true);
+    rindex+=sz;
     ::fsync(fd);
     return fd;
   }
