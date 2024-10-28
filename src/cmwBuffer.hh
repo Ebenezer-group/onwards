@@ -120,9 +120,7 @@ inline int Write (int fd,void const* data,int len){
 }
 
 inline int Read (int fd,void* data,int len){
-  int r=::read(fd,data,len);
-  if(r>0)return r;
-  if(r==0)raise("Read eof",len);
+  if(int r=::read(fd,data,len);r>=0)return r;
   raise("Read",len,errno);
 }
 
