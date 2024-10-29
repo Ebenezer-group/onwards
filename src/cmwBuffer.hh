@@ -222,14 +222,7 @@ inline void setRcvTimeout (sockType s,int time){
 inline int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen){
   if(int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);r>=0)
     return r;
-  auto e=getError();
-#ifdef CMW_WINDOWS
-  if(WSAETIMEDOUT==e)
-#else
-  if(EAGAIN==e||EWOULDBLOCK==e)
-#endif
-    return 0;
-  raise("sockRead",len,e);
+  raise("sockRead",len,getError());
 }
 
 struct SameFormat{
