@@ -533,6 +533,10 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     kosher=true;
   }
 };
+
+inline void setDirectory (char const* d){
+  if(::chdir(d)!=0)raise("setDirectory",d,errno);
+}
 #endif
 
 template<int N>class FixedString{
@@ -628,10 +632,6 @@ inline void setRcvTimeout (sockType s,int time){
   ::timeval t{time,0};
 #endif
   if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
-}
-
-inline void setDirectory (char const* d){
-  if(::chdir(d)!=0)raise("setDirectory",d,errno);
 }
 
 inline void winStart (){
