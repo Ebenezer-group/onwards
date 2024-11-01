@@ -117,29 +117,10 @@ inline int getError (){
 #endif
 }
 
-inline void closeSocket (sockType s){
-#ifdef CMW_WINDOWS
-  ::closesocket(s);
-#else
-  ::close(s);
-#endif
-}
-
-inline int preserveError (int s){
-  auto e=getError();
-  closeSocket(s);
-  return e;
-}
-
 #ifndef CMW_WINDOWS
-inline void setDirectory (char const* d){
-  if(::chdir(d)!=0)raise("setDirectory",d,errno);
-}
-
-inline void Write (int fd,char const* data,int len,bool doClose=false){
+inline void Write (int fd,char const* data,int len){
   for(;;){
-    if(int r=::write(fd,data,len);r<0)
-      raise("Write",doClose?preserveError(fd):errno);
+    if(int r=::write(fd,data,len);r<0)raise("Write",errno);
     else{
      if(0==(len-=r))break;
      data+=r;
@@ -152,16 +133,13 @@ inline int Read (int fd,void* data,int len){
   raise("Read",len,errno);
 }
 
-inline int openWrapper (auto nm,int flags,mode_t md=0){
-  if(int d=::open(nm,flags,md);d>0)return d;
-  raise("openWrapper",nm,errno);
-}
-
 class FileWrapper{
   int d=-1;
  public:
   FileWrapper (){}
-  FileWrapper (auto nm,int flags,mode_t md=0):d{openWrapper(nm,flags,md)}{}
+  FileWrapper (auto nm,int flags,mode_t md=0):d{open(nm,flags,md)}{
+    if(d<0)raise("FileWrapper",nm,errno);
+  }
 
   FileWrapper (FileWrapper const&)=delete;
   void operator= (FileWrapper&)=delete;
@@ -205,19 +183,6 @@ struct FileBuffer{
   }
 };
 #endif
-
-auto setsockWrapper (sockType s,int opt,auto t){
-  return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
-}
-
-inline void setRcvTimeout (sockType s,int time){
-#ifdef CMW_WINDOWS
-  DWORD t=time*1000;
-#else
-  ::timeval t{time,0};
-#endif
-  if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
-}
 
 inline int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen){
   if(int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);r>=0)
@@ -313,10 +278,12 @@ template<class R,class Z>class ReceiveBuffer{
   int giveFile (auto nm){
     int sz=give<::uint32_t>();
     checkLen(sz);
-    int fd=openWrapper(nm,O_CREAT|O_WRONLY|O_TRUNC,0644);
-    Write(fd,rbuf+subTotal+rindex,sz,true);
+    FileWrapper fl(nm,O_CREAT|O_WRONLY|O_TRUNC,0644);
+    Write(fl(),rbuf+subTotal+rindex,sz);
     rindex+=sz;
-    ::fsync(fd);
+    ::fsync(fl());
+    int fd=fl();
+    fl.release();
     return fd;
   }
 #endif
@@ -427,9 +394,10 @@ template<class Z>class SendBuffer{
   int receiveFile (char const* nm,::int32_t sz){
     receive(&sz,sizeof sz);
     auto prev=reserveBytes(sz);
-    int fd=openWrapper(nm,O_RDONLY);
-    if(int r=::read(fd,buf+prev,sz);r<0)
-      raise("receiveFile",preserveError(fd));
+    FileWrapper fl(nm,O_RDONLY);
+    Read(fl(),buf+prev,sz);
+    int fd=fl();
+    fl.release();
     return fd;
   }
 #endif
@@ -628,11 +596,42 @@ struct SockaddrWrapper{
   }
 };
 
+inline void closeSocket (sockType s){
+#ifdef CMW_WINDOWS
+  ::closesocket(s);
+#else
+  ::close(s);
+#endif
+}
+
+inline int preserveError (int s){
+  auto e=getError();
+  closeSocket(s);
+  return e;
+}
+
 inline int udpServer (::uint16_t port){
   int s=::socket(AF_INET,SOCK_DGRAM,0);
   ::sockaddr_in sa{AF_INET,::htons(port),{},{}};
   if(0==::bind(s,reinterpret_cast<sockaddr*>(&sa),sizeof sa))return s;
   raise("udpServer",preserveError(s));
+}
+
+auto setsockWrapper (sockType s,int opt,auto t){
+  return ::setsockopt(s,SOL_SOCKET,opt,reinterpret_cast<char*>(&t),sizeof t);
+}
+
+inline void setRcvTimeout (sockType s,int time){
+#ifdef CMW_WINDOWS
+  DWORD t=time*1000;
+#else
+  ::timeval t{time,0};
+#endif
+  if(setsockWrapper(s,SO_RCVTIMEO,t)!=0)raise("setRcvTimeout",getError());
+}
+
+inline void setDirectory (char const* d){
+  if(::chdir(d)!=0)raise("setDirectory",d,errno);
 }
 
 inline void winStart (){
