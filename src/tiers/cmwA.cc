@@ -25,8 +25,10 @@ constexpr ::uint64_t reedTag=1;
 constexpr ::uint64_t closTag=2;
 constexpr ::uint64_t sendtoTag=3;
 class ioUring{
+  constexpr static int maxBatch=10;
   ::io_uring rng;
-  BufferStack<SameFormat> frntBuf;
+  int s2ind;
+  int udpSock;
 
   auto getSqe (){
     if(auto e=::io_uring_get_sqe(&rng);e)return e;
@@ -36,11 +38,11 @@ class ioUring{
  public:
   void recvmsg (::msghdr& msg){
     auto e=getSqe();
-    ::io_uring_prep_recvmsg(e,frntBuf.sock_,&msg,0);
+    ::io_uring_prep_recvmsg(e,udpSock,&msg,0);
     ::io_uring_sqe_set_data64(e,0);
   }
 
-  ioUring (int sock,::msghdr& msg):frntBuf{sock}{
+  ioUring (int sock,::msghdr& msg):udpSock(sock){
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
@@ -60,8 +62,9 @@ class ioUring{
     while((rc=::io_uring_submit_and_wait(&rng,1))<0){
       if(-EINTR!=rc)raise("waitCqe",rc);
     }
-    static ::io_uring_cqe *cqes[10];
-    seen=::io_uring_peek_batch_cqe(&rng,&cqes[0],10);
+    s2ind=0;
+    static ::io_uring_cqe *cqes[maxBatch];
+    seen=::io_uring_peek_batch_cqe(&rng,&cqes[0],maxBatch);
     return ::std::span<::io_uring_cqe*>(&cqes[0],seen);
   }
 
@@ -162,15 +165,17 @@ struct cmwRequest{
 #include"cmwA.mdl.hh"
 
 void ioUring::sendto (Socky const& s,auto...t){
-  frntBuf.reset();
-  ::front::marshal<udpPacketMax>(frntBuf,{t...});
-  auto sp=frntBuf.outDuo();
+  static BufferStack<SameFormat> frntBufs[maxBatch/2];
+  frntBufs[s2ind].reset();
+  ::front::marshal<udpPacketMax>(frntBufs[s2ind],{t...});
+  auto sp=frntBufs[s2ind].outDuo();
   auto e=getSqe();
-  static Socky frnt2;
-  frnt2=s;
-  ::io_uring_prep_sendto(e,frntBuf.sock_,sp.data(),sp.size(),0
-                         ,(sockaddr*)&frnt2.addr,frnt2.len);
+  static Socky frnts[maxBatch/2];
+  frnts[s2ind]=s;
+  ::io_uring_prep_sendto(e,udpSock,sp.data(),sp.size(),0
+                         ,(sockaddr*)&frnts[s2ind].addr,frnts[s2ind].len);
   ::io_uring_sqe_set_data64(e,sendtoTag);
+  if(++s2ind>=maxBatch/2)raise("ioUring sendto");
 }
 
 void bail (char const* fmt,auto...t)noexcept{

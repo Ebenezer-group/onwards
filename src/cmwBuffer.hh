@@ -436,9 +436,8 @@ template<class R,class Z=::std::int16_t,int N=udpPacketMax>
 class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   char ar[N];
  public:
-  explicit BufferStack (int s):SendBuffer<Z>(ar,N),ReceiveBuffer<R,Z>(ar){
-    this->sock_=s;
-  }
+  BufferStack ():SendBuffer<Z>(ar,N),ReceiveBuffer<R,Z>(ar){}
+  explicit BufferStack (int s):BufferStack(){this->sock_=s;}
 
   auto outDuo (){return ::std::span<char>(ar,this->index);}
   auto getDuo (){return ::std::span<char>(ar,N);}
