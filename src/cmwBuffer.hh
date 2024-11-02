@@ -279,10 +279,10 @@ template<class R,class Z>class ReceiveBuffer{
     int sz=give<::uint32_t>();
     checkLen(sz);
     FileWrapper fl(nm,O_CREAT|O_WRONLY|O_TRUNC,0644);
-    Write(fl(),rbuf+subTotal+rindex,sz);
-    rindex+=sz;
-    ::fsync(fl());
     int fd=fl();
+    Write(fd,rbuf+subTotal+rindex,sz);
+    rindex+=sz;
+    ::fsync(fd);
     fl.release();
     return fd;
   }
@@ -393,10 +393,9 @@ template<class Z>class SendBuffer{
 #ifndef CMW_WINDOWS
   int receiveFile (char const* nm,::int32_t sz){
     receive(&sz,sizeof sz);
-    auto prev=reserveBytes(sz);
     FileWrapper fl(nm,O_RDONLY);
-    Read(fl(),buf+prev,sz);
     int fd=fl();
+    Read(fd,buf+reserveBytes(sz),sz);
     fl.release();
     return fd;
   }
