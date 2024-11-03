@@ -166,6 +166,10 @@ struct cmwRequest{
 
 void ioUring::sendto (Socky const& s,auto...t){
   static BufferStack<SameFormat> frntBufs[maxBatch/2];
+  if(s2ind>=maxBatch/2){
+    ::io_uring_submit(&rng);
+    s2ind=0;
+  }
   frntBufs[s2ind].reset();
   ::front::marshal<udpPacketMax>(frntBufs[s2ind],{t...});
   auto sp=frntBufs[s2ind].outDuo();
@@ -175,10 +179,7 @@ void ioUring::sendto (Socky const& s,auto...t){
   ::io_uring_prep_sendto(e,udpSock,sp.data(),sp.size(),0
                          ,(sockaddr*)&frnts[s2ind].addr,frnts[s2ind].len);
   ::io_uring_sqe_set_data64(e,sendtoTag);
-  if(++s2ind>=maxBatch/2){
-    ::io_uring_submit(&rng);
-    s2ind=0;
-  }
+  ++s2ind;
 }
 
 void bail (char const* fmt,auto...t)noexcept{
