@@ -34,7 +34,7 @@ class ioUring{
     if(auto e=::io_uring_get_sqe(&rng);e)return e;
     else{
       ::io_uring_submit(&rng);
-      if(e=::io_uring_get_sqe(&rng))return e;
+      if((e=::io_uring_get_sqe(&rng)))return e;
       raise("getSqe");
     }
   }
