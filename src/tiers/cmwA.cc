@@ -25,14 +25,18 @@ constexpr ::uint64_t reedTag=1;
 constexpr ::uint64_t closTag=2;
 constexpr ::uint64_t sendtoTag=3;
 class ioUring{
-  constexpr static int maxBatch=10;
   ::io_uring rng;
   int s2ind;
-  int udpSock;
+  int const udpSock;
+  constexpr static int maxBatch=10;
 
   auto getSqe (){
     if(auto e=::io_uring_get_sqe(&rng);e)return e;
-    raise("getSqe");
+    else{
+      ::io_uring_submit(&rng);
+      if(e=::io_uring_get_sqe(&rng))return e;
+      raise("getSqe");
+    }
   }
 
  public:
@@ -63,7 +67,7 @@ class ioUring{
       if(-EINTR!=rc)raise("waitCqe",rc);
     }
     s2ind=0;
-    static ::io_uring_cqe *cqes[maxBatch];
+    static ::io_uring_cqe* cqes[maxBatch];
     seen=::io_uring_peek_batch_cqe(&rng,&cqes[0],maxBatch);
     return ::std::span<::io_uring_cqe*>(&cqes[0],seen);
   }
