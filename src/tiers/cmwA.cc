@@ -31,12 +31,11 @@ class ioUring{
   constexpr static int maxBatch=10;
 
   auto getSqe (){
-    if(auto e=::io_uring_get_sqe(&rng);e)return e;
-    else{
-      ::io_uring_submit(&rng);
-      if((e=::io_uring_get_sqe(&rng)))return e;
-      raise("getSqe");
-    }
+    auto e=::io_uring_get_sqe(&rng);
+    if(e)return e;
+    ::io_uring_submit(&rng);
+    if((e=::io_uring_get_sqe(&rng)))return e;
+    raise("getSqe");
   }
 
  public:
