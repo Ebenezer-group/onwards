@@ -28,6 +28,7 @@ class ioUring{
   ::io_uring rng;
   int s2ind;
   int const udpSock;
+  ::iovec iov;
   constexpr static int maxBatch=10;
 
   auto getSqe (){
@@ -39,13 +40,16 @@ class ioUring{
   }
 
  public:
-  void recvmsg (::msghdr& msg){
+  Socky& recvmsg (){
     auto e=getSqe();
-    ::io_uring_prep_recvmsg(e,udpSock,&msg,0);
+    static Socky frnt;
+    static ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
+    ::io_uring_prep_recvmsg(e,udpSock,&mhdr,0);
     ::io_uring_sqe_set_data64(e,0);
+    return frnt;
   }
 
-  ioUring (int sock,::msghdr& msg):udpSock(sock){
+  ioUring (int sock,auto sp):udpSock(sock),iov{sp.data(),sp.size()}{
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
@@ -55,7 +59,7 @@ class ioUring{
       raise("ioUring",rc);
     int regfds[]={sock,0};
     if(::io_uring_register_files(&rng,regfds,2))raise("io reg");
-    recvmsg(msg);
+    recvmsg();
   }
 
   auto submit (){
@@ -168,15 +172,15 @@ struct cmwRequest{
 #include"cmwA.mdl.hh"
 
 void ioUring::sendto (Socky const& s,auto...t){
-  static BufferStack<SameFormat> frntBufs[maxBatch/2];
   if(s2ind>=maxBatch/2){
     ::io_uring_submit(&rng);
     s2ind=0;
   }
+  auto e=getSqe();
+  static BufferStack<SameFormat> frntBufs[maxBatch/2];
   frntBufs[s2ind].reset();
   ::front::marshal<udpPacketMax>(frntBufs[s2ind],{t...});
   auto sp=frntBufs[s2ind].outDuo();
-  auto e=getSqe();
   static Socky frnts[maxBatch/2];
   frnts[s2ind]=s;
   ::io_uring_prep_sendto(e,udpSock,sp.data(),sp.size(),0
@@ -224,11 +228,7 @@ int main (int ac,char** av)try{
   SockaddrWrapper const sa(cfg.getline().data(),56789);
   checkField("UDP-port-number",cfg.getline(' '));
   BufferStack<SameFormat> rfrntBuf{udpServer(fromChars(cfg.getline().data()))};
-  auto sp=rfrntBuf.getDuo();
-  ::iovec iov{sp.data(),sp.size()};
-  Socky frnt;
-  ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
-  ring=new ioUring{rfrntBuf.sock_,mhdr};
+  ring=new ioUring{rfrntBuf.sock_,rfrntBuf.getDuo()};
 
   checkField("AmbassadorID",cfg.getline(' '));
   cmwCredentials cred(cfg.getline());
@@ -257,7 +257,7 @@ int main (int ac,char** av)try{
         ring->clos(cmwBuf.sock_);
         login(cred,sa);
       }else if(0==cq->user_data){
-        ring->recvmsg(mhdr);
+        auto& frnt=ring->recvmsg();
         cmwRequest* req=0;
         try{
           rfrntBuf.update(cq->res);
