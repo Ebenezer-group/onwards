@@ -12,9 +12,8 @@
 #include<time.h>
 
 using namespace ::cmw;
-
 constexpr ::int32_t bufSize=1101000;
-BufferCompressed<SameFormat,::std::int32_t,bufSize> cmwBuf;
+BufferCompressed<SameFormat,::int32_t,bufSize> cmwBuf;
 
 struct Socky{
   ::sockaddr_in6 addr;
@@ -40,7 +39,7 @@ class ioUring{
   }
 
  public:
-  Socky& recvmsg (){
+  Socky const& recvmsg (){
     auto e=getSqe();
     static Socky frnt;
     static ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
