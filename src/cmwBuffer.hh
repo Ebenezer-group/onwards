@@ -184,7 +184,7 @@ struct FileBuffer{
 };
 #endif
 
-inline int sockRead (sockType s,void* data,int len,sockaddr* addr,socklen_t* fromLen){
+inline int sockRead (sockType s,void* data,int len,::sockaddr* addr,socklen_t* fromLen){
   if(int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);r>=0)
     return r;
   raise("sockRead",len,getError());
@@ -615,7 +615,7 @@ inline int preserveError (int s){
 inline int udpServer (::uint16_t port){
   int s=::socket(AF_INET,SOCK_DGRAM,0);
   ::sockaddr_in sa{AF_INET,::htons(port),{},{}};
-  if(0==::bind(s,reinterpret_cast<sockaddr*>(&sa),sizeof sa))return s;
+  if(0==::bind(s,reinterpret_cast<::sockaddr*>(&sa),sizeof sa))return s;
   raise("udpServer",preserveError(s));
 }
 
