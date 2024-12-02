@@ -387,7 +387,7 @@ template<class Z>class SendBuffer{
     if(int r=::sendto(sock_,buf,index,0,
                       reinterpret_cast<::sockaddr const*>(addr),len);r>0)
       return r;
-    raise("sockWrite",sock_,getError());
+    raise("buf::send",getError());
   }
 
 #ifndef CMW_WINDOWS
