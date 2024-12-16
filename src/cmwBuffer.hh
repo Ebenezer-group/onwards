@@ -592,7 +592,8 @@ using FixedString120=FixedString<120>;
 
 struct SockaddrWrapper{
   ::sockaddr_in sa;
-  SockaddrWrapper (char const* node,::uint16_t port):sa{AF_INET,::htons(port),{},{}}{
+  SockaddrWrapper (::uint16_t port):sa{AF_INET,::htons(port),{},{}}{}
+  SockaddrWrapper (char const* node,::uint16_t port):SockaddrWrapper(port){
     if(int rc=::inet_pton(AF_INET,node,&sa.sin_addr);rc!=1)
       raise("inet_pton",rc);
   }
@@ -614,7 +615,7 @@ inline int preserveError (int s){
 
 inline int udpServer (::uint16_t port){
   int s=::socket(AF_INET,SOCK_DGRAM,0);
-  ::sockaddr_in sa{AF_INET,::htons(port),{},{}};
+  SockaddrWrapper sa{port};
   if(0==::bind(s,reinterpret_cast<::sockaddr*>(&sa),sizeof sa))return s;
   raise("udpServer",preserveError(s));
 }
