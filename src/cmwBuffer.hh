@@ -120,11 +120,10 @@ inline int getError (){
 #ifndef CMW_WINDOWS
 inline void Write (int fd,char const* data,int len){
   for(;;){
-    if(int r=::write(fd,data,len);r<0)raise("Write",errno);
-    else{
-     if(0==(len-=r))break;
-     data+=r;
-    }
+    if(int r=::write(fd,data,len);r>=0){
+      if(0==(len-=r))return;
+      data+=r;
+    }else raise("Write",errno);
   }
 }
 
