@@ -39,7 +39,7 @@ class ioUring{
   }
 
  public:
-  Socky const& recvmsg (){
+  Socky const recvmsg (){
     auto e=getSqe();
     static Socky frnt;
     static ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
