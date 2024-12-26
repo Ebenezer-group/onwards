@@ -155,11 +155,11 @@ class FileWrapper{
 };
 
 struct FileBuffer{
-  FileWrapper fl;
   char buf[4096];
   char line[120];
   int ind=0;
   int bytes=0;
+  FileWrapper fl;
 
   FileBuffer (char const* nam,int flags):fl(nam,flags){}
 
