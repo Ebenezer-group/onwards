@@ -136,7 +136,7 @@ class FileWrapper{
   int d=-1;
  public:
   FileWrapper (){}
-  FileWrapper (auto nm,int flags,mode_t md=0):d{open(nm,flags,md)}{
+  FileWrapper (auto nm,int flags,mode_t md=0):d{::open(nm,flags,md)}{
     if(d<0)raise("FileWrapper",nm,errno);
   }
 
