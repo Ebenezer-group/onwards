@@ -247,9 +247,7 @@ int main (int ac,char** av)try{
         ::syslog(LOG_ERR,"Back tier vanished %llu %d",cq->user_data,cq->res);
         rfrntBuf.reset();
         ::front::marshal<udpPacketMax>(rfrntBuf,{"Back tier vanished"});
-        for(auto& r:pendingRequests){
-          rfrntBuf.send(&r.frnt.addr,r.frnt.len);
-        }
+        for(auto& r:pendingRequests){rfrntBuf.send(&r.frnt.addr,r.frnt.len);}
         pendingRequests.clear();
         cmwBuf.compressedReset();
         ring->clos(cmwBuf.sock_);
