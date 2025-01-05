@@ -175,7 +175,7 @@ struct FileBuffer{
     ::std::size_t idx=0;
     while((line[idx]=getc())!=delim){
       if(line[idx]=='\r')raise("getline cr");
-      if(++idx>=sizeof line)raise("getline too long");
+      if(++idx>=sizeof line)raise("getline size");
     }
     line[idx]=0;
     return ::std::string_view{line,idx};
@@ -431,7 +431,7 @@ void receiveBlock (auto& b,C<T>const& c){
 }
 
 inline constexpr auto udpPacketMax=1500;
-template<class R,class Z=::std::int16_t,int N=udpPacketMax>
+template<class R,class Z=::int16_t,int N=udpPacketMax>
 class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   char ar[N];
  public:
