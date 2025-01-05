@@ -243,8 +243,8 @@ int main (int ac,char** av)try{
   for(;;){
     for(auto cq:ring->submit()){
       if(cq->res<0||(cq->res==0&&cq->user_data!=closTag)){
-        if(-EPIPE!=cq->res&&0!=cq->res)bail("op failed %llu %d",cq->user_data,cq->res);
-        ::syslog(LOG_ERR,"Back tier vanished %llu %d",cq->user_data,cq->res);
+        ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
+        if(-EPIPE!=cq->res&&0!=cq->res)exitFailure();
         rfrntBuf.reset();
         ::front::marshal<udpPacketMax>(rfrntBuf,{"Back tier vanished"});
         for(auto& r:pendingRequests){rfrntBuf.send(&r.frnt.addr,r.frnt.len);}
