@@ -195,7 +195,7 @@ void checkField (char const* fld,::std::string_view actl){
   if(actl!=fld)bail("Expected %s",fld);
 }
 
-void login (cmwCredentials const& cred,SockaddrWrapper& sa,bool signUp=false){
+void login (cmwCredentials const& cred,auto& sa,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,bufSize);
   cmwBuf.compress();
