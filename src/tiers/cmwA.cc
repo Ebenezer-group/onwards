@@ -172,7 +172,7 @@ struct cmwRequest{
 void ioUring::sendto (Socky const& s,auto...t){
   if(++s2ind>=maxBatch/2){
     ::io_uring_submit(&rng);
-    s2ind=-1;
+    s2ind=0;
   }
   auto e=getSqe();
   static BufferStack<SameFormat> frntBufs[maxBatch/2];
