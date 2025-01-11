@@ -25,9 +25,9 @@ constexpr ::uint64_t closTag=2;
 constexpr ::uint64_t sendtoTag=3;
 class ioUring{
   ::io_uring rng;
+  ::iovec iov;
   int s2ind;
   int const udpSock;
-  ::iovec iov;
   constexpr static int maxBatch=10;
 
   auto getSqe (bool internal=false){
@@ -47,7 +47,7 @@ class ioUring{
     return frnt;
   }
 
-  ioUring (int sock,auto sp):udpSock(sock),iov{sp.data(),sp.size()}{
+  ioUring (int sock,auto sp):iov{sp.data(),sp.size()},udpSock(sock){
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
@@ -67,7 +67,7 @@ class ioUring{
     while((rc=::io_uring_submit_and_wait(&rng,1))<0){
       if(-EINTR!=rc)raise("waitCqe",rc);
     }
-    s2ind=0;
+    s2ind=-1;
     static ::io_uring_cqe* cqes[maxBatch];
     seen=::io_uring_peek_batch_cqe(&rng,&cqes[0],maxBatch);
     return ::std::span<::io_uring_cqe*>(&cqes[0],seen);
@@ -170,9 +170,9 @@ struct cmwRequest{
 #include"cmwA.mdl.hh"
 
 void ioUring::sendto (Socky const& s,auto...t){
-  if(s2ind>=maxBatch/2){
+  if(++s2ind>=maxBatch/2){
     ::io_uring_submit(&rng);
-    s2ind=0;
+    s2ind=-1;
   }
   auto e=getSqe();
   static BufferStack<SameFormat> frntBufs[maxBatch/2];
@@ -184,7 +184,6 @@ void ioUring::sendto (Socky const& s,auto...t){
   ::io_uring_prep_sendto(e,udpSock,sp.data(),sp.size(),0
                          ,(sockaddr*)&frnts[s2ind].addr,frnts[s2ind].len);
   ::io_uring_sqe_set_data64(e,sendtoTag);
-  ++s2ind;
 }
 
 void bail (char const* fmt,auto...t)noexcept{
@@ -196,7 +195,7 @@ void checkField (char const* fld,::std::string_view actl){
   if(actl!=fld)bail("Expected %s",fld);
 }
 
-void login (cmwCredentials const& cred,SockaddrWrapper const& sa,bool signUp=false){
+void login (cmwCredentials const& cred,SockaddrWrapper& sa,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,bufSize);
   cmwBuf.compress();
