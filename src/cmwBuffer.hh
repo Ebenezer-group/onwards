@@ -24,7 +24,7 @@ using sockType=SOCKET;
 #include<arpa/inet.h>
 #include<sys/socket.h>
 #include<sys/types.h>
-#include<unistd.h>//chdir,fsync
+#include<unistd.h>//chdir
 using sockType=int;
 #endif
 
@@ -281,7 +281,6 @@ template<class R,class Z>class ReceiveBuffer{
     int fd=fl();
     Write(fd,rbuf+subTotal+rindex,sz);
     rindex+=sz;
-    ::fsync(fd);
     fl.release();
     return fd;
   }

@@ -23,6 +23,7 @@ struct Socky{
 constexpr ::uint64_t reedTag=1;
 constexpr ::uint64_t closTag=2;
 constexpr ::uint64_t sendtoTag=3;
+constexpr ::uint64_t fsyncTag=4;
 class ioUring{
   ::io_uring rng;
   ::iovec iov;
@@ -96,6 +97,14 @@ class ioUring{
     ::io_uring_sqe_set_flags(e,IOSQE_CQE_SKIP_SUCCESS);
   }
 
+  void fsync (int fd){
+    auto e=getSqe();
+    ::io_uring_prep_fsync(e,fd,0);
+    ::io_uring_sqe_set_data64(e,fsyncTag);
+    ::io_uring_sqe_set_flags(e,IOSQE_IO_HARDLINK|IOSQE_CQE_SKIP_SUCCESS);
+    clos(fd);
+  }
+
   void sendto (Socky const&,auto...);
 } *ring;
 
@@ -163,7 +172,7 @@ struct cmwRequest{
 
   void ending (){
     Write(fl(),(char*)&bday,sizeof bday);
-    ring->clos(cmwBuf.giveFile(path.append(".hh")));
+    ring->fsync(cmwBuf.giveFile(path.append(".hh")));
     ring->clos(fl());
     fl.release();
   }
@@ -242,7 +251,7 @@ int main (int ac,char** av)try{
 
   for(;;){
     for(auto cq:ring->submit()){
-      if(cq->res<0||(cq->res==0&&cq->user_data==reedTag)){
+      if(cq->res<0||(cq->res==0&&reedTag==cq->user_data)){
         ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
         if(-EPIPE!=cq->res&&0!=cq->res)exitFailure();
         rfrntBuf.reset();
