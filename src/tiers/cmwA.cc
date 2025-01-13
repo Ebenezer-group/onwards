@@ -93,6 +93,7 @@ class ioUring{
     auto e=getSqe();
     ::io_uring_prep_close(e,fd);
     ::io_uring_sqe_set_data64(e,closTag);
+    ::io_uring_sqe_set_flags(e,IOSQE_CQE_SKIP_SUCCESS);
   }
 
   void sendto (Socky const&,auto...);
@@ -241,7 +242,7 @@ int main (int ac,char** av)try{
 
   for(;;){
     for(auto cq:ring->submit()){
-      if(cq->res<0||(cq->res==0&&cq->user_data!=closTag)){
+      if(cq->res<0||(cq->res==0&&cq->user_data==reedTag)){
         ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
         if(-EPIPE!=cq->res&&0!=cq->res)exitFailure();
         rfrntBuf.reset();
@@ -265,7 +266,7 @@ int main (int ac,char** av)try{
           ring->sendto(frnt,e.what());
           if(req)pendingRequests.pop_back();
         }
-      }else if(closTag==cq->user_data||sendtoTag==cq->user_data){
+      }else if(sendtoTag==cq->user_data){
       }else if(reedTag==cq->user_data){
         assert(!pendingRequests.empty());
         auto& req=pendingRequests.front();
