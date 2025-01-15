@@ -79,7 +79,7 @@ class ioUring{
     auto sp=cmwBuf.getDuo();
     ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
     ::io_uring_sqe_set_data64(e,reedTag);
-    e->ioprio=IORING_RECVSEND_POLL_FIRST;
+    if(sp.size()<10)e->ioprio=IORING_RECVSEND_POLL_FIRST;
     if(stale)::io_uring_register_files_update(&rng,1,&cmwBuf.sock_,1);
   }
 
@@ -101,7 +101,7 @@ class ioUring{
     auto e=getSqe();
     ::io_uring_prep_fsync(e,fd,0);
     ::io_uring_sqe_set_data64(e,fsyncTag);
-    ::io_uring_sqe_set_flags(e,IOSQE_IO_HARDLINK|IOSQE_CQE_SKIP_SUCCESS);
+    ::io_uring_sqe_set_flags(e,IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_HARDLINK);
     clos(fd);
   }
 
@@ -251,9 +251,9 @@ int main (int ac,char** av)try{
 
   for(;;){
     for(auto cq:ring->submit()){
-      if(cq->res<0||(cq->res==0&&reedTag==cq->user_data)){
+      if(cq->res<=0){
         ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
-        if(-EPIPE!=cq->res&&0!=cq->res)exitFailure();
+        if(cq->res<0&&-EPIPE!=cq->res)exitFailure();
         rfrntBuf.reset();
         ::front::marshal<udpPacketMax>(rfrntBuf,{"Back tier vanished"});
         for(auto& r:pendingRequests){rfrntBuf.send(&r.frnt.addr,r.frnt.len);}
