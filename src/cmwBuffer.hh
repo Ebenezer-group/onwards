@@ -82,7 +82,7 @@ class MarshallingInt{
     for(;;){
       auto a=give<::uint8_t>(b);
       val+=(a&127)*shift;
-      if((a&128)==0)return;
+      if(!(a&128))return;
       shift<<=7;
       val+=shift;
     }
@@ -634,7 +634,7 @@ inline void setRcvTimeout (sockType s,int time){
 inline void winStart (){
 #ifdef CMW_WINDOWS
   WSADATA w;
-  if(auto r=::WSAStartup(MAKEWORD(2,2),&w);0!=r)raise("WSAStartup",r);
+  if(auto r=::WSAStartup(MAKEWORD(2,2),&w);r)raise("WSAStartup",r);
 #endif
 }
 }
