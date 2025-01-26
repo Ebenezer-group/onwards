@@ -12,18 +12,18 @@
 #include<time.h>
 
 using namespace ::cmw;
-constexpr ::int32_t bufSize=1101000;
-BufferCompressed<SameFormat,::int32_t,bufSize> cmwBuf;
-
 struct Socky{
   ::sockaddr_in6 addr;
   ::socklen_t len=sizeof addr;
 };
 
-constexpr ::uint64_t reedTag=1;
-constexpr ::uint64_t closTag=2;
-constexpr ::uint64_t sendtoTag=3;
-constexpr ::uint64_t fsyncTag=4;
+constexpr ::int32_t bufSize=1101000;
+BufferCompressed<SameFormat,::int32_t,bufSize> cmwBuf;
+
+constexpr int reedTag=1;
+constexpr int closTag=2;
+constexpr int sendtoTag=3;
+constexpr int fsyncTag=4;
 class ioUring{
   ::io_uring rng;
   ::iovec iov;

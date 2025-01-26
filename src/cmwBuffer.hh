@@ -412,7 +412,7 @@ void receive (auto& b,::std::string_view s){
 
 using stringPlus=::std::initializer_list<::std::string_view>;
 void receive (auto& b,stringPlus lst){
-  ::int32_t t=0;
+  int t=0;
   for(auto s:lst)t+=s.size();
   MarshallingInt{t}.marshal(b);
   for(auto s:lst)b.receive(s.data(),s.size());//Use low-level
