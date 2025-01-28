@@ -20,10 +20,6 @@ struct Socky{
 constexpr ::int32_t bufSize=1101000;
 BufferCompressed<SameFormat,::int32_t,bufSize> cmwBuf;
 
-constexpr int reedTag=1;
-constexpr int closTag=2;
-constexpr int sendtoTag=3;
-constexpr int fsyncTag=4;
 class ioUring{
   ::io_uring rng;
   ::iovec iov;
@@ -39,6 +35,8 @@ class ioUring{
   }
 
  public:
+  constexpr static int Recv=1,Send=2,Close=3,Sendto=4,Fsync=5;
+
   Socky const& recvmsg (){
     auto e=getSqe();
     static Socky frnt;
@@ -74,35 +72,35 @@ class ioUring{
     return ::std::span<::io_uring_cqe*>(&cqes[0],seen);
   }
 
-  void reed (bool stale){
+  void recv (bool stale){
     auto e=getSqe();
     auto sp=cmwBuf.getDuo();
     ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
-    ::io_uring_sqe_set_data64(e,reedTag);
+    ::io_uring_sqe_set_data64(e,Recv);
     if(sp.size()<10)e->ioprio=IORING_RECVSEND_POLL_FIRST;
     if(stale)::io_uring_register_files_update(&rng,1,&cmwBuf.sock_,1);
   }
 
-  void writ (){
+  void send (){
     auto e=getSqe();
     auto sp=cmwBuf.outDuo();
     ::io_uring_prep_send(e,cmwBuf.sock_,sp.data(),sp.size(),0);
-    ::io_uring_sqe_set_data64(e,~reedTag);
+    ::io_uring_sqe_set_data64(e,Send);
   }
 
-  void clos (int fd){
+  void close (int fd){
     auto e=getSqe();
     ::io_uring_prep_close(e,fd);
-    ::io_uring_sqe_set_data64(e,closTag);
+    ::io_uring_sqe_set_data64(e,Close);
     ::io_uring_sqe_set_flags(e,IOSQE_CQE_SKIP_SUCCESS);
   }
 
   void fsync (int fd){
     auto e=getSqe();
     ::io_uring_prep_fsync(e,fd,0);
-    ::io_uring_sqe_set_data64(e,fsyncTag);
+    ::io_uring_sqe_set_data64(e,Fsync);
     ::io_uring_sqe_set_flags(e,IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_HARDLINK);
-    clos(fd);
+    close(fd);
   }
 
   void sendto (Socky const&,auto...);
@@ -150,7 +148,7 @@ struct cmwRequest{
     acctNbr.marshal(buf);
     auto ind=buf.reserveBytes(1);
     auto res=marshalFile(mdlFile,buf);
-    if(res)ring->clos(res);
+    if(res)ring->close(res);
     else receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
     buf.receiveAt(ind,res!=0);
 
@@ -162,18 +160,18 @@ struct cmwRequest{
       if(!::std::strncmp(tok,"--",2))break;
       if(int fd=marshalFile(tok,buf);fd>0){
 	++updatedFiles;
-	ring->clos(fd);
+	ring->close(fd);
       }
     }
     buf.receiveAt(idx,updatedFiles);
-    ring->clos(f.fl());
+    ring->close(f.fl());
     f.fl.release();
   }
 
   void ending (){
     Write(fl(),(char*)&bday,sizeof bday);
     ring->fsync(cmwBuf.giveFile(path.append(".hh")));
-    ring->clos(fl());
+    ring->close(fl());
     fl.release();
   }
 };
@@ -193,7 +191,7 @@ void ioUring::sendto (Socky const& s,auto...t){
   frnts[s2ind]=s;
   ::io_uring_prep_sendto(e,udpSock,sp.data(),sp.size(),0
                          ,(sockaddr*)&frnts[s2ind].addr,frnts[s2ind].len);
-  ::io_uring_sqe_set_data64(e,sendtoTag);
+  ::io_uring_sqe_set_data64(e,Sendto);
 }
 
 void bail (char const* fmt,auto...t)noexcept{
@@ -222,7 +220,7 @@ void login (cmwCredentials const& cred,auto& sa,bool signUp=false){
   pad.spp_flags=SPP_HB_ENABLE;
   if(::setsockopt(cmwBuf.sock_,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
                   ,&pad,sizeof pad)==-1)bail("setsockopt %d",errno);
-  ring->reed(true);
+  ring->recv(true);
   while(!cmwBuf.gotPacket());
   if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
 }
@@ -259,7 +257,7 @@ int main (int ac,char** av)try{
         for(auto& r:pendingRequests){rfrntBuf.send(&r.frnt.addr,r.frnt.len);}
         pendingRequests.clear();
         cmwBuf.compressedReset();
-        ring->clos(cmwBuf.sock_);
+        ring->close(cmwBuf.sock_);
         login(cred,sa);
       }else if(0==cq->user_data){
         auto& frnt=ring->recvmsg();
@@ -269,14 +267,14 @@ int main (int ac,char** av)try{
           req=&pendingRequests.emplace_back(rfrntBuf,frnt);
           ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
           cmwBuf.compress();
-          ring->writ();
+          ring->send();
         }catch(::std::exception& e){
           ::syslog(LOG_ERR,"Accept request:%s",e.what());
           ring->sendto(frnt,e.what());
           if(req)pendingRequests.pop_back();
         }
-      }else if(sendtoTag==cq->user_data){
-      }else if(reedTag==cq->user_data){
+      }else if(::ioUring::Sendto==cq->user_data){
+      }else if(::ioUring::Recv==cq->user_data){
         assert(!pendingRequests.empty());
         auto& req=pendingRequests.front();
         try{
@@ -292,8 +290,8 @@ int main (int ac,char** av)try{
           ring->sendto(req.frnt,e.what());
           pendingRequests.pop_front();
         }
-        ring->reed(false);
-      }else if(!cmwBuf.all(cq->res))ring->writ();
+        ring->recv(false);
+      }else if(!cmwBuf.all(cq->res))ring->send();
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
