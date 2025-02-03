@@ -46,7 +46,7 @@ class ioUring{
     return frnt;
   }
 
-  ioUring (int sock,auto sp):iov{sp.data(),sp.size()},udpSock(sock){
+  ioUring (auto sp,int sock):iov{sp.data(),sp.size()},udpSock(sock){
     auto bff=::mmap(0,103000,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
     if(MAP_FAILED==bff)raise("mmap",errno);
     ::io_uring_params ps{};
@@ -194,6 +194,7 @@ void ioUring::sendto (Socky const& s,auto...t){
   ::io_uring_sqe_set_data64(e,Sendto);
 }
 
+
 void bail (char const* fmt,auto...t)noexcept{
   ::syslog(LOG_ERR,fmt,t...);
   exitFailure();
@@ -233,7 +234,7 @@ int main (int ac,char** av)try{
   SockaddrWrapper const sa(cfg.getline().data(),56789);
   checkField("UDP-port-number",cfg.getline(' '));
   BufferStack<SameFormat> rfrntBuf{udpServer(fromChars(cfg.getline().data()))};
-  ring=new ioUring{rfrntBuf.sock_,rfrntBuf.getDuo()};
+  ring=new ioUring{rfrntBuf.getDuo(),rfrntBuf.sock_};
 
   checkField("AmbassadorID",cfg.getline(' '));
   cmwCredentials cred(cfg.getline());
