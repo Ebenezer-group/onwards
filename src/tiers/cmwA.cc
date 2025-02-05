@@ -100,7 +100,7 @@ class ioUring{
     ::io_uring_prep_fsync(e,fd,0);
     ::io_uring_sqe_set_data64(e,Fsync);
     ::io_uring_sqe_set_flags(e,IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_HARDLINK);
-    close(fd);
+    this->close(fd);
   }
 
   void sendto (Socky const&,auto...);
@@ -193,7 +193,6 @@ void ioUring::sendto (Socky const& s,auto...t){
                          ,(sockaddr*)&frnts[s2ind].addr,frnts[s2ind].len);
   ::io_uring_sqe_set_data64(e,Sendto);
 }
-
 
 void bail (char const* fmt,auto...t)noexcept{
   ::syslog(LOG_ERR,fmt,t...);
