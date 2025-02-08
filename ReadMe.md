@@ -34,22 +34,23 @@ Before running the middle tier, modify your cmwA.cfg file to include your
 ambassador ID and password. The maximum length of an ambassador ID is 20.
 
 #### Running the middle tier -- cmwA (after installing)
-Before running the middle tier normally, it needs to be run 
-with the -signup flag:
+The middle tier is used for two purposes: registration/signup and
+normal operation.  Before the middle tier can be run normally, you need
+to run it with the -signup flag:
 
 cmwA cmwA.cfg -signup
 
-The program exits when run this way.  If this step worked, a message
-is output to the terminal indicating so.  Otherwise, an error message
-is logged.  After registering, the cmwA can be run normally:
+The program exits when run this way.  If the signup succeeds, a message
+is output to the terminal indicating so.  Otherwise, an error message is
+logged.  After registering, the cmwA can be run normally:
 
 nohup cmwA cmwA.cfg &
 
 #### Accounts
-After successfully signing up using the middle tier, you can request
-an account number be associated with your ambassador.  To get an account
-send an email to support@webEbenezer.net with "Account" as the subject,
-and include the ambassador ID that you have chosen.
+After successfully signing up, you can request one or more accounts be 
+associated with your ambassador.  To get an account send an email to 
+support@webEbenezer.net with "Account" as the subject, and mention the 
+ambassador ID that you have chosen.
 
 
 #### Running the front tier -- genz
