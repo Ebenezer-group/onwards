@@ -16,7 +16,7 @@ The
 is header-only.
 
 The [middle tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/cmwA.cc)
-of the CMW, called "cmwA", only gets built on Linux.  Non-Linux developers
+of the CMW, called "cmwA", is a Linux-only program.  Non-Linux developers
 can use the CMW by running the middle tier on a Linux system.
 The [front tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/front/genz.cc)
 of the CMW, called "genz", is built on all platforms.

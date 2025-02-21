@@ -183,14 +183,13 @@ void ioUring::sendto (Socky const& s,auto...t){
     s2ind=0;
   }
   auto e=getSqe();
-  static BufferStack<SameFormat> frntBufs[maxBatch/2];
-  frntBufs[s2ind].reset();
-  ::front::marshal<udpPacketMax>(frntBufs[s2ind],{t...});
-  auto sp=frntBufs[s2ind].outDuo();
-  static Socky frnts[maxBatch/2];
-  frnts[s2ind]=s;
+  static ::std::pair<BufferStack<SameFormat>,::sockaddr_in6> frnts[maxBatch/2];
+  frnts[s2ind].first.reset();
+  ::front::marshal<udpPacketMax>(frnts[s2ind].first,{t...});
+  auto sp=frnts[s2ind].first.outDuo();
+  frnts[s2ind].second=s.addr;
   ::io_uring_prep_sendto(e,udpSock,sp.data(),sp.size(),0
-                         ,(sockaddr*)&frnts[s2ind].addr,frnts[s2ind].len);
+                         ,(sockaddr*)&frnts[s2ind].second,s.len);
   ::io_uring_sqe_set_data64(e,Sendto);
 }
 
