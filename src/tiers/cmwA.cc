@@ -290,7 +290,7 @@ int main (int ac,char** av)try{
           pendingRequests.pop_front();
         }
         ring->recv(false);
-      }else if(!cmwBuf.all(cq->res))ring->send();
+      }else cmwBuf.all(cq->res);
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}

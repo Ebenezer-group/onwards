@@ -473,8 +473,10 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   }
 
   bool all (int bytes){
-    bytesSent-=bytes;
-    if((compIndex-=bytes)==0)return true;
+    bytesSent=0;
+    compIndex-=bytes;
+    if(compIndex<0)compIndex=0;
+    if(compIndex==0)return true;
     ::std::memmove(compBuf,compBuf+bytes,compIndex);
     return false;
   }
