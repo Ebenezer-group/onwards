@@ -458,6 +458,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   char* compressedStart;
   int compPacketSize;
   int compIndex=0;
+  int bytesSent=0;
   int bytesRead=0;
   bool kosher=true;
 
@@ -472,12 +473,17 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   }
 
   bool all (int bytes){
+    bytesSent-=bytes;
     if((compIndex-=bytes)==0)return true;
     ::std::memmove(compBuf,compBuf+bytes,compIndex);
     return false;
   }
 
-  auto outDuo (){return ::std::span<char>(compBuf,compIndex);}
+  auto outDuo (){
+    auto sp=::std::span<char>(compBuf+bytesSent,compIndex-bytesSent);
+    bytesSent=compIndex;
+    return sp;
+  }
 
   auto getDuo (){
     return bytesRead<9?::std::span<char>(recBuf+bytesRead,9-bytesRead):
@@ -525,7 +531,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     this->reset();
     comp={};
     decomp={};
-    compIndex=bytesRead=0;
+    compIndex=bytesSent=bytesRead=0;
     kosher=true;
   }
 };

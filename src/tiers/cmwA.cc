@@ -17,15 +17,15 @@ struct Socky{
   ::socklen_t len=sizeof addr;
 };
 
-constexpr ::int32_t bufSize=1101000;
-BufferCompressed<SameFormat,::int32_t,bufSize> cmwBuf;
+constexpr ::int32_t BufSize=1101000;
+BufferCompressed<SameFormat,::int32_t,BufSize> cmwBuf;
 
 class ioUring{
   ::io_uring rng;
   ::iovec iov;
   int s2ind;
   int const udpSock;
-  constexpr static int maxBatch=10;
+  constexpr static int MaxBatch=10;
 
   auto getSqe (bool internal=false){
     if(auto e=::io_uring_get_sqe(&rng);e)return e;
@@ -67,8 +67,8 @@ class ioUring{
       if(-EINTR!=rc)raise("waitCqe",rc);
     }
     s2ind=-1;
-    static ::io_uring_cqe* cqes[maxBatch];
-    seen=::io_uring_peek_batch_cqe(&rng,&cqes[0],maxBatch);
+    static ::io_uring_cqe* cqes[MaxBatch];
+    seen=::io_uring_peek_batch_cqe(&rng,&cqes[0],MaxBatch);
     return ::std::span<::io_uring_cqe*>(&cqes[0],seen);
   }
 
@@ -178,12 +178,12 @@ struct cmwRequest{
 #include"cmwA.mdl.hh"
 
 void ioUring::sendto (Socky const& s,auto...t){
-  if(++s2ind>=maxBatch/2){
+  if(++s2ind>=MaxBatch/2){
     ::io_uring_submit(&rng);
     s2ind=0;
   }
   auto e=getSqe();
-  static ::std::pair<BufferStack<SameFormat>,::sockaddr_in6> frnts[maxBatch/2];
+  static ::std::pair<BufferStack<SameFormat>,::sockaddr_in6> frnts[MaxBatch/2];
   frnts[s2ind].first.reset();
   ::front::marshal<udpPacketMax>(frnts[s2ind].first,{t...});
   auto sp=frnts[s2ind].first.outDuo();
@@ -204,7 +204,7 @@ void checkField (char const* fld,::std::string_view actl){
 
 void login (cmwCredentials const& cred,auto& sa,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
-        : ::back::marshal<::messageID::login>(cmwBuf,cred,bufSize);
+        : ::back::marshal<::messageID::login>(cmwBuf,cred,BufSize);
   cmwBuf.compress();
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(::connect(cmwBuf.sock_,(::sockaddr*)&sa,sizeof sa)<0){
