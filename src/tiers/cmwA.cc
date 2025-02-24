@@ -246,8 +246,12 @@ int main (int ac,char** av)try{
   }
   ::std::deque<cmwRequest> pendingRequests;
 
+  int sendBytes=0;
   for(;;){
-    for(auto cq:ring->submit()){
+    auto spn=ring->submit();
+    if(sendBytes)cmwBuf.all(sendBytes);
+    sendBytes=0;
+    for(auto cq:spn){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
         if(cq->res<0&&-EPIPE!=cq->res)exitFailure();
@@ -290,7 +294,7 @@ int main (int ac,char** av)try{
           pendingRequests.pop_front();
         }
         ring->recv(false);
-      }else cmwBuf.all(cq->res);
+      }else sendBytes+=cq->res;
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
