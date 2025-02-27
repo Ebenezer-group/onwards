@@ -244,13 +244,13 @@ int main (int ac,char** av)try{
     ::printf("Signup was successful\n");
     ::std::exit(0);
   }
-  ::std::deque<cmwRequest> pendingRequests;
 
-  int sendBytes=0;
+  ::std::deque<cmwRequest> pendingRequests;
+  int sentBytes=0;
   for(;;){
     auto spn=ring->submit();
-    if(sendBytes)cmwBuf.all(sendBytes);
-    sendBytes=0;
+    if(sentBytes)cmwBuf.all(sentBytes);
+    sentBytes=0;
     for(auto cq:spn){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
@@ -294,7 +294,7 @@ int main (int ac,char** av)try{
           pendingRequests.pop_front();
         }
         ring->recv(false);
-      }else sendBytes+=cq->res;
+      }else sentBytes+=cq->res;
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
