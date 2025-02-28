@@ -168,7 +168,7 @@ struct cmwRequest{
     f.fl.release();
   }
 
-  void ending (){
+  void saveOutput (){
     Write(fl(),(char*)&bday,sizeof bday);
     ring->fsync(cmwBuf.giveFile(path.append(".hh")));
     ring->close(fl());
@@ -283,7 +283,7 @@ int main (int ac,char** av)try{
         try{
           if(cmwBuf.gotIt(cq->res)){
             if(giveBool(cmwBuf)){
-              req.ending();
+              req.saveOutput();
               ring->sendto(req.frnt);
             }else ring->sendto(req.frnt,"CMW:",cmwBuf.giveStringView());
             pendingRequests.pop_front();
