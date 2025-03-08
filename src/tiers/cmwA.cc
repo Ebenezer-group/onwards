@@ -245,20 +245,20 @@ int main (int ac,char** av)try{
     ::std::exit(0);
   }
 
-  ::std::deque<cmwRequest> pendingRequests;
+  ::std::deque<cmwRequest> requests;
   int sentBytes=0;
   for(;;){
-    auto spn=ring->submit();
+    auto cqs=ring->submit();
     if(sentBytes)cmwBuf.all(sentBytes);
     sentBytes=0;
-    for(auto cq:spn){
+    for(auto cq:cqs){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
         if(cq->res<0&&-EPIPE!=cq->res)exitFailure();
         rfrntBuf.reset();
         ::front::marshal<udpPacketMax>(rfrntBuf,{"Back tier vanished"});
-        for(auto& r:pendingRequests){rfrntBuf.send(&r.frnt.addr,r.frnt.len);}
-        pendingRequests.clear();
+        for(auto& r:requests){rfrntBuf.send(&r.frnt.addr,r.frnt.len);}
+        requests.clear();
         cmwBuf.compressedReset();
         ring->close(cmwBuf.sock_);
         login(cred,sa);
@@ -267,31 +267,31 @@ int main (int ac,char** av)try{
         cmwRequest* req=0;
         try{
           rfrntBuf.update(cq->res);
-          req=&pendingRequests.emplace_back(rfrntBuf,frnt);
+          req=&requests.emplace_back(rfrntBuf,frnt);
           ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
           cmwBuf.compress();
           ring->send();
         }catch(::std::exception& e){
           ::syslog(LOG_ERR,"Accept request:%s",e.what());
           ring->sendto(frnt,e.what());
-          if(req)pendingRequests.pop_back();
+          if(req)requests.pop_back();
         }
       }else if(::ioUring::Sendto==cq->user_data){
       }else if(::ioUring::Recv==cq->user_data){
-        assert(!pendingRequests.empty());
-        auto& req=pendingRequests.front();
+        assert(!requests.empty());
+        auto& req=requests.front();
         try{
           if(cmwBuf.gotIt(cq->res)){
             if(giveBool(cmwBuf)){
               req.saveOutput();
               ring->sendto(req.frnt);
             }else ring->sendto(req.frnt,"CMW:",cmwBuf.giveStringView());
-            pendingRequests.pop_front();
+            requests.pop_front();
           }
         }catch(::std::exception& e){
           ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
           ring->sendto(req.frnt,e.what());
-          pendingRequests.pop_front();
+          requests.pop_front();
         }
         ring->recv(false);
       }else sentBytes+=cq->res;
