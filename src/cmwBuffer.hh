@@ -472,13 +472,12 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     this->reset();
   }
 
-  bool all (int bytes){
+  void adjustFrame (int bytes){
     bytesSent=0;
     compIndex-=bytes;
     if(compIndex<0)compIndex=0;
-    if(compIndex==0)return true;
+    if(compIndex==0)return;
     ::std::memmove(compBuf,compBuf+bytes,compIndex);
-    return false;
   }
 
   auto outDuo (){

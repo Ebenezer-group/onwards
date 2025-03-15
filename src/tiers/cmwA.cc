@@ -249,7 +249,7 @@ int main (int ac,char** av)try{
   int sentBytes=0;
   for(;;){
     auto cqs=ring->submit();
-    if(sentBytes)cmwBuf.all(sentBytes);
+    if(sentBytes)cmwBuf.adjustFrame(sentBytes);
     sentBytes=0;
     for(auto cq:cqs){
       if(cq->res<=0){
