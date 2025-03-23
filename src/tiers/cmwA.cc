@@ -1,6 +1,7 @@
 #include<cmwBuffer.hh>
 #include"credentials.hh"
 
+#include<array>
 #include<deque>
 #include<cassert>
 #include<liburing.h>
@@ -54,8 +55,8 @@ class ioUring{
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
     if(int rc=::io_uring_queue_init_mem(1024,&rng,&ps,bff,103000);rc<0)
       raise("ioUring",rc);
-    int regfds[]={sock,0};
-    if(::io_uring_register_files(&rng,regfds,2))raise("io reg");
+    ::std::array<int,2> regfds{sock,0};
+    if(::io_uring_register_files(&rng,regfds.data(),regfds.size()))raise("io reg");
     recvmsg();
   }
 
@@ -67,9 +68,9 @@ class ioUring{
       if(-EINTR!=rc)raise("waitCqe",rc);
     }
     s2ind=-1;
-    static ::io_uring_cqe* cqes[MaxBatch];
-    seen=::io_uring_peek_batch_cqe(&rng,&cqes[0],MaxBatch);
-    return ::std::span<::io_uring_cqe*>(&cqes[0],seen);
+    static ::std::array<::io_uring_cqe*,MaxBatch> cqes;
+    seen=::io_uring_peek_batch_cqe(&rng,cqes.data(),MaxBatch);
+    return ::std::span<::io_uring_cqe*>(cqes.data(),seen);
   }
 
   void recv (bool stale){
@@ -183,7 +184,7 @@ void ioUring::sendto (Socky const& s,auto...t){
     s2ind=0;
   }
   auto e=getSqe();
-  static ::std::pair<BufferStack<SameFormat>,::sockaddr_in6> frnts[MaxBatch/2];
+  static ::std::array<::std::pair<BufferStack<SameFormat>,::sockaddr_in6>,MaxBatch/2> frnts;
   frnts[s2ind].first.reset();
   ::front::marshal<udpPacketMax>(frnts[s2ind].first,{t...});
   auto sp=frnts[s2ind].first.outDuo();
