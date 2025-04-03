@@ -22,11 +22,11 @@ constexpr ::int32_t BufSize=1101000;
 BufferCompressed<SameFormat,::int32_t,BufSize> cmwBuf;
 
 class ioUring{
+  constexpr static int MaxBatch=10;
   ::io_uring rng;
   ::iovec iov;
   int s2ind;
   int const udpSock;
-  constexpr static int MaxBatch=10;
 
   auto getSqe (bool internal=false){
     if(auto e=::io_uring_get_sqe(&rng);e)return e;
@@ -55,7 +55,7 @@ class ioUring{
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
     if(int rc=::io_uring_queue_init_mem(1024,&rng,&ps,bff,103000);rc<0)
       raise("ioUring",rc);
-    ::std::array<int,2> regfds{sock,0};
+    ::std::array regfds={sock,0};
     if(::io_uring_register_files(&rng,regfds.data(),regfds.size()))raise("io reg");
     recvmsg();
   }
