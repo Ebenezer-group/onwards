@@ -247,8 +247,7 @@ int main (int ac,char** av)try{
   }
 
   ::std::deque<cmwRequest> requests;
-  int sentBytes=0;
-  for(;;){
+  for(int sentBytes=0;;){
     auto cqs=ring->submit();
     if(sentBytes)cmwBuf.adjustFrame(sentBytes);
     sentBytes=0;
