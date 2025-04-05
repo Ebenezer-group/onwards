@@ -31,7 +31,7 @@ class ioUring{
   auto getSqe (bool internal=false){
     if(auto e=::io_uring_get_sqe(&rng);e)return e;
     if(internal)raise("getSqe");
-    ::io_uring_submit(&rng);
+    ::io_uring_submit_and_wait(&rng,0);
     return getSqe(true);
   }
 
@@ -180,7 +180,7 @@ struct cmwRequest{
 
 void ioUring::sendto (Socky const& s,auto...t){
   if(++s2ind>=MaxBatch/2){
-    ::io_uring_submit(&rng);
+    ::io_uring_submit_and_wait(&rng,0);
     s2ind=0;
   }
   auto e=getSqe();
