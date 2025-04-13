@@ -61,7 +61,7 @@ class ioUring{
   }
 
   auto submit (){
-    static int seen=0;
+    static int seen;
     ::io_uring_cq_advance(&rng,seen);
     int rc;
     while((rc=::io_uring_submit_and_wait(&rng,1))<0){
@@ -69,7 +69,7 @@ class ioUring{
     }
     s2ind=-1;
     static ::std::array<::io_uring_cqe*,MaxBatch> cqes;
-    seen=::io_uring_peek_batch_cqe(&rng,cqes.data(),MaxBatch);
+    seen=::io_uring_peek_batch_cqe(&rng,cqes.data(),cqes.size());
     return ::std::span<::io_uring_cqe*>(cqes.data(),seen);
   }
 
