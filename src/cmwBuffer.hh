@@ -183,12 +183,6 @@ struct FileBuffer{
 };
 #endif
 
-inline int sockRead (sockType s,void* data,int len,::sockaddr* addr,socklen_t* fromLen){
-  if(int r=::recvfrom(s,static_cast<char*>(data),len,0,addr,fromLen);r>=0)
-    return r;
-  raise("sockRead",len,getError());
-}
-
 struct SameFormat{
   static void read (auto& b,auto& data){b.give(&data,sizeof data);}
 
@@ -441,7 +435,8 @@ class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   auto getDuo (){return ::std::span<char>(ar,N);}
 
   bool getPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
-    return this->update(sockRead(this->sock_,ar,N,addr,len));
+    if(int r=::recvfrom(this->sock_,ar,N,0,addr,len);r>=0)return this->update(r);
+    raise("getPacket",getError());
   }
 };
 
