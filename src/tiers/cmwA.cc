@@ -36,14 +36,14 @@ class ioUring{
   }
 
  public:
-  constexpr static int Recv=1,Send=2,Close=3,Sendto=4,Fsync=5;
+  constexpr static int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5;
 
   Socky const& recvmsg (){
     auto e=getSqe();
     static Socky frnt;
     static ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
     ::io_uring_prep_recvmsg(e,udpSock,&mhdr,0);
-    ::io_uring_sqe_set_data64(e,0);
+    ::io_uring_sqe_set_data64(e,Recvmsg);
     return frnt;
   }
 
@@ -262,7 +262,7 @@ int main (int ac,char** av)try{
         cmwBuf.compressedReset();
         ring->close(cmwBuf.sock_);
         login(cred,sa);
-      }else if(0==cq->user_data){
+      }else if(::ioUring::Recvmsg==cq->user_data){
         auto& frnt=ring->recvmsg();
         cmwRequest* req=0;
         try{
