@@ -78,7 +78,7 @@ class ioUring{
     auto sp=cmwBuf.getDuo();
     ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
     ::io_uring_sqe_set_data64(e,Recv);
-    if(sp.size()<10)e->ioprio=IORING_RECVSEND_POLL_FIRST;
+    if(sp.size()<=9)e->ioprio=IORING_RECVSEND_POLL_FIRST;
     if(stale)::io_uring_register_files_update(&rng,1,&cmwBuf.sock_,1);
   }
 
@@ -178,7 +178,7 @@ struct cmwRequest{
 };
 #include"cmwA.mdl.hh"
 
-void ioUring::sendto (Socky const& s,auto...t){
+void ioUring::sendto (Socky const& so,auto...t){
   if(++s2ind>=MaxBatch/2){
     ::io_uring_submit_and_wait(&rng,0);
     s2ind=0;
@@ -188,9 +188,9 @@ void ioUring::sendto (Socky const& s,auto...t){
   frnts[s2ind].first.reset();
   ::front::marshal<udpPacketMax>(frnts[s2ind].first,{t...});
   auto sp=frnts[s2ind].first.outDuo();
-  frnts[s2ind].second=s.addr;
+  frnts[s2ind].second=so.addr;
   ::io_uring_prep_sendto(e,udpSock,sp.data(),sp.size(),0
-                         ,(sockaddr*)&frnts[s2ind].second,s.len);
+                         ,(sockaddr*)&frnts[s2ind].second,so.len);
   ::io_uring_sqe_set_data64(e,Sendto);
 }
 
