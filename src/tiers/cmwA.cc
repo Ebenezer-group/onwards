@@ -294,9 +294,8 @@ int main (int ac,char** av)try{
           requests.pop_front();
         }
         ring->recv(false);
-      }else if(::ioUring::Send==cq->user_data){
-        sentBytes+=cq->res;
-      }else raise("Unknown user_data",cq->user_data);
+      }else if(::ioUring::Send==cq->user_data)sentBytes+=cq->res;
+      else raise("Unknown user_data",cq->user_data);
     }
   }
 }catch(::std::exception& e){bail("Oops:%s",e.what());}
