@@ -2,19 +2,19 @@
 #pragma once
 
 inline void
-cmwCredentials::marshalMembers (auto& buf)const{
+Credentials::marshalMembers (auto& buf)const{
   receive(buf,ambassID);
   password.marshal(buf);
 }
 
 struct back{
 static void mar (auto& buf
-         ,cmwCredentials const& a){
+         ,Credentials const& a){
   a.marshal(buf);
 }
 
 static void mar (auto& buf
-         ,cmwCredentials const& a
+         ,Credentials const& a
          ,::int32_t b){
   a.marshal(buf);
   receive(buf,b);

@@ -1,12 +1,12 @@
-struct cmwCredentials{
+struct Credentials{
   ::std::string ambassID;
   ::cmw::FixedString60 password;
 
-  explicit cmwCredentials (::std::string_view id):ambassID(id){
+  explicit Credentials (::std::string_view id):ambassID(id){
     if(ambassID.size()>20)::cmw::raise("ambassID length");
   }
 
-  template<class R,class Z>explicit cmwCredentials (::cmw::ReceiveBuffer<R,Z>&);
+  template<class R,class Z>explicit Credentials (::cmw::ReceiveBuffer<R,Z>&);
 
   void marshalMembers (auto&)const;
   void marshal (auto& b)const{marshalMembers(b);}

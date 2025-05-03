@@ -200,10 +200,10 @@ void bail (char const* fmt,auto...t)noexcept{
 }
 
 void checkField (char const* fld,::std::string_view actl){
-  if(actl!=fld)bail("Expected %s",fld);
+  if(actl!=fld)::bail("Expected %s",fld);
 }
 
-void login (cmwCredentials const& cred,auto& sa,bool signUp=false){
+void login (::Credentials const& cred,auto& sa,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,BufSize);
   cmwBuf.compress();
@@ -219,34 +219,34 @@ void login (cmwCredentials const& cred,auto& sa,bool signUp=false){
   pad.spp_hbinterval=240000;
   pad.spp_flags=SPP_HB_ENABLE;
   if(::setsockopt(cmwBuf.sock_,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
-                  ,&pad,sizeof pad)==-1)bail("setsockopt %d",errno);
+                  ,&pad,sizeof pad)==-1)::bail("setsockopt %d",errno);
   ring->recv(true);
   while(!cmwBuf.gotPacket());
-  if(!giveBool(cmwBuf))bail("Login:%s",cmwBuf.giveStringView().data());
+  if(!giveBool(cmwBuf))::bail("Login:%s",cmwBuf.giveStringView().data());
 }
 
 int main (int ac,char** av)try{
   ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
-  if(ac<2||ac>3)bail("Usage: %s config-file [-signup]",av[0]);
+  if(ac<2||ac>3)::bail("Usage: %s config-file [-signup]",av[0]);
   FileBuffer cfg{av[1],O_RDONLY};
-  checkField("CMW-IP",cfg.getline(' '));
+  ::checkField("CMW-IP",cfg.getline(' '));
   SockaddrWrapper const sa(cfg.getline().data(),56789);
-  checkField("UDP-port-number",cfg.getline(' '));
+  ::checkField("UDP-port-number",cfg.getline(' '));
   BufferStack<SameFormat> rfrntBuf{udpServer(fromChars(cfg.getline().data()))};
-  ring=new ioUring{rfrntBuf.getDuo(),rfrntBuf.sock_};
+  ring=new ::ioUring{rfrntBuf.getDuo(),rfrntBuf.sock_};
 
   checkField("AmbassadorID",cfg.getline(' '));
-  cmwCredentials cred(cfg.getline());
-  checkField("Password",cfg.getline(' '));
+  ::Credentials cred(cfg.getline());
+  ::checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  login(cred,sa,ac==3);
+  ::login(cred,sa,ac==3);
   if(ac==3){
     ::printf("Signup was successful\n");
     ::std::exit(0);
   }
 
-  ::std::deque<cmwRequest> requests;
+  ::std::deque<::cmwRequest> requests;
   for(int sentBytes=0;;){
     auto cqs=ring->submit();
     if(sentBytes)cmwBuf.adjustFrame(sentBytes);
@@ -261,7 +261,7 @@ int main (int ac,char** av)try{
         requests.clear();
         cmwBuf.compressedReset();
         ring->close(cmwBuf.sock_);
-        login(cred,sa);
+        ::login(cred,sa);
       }else if(::ioUring::Recvmsg==cq->user_data){
         auto& frnt=ring->recvmsg();
         cmwRequest* req=0;
@@ -298,4 +298,4 @@ int main (int ac,char** av)try{
       else raise("Unknown user_data",cq->user_data);
     }
   }
-}catch(::std::exception& e){bail("Oops:%s",e.what());}
+}catch(::std::exception& e){::bail("Oops:%s",e.what());}
