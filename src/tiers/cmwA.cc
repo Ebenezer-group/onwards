@@ -38,9 +38,9 @@ class ioUring{
  public:
   constexpr static int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5;
 
-  Socky const& recvmsg (){
+  auto const& recvmsg (){
     auto e=getSqe();
-    static Socky frnt;
+    static ::Socky frnt;
     static ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
     ::io_uring_prep_recvmsg(e,udpSock,&mhdr,0);
     ::io_uring_sqe_set_data64(e,Recvmsg);
@@ -104,11 +104,11 @@ class ioUring{
     this->close(fd);
   }
 
-  void sendto (Socky const&,auto...);
+  void sendto (::Socky const&,auto...);
 } *ring;
 
 struct cmwRequest{
-  Socky const frnt;
+  ::Socky const frnt;
  private:
   ::int32_t const bday;
   MarshallingInt const acctNbr;
@@ -128,7 +128,7 @@ struct cmwRequest{
   }
 
  public:
-  cmwRequest (auto& buf,Socky const& ft):frnt{ft}
+  cmwRequest (auto& buf,::Socky const& ft):frnt{ft}
       ,bday(::time(0)),acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     mdlFile=::std::strrchr(path(),'/');
@@ -178,7 +178,7 @@ struct cmwRequest{
 };
 #include"cmwA.mdl.hh"
 
-void ioUring::sendto (Socky const& so,auto...t){
+void ioUring::sendto (::Socky const& so,auto...t){
   if(++s2ind>=MaxBatch/2){
     ::io_uring_submit_and_wait(&rng,0);
     s2ind=0;
@@ -235,7 +235,7 @@ int main (int ac,char** av)try{
   BufferStack<SameFormat> rfrntBuf{udpServer(fromChars(cfg.getline().data()))};
   ring=new ::ioUring{rfrntBuf.getDuo(),rfrntBuf.sock_};
 
-  checkField("AmbassadorID",cfg.getline(' '));
+  ::checkField("AmbassadorID",cfg.getline(' '));
   ::Credentials cred(cfg.getline());
   ::checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
