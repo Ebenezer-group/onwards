@@ -148,7 +148,7 @@ struct cmwRequest{
   void marshal (auto& buf)const{
     acctNbr.marshal(buf);
     auto ind=buf.reserveBytes(1);
-    auto res=marshalFile(mdlFile,buf);
+    int res=marshalFile(mdlFile,buf);
     if(res)ring->close(res);
     else receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
     buf.receiveAt(ind,res!=0);
@@ -191,6 +191,7 @@ void ioUring::sendto (::Socky const& so,auto...t){
   frnts[s2ind].second=so.addr;
   ::io_uring_prep_sendto(e,udpSock,sp.data(),sp.size(),0
                          ,(sockaddr*)&frnts[s2ind].second,so.len);
+  ::io_uring_sqe_set_flags(e,IOSQE_CQE_SKIP_SUCCESS);
   ::io_uring_sqe_set_data64(e,Sendto);
 }
 
@@ -276,7 +277,6 @@ int main (int ac,char** av)try{
           ring->sendto(frnt,e.what());
           if(req)requests.pop_back();
         }
-      }else if(::ioUring::Sendto==cq->user_data){
       }else if(::ioUring::Recv==cq->user_data){
         assert(!requests.empty());
         auto& req=requests.front();
