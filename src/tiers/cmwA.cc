@@ -295,7 +295,7 @@ int main (int ac,char** av)try{
         }
         ring->recv(false);
       }else if(::ioUring::Send==cq->user_data)sentBytes+=cq->res;
-      else raise("Unknown user_data",cq->user_data);
+      else ::bail("Unknown user_data %llu",cq->user_data);
     }
   }
 }catch(::std::exception& e){::bail("Oops:%s",e.what());}
