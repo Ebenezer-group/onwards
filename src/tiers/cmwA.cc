@@ -252,7 +252,7 @@ int main (int ac,char** av)try{
     auto cqs=ring->submit();
     if(sentBytes)cmwBuf.adjustFrame(sentBytes);
     sentBytes=0;
-    for(auto cq:cqs){
+    for(::io_uring_cqe const* cq:cqs){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
         if(cq->res<0&&-EPIPE!=cq->res)exitFailure();
