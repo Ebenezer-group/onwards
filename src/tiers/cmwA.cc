@@ -22,7 +22,7 @@ constexpr ::int32_t BufSize=1101000;
 BufferCompressed<SameFormat,::int32_t,BufSize> cmwBuf;
 
 class ioUring{
-  constexpr static int MaxBatch=10;
+  static constexpr int MaxBatch=10;
   ::io_uring rng;
   ::iovec iov;
   int s2ind;
@@ -36,7 +36,7 @@ class ioUring{
   }
 
  public:
-  constexpr static int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5;
+  static constexpr int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5;
 
   auto const& recvmsg (){
     auto e=getSqe();
