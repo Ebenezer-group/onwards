@@ -262,6 +262,8 @@ template<class R,class Z>class ReceiveBuffer{
     return nextMessage();
   }
 
+  explicit ReceiveBuffer (::std::span<char> sp):rbuf{sp.data()}{update(sp.size());}
+
   void giveBlock (auto* data,unsigned int elements){
     if(sizeof(*data)==1)give(data,elements);
     else R::readBlock(*this,data,elements);

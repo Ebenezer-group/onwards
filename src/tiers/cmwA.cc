@@ -14,7 +14,7 @@
 
 using namespace ::cmw;
 struct Socky{
-  ::sockaddr_in6 addr;
+  ::sockaddr_in addr;
   ::socklen_t len=sizeof addr;
 };
 
@@ -22,11 +22,13 @@ constexpr ::int32_t BufSize=1101000;
 BufferCompressed<SameFormat,::int32_t,BufSize> cmwBuf;
 
 class ioUring{
-  static constexpr int MaxBatch=10;
   ::io_uring rng;
   ::iovec iov;
+  ::msghdr mhdr{0,sizeof(::sockaddr_in),&iov,0,0,0,0};
   int s2ind;
   int const udpSock;
+  ::io_uring_buf_ring* bufRing;
+  char* const bufBase;
 
   auto getSqe (bool internal=false){
     if(auto e=::io_uring_get_sqe(&rng);e)return e;
@@ -36,33 +38,53 @@ class ioUring{
   }
 
  public:
+  static constexpr int MaxBatch=10,NumBufs=4;
   static constexpr int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5;
 
-  auto const& recvmsg (){
+  void recvmsg (){
     auto e=getSqe();
-    static ::Socky frnt;
-    static ::msghdr mhdr{&frnt.addr,frnt.len,&iov,1,0,0,0};
-    ::io_uring_prep_recvmsg(e,udpSock,&mhdr,0);
+    ::io_uring_prep_recvmsg_multishot(e,udpSock,&mhdr,MSG_TRUNC);
+    e->flags|=IOSQE_BUFFER_SELECT;
+    e->buf_group=0;
     ::io_uring_sqe_set_data64(e,Recvmsg);
-    return frnt;
   }
 
-  ioUring (auto sp,int sock):iov{sp.data(),sp.size()},udpSock(sock){
+  ioUring (int sock):udpSock{sock}
+          ,bufBase{static_cast<char*>(::std::aligned_alloc(4096,udpPacketMax*NumBufs))}{
+    if(!bufBase)raise("aligned_alloc failed");
     auto bff=::mmap(0,103000,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
     if(MAP_FAILED==bff)raise("mmap",errno);
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
-    if(int rc=::io_uring_queue_init_mem(1024,&rng,&ps,bff,103000);rc<0)
-      raise("ioUring",rc);
+    int rc=::io_uring_queue_init_mem(1024,&rng,&ps,bff,103000);
+    if(rc<0)raise("ioUring",rc);
+
+    bufRing=::io_uring_setup_buf_ring(&rng,NumBufs,0,0,&rc);
+    if(!bufRing)raise("setup_buf_ring failed",rc);
+    int mask=::io_uring_buf_ring_mask(NumBufs);
+    for(int i=0;i<NumBufs;i++){
+      ::io_uring_buf_ring_add(bufRing,bufBase+i*udpPacketMax,udpPacketMax,i,mask,i);
+    }
     ::std::array regfds={sock,0};
     if(::io_uring_register_files(&rng,regfds.data(),regfds.size()))raise("io reg");
-    recvmsg();
   }
 
-  auto submit (){
+  auto check (auto const* cq,::Socky& s){
+    if(~cq->flags&IORING_CQE_F_MORE){
+      ::syslog(LOG_ERR,"recvmsg was disabled");
+      recvmsg();
+    }
+    auto idx=cq->flags>>IORING_CQE_BUFFER_SHIFT;
+    auto* o=::io_uring_recvmsg_validate(bufBase+idx*udpPacketMax,cq->res,&mhdr);
+    if(!o)raise("recvmsg_validate");
+    ::std::memcpy(&s.addr,::io_uring_recvmsg_name(o),o->namelen);
+    return ::std::span<char>(static_cast<char*>(::io_uring_recvmsg_payload(o,&mhdr)),o->payloadlen);
+  }
+
+  auto submit (int bufsUsed){
     static int seen;
-    ::io_uring_cq_advance(&rng,seen);
+    ::__io_uring_buf_ring_cq_advance(&rng,bufRing,seen,bufsUsed);
     int rc;
     while((rc=::io_uring_submit_and_wait(&rng,1))<0){
       if(-EINTR!=rc)raise("waitCqe",rc);
@@ -128,7 +150,7 @@ struct cmwRequest{
   }
 
  public:
-  cmwRequest (auto& buf,::Socky const& ft):frnt{ft}
+  cmwRequest (auto&& buf,::Socky const& ft):frnt{ft}
       ,bday(::time(0)),acctNbr{buf},path{buf}{
     if(path.bytesAvailable()<3)raise("No room for file suffix");
     mdlFile=::std::strrchr(path(),'/');
@@ -160,8 +182,8 @@ struct cmwRequest{
       if(!::std::strncmp(tok,"//",2)||!::std::strncmp(tok,"define",6))continue;
       if(!::std::strncmp(tok,"--",2))break;
       if(int fd=marshalFile(tok,buf);fd>0){
-	++updatedFiles;
-	ring->close(fd);
+        ++updatedFiles;
+        ring->close(fd);
       }
     }
     buf.receiveAt(idx,updatedFiles);
@@ -184,7 +206,7 @@ void ioUring::sendto (::Socky const& so,auto...t){
     s2ind=0;
   }
   auto e=getSqe();
-  static ::std::array<::std::pair<BufferStack<SameFormat>,::sockaddr_in6>,MaxBatch/2> frnts;
+  static ::std::array<::std::pair<BufferStack<SameFormat>,::sockaddr_in>,MaxBatch/2> frnts;
   frnts[s2ind].first.reset();
   ::front::marshal<udpPacketMax>(frnts[s2ind].first,{t...});
   auto sp=frnts[s2ind].first.outDuo();
@@ -234,7 +256,8 @@ int main (int ac,char** av)try{
   SockaddrWrapper const sa(cfg.getline().data(),56789);
   ::checkField("UDP-port-number",cfg.getline(' '));
   BufferStack<SameFormat> rfrntBuf{udpServer(fromChars(cfg.getline().data()))};
-  ring=new ::ioUring{rfrntBuf.getDuo(),rfrntBuf.sock_};
+  ring=new ::ioUring{rfrntBuf.sock_};
+  ring->recvmsg();
 
   ::checkField("AmbassadorID",cfg.getline(' '));
   ::Credentials cred(cfg.getline());
@@ -248,10 +271,10 @@ int main (int ac,char** av)try{
   }
 
   ::std::deque<::cmwRequest> requests;
-  for(int sentBytes=0;;){
-    auto cqs=ring->submit();
+  for(int sentBytes=0,bufsUsed=::ioUring::NumBufs;;){
+    auto cqs=ring->submit(bufsUsed);
     if(sentBytes)cmwBuf.adjustFrame(sentBytes);
-    sentBytes=0;
+    sentBytes=bufsUsed=0;
     for(::io_uring_cqe const* cq:cqs){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
@@ -264,11 +287,12 @@ int main (int ac,char** av)try{
         ring->close(cmwBuf.sock_);
         ::login(cred,sa);
       }else if(::ioUring::Recvmsg==cq->user_data){
-        auto& frnt=ring->recvmsg();
+        ++bufsUsed;
+        ::Socky frnt;
+        auto spn=ring->check(cq,frnt);
         cmwRequest* req=0;
         try{
-          rfrntBuf.update(cq->res);
-          req=&requests.emplace_back(rfrntBuf,frnt);
+          req=&requests.emplace_back(ReceiveBuffer<SameFormat,::int16_t>{spn},frnt);
           ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
           cmwBuf.compress();
           ring->send();
