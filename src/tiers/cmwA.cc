@@ -289,9 +289,9 @@ int main (int ac,char** av)try{
       }else if(::ioUring::Recvmsg==cq->user_data){
         ++bufsUsed;
         ::Socky frnt;
-        auto spn=ring->check(cq,frnt);
         cmwRequest* req=0;
         try{
+          auto spn=ring->check(cq,frnt);
           req=&requests.emplace_back(ReceiveBuffer<SameFormat,::int16_t>{spn},frnt);
           ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
           cmwBuf.compress();
