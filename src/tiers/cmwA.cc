@@ -289,16 +289,17 @@ int main (int ac,char** av)try{
       }else if(::ioUring::Recvmsg==cq->user_data){
         ++bufsUsed;
         ::Socky frnt;
+	::std::span<char> spn{};
         cmwRequest* req=0;
         try{
-          auto spn=ring->check(cq,frnt);
+          spn=ring->check(cq,frnt);
           req=&requests.emplace_back(ReceiveBuffer<SameFormat,::int16_t>{spn},frnt);
           ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
           cmwBuf.compress();
           ring->send();
         }catch(::std::exception& e){
           ::syslog(LOG_ERR,"Accept request:%s",e.what());
-          ring->sendto(frnt,e.what());
+          if(spn.size())ring->sendto(frnt,e.what());
           if(req)requests.pop_back();
         }
       }else if(::ioUring::Recv==cq->user_data){
