@@ -255,8 +255,8 @@ int main (int ac,char** av)try{
   ::checkField("CMW-IP",cfg.getline(' '));
   SockaddrWrapper const sa(cfg.getline().data(),56789);
   ::checkField("UDP-port-number",cfg.getline(' '));
-  BufferStack<SameFormat> rfrntBuf{udpServer(fromChars(cfg.getline().data()))};
-  ring=new ::ioUring{rfrntBuf.sock_};
+  BufferStack<SameFormat> frntBuf{udpServer(fromChars(cfg.getline().data()))};
+  ring=new ::ioUring{frntBuf.sock_};
   ring->recvmsg();
 
   ::checkField("AmbassadorID",cfg.getline(' '));
@@ -272,16 +272,16 @@ int main (int ac,char** av)try{
 
   ::std::deque<::cmwRequest> requests;
   for(int sentBytes=0,bufsUsed=::ioUring::NumBufs;;){
-    auto cqs=ring->submit(bufsUsed);
+    autw cqs=ring->submit(bufsUsed);
     if(sentBytes)cmwBuf.adjustFrame(sentBytes);
     sentBytes=bufsUsed=0;
     for(::io_uring_cqe const* cq:cqs){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
         if(cq->res<0&&-EPIPE!=cq->res)exitFailure();
-        rfrntBuf.reset();
-        ::front::marshal<udpPacketMax>(rfrntBuf,{"Back tier vanished"});
-        for(auto& r:requests){rfrntBuf.send(&r.frnt.addr,r.frnt.len);}
+        frntBuf.reset();
+        ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
+        for(auto& r:requests){frntBuf.send(&r.frnt.addr,r.frnt.len);}
         requests.clear();
         cmwBuf.compressedReset();
         ring->close(cmwBuf.sock_);
