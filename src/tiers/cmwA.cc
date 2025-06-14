@@ -272,7 +272,7 @@ int main (int ac,char** av)try{
 
   ::std::deque<::cmwRequest> requests;
   for(int sentBytes=0,bufsUsed=::ioUring::NumBufs;;){
-    autw cqs=ring->submit(bufsUsed);
+    auto cqs=ring->submit(bufsUsed);
     if(sentBytes)cmwBuf.adjustFrame(sentBytes);
     sentBytes=bufsUsed=0;
     for(::io_uring_cqe const* cq:cqs){
