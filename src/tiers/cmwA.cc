@@ -256,26 +256,26 @@ int main (int ac,char** av)try{
   SockaddrWrapper const sa(cfg.getline().data(),56789);
   ::checkField("UDP-port-number",cfg.getline(' '));
   BufferStack<SameFormat> frntBuf{udpServer(fromChars(cfg.getline().data()))};
-  ring=new ::ioUring{frntBuf.sock_};
-  ring->recvmsg();
 
   ::checkField("AmbassadorID",cfg.getline(' '));
   ::Credentials cred(cfg.getline());
   ::checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
+  ring=new ::ioUring{frntBuf.sock_};
   ::login(cred,sa,ac==3);
   if(ac==3){
     ::printf("Signup was successful\n");
     ::std::exit(0);
   }
+  ring->recvmsg();
 
   ::std::deque<::cmwRequest> requests;
   for(int sentBytes=0,bufsUsed=::ioUring::NumBufs;;){
     auto cqs=ring->submit(bufsUsed);
     if(sentBytes)cmwBuf.adjustFrame(sentBytes);
     sentBytes=bufsUsed=0;
-    for(::io_uring_cqe const* cq:cqs){
+    for(auto const* cq:cqs){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
         if(cq->res<0&&-EPIPE!=cq->res)exitFailure();
