@@ -292,10 +292,10 @@ int main (int ac,char** av)try{
         int tracy=0;
         try{
           auto spn=ring->check(cq,frnt);
-	  ++tracy;
-          auto req=&requests.emplace_back(ReceiveBuffer<SameFormat,::int16_t>{spn},frnt);
-	  ++tracy;
-          ::back::marshal<::messageID::generate,700000>(cmwBuf,*req);
+          ++tracy;
+          auto& req=requests.emplace_back(ReceiveBuffer<SameFormat,::int16_t>{spn},frnt);
+          ++tracy;
+          ::back::marshal<::messageID::generate,700000>(cmwBuf,req);
           cmwBuf.compress();
           ring->send();
         }catch(::std::exception& e){
