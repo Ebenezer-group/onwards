@@ -11,6 +11,7 @@
 #include<stdio.h>
 #include<syslog.h>
 #include<time.h>
+#include"ring_setup.hh"
 
 using namespace ::cmw;
 struct Socky{
@@ -22,7 +23,7 @@ constexpr ::int32_t BufSize=1101000;
 BufferCompressed<SameFormat,::int32_t,BufSize> cmwBuf;
 
 class ioUring{
-  ::io_uring rng;
+  ::io_uring rng{};
   ::iovec iov;
   ::msghdr mhdr{0,sizeof(::sockaddr_in),&iov,0,0,0,0};
   int s2ind;
@@ -57,17 +58,28 @@ class ioUring{
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
-    int rc=::io_uring_queue_init_mem(1024,&rng,&ps,bff,103000);
-    if(rc<0)raise("ioUring",rc);
 
-    bufRing=::io_uring_setup_buf_ring(&rng,NumBufs,0,0,&rc);
-    if(!bufRing)raise("setup_buf_ring failed",rc);
+    int ret=io_uring_alloc_huge(1024,&ps,&rng.sq,&rng.cq,bff,103000);
+    if(ret<0)raise("alloc_huge",ret);
+    int fd=::io_uring_setup(1024,&ps);
+    if(fd<0)raise("ioUring",fd);
+    io_uring_setup_ring_pointers(&ps,&rng.sq,&rng.cq);
+
+    rng.features=ps.features;
+    rng.flags=ps.flags;
+    rng.enter_ring_fd=fd;
+    rng.ring_fd=-1;
+    rng.int_flags |= INT_FLAG_REG_RING|INT_FLAG_REG_REG_RING|INT_FLAG_APP_MEM;
+
+    bufRing=::io_uring_setup_buf_ring(&rng,NumBufs,0,0,&ret);
+    if(!bufRing)raise("setup_buf_ring failed",ret);
     int mask=::io_uring_buf_ring_mask(NumBufs);
     for(int i=0;i<NumBufs;i++){
       ::io_uring_buf_ring_add(bufRing,bufBase+i*udpPacketMax,udpPacketMax,i,mask,i);
     }
     ::std::array regfds={sock,0};
-    if(::io_uring_register_files(&rng,regfds.data(),regfds.size()))raise("io reg");
+    if(::io_uring_register(fd,IORING_REGISTER_FILES|IORING_REGISTER_USE_REGISTERED_RING,
+                           regfds.data(),regfds.size())<0)raise("io reg");
   }
 
   auto check (auto const* cq,::Socky& s){
@@ -79,7 +91,8 @@ class ioUring{
     auto* o=::io_uring_recvmsg_validate(bufBase+idx*udpPacketMax,cq->res,&mhdr);
     if(!o)raise("recvmsg_validate");
     ::std::memcpy(&s.addr,::io_uring_recvmsg_name(o),o->namelen);
-    return ::std::span<char>(static_cast<char*>(::io_uring_recvmsg_payload(o,&mhdr)),o->payloadlen);
+    return ::std::span<char>(static_cast<char*>(::io_uring_recvmsg_payload(o,&mhdr)),
+		             o->payloadlen);
   }
 
   auto submit (int bufsUsed){
