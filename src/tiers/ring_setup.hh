@@ -1,42 +1,29 @@
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpointer-arith"
 void io_uring_setup_ring_pointers(io_uring_params *p,
                                   io_uring_sq *sq,
                                   io_uring_cq *cq)
 {
-  sq->khead = (unsigned*)(sq->ring_ptr + p->sq_off.head);
-  sq->ktail = (unsigned*)(sq->ring_ptr + p->sq_off.tail);
-  sq->kring_mask = (unsigned*)(sq->ring_ptr + p->sq_off.ring_mask);
-  sq->kring_entries = (unsigned*)(sq->ring_ptr + p->sq_off.ring_entries);
-  sq->kflags = (unsigned*)(sq->ring_ptr + p->sq_off.flags);
-  sq->kdropped = (unsigned*)(sq->ring_ptr + p->sq_off.dropped);
-  if (!(p->flags & IORING_SETUP_NO_SQARRAY))
-    sq->array = (unsigned*)(sq->ring_ptr + p->sq_off.array);
+  sq->khead = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.head);
+  sq->ktail = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.tail);
+  sq->kring_mask = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.ring_mask);
+  sq->kring_entries = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.ring_entries);
+  sq->kflags = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.flags);
+  sq->kdropped = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.dropped);
 
-  cq->khead = (unsigned*)(cq->ring_ptr + p->cq_off.head);
-  cq->ktail = (unsigned*)(cq->ring_ptr + p->cq_off.tail);
-  cq->kring_mask = (unsigned*)(cq->ring_ptr + p->cq_off.ring_mask);
-  cq->kring_entries = (unsigned*)(cq->ring_ptr + p->cq_off.ring_entries);
-  cq->koverflow = (unsigned*)(cq->ring_ptr + p->cq_off.overflow);
-  cq->cqes = (io_uring_cqe*)(cq->ring_ptr + p->cq_off.cqes);
+  cq->khead = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.head);
+  cq->ktail = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.tail);
+  cq->kring_mask = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.ring_mask);
+  cq->kring_entries = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.ring_entries);
+  cq->koverflow = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.overflow);
+  cq->cqes = (::io_uring_cqe*)((unsigned char*)cq->ring_ptr + p->cq_off.cqes);
   if (p->cq_off.flags)
-    cq->kflags = (unsigned*)(cq->ring_ptr + p->cq_off.flags);
+    cq->kflags = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.flags);
 
   sq->ring_mask = *sq->kring_mask;
   sq->ring_entries = *sq->kring_entries;
   cq->ring_mask = *cq->kring_mask;
   cq->ring_entries = *cq->kring_entries;
 }
-#pragma GCC diagnostic pop
-
-enum {
-        INT_FLAG_REG_RING       = IORING_ENTER_REGISTERED_RING,
-        INT_FLAG_NO_IOWAIT      = IORING_ENTER_NO_IOWAIT,
-        INT_FLAG_REG_REG_RING   = 1,
-        INT_FLAG_APP_MEM        = 2,
-        INT_FLAG_CQ_ENTER       = 4,
-};
 
 int io_uring_alloc_huge (unsigned entries, io_uring_params *p,
                          io_uring_sq *sq, io_uring_cq *cq,
@@ -94,11 +81,19 @@ int io_uring_alloc_huge (unsigned entries, io_uring_params *p,
   if(mem_used>buf_size)return -ENOMEM;
 
   sq->sqes=(io_uring_sqe*)buf;
-  sq->ring_ptr=(void *)sq->sqes+sqes_mem ;
+  sq->ring_ptr=(unsigned char*)sq->sqes+sqes_mem ;
 
   cq->ring_ptr=(void *)sq->ring_ptr;
   p->sq_off.user_addr = (unsigned long) sq->sqes;
   p->cq_off.user_addr = (unsigned long) sq->ring_ptr;
   return (int) mem_used;
 }
+
+enum {
+        INT_FLAG_REG_RING       = IORING_ENTER_REGISTERED_RING,
+        INT_FLAG_NO_IOWAIT      = IORING_ENTER_NO_IOWAIT,
+        INT_FLAG_REG_REG_RING   = 1,
+        INT_FLAG_APP_MEM        = 2,
+        INT_FLAG_CQ_ENTER       = 4,
+};
 
