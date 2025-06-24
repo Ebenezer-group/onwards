@@ -1,7 +1,32 @@
 
-void io_uring_setup_ring_pointers(io_uring_params *p,
-                                  io_uring_sq *sq,
-                                  io_uring_cq *cq)
+void uring_initialize_sqe (::io_uring_sqe* sqe)
+{
+  sqe->flags=0;
+  sqe->ioprio=0;
+  sqe->rw_flags=0;
+  sqe->buf_index=0;
+  sqe->personality=0;
+  sqe->file_index=0;
+  sqe->addr3=0;
+  sqe->__pad2[0]=0;
+}
+
+::io_uring_sqe* uring_get_sqe (::io_uring* ring)
+{
+  ::io_uring_sq* sq=&ring->sq;
+  unsigned head=*ring->sq.khead, 
+	   tail=sq->sqe_tail;
+
+  if(tail-head>=sq->ring_entries)return 0;
+
+  auto sqe=&sq->sqes[(tail & sq->ring_mask)<<io_uring_sqe_shift(ring)];
+  sq->sqe_tail=tail+1;
+  ::uring_initialize_sqe(sqe);
+  return sqe;
+}
+
+void uring_setup_ring_pointers (::io_uring_params* p,
+                                ::io_uring_sq* sq,::io_uring_cq* cq)
 {
   sq->khead = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.head);
   sq->ktail = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.tail);
@@ -19,15 +44,15 @@ void io_uring_setup_ring_pointers(io_uring_params *p,
   if (p->cq_off.flags)
     cq->kflags = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.flags);
 
-  sq->ring_mask = *sq->kring_mask;
-  sq->ring_entries = *sq->kring_entries;
-  cq->ring_mask = *cq->kring_mask;
-  cq->ring_entries = *cq->kring_entries;
+  sq->ring_mask=*sq->kring_mask;
+  sq->ring_entries=*sq->kring_entries;
+  cq->ring_mask=*cq->kring_mask;
+  cq->ring_entries=*cq->kring_entries;
 }
 
-int io_uring_alloc_huge (unsigned entries, io_uring_params *p,
-                         io_uring_sq *sq, io_uring_cq *cq,
-                         void *buf, size_t buf_size)
+int uring_alloc_huge (unsigned entries, ::io_uring_params* p,
+                      ::io_uring_sq* sq, ::io_uring_cq* cq,
+                      void* buf, size_t buf_size)
 {
   constexpr int KERN_MAX_ENTRIES=32768;
   constexpr int KERN_MAX_CQ_ENTRIES=2*KERN_MAX_ENTRIES;

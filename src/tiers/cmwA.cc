@@ -32,7 +32,7 @@ class ioUring{
   char* const bufBase;
 
   auto getSqe (bool internal=false){
-    if(auto e=::io_uring_get_sqe(&rng);e)return e;
+    if(auto e=::uring_get_sqe(&rng);e)return e;
     if(internal)raise("getSqe");
     ::io_uring_submit_and_wait(&rng,0);
     return getSqe(true);
@@ -59,11 +59,11 @@ class ioUring{
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
 
-    if(int rc=io_uring_alloc_huge(1024,&ps,&rng.sq,&rng.cq,bff,103000);rc<0)
+    if(int rc=uring_alloc_huge(1024,&ps,&rng.sq,&rng.cq,bff,103000);rc<0)
       raise("alloc_huge",rc);
     int fd=::io_uring_setup(1024,&ps);
     if(fd<0)raise("ioUring",fd);
-    io_uring_setup_ring_pointers(&ps,&rng.sq,&rng.cq);
+    uring_setup_ring_pointers(&ps,&rng.sq,&rng.cq);
 
     rng.features=ps.features;
     rng.flags=ps.flags;
