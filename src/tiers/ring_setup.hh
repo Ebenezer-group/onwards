@@ -1,4 +1,36 @@
 
+#include <atomic>
+
+template <typename T>
+void URING_WRITE_ONCE (T &var,T val){
+        std::atomic_store_explicit(reinterpret_cast<std::atomic<T>*>(&var),
+                                   val, ::std::memory_order_relaxed);
+}
+
+template <typename T>
+T URING_READ_ONCE (T const& var){
+	return ::std::atomic_load_explicit(
+           reinterpret_cast<::std::atomic<T> const*>(&var),
+           ::std::memory_order_relaxed);
+}
+
+template <typename T>
+void uring_smp_store_release (T *p,T v){
+  ::std::atomic_store_explicit(reinterpret_cast<::std::atomic<T> *>(p), v,
+                               ::std::memory_order_release);
+}
+
+template <typename T>
+T uring_smp_load_acquire (const T *p){
+  return ::std::atomic_load_explicit(
+        reinterpret_cast<::std::atomic<T> const*>(p),
+                ::std::memory_order_acquire);
+}
+
+inline void uring_smp_mb (){
+  ::std::atomic_thread_fence(::std::memory_order_seq_cst);
+}
+
 void uring_initialize_sqe (::io_uring_sqe* sqe)
 {
   sqe->flags=0;
@@ -23,6 +55,29 @@ void uring_initialize_sqe (::io_uring_sqe* sqe)
   sq->sqe_tail=tail+1;
   ::uring_initialize_sqe(sqe);
   return sqe;
+}
+
+unsigned uring_cq_ready (::io_uring const* ring)
+{
+  return uring_smp_load_acquire(ring->cq.ktail) - *ring->cq.khead;
+}
+
+unsigned uring_peek_batch_cqe (::io_uring* ring,
+                               ::io_uring_cqe** cqes,unsigned count)
+{
+  int shift=0;
+  if(ring->flags&IORING_SETUP_CQE32)
+    shift=1;
+
+  unsigned ready=uring_cq_ready(ring);
+  if(ready<count)count=ready;
+
+  unsigned head=*ring->cq.khead;
+  unsigned last=head+count;
+  unsigned mask=ring->cq.ring_mask;
+  for(;head!=last;++head)
+    *(cqes++)=&ring->cq.cqes[(head & mask)<<shift];
+  return count;
 }
 
 void uring_setup_ring_pointers (::io_uring_params* p,

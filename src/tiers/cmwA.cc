@@ -118,7 +118,7 @@ class ioUring{
     }
     s2ind=-1;
     static ::std::array<::io_uring_cqe*,MaxBatch> cqes;
-    seen=::io_uring_peek_batch_cqe(&rng,cqes.data(),cqes.size());
+    seen=::uring_peek_batch_cqe(&rng,cqes.data(),cqes.size());
     return ::std::span<::io_uring_cqe*>(cqes.data(),seen);
   }
 
