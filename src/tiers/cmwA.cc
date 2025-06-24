@@ -71,23 +71,25 @@ class ioUring{
     rng.ring_fd=-1;
     rng.int_flags |= INT_FLAG_REG_RING|INT_FLAG_REG_REG_RING|INT_FLAG_APP_MEM;
 
-    size_t ring_size=NumBufs*sizeof(::io_uring_buf);
-    bufRing=(::io_uring_buf_ring*)::mmap(0,ring_size,PROT_READ|PROT_WRITE,
+    size_t ringSize=NumBufs*sizeof(::io_uring_buf);
+    bufRing=(::io_uring_buf_ring*)::mmap(0,ringSize,PROT_READ|PROT_WRITE,
                                       MAP_ANONYMOUS|MAP_PRIVATE,-1,0);
     if(MAP_FAILED==bufRing)raise("mmap2",errno);
     bufRing->tail=0;
 
     ::io_uring_buf_reg reg{};
-    reg.ring_addr = (unsigned long) (uintptr_t) bufRing;
+    reg.ring_addr=(unsigned long) (uintptr_t)bufRing;
     reg.ring_entries=NumBufs;
     reg.bgid=0;
-
     if(::io_uring_register(fd,IORING_REGISTER_PBUF_RING|IORING_REGISTER_USE_REGISTERED_RING
        	                   ,&reg,1)<0)raise("reg buf ring");
 
-    int mask=::io_uring_buf_ring_mask(NumBufs);
+    int mask=NumBufs-1;
     for(int i=0;i<NumBufs;i++){
-      ::io_uring_buf_ring_add(bufRing,bufBase+i*udpPacketMax,udpPacketMax,i,mask,i);
+      ::io_uring_buf* buf=&bufRing->bufs[(bufRing->tail + i)&mask];
+      buf->addr=(unsigned long) (uintptr_t)(bufBase+i*udpPacketMax);
+      buf->len=udpPacketMax;
+      buf->bid=i;
     }
     ::std::array regfds={sock,0};
     if(::io_uring_register(fd,IORING_REGISTER_FILES|IORING_REGISTER_USE_REGISTERED_RING,
