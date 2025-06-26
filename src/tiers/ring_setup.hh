@@ -1,5 +1,11 @@
 
-#include <atomic>
+#include<atomic>
+#include<cmwBuffer.hh>
+
+inline auto mmapWrapper (size_t length){
+  if(auto addr=::mmap(0,length,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);addr!=MAP_FAILED)return addr;
+  ::cmw::raise("mmap",errno);
+}
 
 template <typename T>
 void URING_WRITE_ONCE (T &var,T val){
@@ -73,9 +79,8 @@ unsigned uring_peek_batch_cqe (::io_uring* ring,
   if(ready<count)count=ready;
 
   unsigned head=*ring->cq.khead;
-  unsigned last=head+count;
   unsigned mask=ring->cq.ring_mask;
-  for(;head!=last;++head)
+  for(unsigned last=head+count;head!=last;++head)
     *(cqes++)=&ring->cq.cqes[(head & mask)<<shift];
   return count;
 }

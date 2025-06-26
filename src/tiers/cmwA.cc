@@ -51,10 +51,8 @@ class ioUring{
   }
 
   ioUring (int sock):udpSock{sock}
-          ,bufBase{static_cast<char*>(::std::aligned_alloc(4096,udpPacketMax*NumBufs))}{
-    if(!bufBase)raise("aligned_alloc failed");
-    auto bff=::mmap(0,103000,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
-    if(MAP_FAILED==bff)raise("mmap",errno);
+          ,bufBase{static_cast<char*>(mmapWrapper(udpPacketMax*NumBufs))}{
+    auto bff=mmapWrapper(103000);
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
@@ -72,9 +70,7 @@ class ioUring{
     rng.int_flags |= INT_FLAG_REG_RING|INT_FLAG_REG_REG_RING|INT_FLAG_APP_MEM;
 
     size_t ringSize=NumBufs*sizeof(::io_uring_buf);
-    bufRing=(::io_uring_buf_ring*)::mmap(0,ringSize,PROT_READ|PROT_WRITE,
-                                      MAP_ANONYMOUS|MAP_PRIVATE,-1,0);
-    if(MAP_FAILED==bufRing)raise("mmap2",errno);
+    bufRing=(::io_uring_buf_ring*)mmapWrapper(ringSize);
     bufRing->tail=0;
 
     ::io_uring_buf_reg reg{};
