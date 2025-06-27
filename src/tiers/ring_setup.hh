@@ -2,8 +2,11 @@
 #include<atomic>
 #include<cmwBuffer.hh>
 
-inline auto mmapWrapper (size_t length){
-  if(auto addr=::mmap(0,length,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);addr!=MAP_FAILED)return addr;
+template<class T=void*>
+auto mmapWrapper (size_t length){
+  if(auto addr=::mmap(0,length,PROT_READ|PROT_WRITE,
+                      MAP_PRIVATE|MAP_ANONYMOUS,-1,0);addr!=MAP_FAILED)
+    return reinterpret_cast<T>(addr);
   ::cmw::raise("mmap",errno);
 }
 
@@ -52,7 +55,7 @@ void uring_initialize_sqe (::io_uring_sqe* sqe)
 ::io_uring_sqe* uring_get_sqe (::io_uring* ring)
 {
   ::io_uring_sq* sq=&ring->sq;
-  unsigned head=*ring->sq.khead, 
+  unsigned head=*ring->sq.khead,
 	   tail=sq->sqe_tail;
 
   if(tail-head>=sq->ring_entries)return 0;
@@ -110,9 +113,9 @@ void uring_setup_ring_pointers (::io_uring_params* p,
   cq->ring_entries=*cq->kring_entries;
 }
 
-int uring_alloc_huge (unsigned entries, ::io_uring_params* p,
-                      ::io_uring_sq* sq, ::io_uring_cq* cq,
-                      void* buf, size_t buf_size)
+int uring_alloc_huge (unsigned entries,::io_uring_params* p,
+                      ::io_uring_sq* sq,::io_uring_cq* cq,
+                      void* buf,size_t buf_size)
 {
   constexpr int KERN_MAX_ENTRIES=32768;
   constexpr int KERN_MAX_CQ_ENTRIES=2*KERN_MAX_ENTRIES;

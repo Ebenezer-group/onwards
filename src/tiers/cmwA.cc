@@ -51,7 +51,7 @@ class ioUring{
   }
 
   ioUring (int sock):udpSock{sock}
-          ,bufBase{static_cast<char*>(mmapWrapper(NumBufs*udpPacketMax))}{
+            ,bufBase{mmapWrapper<char*>(NumBufs*udpPacketMax)}{
     auto bff=mmapWrapper(26*4096);
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
@@ -62,14 +62,13 @@ class ioUring{
     int fd=::io_uring_setup(1024,&ps);
     if(fd<0)raise("ioUring",fd);
     uring_setup_ring_pointers(&ps,&rng.sq,&rng.cq);
-
     rng.features=ps.features;
     rng.flags=ps.flags;
     rng.enter_ring_fd=fd;
     rng.ring_fd=-1;
-    rng.int_flags|= INT_FLAG_REG_RING|INT_FLAG_REG_REG_RING|INT_FLAG_APP_MEM;
+    rng.int_flags|=INT_FLAG_REG_RING|INT_FLAG_REG_REG_RING|INT_FLAG_APP_MEM;
 
-    bufRing=(::io_uring_buf_ring*)mmapWrapper(NumBufs*sizeof(::io_uring_buf));
+    bufRing=mmapWrapper<::io_uring_buf_ring*>(NumBufs*sizeof(::io_uring_buf));
     bufRing->tail=0;
 
     ::io_uring_buf_reg reg{};
