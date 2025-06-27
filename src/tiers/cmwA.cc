@@ -51,13 +51,13 @@ class ioUring{
   }
 
   ioUring (int sock):udpSock{sock}
-          ,bufBase{static_cast<char*>(mmapWrapper(udpPacketMax*NumBufs))}{
-    auto bff=mmapWrapper(103000);
+          ,bufBase{static_cast<char*>(mmapWrapper(NumBufs*udpPacketMax))}{
+    auto bff=mmapWrapper(26*4096);
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
 
-    if(int rc=uring_alloc_huge(1024,&ps,&rng.sq,&rng.cq,bff,103000);rc<0)
+    if(int rc=uring_alloc_huge(1024,&ps,&rng.sq,&rng.cq,bff,26*4096);rc<0)
       raise("alloc_huge",rc);
     int fd=::io_uring_setup(1024,&ps);
     if(fd<0)raise("ioUring",fd);
@@ -67,10 +67,9 @@ class ioUring{
     rng.flags=ps.flags;
     rng.enter_ring_fd=fd;
     rng.ring_fd=-1;
-    rng.int_flags |= INT_FLAG_REG_RING|INT_FLAG_REG_REG_RING|INT_FLAG_APP_MEM;
+    rng.int_flags|= INT_FLAG_REG_RING|INT_FLAG_REG_REG_RING|INT_FLAG_APP_MEM;
 
-    size_t ringSize=NumBufs*sizeof(::io_uring_buf);
-    bufRing=(::io_uring_buf_ring*)mmapWrapper(ringSize);
+    bufRing=(::io_uring_buf_ring*)mmapWrapper(NumBufs*sizeof(::io_uring_buf));
     bufRing->tail=0;
 
     ::io_uring_buf_reg reg{};
