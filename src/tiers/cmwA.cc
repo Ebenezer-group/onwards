@@ -105,7 +105,8 @@ class ioUring{
 
   auto submit (int bufsUsed){
     static int seen;
-    ::__io_uring_buf_ring_cq_advance(&rng,bufRing,seen,bufsUsed);
+    ::io_uring_buf_ring_advance(bufRing,bufsUsed);
+    ::io_uring_cq_advance(&rng,seen);
     int rc;
     while((rc=::io_uring_submit_and_wait(&rng,1))<0){
       if(-EINTR!=rc)raise("waitCqe",rc);
