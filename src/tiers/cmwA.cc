@@ -56,7 +56,7 @@ class ioUring{
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
 
-    if(int rc=uring_alloc_huge(1024,&ps,&rng.sq,&rng.cq,bufBase+3*4096,26*4096);rc<0)
+    if(int rc=uring_alloc_huge(1024,ps,&rng.sq,&rng.cq,bufBase+3*4096,26*4096);rc<0)
       raise("alloc_huge",rc);
     int fd=::io_uring_setup(1024,&ps);
     if(fd<0)raise("ioUring",fd);

@@ -9,47 +9,44 @@ auto mmapWrapper (size_t length){
   ::cmw::raise("mmap",errno);
 }
 
-inline int uring_alloc_huge (unsigned entries,::io_uring_params* p,
+inline int uring_alloc_huge (unsigned sq_entries,::io_uring_params& p,
                              ::io_uring_sq* sq,::io_uring_cq* cq,
-                             void* buf,size_t buf_size)
+                             void* buf,size_t bufSize)
 {
   constexpr int KERN_MAX_ENTRIES=32768;
   constexpr int KERN_MAX_CQ_ENTRIES=2*KERN_MAX_ENTRIES;
 
-  unsigned long page_size=getpagesize();
-
-  if(!entries)return -EINVAL;
-  if(entries>KERN_MAX_ENTRIES){
-    if(!(p->flags&IORING_SETUP_CLAMP))
+  if(!sq_entries)return -EINVAL;
+  if(sq_entries>KERN_MAX_ENTRIES){
+    if(!(p.flags&IORING_SETUP_CLAMP))
       return -EINVAL;
-    entries=KERN_MAX_ENTRIES;
+    sq_entries=KERN_MAX_ENTRIES;
   }
 
   unsigned cq_entries;
-  if(p->flags&IORING_SETUP_CQSIZE){
-    if(!p->cq_entries)return -EINVAL;
-    cq_entries=p->cq_entries;
+  if(p.flags&IORING_SETUP_CQSIZE){
+    if(!p.cq_entries)return -EINVAL;
+    cq_entries=p.cq_entries;
     if(cq_entries>KERN_MAX_CQ_ENTRIES){
-      if(!(p->flags & IORING_SETUP_CLAMP))
+      if(!(p.flags & IORING_SETUP_CLAMP))
         return -EINVAL;
       cq_entries=KERN_MAX_CQ_ENTRIES;
     }
-    if(cq_entries<entries)return -EINVAL;
+    if(cq_entries<sq_entries)return -EINVAL;
   }else{
-    cq_entries=2*entries;
+    cq_entries=2*sq_entries;
   }
 
-  unsigned sq_entries=entries;
-
   size_t sqes_mem=sq_entries*sizeof(io_uring_sqe);
-  sqes_mem = (sqes_mem+page_size-1) & ~(page_size-1);
+  unsigned long pageSize=getpagesize();
+  sqes_mem=(sqes_mem+pageSize-1) & ~(pageSize-1);
 
   size_t cqes_mem=cq_entries*sizeof(io_uring_cqe);
-  if(p->flags&IORING_SETUP_CQE32) cqes_mem*=2;
+  if(p.flags&IORING_SETUP_CQE32)cqes_mem*=2;
   constexpr int KRING_SIZE=64;
   size_t const ring_mem=KRING_SIZE+sqes_mem+cqes_mem;
   unsigned long mem_used=ring_mem;
-  mem_used=(mem_used+page_size-1) & ~(page_size-1);
+  mem_used=(mem_used+pageSize-1) & ~(pageSize-1);
 
   /*
    * A maxed-out number of CQ entries with IORING_SETUP_CQE32 fills a 2MB
@@ -58,18 +55,18 @@ inline int uring_alloc_huge (unsigned entries,::io_uring_params* p,
    * but check that too to future-proof (e.g. against different huge page
    * sizes). Bail out early so we don't overrun.
    */
-  constexpr size_t huge_page_size = 2*1024*1024;
-  if(!buf && (sqes_mem>huge_page_size||ring_mem>huge_page_size))
+  constexpr size_t huge_pageSize=2*1024*1024;
+  if(!buf && (sqes_mem>huge_pageSize||ring_mem>huge_pageSize))
     return -ENOMEM;
 
-  if(mem_used>buf_size)return -ENOMEM;
+  if(mem_used>bufSize)return -ENOMEM;
 
   sq->sqes=(io_uring_sqe*)buf;
-  sq->ring_ptr=(unsigned char*)sq->sqes+sqes_mem ;
+  sq->ring_ptr=(unsigned char*)sq->sqes+sqes_mem;
 
   cq->ring_ptr=sq->ring_ptr;
-  p->sq_off.user_addr = (unsigned long) sq->sqes;
-  p->cq_off.user_addr = (unsigned long) sq->ring_ptr;
+  p.sq_off.user_addr = (unsigned long) sq->sqes;
+  p.cq_off.user_addr = (unsigned long) sq->ring_ptr;
   return (int) mem_used;
 }
 
