@@ -60,9 +60,7 @@ class ioUring{
       raise("alloc_huge",rc);
     int fd=::io_uring_setup(1024,&ps);
     if(fd<0)raise("ioUring",fd);
-    uring_setup_ring_pointers(&ps,&rng.sq,&rng.cq);
-    rng.features=ps.features;
-    rng.flags=ps.flags;
+    uring_setup_ring(ps,rng);
     rng.enter_ring_fd=fd;
     rng.ring_fd=-1;
     rng.int_flags|=INT_FLAG_REG_RING|INT_FLAG_REG_REG_RING|INT_FLAG_APP_MEM;
@@ -79,7 +77,7 @@ class ioUring{
        	                   ,&reg,1)<0)raise("reg buf ring");
 
     int mask=NumBufs-1;
-    for(int i=0;i<NumBufs;i++){
+    for(int i=0;i<NumBufs;++i){
       ::io_uring_buf* buf=&bufRing->bufs[(bufRing->tail + i)&mask];
       buf->addr=(unsigned long) (uintptr_t)(bufBase+i*udpPacketMax);
       buf->len=udpPacketMax;

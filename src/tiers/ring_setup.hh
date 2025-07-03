@@ -73,29 +73,32 @@ inline int uring_alloc_huge (unsigned entries,::io_uring_params* p,
   return (int) mem_used;
 }
 
-inline void uring_setup_ring_pointers (::io_uring_params* p,
-                                       ::io_uring_sq* sq,::io_uring_cq* cq)
+inline void uring_setup_ring (::io_uring_params& p,::io_uring& rng)
 {
-  sq->khead = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.head);
-  sq->ktail = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.tail);
-  sq->kring_mask = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.ring_mask);
-  sq->kring_entries = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.ring_entries);
-  sq->kflags = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.flags);
-  sq->kdropped = (unsigned*)((unsigned char*)sq->ring_ptr + p->sq_off.dropped);
+  ::io_uring_sq& sq=rng.sq;
+  ::io_uring_cq& cq=rng.cq;
+  sq.khead = (unsigned*)((unsigned char*)sq.ring_ptr + p.sq_off.head);
+  sq.ktail = (unsigned*)((unsigned char*)sq.ring_ptr + p.sq_off.tail);
+  sq.kring_mask = (unsigned*)((unsigned char*)sq.ring_ptr + p.sq_off.ring_mask);
+  sq.kring_entries = (unsigned*)((unsigned char*)sq.ring_ptr + p.sq_off.ring_entries);
+  sq.kflags = (unsigned*)((unsigned char*)sq.ring_ptr + p.sq_off.flags);
+  sq.kdropped = (unsigned*)((unsigned char*)sq.ring_ptr + p.sq_off.dropped);
 
-  cq->khead = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.head);
-  cq->ktail = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.tail);
-  cq->kring_mask = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.ring_mask);
-  cq->kring_entries = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.ring_entries);
-  cq->koverflow = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.overflow);
-  cq->cqes = (::io_uring_cqe*)((unsigned char*)cq->ring_ptr + p->cq_off.cqes);
-  if (p->cq_off.flags)
-    cq->kflags = (unsigned*)((unsigned char*)cq->ring_ptr + p->cq_off.flags);
+  cq.khead = (unsigned*)((unsigned char*)cq.ring_ptr + p.cq_off.head);
+  cq.ktail = (unsigned*)((unsigned char*)cq.ring_ptr + p.cq_off.tail);
+  cq.kring_mask = (unsigned*)((unsigned char*)cq.ring_ptr + p.cq_off.ring_mask);
+  cq.kring_entries = (unsigned*)((unsigned char*)cq.ring_ptr + p.cq_off.ring_entries);
+  cq.koverflow = (unsigned*)((unsigned char*)cq.ring_ptr + p.cq_off.overflow);
+  cq.cqes = (::io_uring_cqe*)((unsigned char*)cq.ring_ptr + p.cq_off.cqes);
+  if(p.cq_off.flags)
+    cq.kflags = (unsigned*)((unsigned char*)cq.ring_ptr + p.cq_off.flags);
 
-  sq->ring_mask=*sq->kring_mask;
-  sq->ring_entries=*sq->kring_entries;
-  cq->ring_mask=*cq->kring_mask;
-  cq->ring_entries=*cq->kring_entries;
+  sq.ring_mask=*sq.kring_mask;
+  sq.ring_entries=*sq.kring_entries;
+  cq.ring_mask=*cq.kring_mask;
+  cq.ring_entries=*cq.kring_entries;
+  rng.features=p.features;
+  rng.flags=p.flags;
 }
 
 template <typename T>
