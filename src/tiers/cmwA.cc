@@ -252,7 +252,7 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
   cmwBuf.compress();
   cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(::connect(cmwBuf.sock_,(::sockaddr*)&sa,sizeof sa)<0){
-    ::perror("connect");
+    ::fprintf(stderr,"connect %s",::strerror(errno));
     ::sleep(30);
   }
 
