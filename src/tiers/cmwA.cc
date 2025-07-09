@@ -250,12 +250,13 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,BufSize);
   cmwBuf.compress();
-  cmwBuf.sock_=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-  while(::connect(cmwBuf.sock_,(::sockaddr*)&sa,sizeof sa)<0){
-    ::fprintf(stderr,"connect %s",::strerror(errno));
+  static int next=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
+  while(::connect(next,(::sockaddr*)&sa,sizeof sa)<0){
+    ::fprintf(stderr,"connect %s\n",::strerror(errno));
     ::sleep(30);
   }
 
+  cmwBuf.sock_=next;
   cmwBuf.flush();
   ::sctp_paddrparams pad{};
   pad.spp_address.ss_family=AF_INET;
@@ -264,6 +265,7 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
   if(::setsockopt(cmwBuf.sock_,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
                   ,&pad,sizeof pad)==-1)::bail("setsockopt %d",errno);
   ring->recv(true);
+  next=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(!cmwBuf.gotPacket());
   if(!giveBool(cmwBuf))::bail("Login:%s",cmwBuf.giveStringView().data());
 }
