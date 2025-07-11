@@ -40,7 +40,7 @@ class ioUring{
 
  public:
   static constexpr int MaxBatch=10,NumBufs=4;
-  static constexpr int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5;
+  static constexpr int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5,Write=6;
 
   void recvmsg (){
     auto e=getSqe();
@@ -50,8 +50,7 @@ class ioUring{
     ::io_uring_sqe_set_data64(e,Recvmsg);
   }
 
-  ioUring (int sock):udpSock{sock}
-            ,bufBase{mmapWrapper<char*>(29*4096)}{
+  ioUring (int sock):udpSock{sock},bufBase{mmapWrapper<char*>(29*4096)}{
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
@@ -138,6 +137,14 @@ class ioUring{
     ::io_uring_sqe_set_flags(e,IOSQE_CQE_SKIP_SUCCESS);
   }
 
+  void writeDot (int fd,auto& bday){
+    auto e=getSqe();
+    ::io_uring_prep_write(e,fd,&bday,sizeof bday,0);
+    ::io_uring_sqe_set_data64(e,Write);
+    ::io_uring_sqe_set_flags(e,IOSQE_IO_HARDLINK);
+    this->close(fd);
+  }
+
   void fsync (int fd){
     auto e=getSqe();
     ::io_uring_prep_fsync(e,fd,0);
@@ -181,9 +188,9 @@ struct cmwRequest{
     char last[60];
     ::snprintf(last,sizeof last,".%s.last",++mdlFile);
     fl=FileWrapper{last,O_RDWR|O_CREAT,0640};
-    switch(::pread(fl(),&prevTime,sizeof prevTime,0)){
+    switch(::read(fl(),&prevTime,sizeof prevTime)){
       case 0:prevTime=0;break;
-      case -1:raise("pread",errno);
+      case -1:raise("read dot",errno);
     }
   }
 
@@ -212,10 +219,9 @@ struct cmwRequest{
   }
 
   void saveOutput (){
-    Write(fl(),(char*)&bday,sizeof bday);
-    ring->fsync(cmwBuf.giveFile(path.append(".hh")));
-    ring->close(fl());
+    ring->writeDot(fl(),bday);
     fl.release();
+    ring->fsync(cmwBuf.giveFile(path.append(".hh")));
   }
 };
 #include"cmwA.mdl.hh"
@@ -250,13 +256,13 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,BufSize);
   cmwBuf.compress();
-  static int next=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-  while(::connect(next,(::sockaddr*)&sa,sizeof sa)<0){
+  static int sock=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
+  while(::connect(sock,(::sockaddr*)&sa,sizeof sa)<0){
     ::fprintf(stderr,"connect %s\n",::strerror(errno));
     ::sleep(30);
   }
 
-  cmwBuf.sock_=next;
+  cmwBuf.sock_=sock;
   cmwBuf.flush();
   ::sctp_paddrparams pad{};
   pad.spp_address.ss_family=AF_INET;
@@ -265,7 +271,7 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
   if(::setsockopt(cmwBuf.sock_,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
                   ,&pad,sizeof pad)==-1)::bail("setsockopt %d",errno);
   ring->recv(true);
-  next=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
+  sock=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(!cmwBuf.gotPacket());
   if(!giveBool(cmwBuf))::bail("Login:%s",cmwBuf.giveStringView().data());
 }
@@ -343,7 +349,9 @@ int main (int ac,char** av)try{
         }
         ring->recv(false);
       }else if(::ioUring::Send==cq->user_data)sentBytes+=cq->res;
-      else ::bail("Unknown user_data %llu",cq->user_data);
+      else if(::ioUring::Write==cq->user_data){
+	if(cq->res!=4)::syslog(LOG_ERR,"Write of timestamp %d",cq->res);
+      }else ::bail("Unknown user_data %llu",cq->user_data);
     }
   }
 }catch(::std::exception& e){::bail("Oops:%s",e.what());}
