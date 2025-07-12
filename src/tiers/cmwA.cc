@@ -26,7 +26,7 @@ class ioUring{
   ::io_uring rng{};
   ::iovec iov;
   ::msghdr mhdr{0,sizeof(::sockaddr_in),&iov,0,0,0,0};
-  int s2ind;
+  int s2ind,dotind;
   int const udpSock;
   ::io_uring_buf_ring* bufRing;
   char* const bufBase;
@@ -108,7 +108,7 @@ class ioUring{
     while((rc=::io_uring_submit_and_wait(&rng,1))<0){
       if(-EINTR!=rc)raise("waitCqe",rc);
     }
-    s2ind=-1;
+    s2ind=dotind=-1;
     static ::std::array<::io_uring_cqe*,MaxBatch> cqes;
     seen=::uring_peek_batch_cqe(&rng,cqes.data(),cqes.size());
     return ::std::span<::io_uring_cqe*>(cqes.data(),seen);
@@ -137,13 +137,18 @@ class ioUring{
     ::io_uring_sqe_set_flags(e,IOSQE_CQE_SKIP_SUCCESS);
   }
 
-  void writeDot (int fd,auto bday){
+  void writeDot (int fd,int bday){
+    if(++dotind>=MaxBatch/2){
+      ::io_uring_submit_and_wait(&rng,0);
+      dotind=0;
+    }
     auto e=getSqe();
-    ::io_uring_prep_write(e,fd,&bday,sizeof bday,0);
+    static ::std::array<int,MaxBatch/2> timestamps;
+    timestamps[dotind]=bday;
+    ::io_uring_prep_write(e,fd,&timestamps[dotind],sizeof bday,0);
     ::io_uring_sqe_set_data64(e,Write);
     ::io_uring_sqe_set_flags(e,IOSQE_IO_HARDLINK);
     this->close(fd);
-    ::io_uring_submit_and_wait(&rng,0);
   }
 
   void fsync (int fd){
