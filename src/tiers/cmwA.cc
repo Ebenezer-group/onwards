@@ -137,12 +137,13 @@ class ioUring{
     ::io_uring_sqe_set_flags(e,IOSQE_CQE_SKIP_SUCCESS);
   }
 
-  void writeDot (int fd,auto& bday){
+  void writeDot (int fd,auto bday){
     auto e=getSqe();
     ::io_uring_prep_write(e,fd,&bday,sizeof bday,0);
     ::io_uring_sqe_set_data64(e,Write);
     ::io_uring_sqe_set_flags(e,IOSQE_IO_HARDLINK);
     this->close(fd);
+    ::io_uring_submit_and_wait(&rng,0);
   }
 
   void fsync (int fd){
