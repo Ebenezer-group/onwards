@@ -148,7 +148,7 @@ class ioUring{
     timestamps[dotind]=bday;
     ::io_uring_prep_write(e,fd,&timestamps[dotind],sizeof bday,0);
     ::io_uring_sqe_set_data64(e,Write);
-    e->flags=IOSQE_IO_HARDLINK;
+    e->flags=IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_HARDLINK;
     this->close(fd);
   }
 
@@ -356,9 +356,7 @@ int main (int ac,char** av)try{
         }
         ring->recv(false);
       }else if(::ioUring::Send==cq->user_data)sentBytes+=cq->res;
-      else if(::ioUring::Write==cq->user_data){
-	if(cq->res!=4)::syslog(LOG_ERR,"Write of timestamp %d",cq->res);
-      }else ::bail("Unknown user_data %llu",cq->user_data);
+      else ::bail("Unknown user_data %llu",cq->user_data);
     }
   }
 }catch(::std::exception& e){::bail("Oops:%s",e.what());}
