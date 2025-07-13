@@ -44,10 +44,10 @@ class ioUring{
 
   void recvmsg (){
     auto e=getSqe();
-    ::io_uring_prep_recvmsg_multishot(e,0,&mhdr,MSG_TRUNC);
+    ::io_uring_prep_recvmsg(e,0,&mhdr,MSG_TRUNC);
     ::io_uring_sqe_set_data64(e,Recvmsg);
-    e->ioprio|=IORING_RECVSEND_POLL_FIRST;
-    e->flags|=IOSQE_FIXED_FILE|IOSQE_BUFFER_SELECT;
+    e->ioprio=IORING_RECV_MULTISHOT|IORING_RECVSEND_POLL_FIRST;
+    e->flags=IOSQE_FIXED_FILE|IOSQE_BUFFER_SELECT;
     e->buf_group=0;
   }
 
@@ -135,7 +135,7 @@ class ioUring{
     auto e=getSqe();
     ::io_uring_prep_close(e,fd);
     ::io_uring_sqe_set_data64(e,Close);
-    e->flags|=IOSQE_CQE_SKIP_SUCCESS;
+    e->flags=IOSQE_CQE_SKIP_SUCCESS;
   }
 
   void writeDot (int fd,int bday){
@@ -148,7 +148,7 @@ class ioUring{
     timestamps[dotind]=bday;
     ::io_uring_prep_write(e,fd,&timestamps[dotind],sizeof bday,0);
     ::io_uring_sqe_set_data64(e,Write);
-    e->flags|=IOSQE_IO_HARDLINK;
+    e->flags=IOSQE_IO_HARDLINK;
     this->close(fd);
   }
 
@@ -156,7 +156,7 @@ class ioUring{
     auto e=getSqe();
     ::io_uring_prep_fsync(e,fd,0);
     ::io_uring_sqe_set_data64(e,Fsync);
-    e->flags|=IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_HARDLINK;
+    e->flags=IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_HARDLINK;
     this->close(fd);
   }
 
@@ -247,7 +247,7 @@ void ioUring::sendto (::Socky const& so,auto...t){
   ::io_uring_prep_sendto(e,udpSock,sp.data(),sp.size(),0
                          ,(sockaddr*)&frnts[s2ind].second,so.len);
   ::io_uring_sqe_set_data64(e,Sendto);
-  e->flags|=IOSQE_CQE_SKIP_SUCCESS;
+  e->flags=IOSQE_CQE_SKIP_SUCCESS;
 }
 
 void bail (char const* fmt,auto...t)noexcept{
