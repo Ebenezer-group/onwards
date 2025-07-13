@@ -44,10 +44,11 @@ class ioUring{
 
   void recvmsg (){
     auto e=getSqe();
-    ::io_uring_prep_recvmsg_multishot(e,udpSock,&mhdr,MSG_TRUNC);
-    e->flags|=IOSQE_BUFFER_SELECT;
-    e->buf_group=0;
+    ::io_uring_prep_recvmsg_multishot(e,0,&mhdr,MSG_TRUNC);
     ::io_uring_sqe_set_data64(e,Recvmsg);
+    e->ioprio=IORING_RECVSEND_POLL_FIRST;
+    e->flags|=IOSQE_FIXED_FILE|IOSQE_BUFFER_SELECT;
+    e->buf_group=0;
   }
 
   ioUring (int sock):udpSock{sock},bufBase{mmapWrapper<char*>(29*4096)}{
