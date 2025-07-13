@@ -27,7 +27,6 @@ class ioUring{
   ::iovec iov;
   ::msghdr mhdr{0,sizeof(::sockaddr_in),&iov,0,0,0,0};
   int s2ind,dotind;
-  int const udpSock;
   ::io_uring_buf_ring* bufRing;
   char* const bufBase;
 
@@ -51,7 +50,7 @@ class ioUring{
     e->buf_group=0;
   }
 
-  ioUring (int sock):udpSock{sock},bufBase{mmapWrapper<char*>(29*4096)}{
+  ioUring (int sock):bufBase{mmapWrapper<char*>(29*4096)}{
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
@@ -244,10 +243,10 @@ void ioUring::sendto (::Socky const& so,auto...t){
   ::front::marshal<udpPacketMax>(frnts[s2ind].first,{t...});
   auto sp=frnts[s2ind].first.outDuo();
   frnts[s2ind].second=so.addr;
-  ::io_uring_prep_sendto(e,udpSock,sp.data(),sp.size(),0
+  ::io_uring_prep_sendto(e,0,sp.data(),sp.size(),0
                          ,(sockaddr*)&frnts[s2ind].second,so.len);
   ::io_uring_sqe_set_data64(e,Sendto);
-  e->flags=IOSQE_CQE_SKIP_SUCCESS;
+  e->flags=IOSQE_CQE_SKIP_SUCCESS|IOSQE_FIXED_FILE;
 }
 
 void bail (char const* fmt,auto...t)noexcept{
