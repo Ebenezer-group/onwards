@@ -50,7 +50,7 @@ class ioUring{
     e->buf_group=0;
   }
 
-  ioUring (int sock):bufBase{mmapWrapper<char*>(29*4096)}{
+  ioUring (int udpSock):bufBase{mmapWrapper<char*>(29*4096)}{
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
@@ -82,7 +82,7 @@ class ioUring{
       buf->len=udpPacketMax;
       buf->bid=i;
     }
-    ::std::array regfds={sock,0};
+    ::std::array regfds={udpSock,0};
     if(::io_uring_register(fd,IORING_REGISTER_FILES|IORING_REGISTER_USE_REGISTERED_RING,
                            regfds.data(),regfds.size())<0)raise("reg files");
   }
@@ -282,9 +282,11 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
   if(!giveBool(cmwBuf))::bail("Login:%s",cmwBuf.giveStringView().data());
 }
 
+int pid;
 int main (int ac,char** av)try{
-  ::openlog(av[0],LOG_PID|LOG_NDELAY,LOG_USER);
+  ::openlog(av[0],LOG_NDELAY,LOG_USER);
   if(ac<2||ac>3)::bail("Usage: %s config-file [-signup]",av[0]);
+  pid=::getpid();
   FileBuffer cfg{av[1],O_RDONLY};
   ::checkField("CMW-IP",cfg.getline(' '));
   SockaddrWrapper const sa(cfg.getline().data(),56789);
@@ -311,7 +313,7 @@ int main (int ac,char** av)try{
     sentBytes=bufsUsed=0;
     for(auto const* cq:cqs){
       if(cq->res<=0){
-        ::syslog(LOG_ERR,"Op failed %llu %d",cq->user_data,cq->res);
+        ::syslog(LOG_ERR,"%d Op failed %llu %d",pid,cq->user_data,cq->res);
         if(cq->res<0&&-EPIPE!=cq->res)exitFailure();
         frntBuf.reset();
         ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
@@ -333,7 +335,7 @@ int main (int ac,char** av)try{
           cmwBuf.compress();
           ring->send();
         }catch(::std::exception& e){
-          ::syslog(LOG_ERR,"Accept request:%s",e.what());
+          ::syslog(LOG_ERR,"%d Accept request:%s",pid,e.what());
           if(tracy>0)ring->sendto(frnt,e.what());
           if(tracy>1)requests.pop_back();
         }
@@ -349,7 +351,7 @@ int main (int ac,char** av)try{
             requests.pop_front();
           }
         }catch(::std::exception& e){
-          ::syslog(LOG_ERR,"Reply from CMW %s",e.what());
+          ::syslog(LOG_ERR,"%d Reply from CMW %s",pid,e.what());
           ring->sendto(req.frnt,e.what());
           requests.pop_front();
         }
@@ -358,4 +360,4 @@ int main (int ac,char** av)try{
       else ::bail("Unknown user_data %llu",cq->user_data);
     }
   }
-}catch(::std::exception& e){::bail("Oops:%s",e.what());}
+}catch(::std::exception& e){::bail("%d Oops:%s",pid,e.what());}
