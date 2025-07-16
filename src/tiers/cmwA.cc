@@ -117,17 +117,20 @@ class ioUring{
   void recv (bool stale){
     auto e=getSqe();
     auto sp=cmwBuf.getDuo();
-    ::io_uring_prep_recv(e,cmwBuf.sock_,sp.data(),sp.size(),0);
+    ::io_uring_prep_recv(e,1,sp.data(),sp.size(),0);
     ::io_uring_sqe_set_data64(e,Recv);
+    e->flags=IOSQE_FIXED_FILE;
     if(sp.size()<=9)e->ioprio|=IORING_RECVSEND_POLL_FIRST;
-    if(stale)::io_uring_register_files_update(&rng,1,&cmwBuf.sock_,1);
+    if(stale&&(::io_uring_register_files_update(&rng,1,&cmwBuf.sock_,1)<1))
+      raise("reg files update");
   }
 
   void send (){
     auto e=getSqe();
     auto sp=cmwBuf.outDuo();
-    ::io_uring_prep_send(e,cmwBuf.sock_,sp.data(),sp.size(),0);
+    ::io_uring_prep_send(e,1,sp.data(),sp.size(),0);
     ::io_uring_sqe_set_data64(e,Send);
+    e->flags=IOSQE_FIXED_FILE;
   }
 
   void close (int fd){
