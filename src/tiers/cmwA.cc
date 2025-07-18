@@ -27,13 +27,13 @@ class ioUring{
   ::iovec iov;
   ::msghdr mhdr{0,sizeof(::sockaddr_in),&iov,0,0,0,0};
   int s2ind,dotind;
-  ::io_uring_buf_ring* bufRing;
   char* const bufBase;
+  ::io_uring_buf_ring* bufRing;
 
-  void checkIndex (int& index){
-    if(++index>=MaxBatch/2){
+  void checkIndex (int& ind){
+    if(++ind>=MaxBatch/2){
       ::io_uring_submit_and_wait(&rng,0);
-      index=0;
+      ind=0;
     }
   }
 
@@ -47,15 +47,6 @@ class ioUring{
  public:
   static constexpr int MaxBatch=10,NumBufs=4;
   static constexpr int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5,Write=6;
-
-  void recvmsg (){
-    auto e=getSqe();
-    ::io_uring_prep_recvmsg(e,0,&mhdr,MSG_TRUNC);
-    ::io_uring_sqe_set_data64(e,Recvmsg);
-    e->ioprio=IORING_RECV_MULTISHOT|IORING_RECVSEND_POLL_FIRST;
-    e->flags=IOSQE_FIXED_FILE|IOSQE_BUFFER_SELECT;
-    e->buf_group=0;
-  }
 
   ioUring (int udpSock):bufBase{mmapWrapper<char*>(29*4096)}{
     ::io_uring_params ps{};
@@ -94,19 +85,6 @@ class ioUring{
                            regfds.data(),regfds.size())<0)raise("reg files");
   }
 
-  auto check (auto const* cq,::Socky& s){
-    if(~cq->flags&IORING_CQE_F_MORE){
-      ::syslog(LOG_ERR,"recvmsg was disabled");
-      recvmsg();
-    }
-    auto idx=cq->flags>>IORING_CQE_BUFFER_SHIFT;
-    auto* o=::io_uring_recvmsg_validate(bufBase+idx*udpPacketMax,cq->res,&mhdr);
-    if(!o)raise("recvmsg_validate");
-    ::std::memcpy(&s.addr,::io_uring_recvmsg_name(o),o->namelen);
-    return ::std::span<char>(static_cast<char*>(::io_uring_recvmsg_payload(o,&mhdr)),
-		             o->payloadlen);
-  }
-
   auto submit (int bufsUsed){
     static int seen;
     ::io_uring_buf_ring_advance(bufRing,bufsUsed);
@@ -119,6 +97,28 @@ class ioUring{
     static ::std::array<::io_uring_cqe*,MaxBatch> cqes;
     seen=::uring_peek_batch_cqe(&rng,cqes.data(),cqes.size());
     return ::std::span<::io_uring_cqe*>(cqes.data(),seen);
+  }
+
+  void recvmsg (){
+    auto e=getSqe();
+    ::io_uring_prep_recvmsg(e,0,&mhdr,MSG_TRUNC);
+    ::io_uring_sqe_set_data64(e,Recvmsg);
+    e->ioprio=IORING_RECV_MULTISHOT|IORING_RECVSEND_POLL_FIRST;
+    e->flags=IOSQE_FIXED_FILE|IOSQE_BUFFER_SELECT;
+    e->buf_group=0;
+  }
+
+  auto check (auto const* cq,::Socky& s){
+    if(~cq->flags&IORING_CQE_F_MORE){
+      ::syslog(LOG_ERR,"recvmsg was disabled");
+      recvmsg();
+    }
+    auto idx=cq->flags>>IORING_CQE_BUFFER_SHIFT;
+    auto* o=::io_uring_recvmsg_validate(bufBase+idx*udpPacketMax,cq->res,&mhdr);
+    if(!o)raise("recvmsg_validate");
+    ::std::memcpy(&s.addr,::io_uring_recvmsg_name(o),o->namelen);
+    return ::std::span<char>(static_cast<char*>(::io_uring_recvmsg_payload(o,&mhdr)),
+                                                o->payloadlen);
   }
 
   void recv (bool stale){
