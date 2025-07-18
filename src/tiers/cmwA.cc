@@ -30,6 +30,13 @@ class ioUring{
   ::io_uring_buf_ring* bufRing;
   char* const bufBase;
 
+  void checkIndex (int& index){
+    if(++index>=MaxBatch/2){
+      ::io_uring_submit_and_wait(&rng,0);
+      index=0;
+    }
+  }
+
   auto getSqe (bool internal=false){
     if(auto e=::uring_get_sqe(&rng);e)return e;
     if(internal)raise("getSqe");
@@ -141,10 +148,7 @@ class ioUring{
   }
 
   void writeDot (int fd,int bday){
-    if(++dotind>=MaxBatch/2){
-      ::io_uring_submit_and_wait(&rng,0);
-      dotind=0;
-    }
+    checkIndex(dotind);
     auto e=getSqe();
     static ::std::array<int,MaxBatch/2> timestamps;
     timestamps[dotind]=bday;
@@ -236,10 +240,7 @@ struct cmwRequest{
 #include"cmwA.mdl.hh"
 
 void ioUring::sendto (::Socky const& so,auto...t){
-  if(++s2ind>=MaxBatch/2){
-    ::io_uring_submit_and_wait(&rng,0);
-    s2ind=0;
-  }
+  checkIndex(s2ind);
   auto e=getSqe();
   static ::std::array<::std::pair<BufferStack<SameFormat>,::sockaddr_in>,MaxBatch/2> frnts;
   frnts[s2ind].first.reset();
