@@ -96,7 +96,7 @@ class ioUring{
     s2ind=dotind=-1;
     static ::std::array<::io_uring_cqe*,MaxBatch> cqes;
     seen=::uring_peek_batch_cqe(&rng,cqes.data(),cqes.size());
-    return ::std::span<::io_uring_cqe*>(cqes.data(),seen);
+    return ::std::span(cqes.data(),seen);
   }
 
   void recvmsg (){
@@ -108,7 +108,7 @@ class ioUring{
     e->buf_group=0;
   }
 
-  auto check (auto const* cq,::Socky& s){
+  auto checkMsg (auto const* cq,::Socky& s){
     if(~cq->flags&IORING_CQE_F_MORE){
       ::syslog(LOG_ERR,"recvmsg was disabled");
       recvmsg();
@@ -117,8 +117,8 @@ class ioUring{
     auto* o=::io_uring_recvmsg_validate(bufBase+idx*udpPacketMax,cq->res,&mhdr);
     if(!o)raise("recvmsg_validate");
     ::std::memcpy(&s.addr,::io_uring_recvmsg_name(o),o->namelen);
-    return ::std::span<char>(static_cast<char*>(::io_uring_recvmsg_payload(o,&mhdr)),
-                                                o->payloadlen);
+    return ::std::span(static_cast<char*>(::io_uring_recvmsg_payload(o,&mhdr)),
+                                          o->payloadlen);
   }
 
   void recv (bool stale){
@@ -331,7 +331,7 @@ int main (int ac,char** av)try{
         ::Socky frnt;
         int tracy=0;
         try{
-          auto spn=ring->check(cq,frnt);
+          auto spn=ring->checkMsg(cq,frnt);
           ++tracy;
           auto& req=requests.emplace_back(ReceiveBuffer<SameFormat,::int16_t>{spn},frnt);
           ++tracy;
