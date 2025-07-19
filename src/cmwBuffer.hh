@@ -433,8 +433,8 @@ class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   BufferStack ():SendBuffer<Z>(ar,N),ReceiveBuffer<R,Z>(ar){}
   explicit BufferStack (int s):BufferStack(){this->sock_=s;}
 
-  auto outDuo (){return ::std::span<char>(ar,this->index);}
-  auto getDuo (){return ::std::span<char>(ar,N);}
+  auto outDuo (){return ::std::span(ar,this->index);}
+  auto getDuo (){return ::std::span(ar,N);}
 
   bool getPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
     if(int r=::recvfrom(this->sock_,ar,N,0,addr,len);r>=0)return this->update(r);
@@ -486,8 +486,8 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   }
 
   auto getDuo (){
-    return bytesRead<9?::std::span<char>(recBuf+bytesRead,9-bytesRead):
-                       ::std::span<char>(compressedStart+bytesRead,compPacketSize-bytesRead);
+    return bytesRead<9?::std::span(recBuf+bytesRead,9-bytesRead):
+                       ::std::span(compressedStart+bytesRead,compPacketSize-bytesRead);
   }
 
   bool gotIt (int rc){
