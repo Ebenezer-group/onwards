@@ -97,7 +97,7 @@ class MarshallingInt{
     for(;;){
       ::uint8_t a=n&127;
       n>>=7;
-      if(0==n){receive(b,a);break;}
+      if(!n){receive(b,a);break;}
       a|=128;
       receive(b,a);
       --n;
@@ -121,14 +121,14 @@ inline int getError (){
 inline void Write (int fd,char const* data,int len){
   for(;;){
     if(int r=::write(fd,data,len);r>=0){
-      if(0==(len-=r))return;
+      if(!(len-=r))return;
       data+=r;
     }else raise("Write",errno);
   }
 }
 
 inline int Read (int fd,void* data,int len){
-  if(int r=::read(fd,data,len);r>=0)return r;
+  if(int r=::read(fd,data,len);r>0)return r;
   raise("Read",len,errno);
 }
 
