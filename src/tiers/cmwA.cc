@@ -179,14 +179,15 @@ struct cmwRequest{
   FileWrapper fl;
   inline static ::int32_t prevTime;
 
-  static int marshalFile (char const* name,auto& buf){
+  static bool marshalFile (char const* name,auto& buf){
     struct ::stat sb;
     if(::stat(name,&sb)<0)raise("stat",name,errno);
-    if(sb.st_mtime<=prevTime)return 0;
+    if(sb.st_mtime<=prevTime)return false;
 
     receive(buf,{'.'==name[0]||name[0]=='/'?::std::strrchr(name,'/')+1:name,
                  {"\0",1}});
-    return buf.receiveFile(name,sb.st_size);
+    ring->close(buf.receiveFile(name,sb.st_size));
+    return true;
   }
 
  public:
@@ -210,10 +211,9 @@ struct cmwRequest{
   void marshal (auto& buf)const{
     acctNbr.marshal(buf);
     auto ind=buf.reserveBytes(1);
-    int res=marshalFile(mdlFile,buf);
-    if(res)ring->close(res);
-    else receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
-    buf.receiveAt(ind,res!=0);
+    bool res=marshalFile(mdlFile,buf);
+    if(!res)receive(buf,{mdlFile,::std::strlen(mdlFile)+1});
+    buf.receiveAt(ind,res);
 
     ::int8_t updatedFiles=0;
     auto const idx=buf.reserveBytes(sizeof updatedFiles);
@@ -221,10 +221,7 @@ struct cmwRequest{
     while(auto tok=f.getline().data()){
       if(!::std::strncmp(tok,"//",2)||!::std::strncmp(tok,"define",6))continue;
       if(!::std::strncmp(tok,"--",2))break;
-      if(int fd=marshalFile(tok,buf);fd>0){
-        ++updatedFiles;
-        ring->close(fd);
-      }
+      if(marshalFile(tok,buf))++updatedFiles;
     }
     buf.receiveAt(idx,updatedFiles);
     ring->close(f.fl());
