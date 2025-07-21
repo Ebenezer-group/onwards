@@ -275,7 +275,7 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
   pad.spp_address.ss_family=AF_INET;
   pad.spp_hbinterval=240000;
   pad.spp_flags=SPP_HB_ENABLE;
-  if(::setsockopt(cmwBuf.sock_,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
+  if(::setsockopt(sock,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
                   ,&pad,sizeof pad)==-1)::bail("setsockopt %d",errno);
   ring->recv(true);
   sock=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
@@ -285,14 +285,14 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
 
 int pid;
 int main (int ac,char** av)try{
-  ::openlog(av[0],LOG_NDELAY,LOG_USER);
+  ::openlog(av[0],LOG_PERROR|LOG_NDELAY,LOG_USER);
   if(ac<2||ac>3)::bail("Usage: %s config-file [-signup]",av[0]);
   pid=::getpid();
   FileBuffer cfg{av[1],O_RDONLY};
   ::checkField("CMW-IP",cfg.getline(' '));
   SockaddrWrapper const sa(cfg.getline().data(),56789);
   ::checkField("UDP-port-number",cfg.getline(' '));
-  BufferStack<SameFormat> frntBuf{udpServer(fromChars(cfg.getline().data()))};
+  BufferStack<SameFormat> frntBuf{udpServer(fromChars(cfg.getline()))};
 
   ::checkField("AmbassadorID",cfg.getline(' '));
   ::Credentials cred(cfg.getline());
