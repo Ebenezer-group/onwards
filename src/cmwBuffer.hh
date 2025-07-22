@@ -601,6 +601,7 @@ struct SockaddrWrapper{
     if(int rc=::inet_pton(AF_INET,node,&sa.sin_addr);rc!=1)
       raise("inet_pton",rc);
   }
+  auto operator() ()const{return reinterpret_cast<::sockaddr const*>(&sa);}
 };
 
 inline void closeSocket (sockType s){
@@ -620,7 +621,7 @@ inline int preserveError (int s){
 inline int udpServer (::uint16_t port){
   int s=::socket(AF_INET,SOCK_DGRAM,0);
   SockaddrWrapper sa{port};
-  if(0==::bind(s,reinterpret_cast<::sockaddr*>(&sa),sizeof sa))return s;
+  if(0==::bind(s,sa(),sizeof sa))return s;
   raise("udpServer",preserveError(s));
 }
 

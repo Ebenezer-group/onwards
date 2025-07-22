@@ -264,7 +264,7 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
         : ::back::marshal<::messageID::login>(cmwBuf,cred,BufSize);
   cmwBuf.compress();
   static int sock=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-  while(::connect(sock,(::sockaddr*)&sa,sizeof sa)<0){
+  while(::connect(sock,sa(),sizeof sa)<0){
     ::fprintf(stderr,"connect %s\n",::strerror(errno));
     ::sleep(30);
   }
