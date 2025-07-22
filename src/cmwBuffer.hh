@@ -315,6 +315,8 @@ void giveVec (auto& buf,auto& v){
   buf.giveBlock(&*(v.end()-n),n);
 }
 
+auto cast (auto* t){return reinterpret_cast<::sockaddr const*>(t);}
+
 template<class Z>class SendBuffer{
   SendBuffer (SendBuffer const&)=delete;
   void operator= (SendBuffer&);
@@ -378,9 +380,7 @@ template<class Z>class SendBuffer{
   }
 
   template<class T=int>auto send (T* addr=nullptr,::socklen_t len=0){
-    if(int r=::sendto(sock_,buf,index,0,
-                      reinterpret_cast<::sockaddr const*>(addr),len);r>0)
-      return r;
+    if(int r=::sendto(sock_,buf,index,0,cast(addr),len);r>0)return r;
     raise("buf::send",getError());
   }
 
@@ -594,14 +594,15 @@ template<int N>class FixedString{
 using FixedString60=FixedString<60>;
 using FixedString120=FixedString<120>;
 
-struct SockaddrWrapper{
+class SockaddrWrapper{
   ::sockaddr_in sa;
+ public:
   SockaddrWrapper (::uint16_t port):sa{AF_INET,::htons(port),{},{}}{}
   SockaddrWrapper (char const* node,::uint16_t port):SockaddrWrapper(port){
     if(int rc=::inet_pton(AF_INET,node,&sa.sin_addr);rc!=1)
       raise("inet_pton",rc);
   }
-  auto operator() ()const{return reinterpret_cast<::sockaddr const*>(&sa);}
+  auto operator() ()const{return cast(&sa);}
 };
 
 inline void closeSocket (sockType s){

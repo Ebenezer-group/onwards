@@ -44,5 +44,5 @@ int main ()try{
     std::cout<<"unknown message id\n";
     return 0;
   }
-  buf.send(&sa,sizeof(sa));
+  buf.send(sa(),sizeof(sa));
 }catch(::std::exception& e){::std::cout<<"failure: "<<e.what()<<"\n";}

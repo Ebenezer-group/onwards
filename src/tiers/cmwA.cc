@@ -245,7 +245,7 @@ void ioUring::sendto (::Socky const& so,auto...t){
   auto sp=frnts[s2ind].first.outDuo();
   frnts[s2ind].second=so.addr;
   ::io_uring_prep_sendto(e,0,sp.data(),sp.size(),0
-                         ,(sockaddr*)&frnts[s2ind].second,so.len);
+                         ,cast(&frnts[s2ind].second),so.len);
   ::io_uring_sqe_set_data64(e,Sendto);
   e->flags=IOSQE_CQE_SKIP_SUCCESS|IOSQE_FIXED_FILE;
 }
