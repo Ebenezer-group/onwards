@@ -147,6 +147,14 @@ class ioUring{
     e->flags=IOSQE_CQE_SKIP_SUCCESS;
   }
 
+  void fsync (int fd){
+    auto e=getSqe();
+    ::io_uring_prep_fsync(e,fd,0);
+    ::io_uring_sqe_set_data64(e,Fsync);
+    e->flags=IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_HARDLINK;
+    this->close(fd);
+  }
+
   void writeDot (int fd,int bday){
     checkIndex(dotind);
     auto e=getSqe();
@@ -154,14 +162,6 @@ class ioUring{
     timestamps[dotind]=bday;
     ::io_uring_prep_write(e,fd,&timestamps[dotind],sizeof bday,0);
     ::io_uring_sqe_set_data64(e,Write);
-    e->flags=IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_HARDLINK;
-    this->close(fd);
-  }
-
-  void fsync (int fd){
-    auto e=getSqe();
-    ::io_uring_prep_fsync(e,fd,0);
-    ::io_uring_sqe_set_data64(e,Fsync);
     e->flags=IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_HARDLINK;
     this->close(fd);
   }
@@ -275,8 +275,8 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
   pad.spp_address.ss_family=AF_INET;
   pad.spp_hbinterval=240000;
   pad.spp_flags=SPP_HB_ENABLE;
-  if(::setsockopt(sock,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS
-                  ,&pad,sizeof pad)==-1)::bail("setsockopt %d",errno);
+  if(::setsockopt(sock,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS,&pad,sizeof pad)==-1)
+    ::bail("setsockopt %d",errno);
   ring->recv(true);
   sock=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   while(!cmwBuf.gotPacket());
