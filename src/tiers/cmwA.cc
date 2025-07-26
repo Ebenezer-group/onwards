@@ -26,9 +26,8 @@ class ioUring{
   ::io_uring rng{};
   ::iovec iov;
   ::msghdr mhdr{0,sizeof(::sockaddr_in),&iov,0,0,0,0};
-  int s2ind,dotind;
   char* const bufBase;
-  ::io_uring_buf_ring* bufRing;
+  ::io_uring_buf_ring* const bufRing;
 
   void checkIndex (int& ind){
     if(++ind>=MaxBatch/2){
@@ -48,7 +47,10 @@ class ioUring{
   static constexpr int MaxBatch=10,NumBufs=4;
   static constexpr int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5,Write=6;
 
-  ioUring (int udpSock):bufBase{mmapWrapper<char*>(29*4096)}{
+  ioUring (int udpSock):bufBase{mmapWrapper<char*>(29*4096)}
+             //NumBufs*sizeof(::io_uring_buf)
+             ,bufRing{reinterpret_cast<::io_uring_buf_ring*>(bufBase+2*4096)}{
+    //bufRing->tail=0;
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
@@ -61,10 +63,6 @@ class ioUring{
     rng.enter_ring_fd=fd;
     rng.ring_fd=-1;
     rng.int_flags|=INT_FLAG_REG_RING|INT_FLAG_REG_REG_RING|INT_FLAG_APP_MEM;
-
-    //NumBufs*sizeof(::io_uring_buf)
-    bufRing=reinterpret_cast<::io_uring_buf_ring*>(bufBase+2*4096);
-    bufRing->tail=0;
 
     ::io_uring_buf_reg reg{};
     reg.ring_addr=(unsigned long) (uintptr_t)bufRing;
@@ -93,7 +91,6 @@ class ioUring{
     while((rc=::io_uring_submit_and_wait(&rng,1))<0){
       if(-EINTR!=rc)raise("waitCqe",rc);
     }
-    s2ind=dotind=-1;
     static ::std::array<::io_uring_cqe*,MaxBatch> cqes;
     seen=::uring_peek_batch_cqe(&rng,cqes.data(),cqes.size());
     return ::std::span(cqes.data(),seen);
@@ -155,7 +152,7 @@ class ioUring{
     this->close(fd);
   }
 
-  void writeDot (int fd,int bday){
+  void writeDot (int& dotind,int fd,int bday){
     checkIndex(dotind);
     auto e=getSqe();
     static ::std::array<int,MaxBatch/2> timestamps;
@@ -166,7 +163,7 @@ class ioUring{
     this->close(fd);
   }
 
-  void sendto (::Socky const&,auto...);
+  void sendto (int&,::Socky const&,auto...);
 } *ring;
 
 struct cmwRequest{
@@ -228,15 +225,15 @@ struct cmwRequest{
     f.fl.release();
   }
 
-  void saveOutput (){
-    ring->writeDot(fl(),bday);
+  void saveOutput (int& dotind){
+    ring->writeDot(dotind,fl(),bday);
     fl.release();
     ring->fsync(cmwBuf.giveFile(path.append(".hh")));
   }
 };
 #include"cmwA.mdl.hh"
 
-void ioUring::sendto (::Socky const& so,auto...t){
+void ioUring::sendto (int& s2ind,::Socky const& so,auto...t){
   checkIndex(s2ind);
   auto e=getSqe();
   static ::std::array<::std::pair<BufferStack<SameFormat>,::sockaddr_in>,MaxBatch/2> frnts;
@@ -283,9 +280,9 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
   if(!giveBool(cmwBuf))::bail("Login:%s",cmwBuf.giveStringView().data());
 }
 
-int pid;
-int main (int ac,char** av)try{
+int main (int pid,char** av)try{
   ::openlog(av[0],LOG_PERROR|LOG_NDELAY,LOG_USER);
+  int ac=pid;
   if(ac<2||ac>3)::bail("Usage: %s config-file [-signup]",av[0]);
   pid=::getpid();
   FileBuffer cfg{av[1],O_RDONLY};
@@ -312,6 +309,7 @@ int main (int ac,char** av)try{
     auto cqs=ring->submit(bufsUsed);
     if(sentBytes)cmwBuf.adjustFrame(sentBytes);
     sentBytes=bufsUsed=0;
+    int s2ind=-1,dotind=-1;
     for(auto const* cq:cqs){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"%d Op failed %llu %d",pid,cq->user_data,cq->res);
@@ -337,7 +335,7 @@ int main (int ac,char** av)try{
           ring->send();
         }catch(::std::exception& e){
           ::syslog(LOG_ERR,"%d Accept request:%s",pid,e.what());
-          if(tracy>0)ring->sendto(frnt,e.what());
+          if(tracy>0)ring->sendto(s2ind,frnt,e.what());
           if(tracy>1)requests.pop_back();
         }
       }else if(::ioUring::Recv==cq->user_data){
@@ -346,14 +344,14 @@ int main (int ac,char** av)try{
         try{
           if(cmwBuf.gotIt(cq->res)){
             if(giveBool(cmwBuf)){
-              req.saveOutput();
-              ring->sendto(req.frnt);
-            }else ring->sendto(req.frnt,"CMW:",cmwBuf.giveStringView());
+              req.saveOutput(dotind);
+              ring->sendto(s2ind,req.frnt);
+            }else ring->sendto(s2ind,req.frnt,"CMW:",cmwBuf.giveStringView());
             requests.pop_front();
           }
         }catch(::std::exception& e){
           ::syslog(LOG_ERR,"%d Reply from CMW %s",pid,e.what());
-          ring->sendto(req.frnt,e.what());
+          ring->sendto(s2ind,req.frnt,e.what());
           requests.pop_front();
         }
         ring->recv(false);

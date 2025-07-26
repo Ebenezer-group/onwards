@@ -1,13 +1,4 @@
 #include<atomic>
-#include<cmwBuffer.hh>
-
-template<class T=void*>
-auto mmapWrapper (size_t length){
-  if(auto addr=::mmap(0,length,PROT_READ|PROT_WRITE,
-                      MAP_PRIVATE|MAP_ANONYMOUS,-1,0);addr!=MAP_FAILED)
-    return reinterpret_cast<T>(addr);
-  ::cmw::raise("mmap",errno);
-}
 
 inline int uring_alloc_huge (unsigned sq_entries,::io_uring_params& p,
                              ::io_uring_sq* sq,::io_uring_cq* cq,
