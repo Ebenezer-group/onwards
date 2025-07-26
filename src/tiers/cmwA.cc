@@ -5,7 +5,6 @@
 #include<deque>
 #include<cassert>
 #include<liburing.h>
-#include<sys/mman.h>
 #include<linux/sctp.h>
 #include<signal.h>
 #include<stdio.h>

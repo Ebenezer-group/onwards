@@ -22,6 +22,7 @@ using sockType=SOCKET;
 #include<errno.h>
 #include<fcntl.h>//open
 #include<arpa/inet.h>
+#include<sys/mman.h>
 #include<sys/socket.h>
 #include<sys/types.h>
 #include<unistd.h>//chdir
