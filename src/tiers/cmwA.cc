@@ -158,8 +158,7 @@ class ioUring{
     timestamps[dotind]=bday;
     ::io_uring_prep_write(e,fd,&timestamps[dotind],sizeof bday,0);
     ::io_uring_sqe_set_data64(e,Write);
-    e->flags=IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_HARDLINK;
-    this->close(fd);
+    e->flags=IOSQE_CQE_SKIP_SUCCESS;
   }
 
   void sendto (int&,::Socky const&,auto...);
@@ -226,8 +225,12 @@ struct cmwRequest{
 
   void saveOutput (int& dotind){
     ring->writeDot(dotind,fl(),bday);
-    fl.release();
     ring->fsync(cmwBuf.giveFile(path.append(".hh")));
+  }
+
+  ~cmwRequest (){
+    ring->close(fl());
+    fl.release();
   }
 };
 #include"cmwA.mdl.hh"
