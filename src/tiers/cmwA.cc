@@ -164,6 +164,38 @@ class ioUring{
   void sendto (int&,::Socky const&,auto...);
 } *ring;
 
+struct FileBuffer{
+  char buf[4096];
+  char line[120];
+  int ind=0;
+  int bytes=0;
+  int fd;
+
+  FileBuffer (char const* nam,int flags):fd(Open(nam,flags)){}
+
+  char getc (){
+    if(ind>=bytes){
+      bytes=Read(fd,buf,sizeof buf);
+      ind=0;
+    }
+    return buf[ind++];
+  }
+
+  auto getline (char delim='\n'){
+    ::std::size_t idx=0;
+    while((line[idx]=getc())!=delim){
+      if(line[idx]=='\r')raise("getline cr");
+      if(++idx>=sizeof line)raise("getline size");
+    }
+    line[idx]=0;
+    return ::std::string_view{line,idx};
+  }
+
+  auto operator() (){return fd;}
+  void release (){fd=-1;}
+  ~FileBuffer (){if(fd>0)::close(fd);}
+};
+
 struct cmwRequest{
   ::Socky const frnt;
  private:
@@ -171,7 +203,7 @@ struct cmwRequest{
   MarshallingInt const acctNbr;
   FixedString120 path;
   char* mdlFile;
-  FileWrapper fl;
+  int fd;
   inline static ::int32_t prevTime;
 
   static bool marshalFile (char const* name,auto& buf){
@@ -196,8 +228,8 @@ struct cmwRequest{
     *mdlFile='/';
     char last[60];
     ::snprintf(last,sizeof last,".%s.last",++mdlFile);
-    fl=FileWrapper{last,O_RDWR|O_CREAT,0640};
-    switch(::read(fl(),&prevTime,sizeof prevTime)){
+    fd=Open(last,O_RDWR|O_CREAT,0640);
+    switch(::read(fd,&prevTime,sizeof prevTime)){
       case 0:prevTime=0;break;
       case -1:raise("read dot",errno);
     }
@@ -219,18 +251,17 @@ struct cmwRequest{
       if(marshalFile(tok,buf))++updatedFiles;
     }
     buf.receiveAt(idx,updatedFiles);
-    ring->close(f.fl());
-    f.fl.release();
+    ring->close(f());
+    f.release();
   }
 
   void saveOutput (int& dotind){
-    ring->writeDot(dotind,fl(),bday);
+    ring->writeDot(dotind,fd,bday);
     ring->fsync(cmwBuf.giveFile(path.append(".hh")));
   }
 
   ~cmwRequest (){
-    ring->close(fl());
-    fl.release();
+    ring->close(fd);
   }
 };
 #include"cmwA.mdl.hh"

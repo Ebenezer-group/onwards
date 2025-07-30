@@ -118,70 +118,39 @@ inline int getError (){
 #endif
 }
 
+inline void closeSocket (sockType s){
+#ifdef CMW_WINDOWS
+  ::closesocket(s);
+#else
+  ::close(s);
+#endif
+}
+
+inline int preserveError (int s){
+  auto e=getError();
+  closeSocket(s);
+  return e;
+}
+
 #ifndef CMW_WINDOWS
 inline void Write (int fd,char const* data,int len){
   for(;;){
     if(int r=::write(fd,data,len);r>=0){
       if(!(len-=r))return;
       data+=r;
-    }else raise("Write",errno);
+    }else raise("Write",preserveError(fd));
   }
 }
 
 inline int Read (int fd,void* data,int len){
   if(int r=::read(fd,data,len);r>0)return r;
-  raise("Read",len,errno);
+  raise("Read",len,preserveError(fd));
 }
 
-class FileWrapper{
-  int d=-1;
- public:
-  FileWrapper (){}
-  FileWrapper (auto nm,int flags,mode_t md=0):d{::open(nm,flags,md)}{
-    if(d<0)raise("FileWrapper",nm,errno);
-  }
-
-  FileWrapper (FileWrapper const&)=delete;
-  void operator= (FileWrapper&)=delete;
-
-  FileWrapper (FileWrapper&& o)noexcept:d{o.d}{o.d=-1;}
-  void operator= (FileWrapper&& o)noexcept{
-    d=o.d;
-    o.d=-1;
-  }
-
-  auto operator() (){return d;}
-  void release (){d=-1;}
-  ~FileWrapper (){if(d>0)::close(d);}
-};
-
-struct FileBuffer{
-  char buf[4096];
-  char line[120];
-  int ind=0;
-  int bytes=0;
-  FileWrapper fl;
-
-  FileBuffer (char const* nam,int flags):fl(nam,flags){}
-
-  char getc (){
-    if(ind>=bytes){
-      bytes=Read(fl(),buf,sizeof buf);
-      ind=0;
-    }
-    return buf[ind++];
-  }
-
-  auto getline (char delim='\n'){
-    ::std::size_t idx=0;
-    while((line[idx]=getc())!=delim){
-      if(line[idx]=='\r')raise("getline cr");
-      if(++idx>=sizeof line)raise("getline size");
-    }
-    line[idx]=0;
-    return ::std::string_view{line,idx};
-  }
-};
+inline int Open (auto nm,int flags,mode_t md=0){
+  if(int d=::open(nm,flags,md);d>0)return d;
+  raise("Open",nm,errno);
+}
 #endif
 
 struct SameFormat{
@@ -274,11 +243,9 @@ template<class R,class Z>class ReceiveBuffer{
   int giveFile (auto nm){
     int sz=give<::uint32_t>();
     checkLen(sz);
-    FileWrapper fl(nm,O_CREAT|O_WRONLY|O_TRUNC,0644);
-    int fd=fl();
+    int fd=Open(nm,O_CREAT|O_WRONLY|O_TRUNC,0644);
     Write(fd,rbuf+subTotal+rindex,sz);
     rindex+=sz;
-    fl.release();
     return fd;
   }
 #endif
@@ -388,10 +355,8 @@ template<class Z>class SendBuffer{
 #ifndef CMW_WINDOWS
   int receiveFile (char const* nm,::int32_t sz){
     receive(&sz,sizeof sz);
-    FileWrapper fl(nm,O_RDONLY);
-    int fd=fl();
+    int fd=Open(nm,O_RDONLY);
     Read(fd,buf+reserveBytes(sz),sz);
-    fl.release();
     return fd;
   }
 #endif
@@ -613,20 +578,6 @@ class SockaddrWrapper{
   }
   auto operator() ()const{return cast(&sa);}
 };
-
-inline void closeSocket (sockType s){
-#ifdef CMW_WINDOWS
-  ::closesocket(s);
-#else
-  ::close(s);
-#endif
-}
-
-inline int preserveError (int s){
-  auto e=getError();
-  closeSocket(s);
-  return e;
-}
 
 inline int udpServer (::uint16_t port){
   int s=::socket(AF_INET,SOCK_DGRAM,0);
