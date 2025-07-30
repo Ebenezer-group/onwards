@@ -133,18 +133,20 @@ inline int preserveError (int s){
 }
 
 #ifndef CMW_WINDOWS
-inline void Write (int fd,char const* data,int len){
+inline void Write (int fd,char const* data,int len,bool doClose=false){
   for(;;){
-    if(int r=::write(fd,data,len);r>=0){
+    if(int r=::write(fd,data,len);r>0){
       if(!(len-=r))return;
       data+=r;
-    }else raise("Write",preserveError(fd));
+    }else{
+      if(errno!=EINTR)raise("Write",doClose?preserveError(fd):errno);
+    }
   }
 }
 
-inline int Read (int fd,void* data,int len){
+inline int Read (int fd,void* data,int len,bool doClose=false){
   if(int r=::read(fd,data,len);r>0)return r;
-  raise("Read",len,preserveError(fd));
+  raise("Read",len,doClose?preserveError(fd):errno);
 }
 
 inline int Open (auto nm,int flags,mode_t md=0){
@@ -244,7 +246,7 @@ template<class R,class Z>class ReceiveBuffer{
     int sz=give<::uint32_t>();
     checkLen(sz);
     int fd=Open(nm,O_CREAT|O_WRONLY|O_TRUNC,0644);
-    Write(fd,rbuf+subTotal+rindex,sz);
+    Write(fd,rbuf+subTotal+rindex,sz,true);
     rindex+=sz;
     return fd;
   }
@@ -356,7 +358,7 @@ template<class Z>class SendBuffer{
   int receiveFile (char const* nm,::int32_t sz){
     receive(&sz,sizeof sz);
     int fd=Open(nm,O_RDONLY);
-    Read(fd,buf+reserveBytes(sz),sz);
+    Read(fd,buf+reserveBytes(sz),sz,true);
     return fd;
   }
 #endif
