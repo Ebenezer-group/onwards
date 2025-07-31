@@ -46,7 +46,7 @@ class ioUring{
   static constexpr int MaxBatch=10,NumBufs=4;
   static constexpr int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5,Write=6;
 
-  ioUring (int udpSock):bufBase{mmapWrapper<char*>(29*4096)}
+  ioUring (int udpSock):bufBase{mmapWrapper<char*>(16*4096)}
              //NumBufs*sizeof(::io_uring_buf)
              ,bufRing{reinterpret_cast<::io_uring_buf_ring*>(bufBase+2*4096)}{
     //bufRing->tail=0;
@@ -54,9 +54,9 @@ class ioUring{
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
 
-    if(int rc=uring_alloc_huge(1024,ps,&rng.sq,&rng.cq,bufBase+3*4096,26*4096);rc<0)
+    if(int rc=uring_alloc_huge(512,ps,&rng.sq,&rng.cq,bufBase+3*4096,13*4096);rc<0)
       raise("alloc_huge",rc);
-    int fd=::io_uring_setup(1024,&ps);
+    int fd=::io_uring_setup(512,&ps);
     if(fd<0)raise("ioUring",fd);
     uring_setup_ring(ps,rng);
     rng.enter_ring_fd=fd;
