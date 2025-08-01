@@ -250,7 +250,7 @@ static __inline void fast_write(ui32 f, void *dst, size_t bytes)
 }
 
 
-size_t qlz_size_decompressed(const char *source)
+inline size_t qlz_size_decompressed(const char *source)
 {
 	ui32 n, r;
 	n = (((*source) & 2) == 2) ? 4 : 1;
@@ -259,7 +259,7 @@ size_t qlz_size_decompressed(const char *source)
 	return r;
 }
 
-size_t qlz_size_compressed(const char *source)
+inline size_t qlz_size_compressed(const char *source)
 {
 	ui32 n, r;
 	n = (((*source) & 2) == 2) ? 4 : 1;
@@ -802,7 +802,7 @@ static size_t qlz_decompress_core(const unsigned char *source, unsigned char *de
 	}
 }
 
-size_t qlz_compress(const void *source, char *destination, size_t size, qlz_state_compress *state)
+inline size_t qlz_compress(const void *source, char *destination, size_t size, qlz_state_compress *state)
 {
 	size_t r;
 	ui32 compressed;
@@ -882,7 +882,7 @@ size_t qlz_compress(const void *source, char *destination, size_t size, qlz_stat
 	return r;
 }
 
-size_t qlz_decompress(const char *source, void *destination, struct qlz_state_decompress *state)
+inline size_t qlz_decompress(const char *source, void *destination, struct qlz_state_decompress *state)
 {
 	size_t dsiz = qlz_size_decompressed(source);
 
