@@ -371,7 +371,8 @@ int main (int pid,char** av)try{
           if(tracy>0)ring->sendto(s2ind,frnt,e.what());
           if(tracy>1)requests.pop_back();
         }
-      }else if(::ioUring::Recv==cq->user_data){
+      }else if(::ioUring::Send==cq->user_data)sentBytes+=cq->res;
+      else if(::ioUring::Recv==cq->user_data){
         assert(!requests.empty());
         auto& req=requests.front();
         try{
@@ -388,8 +389,7 @@ int main (int pid,char** av)try{
           requests.pop_front();
         }
         ring->recv(false);
-      }else if(::ioUring::Send==cq->user_data)sentBytes+=cq->res;
-      else ::bail("Unknown user_data %llu",cq->user_data);
+      }else ::bail("Unknown user_data %llu",cq->user_data);
     }
   }
 }catch(::std::exception& e){::bail("%d Oops:%s",pid,e.what());}

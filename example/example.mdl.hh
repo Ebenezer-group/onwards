@@ -27,7 +27,7 @@ static void mar (auto& buf
 static void give (auto& buf
          ,::std::set<::int32_t>& a){
   auto z3=a.end();
-  for(int32_t ca=::cmw::give<uint32_t>(buf);ca>0;--ca){
+  for(::int32_t ca=::cmw::give<::uint32_t>(buf);ca>0;--ca){
     a.emplace_hint(z3,::cmw::give<uint32_t>(buf));
   }
 }
