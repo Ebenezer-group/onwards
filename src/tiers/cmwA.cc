@@ -4,6 +4,7 @@
 #include<array>
 #include<deque>
 #include<cassert>
+#include<cmath>
 #include<liburing.h>
 #include<linux/sctp.h>
 #include<signal.h>
@@ -25,6 +26,7 @@ class ioUring{
   ::io_uring rng{};
   ::iovec iov;
   ::msghdr mhdr{0,sizeof(::sockaddr_in),&iov,0,0,0,0};
+  int chunk1,chunk2,chunk3;
   char* const bufBase;
   ::io_uring_buf_ring* const bufRing;
 
@@ -46,15 +48,20 @@ class ioUring{
   static constexpr int MaxBatch=10,NumBufs=4;
   static constexpr int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5,Write=6;
 
-  ioUring (int udpSock):bufBase{mmapWrapper<char*>(16*4096)}
-             //NumBufs*sizeof(::io_uring_buf)
-             ,bufRing{reinterpret_cast<::io_uring_buf_ring*>(bufBase+2*4096)}{
+  ioUring (int udpSock,long int pageSize):
+    chunk1(::std::ceil((1.0*NumBufs*udpPacketMax)/pageSize))
+    ,chunk2(::std::ceil((1.0*NumBufs*sizeof(::io_uring_buf))/pageSize))
+    ,chunk3(::std::ceil(52000.0/pageSize))
+    ,bufBase{mmapWrapper<char*>((chunk1+chunk2+chunk3)*pageSize)}
+    ,bufRing{reinterpret_cast<::io_uring_buf_ring*>(bufBase+chunk1*pageSize)}{
     //bufRing->tail=0;
+    
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
 
-    if(int rc=uring_alloc_huge(512,ps,&rng.sq,&rng.cq,bufBase+3*4096,13*4096);rc<0)
+    if(int rc=uring_alloc_huge(512,ps,&rng.sq,&rng.cq,
+                 bufBase+(chunk1+chunk2)*pageSize,chunk3*pageSize);rc<0)
       raise("alloc_huge",rc);
     int fd=::io_uring_setup(512,&ps);
     if(fd<0)raise("ioUring",fd);
@@ -329,7 +336,7 @@ int main (int pid,char** av)try{
   ::checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  ring=new ::ioUring{frntBuf.sock_};
+  ring=new ::ioUring{frntBuf.sock_,::sysconf(_SC_PAGESIZE)};
   ::login(cred,sa,ac==3);
   if(ac==3){
     ::printf("Signup was successful\n");
