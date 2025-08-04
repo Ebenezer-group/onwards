@@ -45,14 +45,14 @@ class ioUring{
   }
 
  public:
-  static constexpr int MaxBatch=10,NumBufs=4;
+  static constexpr int SubQ=512,MaxBatch=10,NumBufs=4;
   static constexpr int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5,Write=6;
 
   ioUring (int udpSock,auto pageSize):
     chunk1((::std::ceil((1.0*NumBufs*udpPacketMax)/pageSize))*pageSize)
     ,chunk2((::std::ceil((1.0*NumBufs*sizeof(::io_uring_buf))/pageSize))*pageSize)
     ,chunk3((::std::ceil(52000.0/pageSize))*pageSize)
-    ,bufBase{mmapWrapper<char*>(chunk1+chunk2+chunk3)}
+    ,bufBase{mmapWrapper(chunk1+chunk2+chunk3)}
     ,bufRing{reinterpret_cast<::io_uring_buf_ring*>(bufBase+chunk1)}{
     //bufRing->tail=0;
     
@@ -60,9 +60,9 @@ class ioUring{
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
 
-    if(int rc=uring_alloc_huge(512,ps,&rng.sq,&rng.cq,bufBase+chunk1+chunk2
+    if(int rc=uring_alloc_huge(SubQ,ps,&rng.sq,&rng.cq,bufBase+chunk1+chunk2
                                ,chunk3);rc<0)raise("alloc_huge",rc);
-    int fd=::io_uring_setup(512,&ps);
+    int fd=::io_uring_setup(SubQ,&ps);
     if(fd<0)raise("ioUring",fd);
     uring_setup_ring(ps,rng);
     rng.enter_ring_fd=fd;

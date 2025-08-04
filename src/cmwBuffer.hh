@@ -508,7 +508,7 @@ inline void setDirectory (char const* d){
   if(::chdir(d)!=0)raise("setDirectory",d,errno);
 }
 
-template<class T=void*>
+template<class T=char*>
 auto mmapWrapper (size_t len){
   if(auto addr=::mmap(0,len,PROT_READ|PROT_WRITE,
                       MAP_PRIVATE|MAP_ANONYMOUS,-1,0);addr!=MAP_FAILED)
