@@ -48,21 +48,20 @@ class ioUring{
   static constexpr int MaxBatch=10,NumBufs=4;
   static constexpr int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5,Write=6;
 
-  ioUring (int udpSock,long int pageSize):
-    chunk1(::std::ceil((1.0*NumBufs*udpPacketMax)/pageSize))
-    ,chunk2(::std::ceil((1.0*NumBufs*sizeof(::io_uring_buf))/pageSize))
-    ,chunk3(::std::ceil(52000.0/pageSize))
-    ,bufBase{mmapWrapper<char*>((chunk1+chunk2+chunk3)*pageSize)}
-    ,bufRing{reinterpret_cast<::io_uring_buf_ring*>(bufBase+chunk1*pageSize)}{
+  ioUring (int udpSock,auto pageSize):
+    chunk1((::std::ceil((1.0*NumBufs*udpPacketMax)/pageSize))*pageSize)
+    ,chunk2((::std::ceil((1.0*NumBufs*sizeof(::io_uring_buf))/pageSize))*pageSize)
+    ,chunk3((::std::ceil(52000.0/pageSize))*pageSize)
+    ,bufBase{mmapWrapper<char*>(chunk1+chunk2+chunk3)}
+    ,bufRing{reinterpret_cast<::io_uring_buf_ring*>(bufBase+chunk1)}{
     //bufRing->tail=0;
     
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
 
-    if(int rc=uring_alloc_huge(512,ps,&rng.sq,&rng.cq,
-                 bufBase+(chunk1+chunk2)*pageSize,chunk3*pageSize);rc<0)
-      raise("alloc_huge",rc);
+    if(int rc=uring_alloc_huge(512,ps,&rng.sq,&rng.cq,bufBase+chunk1+chunk2
+                               ,chunk3);rc<0)raise("alloc_huge",rc);
     int fd=::io_uring_setup(512,&ps);
     if(fd<0)raise("ioUring",fd);
     uring_setup_ring(ps,rng);
@@ -158,12 +157,12 @@ class ioUring{
     this->close(fd);
   }
 
-  void writeDot (int& dotind,int fd,int bday){
-    checkIndex(dotind);
+  void writeDot (int& ind,int fd,int bday){
+    checkIndex(ind);
     auto e=getSqe();
     static ::std::array<int,MaxBatch/2> timestamps;
-    timestamps[dotind]=bday;
-    ::io_uring_prep_write(e,fd,&timestamps[dotind],sizeof bday,0);
+    timestamps[ind]=bday;
+    ::io_uring_prep_write(e,fd,&timestamps[ind],sizeof bday,0);
     ::io_uring_sqe_set_data64(e,Write);
     e->flags=IOSQE_CQE_SKIP_SUCCESS;
   }
@@ -273,16 +272,16 @@ struct cmwRequest{
 };
 #include"cmwA.mdl.hh"
 
-void ioUring::sendto (int& s2ind,::Socky const& so,auto...t){
-  checkIndex(s2ind);
+void ioUring::sendto (int& ind,::Socky const& so,auto...t){
+  checkIndex(ind);
   auto e=getSqe();
   static ::std::array<::std::pair<BufferStack<SameFormat>,::sockaddr_in>,MaxBatch/2> frnts;
-  frnts[s2ind].first.reset();
-  ::front::marshal<udpPacketMax>(frnts[s2ind].first,{t...});
-  auto sp=frnts[s2ind].first.outDuo();
-  frnts[s2ind].second=so.addr;
+  frnts[ind].first.reset();
+  ::front::marshal<udpPacketMax>(frnts[ind].first,{t...});
+  auto sp=frnts[ind].first.outDuo();
+  frnts[ind].second=so.addr;
   ::io_uring_prep_sendto(e,0,sp.data(),sp.size(),0
-                         ,cast(&frnts[s2ind].second),so.len);
+                         ,cast(&frnts[ind].second),so.len);
   ::io_uring_sqe_set_data64(e,Sendto);
   e->flags=IOSQE_CQE_SKIP_SUCCESS|IOSQE_FIXED_FILE;
 }
