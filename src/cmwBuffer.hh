@@ -425,7 +425,6 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   int compIndex=0;
   int bytesSent=0;
   int bytesRead=0;
-  bool kosher=true;
 
  public:
   BufferCompressed ():SendBuffer<Z>(sendBuf,sz),ReceiveBuffer<R,Z>(recBuf){}
@@ -463,7 +462,6 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     if(bytesRead==9){
       if((compPacketSize=::qlz_size_compressed(recBuf))>sz||
          ::qlz_size_decompressed(recBuf)>sz){
-        kosher=false;
         raise("gotIt size",compPacketSize,sz);
       }
       compressedStart=recBuf+sz-compPacketSize;
@@ -478,16 +476,8 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   }
 
   bool gotPacket (){
-    if(kosher){
-      auto sp=getDuo();
-      return gotIt(Read(this->sock_,sp.data(),sp.size()));
-    }
-    bytesRead+=Read(this->sock_,recBuf,myMin(sz,compPacketSize-bytesRead));
-    if(bytesRead==compPacketSize){
-      kosher=true;
-      bytesRead=0;
-    }
-    return false;
+    auto sp=getDuo();
+    return gotIt(Read(this->sock_,sp.data(),sp.size()));
   }
 
   void flush (){
@@ -500,7 +490,6 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     comp={};
     decomp={};
     compIndex=bytesSent=bytesRead=0;
-    kosher=true;
   }
 };
 
