@@ -103,7 +103,7 @@ class ioUring{
 
   void recvmsg (){
     auto e=getSqe();
-    ::io_uring_prep_recvmsg(e,0,&mhdr,MSG_TRUNC);
+    ::io_uring_prep_recvmsg(e,0,&mhdr,0);
     ::io_uring_sqe_set_data64(e,Recvmsg);
     e->ioprio=IORING_RECV_MULTISHOT|IORING_RECVSEND_POLL_FIRST;
     e->flags=IOSQE_FIXED_FILE|IOSQE_BUFFER_SELECT;
@@ -126,7 +126,7 @@ class ioUring{
   void recv (bool stale){
     auto e=getSqe();
     auto sp=cmwBuf.getDuo();
-    ::io_uring_prep_recv(e,1,sp.data(),sp.size(),0);
+    ::io_uring_prep_recv(e,1,sp.data(),sp.size(),MSG_WAITALL);
     ::io_uring_sqe_set_data64(e,Recv);
     e->flags=IOSQE_FIXED_FILE;
     if(sp.size()<=9)e->ioprio|=IORING_RECVSEND_POLL_FIRST;
