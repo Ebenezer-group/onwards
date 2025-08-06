@@ -149,6 +149,11 @@ inline int Read (int fd,void* data,int len,bool doClose=false){
   raise("Read",len,doClose?preserveError(fd):errno);
 }
 
+inline int Recv (int s,void* data,int len){
+  if(int r=::recv(s,data,len,MSG_WAITALL);r>0)return r;
+  raise("Recv",len,errno);
+}
+
 inline int Open (auto nm,int flags,mode_t md=0){
   if(int d=::open(nm,flags,md);d>0)return d;
   raise("Open",nm,errno);
@@ -421,10 +426,8 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   char compBuf[qlzFormula(sz)];
   char recBuf[sz];
   char* compressedStart;
-  int compPacketSize;
   int compIndex=0;
   int bytesSent=0;
-  int bytesRead=0;
 
  public:
   BufferCompressed ():SendBuffer<Z>(sendBuf,sz),ReceiveBuffer<R,Z>(recBuf){}
@@ -452,32 +455,27 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     return sp;
   }
 
-  auto getDuo (){
-    return bytesRead<9?::std::span(recBuf+bytesRead,9-bytesRead):
-                       ::std::span(compressedStart+bytesRead,compPacketSize-bytesRead);
+  auto getuo (){return recBuf;}
+
+  auto gothd (){
+    int compPacketSize;
+    if((compPacketSize=::qlz_size_compressed(recBuf))>sz||
+       ::qlz_size_decompressed(recBuf)>sz)
+      raise("gotIt size",compPacketSize,sz);
+    compressedStart=recBuf+sz-compPacketSize;
+    ::std::memmove(compressedStart,recBuf,9);
+    return ::std::span(compressedStart+9,compPacketSize-9);
   }
 
-  bool gotIt (int rc){
-    if((bytesRead+=rc)<9)return false;
-    if(bytesRead==9){
-      if((compPacketSize=::qlz_size_compressed(recBuf))>sz||
-         ::qlz_size_decompressed(recBuf)>sz){
-        raise("gotIt size",compPacketSize,sz);
-      }
-      compressedStart=recBuf+sz-compPacketSize;
-      ::std::memmove(compressedStart,recBuf,9);
-      return false;
-    }
-
-    if(bytesRead<compPacketSize)return false;
-    bytesRead=0;
+  void gotIt (){
     this->update(::qlz_decompress(compressedStart,recBuf,&decomp));
-    return true;
   }
 
-  bool gotPacket (){
-    auto sp=getDuo();
-    return gotIt(Read(this->sock_,sp.data(),sp.size()));
+  void gotPacket (){
+    Recv(this->sock_,recBuf,9);
+    auto sp=gothd();
+    Recv(this->sock_,sp.data(),sp.size());
+    gotIt();
   }
 
   void flush (){
@@ -489,7 +487,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     this->reset();
     comp={};
     decomp={};
-    compIndex=bytesSent=bytesRead=0;
+    compIndex=bytesSent=0;
   }
 };
 

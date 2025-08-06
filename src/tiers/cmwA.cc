@@ -46,7 +46,7 @@ class ioUring{
 
  public:
   static constexpr int SubQ=512,MaxBatch=10,NumBufs=4;
-  static constexpr int Recvmsg=0,Recv=1,Send=2,Close=3,Sendto=4,Fsync=5,Write=6;
+  static constexpr int Recvmsg=0,Recv9=1,Recv=2,Send=3,Close=4,Sendto=5,Fsync=6,Write=7;
 
   ioUring (int udpSock,auto pageSize):
     chunk1((::std::ceil((1.0*NumBufs*udpPacketMax)/pageSize))*pageSize)
@@ -123,15 +123,21 @@ class ioUring{
                                           o->payloadlen);
   }
 
-  void recv (bool stale){
+  void recv9 (bool stale){
     auto e=getSqe();
-    auto sp=cmwBuf.getDuo();
+    ::io_uring_prep_recv(e,1,cmwBuf.getuo(),9,MSG_WAITALL);
+    ::io_uring_sqe_set_data64(e,Recv9);
+    e->flags=IOSQE_FIXED_FILE;
+    e->ioprio|=IORING_RECVSEND_POLL_FIRST;
+    if(stale&&(::io_uring_register_files_update(&rng,1,&cmwBuf.sock_,1)<1))
+      raise("reg files update");
+  }
+
+  void recv (auto sp){
+    auto e=getSqe();
     ::io_uring_prep_recv(e,1,sp.data(),sp.size(),MSG_WAITALL);
     ::io_uring_sqe_set_data64(e,Recv);
     e->flags=IOSQE_FIXED_FILE;
-    if(sp.size()<=9)e->ioprio|=IORING_RECVSEND_POLL_FIRST;
-    if(stale&&(::io_uring_register_files_update(&rng,1,&cmwBuf.sock_,1)<1))
-      raise("reg files update");
   }
 
   void send (){
@@ -313,9 +319,9 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
   pad.spp_flags=SPP_HB_ENABLE;
   if(::setsockopt(sock,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS,&pad,sizeof pad)==-1)
     ::bail("setsockopt %d",errno);
-  ring->recv(true);
+  ring->recv9(true);
   sock=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
-  while(!cmwBuf.gotPacket());
+  cmwBuf.gotPacket();
   if(!giveBool(cmwBuf))::bail("Login:%s",cmwBuf.giveStringView().data());
 }
 
@@ -378,23 +384,25 @@ int main (int pid,char** av)try{
           if(tracy>1)requests.pop_back();
         }
       }else if(::ioUring::Send==cq->user_data)sentBytes+=cq->res;
-      else if(::ioUring::Recv==cq->user_data){
+      else if(::ioUring::Recv9==cq->user_data){
+        auto sp=cmwBuf.gothd();
+	ring->recv(sp);
+      }else if(::ioUring::Recv==cq->user_data){
         assert(!requests.empty());
         auto& req=requests.front();
         try{
-          if(cmwBuf.gotIt(cq->res)){
-            if(giveBool(cmwBuf)){
-              req.saveOutput(dotind);
-              ring->sendto(s2ind,req.frnt);
-            }else ring->sendto(s2ind,req.frnt,"CMW:",cmwBuf.giveStringView());
-            requests.pop_front();
-          }
+          cmwBuf.gotIt();
+          if(giveBool(cmwBuf)){
+            req.saveOutput(dotind);
+            ring->sendto(s2ind,req.frnt);
+          }else ring->sendto(s2ind,req.frnt,"CMW:",cmwBuf.giveStringView());
+          requests.pop_front();
         }catch(::std::exception& e){
           ::syslog(LOG_ERR,"%d Reply from CMW %s",pid,e.what());
           ring->sendto(s2ind,req.frnt,e.what());
           requests.pop_front();
         }
-        ring->recv(false);
+        ring->recv9(false);
       }else ::bail("Unknown user_data %llu",cq->user_data);
     }
   }
