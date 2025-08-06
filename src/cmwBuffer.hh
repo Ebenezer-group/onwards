@@ -458,9 +458,8 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   auto getuo (){return recBuf;}
 
   auto gothd (){
-    int compPacketSize;
-    if((compPacketSize=::qlz_size_compressed(recBuf))>sz||
-       ::qlz_size_decompressed(recBuf)>sz)
+    int compPacketSize=::qlz_size_compressed(recBuf);
+    if(compPacketSize>sz||::qlz_size_decompressed(recBuf)>sz)
       raise("gotIt size",compPacketSize,sz);
     compressedStart=recBuf+sz-compPacketSize;
     ::std::memmove(compressedStart,recBuf,9);
