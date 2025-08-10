@@ -1,4 +1,13 @@
 #include<atomic>
+#include<sys/mman.h>
+
+template<class T=char*>
+auto mmapWrapper (size_t len){
+  if(auto addr=::mmap(0,len,PROT_READ|PROT_WRITE,
+                      MAP_PRIVATE|MAP_ANONYMOUS,-1,0);addr!=MAP_FAILED)
+    return reinterpret_cast<T>(addr);
+  ::cmw::raise("mmap",errno);
+}
 
 inline int uring_alloc_huge (unsigned sq_entries,::io_uring_params& p,
                              ::io_uring_sq* sq,::io_uring_cq* cq,
@@ -162,4 +171,5 @@ enum{
   INT_FLAG_APP_MEM        = 2,
   INT_FLAG_CQ_ENTER       = 4,
 };
+
 

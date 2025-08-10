@@ -22,7 +22,6 @@ using sockType=SOCKET;
 #include<errno.h>
 #include<fcntl.h>//open
 #include<arpa/inet.h>
-#include<sys/mman.h>
 #include<sys/socket.h>
 #include<sys/types.h>
 #include<unistd.h>//chdir
@@ -492,14 +491,6 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
 
 inline void setDirectory (char const* d){
   if(::chdir(d)!=0)raise("setDirectory",d,errno);
-}
-
-template<class T=char*>
-auto mmapWrapper (size_t len){
-  if(auto addr=::mmap(0,len,PROT_READ|PROT_WRITE,
-                      MAP_PRIVATE|MAP_ANONYMOUS,-1,0);addr!=MAP_FAILED)
-    return reinterpret_cast<T>(addr);
-  raise("mmap",errno);
 }
 #endif
 
