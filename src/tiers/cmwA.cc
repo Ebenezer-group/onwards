@@ -23,9 +23,11 @@ constexpr ::int32_t BufSize=1101000;
 BufferCompressed<SameFormat,::int32_t,BufSize> cmwBuf;
 
 class ioUring{
+  static constexpr int SubQ=512,MaxBatch=10,NumBufs=4;
   ::io_uring rng{};
   ::iovec iov;
   ::msghdr mhdr{0,sizeof(::sockaddr_in),&iov,0,0,0,0};
+  int bufsUsed=NumBufs;
   int chunk1,chunk2,chunk3;
   char* const bufBase;
   ::io_uring_buf_ring* const bufRing;
@@ -45,7 +47,6 @@ class ioUring{
   }
 
  public:
-  static constexpr int SubQ=512,MaxBatch=10,NumBufs=4;
   static constexpr int Recvmsg=0,Recv9=1,Recv=2,Send=3,Close=4,Sendto=5,Fsync=6,Write=7;
 
   ioUring (int udpSock,auto pageSize):
@@ -88,9 +89,10 @@ class ioUring{
                            regfds.data(),regfds.size())<0)raise("reg files");
   }
 
-  auto submit (int bufsUsed){
+  auto submit (){
     static int seen;
     ::io_uring_buf_ring_advance(bufRing,bufsUsed);
+    bufsUsed=0;
     ::io_uring_cq_advance(&rng,seen);
     int rc;
     while((rc=::io_uring_submit_and_wait(&rng,1))<0){
@@ -111,6 +113,7 @@ class ioUring{
   }
 
   auto checkMsg (auto const* cq,::Socky& s){
+    ++bufsUsed;
     if(~cq->flags&IORING_CQE_F_MORE){
       ::syslog(LOG_ERR,"recvmsg was disabled");
       recvmsg();
@@ -350,10 +353,10 @@ int main (int pid,char** av)try{
   ring->recvmsg();
 
   ::std::deque<::cmwRequest> requests;
-  for(int sentBytes=0,bufsUsed=::ioUring::NumBufs;;){
-    auto cqs=ring->submit(bufsUsed);
+  for(int sentBytes=0;;){
+    auto cqs=ring->submit();
     if(sentBytes)cmwBuf.adjustFrame(sentBytes);
-    sentBytes=bufsUsed=0;
+    sentBytes=0;
     int s2ind=-1,dotind=-1;
     for(auto const* cq:cqs){
       if(cq->res<=0){
@@ -367,7 +370,6 @@ int main (int pid,char** av)try{
         ring->close(cmwBuf.sock_);
         ::login(cred,sa);
       }else if(::ioUring::Recvmsg==cq->user_data){
-        ++bufsUsed;
         ::Socky frnt;
         int tracy=0;
         try{
