@@ -4,7 +4,6 @@
 #include<array>
 #include<deque>
 #include<cassert>
-#include<cmath>
 #include<liburing.h>
 #include<linux/sctp.h>
 #include<signal.h>
@@ -22,13 +21,17 @@ struct Socky{
 constexpr ::int32_t BufSize=1101000;
 BufferCompressed<SameFormat,::int32_t,BufSize> cmwBuf;
 
+auto roundUp (::uint64_t val,::uint64_t multiple){
+  return (((val+multiple-1)/multiple)*multiple);
+}
+
 class ioUring{
   static constexpr int SubQ=512,MaxBatch=10,NumBufs=4;
   ::io_uring rng{};
   ::iovec iov;
   ::msghdr mhdr{0,sizeof(::sockaddr_in),&iov,0,0,0,0};
-  int bufsUsed=NumBufs;
-  int chunk1,chunk2,chunk3;
+  int sentBytes=0,bufsUsed=NumBufs;
+  int const pageSize,chunk1,chunk2,chunk3;
   char* const bufBase;
   ::io_uring_buf_ring* const bufRing;
 
@@ -49,10 +52,11 @@ class ioUring{
  public:
   static constexpr int Recvmsg=0,Recv9=1,Recv=2,Send=3,Close=4,Sendto=5,Fsync=6,Write=7;
 
-  ioUring (int udpSock,auto pageSize):
-    chunk1((::std::ceil((1.0*NumBufs*udpPacketMax)/pageSize))*pageSize)
-    ,chunk2((::std::ceil((1.0*NumBufs*sizeof(::io_uring_buf))/pageSize))*pageSize)
-    ,chunk3((::std::ceil(52000.0/pageSize))*pageSize)
+  ioUring (int udpSock):
+    pageSize(::sysconf(_SC_PAGESIZE))
+    ,chunk1(roundUp(NumBufs*udpPacketMax,pageSize))
+    ,chunk2(roundUp(NumBufs*sizeof(::io_uring_buf),pageSize))
+    ,chunk3(roundUp(52000,pageSize))
     ,bufBase{mmapWrapper(chunk1+chunk2+chunk3)}
     ,bufRing{reinterpret_cast<::io_uring_buf_ring*>(bufBase+chunk1)}{
     //bufRing->tail=0;
@@ -92,16 +96,19 @@ class ioUring{
   auto submit (){
     static int seen;
     ::io_uring_buf_ring_advance(bufRing,bufsUsed);
-    bufsUsed=0;
     ::io_uring_cq_advance(&rng,seen);
     int rc;
     while((rc=::io_uring_submit_and_wait(&rng,1))<0){
       if(-EINTR!=rc)raise("waitCqe",rc);
     }
+    if(sentBytes)cmwBuf.adjustFrame(sentBytes);
+    bufsUsed=sentBytes=0;
     static ::std::array<::io_uring_cqe*,MaxBatch> cqes;
     seen=::uring_peek_batch_cqe(&rng,cqes.data(),cqes.size());
     return ::std::span(cqes.data(),seen);
   }
+
+  void tallyBytes (int sent){sentBytes+=sent;}
 
   void recvmsg (){
     auto e=getSqe();
@@ -344,7 +351,7 @@ int main (int pid,char** av)try{
   ::checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  ring=new ::ioUring{frntBuf.sock_,::sysconf(_SC_PAGESIZE)};
+  ring=new ::ioUring{frntBuf.sock_};
   ::login(cred,sa,ac==3);
   if(ac==3){
     ::printf("Signup was successful\n");
@@ -353,10 +360,8 @@ int main (int pid,char** av)try{
   ring->recvmsg();
 
   ::std::deque<::cmwRequest> requests;
-  for(int sentBytes=0;;){
+  for(;;){
     auto cqs=ring->submit();
-    if(sentBytes)cmwBuf.adjustFrame(sentBytes);
-    sentBytes=0;
     int s2ind=-1,dotind=-1;
     for(auto const* cq:cqs){
       if(cq->res<=0){
@@ -385,7 +390,7 @@ int main (int pid,char** av)try{
           if(tracy>0)ring->sendto(s2ind,frnt,e.what());
           if(tracy>1)requests.pop_back();
         }
-      }else if(::ioUring::Send==cq->user_data)sentBytes+=cq->res;
+      }else if(::ioUring::Send==cq->user_data)ring->tallyBytes(cq->res);
       else if(::ioUring::Recv9==cq->user_data){
         auto sp=cmwBuf.gothd();
 	ring->recv(sp);
