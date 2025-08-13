@@ -22,7 +22,7 @@ constexpr ::int32_t BufSize=1101000;
 BufferCompressed<SameFormat,::int32_t,BufSize> cmwBuf;
 
 auto roundUp (::uint64_t val,::uint64_t multiple){
-  return (((val+multiple-1)/multiple)*multiple);
+  return ((val+multiple-1)/multiple)*multiple;
 }
 
 class ioUring{
@@ -60,7 +60,7 @@ class ioUring{
     ,bufBase{mmapWrapper(chunk1+chunk2+chunk3)}
     ,bufRing{reinterpret_cast<::io_uring_buf_ring*>(bufBase+chunk1)}{
     //bufRing->tail=0;
-    
+
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
     ps.flags|=IORING_SETUP_NO_MMAP|IORING_SETUP_NO_SQARRAY|IORING_SETUP_REGISTERED_FD_ONLY;
@@ -79,7 +79,7 @@ class ioUring{
     reg.ring_entries=NumBufs;
     reg.bgid=0;
     if(::io_uring_register(fd,IORING_REGISTER_PBUF_RING|IORING_REGISTER_USE_REGISTERED_RING
-       	                   ,&reg,1)<0)raise("reg buf ring");
+                           ,&reg,1)<0)raise("reg buf ring");
 
     int mask=NumBufs-1;
     for(int i=0;i<NumBufs;++i){
@@ -393,7 +393,7 @@ int main (int pid,char** av)try{
       }else if(::ioUring::Send==cq->user_data)ring->tallyBytes(cq->res);
       else if(::ioUring::Recv9==cq->user_data){
         auto sp=cmwBuf.gothd();
-	ring->recv(sp);
+        ring->recv(sp);
       }else if(::ioUring::Recv==cq->user_data){
         assert(!requests.empty());
         auto& req=requests.front();
