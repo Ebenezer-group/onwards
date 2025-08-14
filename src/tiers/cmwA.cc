@@ -56,7 +56,7 @@ class ioUring{
     pageSize(::sysconf(_SC_PAGESIZE))
     ,chunk1(roundUp(NumBufs*udpPacketMax,pageSize))
     ,chunk2(roundUp(NumBufs*sizeof(::io_uring_buf),pageSize))
-    ,chunk3(roundUp(52000,pageSize))
+    ,chunk3(roundUp(SubQ*(sizeof(::io_uring_sqe)+2*sizeof(::io_uring_cqe))+100,pageSize))
     ,bufBase{mmapWrapper(chunk1+chunk2+chunk3)}
     ,bufRing{reinterpret_cast<::io_uring_buf_ring*>(bufBase+chunk1)}{
     //bufRing->tail=0;
