@@ -95,8 +95,8 @@ class ioUring{
 
   auto submit (){
     static int seen;
-    ::io_uring_buf_ring_advance(bufRing,bufsUsed);
     ::io_uring_cq_advance(&rng,seen);
+    ::io_uring_buf_ring_advance(bufRing,bufsUsed);
     int rc;
     while((rc=::io_uring_submit_and_wait(&rng,1))<0){
       if(-EINTR!=rc)raise("waitCqe",rc);
@@ -186,13 +186,14 @@ class ioUring{
   void sendto (int&,::Socky const&,auto...);
 } *ring;
 
-struct FileBuffer{
+class FileBuffer{
   char buf[4096];
   char line[120];
   int ind=0;
   int bytes=0;
   int fd;
 
+ public:
   FileBuffer (char const* nam,int flags):fd(Open(nam,flags)){}
 
   char getc (){

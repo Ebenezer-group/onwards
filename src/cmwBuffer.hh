@@ -449,7 +449,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   }
 
   auto outDuo (){
-    auto sp=::std::span<char>(compBuf+bytesSent,compIndex-bytesSent);
+    auto sp=::std::span(compBuf+bytesSent,compIndex-bytesSent);
     bytesSent=compIndex;
     return sp;
   }
