@@ -78,8 +78,8 @@ class ioUring{
     reg.ring_addr=(unsigned long) (uintptr_t)bufRing;
     reg.ring_entries=NumBufs;
     reg.bgid=0;
-    if(::io_uring_register(fd,IORING_REGISTER_PBUF_RING|IORING_REGISTER_USE_REGISTERED_RING
-                           ,&reg,1)<0)raise("reg buf ring");
+    if(int rc=::io_uring_register(fd,IORING_REGISTER_PBUF_RING|IORING_REGISTER_USE_REGISTERED_RING
+                           ,&reg,1);rc<0)raise("reg buf ring",rc);
 
     int mask=NumBufs-1;
     for(int i=0;i<NumBufs;++i){
@@ -89,8 +89,8 @@ class ioUring{
       buf->bid=i;
     }
     ::std::array regfds={udpSock,0};
-    if(::io_uring_register(fd,IORING_REGISTER_FILES|IORING_REGISTER_USE_REGISTERED_RING,
-                           regfds.data(),regfds.size())<0)raise("reg files");
+    if(int rc=::io_uring_register(fd,IORING_REGISTER_FILES|IORING_REGISTER_USE_REGISTERED_RING,
+                           regfds.data(),regfds.size());rc<0)raise("reg files",rc);
   }
 
   auto submit (){
