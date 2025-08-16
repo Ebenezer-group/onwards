@@ -415,7 +415,6 @@ class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
 };
 
 #ifndef CMW_WINDOWS
-auto myMin (auto a,auto b){return a<b?a:b;}
 constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 
 template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
