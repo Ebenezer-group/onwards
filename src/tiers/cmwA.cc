@@ -13,6 +13,39 @@
 #include"ring_setup.hh"
 
 using namespace ::cmw;
+class FileBuffer{
+  char buf[4096];
+  char line[120];
+  int ind=0;
+  int bytes=0;
+  int fd;
+
+ public:
+  FileBuffer (char const* nam,int flags):fd(Open(nam,flags)){}
+
+  char getc (){
+    if(ind>=bytes){
+      bytes=Read(fd,buf,sizeof buf);
+      ind=0;
+    }
+    return buf[ind++];
+  }
+
+  auto getline (char delim='\n'){
+    ::std::size_t idx=0;
+    while((line[idx]=getc())!=delim){
+      if(line[idx]=='\r')raise("getline cr");
+      if(++idx>=sizeof line)raise("getline size");
+    }
+    line[idx]=0;
+    return ::std::string_view{line,idx};
+  }
+
+  auto operator() (){return fd;}
+  void release (){fd=-1;}
+  ~FileBuffer (){if(fd>0)::close(fd);}
+};
+
 struct Socky{
   ::sockaddr_in addr;
   ::socklen_t len=sizeof addr;
@@ -185,39 +218,6 @@ class ioUring{
 
   void sendto (int&,::Socky const&,auto...);
 } *ring;
-
-class FileBuffer{
-  char buf[4096];
-  char line[120];
-  int ind=0;
-  int bytes=0;
-  int fd;
-
- public:
-  FileBuffer (char const* nam,int flags):fd(Open(nam,flags)){}
-
-  char getc (){
-    if(ind>=bytes){
-      bytes=Read(fd,buf,sizeof buf);
-      ind=0;
-    }
-    return buf[ind++];
-  }
-
-  auto getline (char delim='\n'){
-    ::std::size_t idx=0;
-    while((line[idx]=getc())!=delim){
-      if(line[idx]=='\r')raise("getline cr");
-      if(++idx>=sizeof line)raise("getline size");
-    }
-    line[idx]=0;
-    return ::std::string_view{line,idx};
-  }
-
-  auto operator() (){return fd;}
-  void release (){fd=-1;}
-  ~FileBuffer (){if(fd>0)::close(fd);}
-};
 
 struct cmwRequest{
   ::Socky const frnt;
