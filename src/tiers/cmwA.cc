@@ -392,10 +392,8 @@ int main (int pid,char** av)try{
           if(tracy>1)requests.pop_back();
         }
       }else if(::ioUring::Send==cq->user_data)ring->tallyBytes(cq->res);
-      else if(::ioUring::Recv9==cq->user_data){
-        auto sp=cmwBuf.gothd();
-        ring->recv(sp);
-      }else if(::ioUring::Recv==cq->user_data){
+      else if(::ioUring::Recv9==cq->user_data)ring->recv(cmwBuf.gothd());
+      else if(::ioUring::Recv==cq->user_data){
         assert(!requests.empty());
         auto& req=requests.front();
         try{
