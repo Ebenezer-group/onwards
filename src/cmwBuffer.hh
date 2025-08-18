@@ -145,12 +145,12 @@ inline void Write (int fd,char const* data,int len,bool doClose=false){
 
 inline int Read (int fd,void* data,int len,bool doClose=false){
   if(int r=::read(fd,data,len);r>0)return r;
-  raise("Read",len,doClose?preserveError(fd):errno);
+  raise("Read",doClose?preserveError(fd):errno);
 }
 
 inline int Recv (int s,void* data,int len){
   if(int r=::recv(s,data,len,MSG_WAITALL);r>0)return r;
-  raise("Recv",len,errno);
+  raise("Recv",errno);
 }
 
 inline int Open (auto nm,int flags,mode_t md=0){
