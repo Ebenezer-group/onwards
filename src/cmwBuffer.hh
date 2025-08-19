@@ -464,7 +464,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     return ::std::span(compressedStart+9,compPacketSize-9);
   }
 
-  void gotIt (){
+  void decompress (){
     this->update(::qlz_decompress(compressedStart,recBuf,&decomp));
   }
 
@@ -472,7 +472,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     Recv(this->sock_,recBuf,9);
     auto sp=gothd();
     Recv(this->sock_,sp.data(),sp.size());
-    gotIt();
+    decompress();
   }
 
   void flush (){

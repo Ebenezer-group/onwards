@@ -397,7 +397,7 @@ int main (int pid,char** av)try{
         assert(!requests.empty());
         auto& req=requests.front();
         try{
-          cmwBuf.gotIt();
+          cmwBuf.decompress();
           if(giveBool(cmwBuf)){
             req.saveOutput(dotind);
             ring->sendto(s2ind,req.frnt);
