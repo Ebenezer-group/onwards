@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.22)
 project(onwards CXX)
 
 function(addExecutable name)
@@ -12,6 +12,7 @@ addExecutable(receiveExample example/receiveExample.cc)
 addExecutable(genz src/tiers/front/genz.cc)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     addExecutable(cmwA src/tiers/cmwA.cc)
+    target_compile_options(cmwA PRIVATE -fno-threadsafe-statics)
     target_link_libraries(cmwA PRIVATE uring)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(sendExample PRIVATE ws2_32)

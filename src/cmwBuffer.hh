@@ -11,7 +11,6 @@
 #include<string_view>
 #include<type_traits>
 #include<utility>
-static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 
 #if defined(_MSC_VER)||defined(WIN32)||defined(_WIN32)||defined(__WIN32__)||defined(__CYGWIN__)
 #include<ws2tcpip.h>
@@ -29,6 +28,7 @@ using sockType=int;
 #endif
 
 static_assert(sizeof(bool)==1);
+static_assert(::std::numeric_limits<float>::is_iec559,"IEEE754");
 template<class T>concept arithmetic=::std::is_arithmetic_v<T>||::std::is_enum_v<T>;
 
 namespace cmw{
@@ -72,8 +72,8 @@ class MarshallingInt{
   ::int32_t val=0;
  public:
   MarshallingInt ()=default;
-  explicit MarshallingInt (::int32_t v):val{v}{}
-  explicit MarshallingInt (::std::string_view v):val{fromChars(v)}{}
+  explicit MarshallingInt (::int32_t i):val{i}{}
+  explicit MarshallingInt (::std::string_view s):val{fromChars(s)}{}
 
   //Reads a sequence of bytes in variable-length format and
   //builds a 32 bit integer.
