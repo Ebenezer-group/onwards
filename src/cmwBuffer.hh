@@ -132,6 +132,11 @@ inline int preserveError (int s){
 }
 
 #ifndef CMW_WINDOWS
+inline int Open (auto nm,int flags,mode_t md=0){
+  if(int d=::open(nm,flags,md);d>0)return d;
+  raise("Open",nm,errno);
+}
+
 inline void Write (int fd,char const* data,int len,bool doClose=false){
   for(;;){
     if(int r=::write(fd,data,len);r>0){
@@ -146,16 +151,6 @@ inline void Write (int fd,char const* data,int len,bool doClose=false){
 inline int Read (int fd,void* data,int len,bool doClose=false){
   if(int r=::read(fd,data,len);r>0)return r;
   raise("Read",doClose?preserveError(fd):errno);
-}
-
-inline int Recv (int s,void* data,int len){
-  if(int r=::recv(s,data,len,MSG_WAITALL);r>0)return r;
-  raise("Recv",errno);
-}
-
-inline int Open (auto nm,int flags,mode_t md=0){
-  if(int d=::open(nm,flags,md);d>0)return d;
-  raise("Open",nm,errno);
 }
 #endif
 
@@ -245,16 +240,15 @@ template<class R,class Z>class ReceiveBuffer{
     else R::readBlock(*this,data,elements);
   }
 
-#ifndef CMW_WINDOWS
-  int giveFile (auto nm){
+  int giveFile (auto);
+
+  auto giveFile (){
     int sz=give<::uint32_t>();
     checkLen(sz);
-    int fd=Open(nm,O_CREAT|O_WRONLY|O_TRUNC,0644);
-    Write(fd,rbuf+subTotal+rindex,sz,true);
+    auto sp=::std::span(rbuf+subTotal+rindex,sz);
     rindex+=sz;
-    return fd;
+    return sp;
   }
-#endif
 
   template<class T>requires arithmetic<T>
   auto giveSpan (){
@@ -415,6 +409,11 @@ class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
 };
 
 #ifndef CMW_WINDOWS
+inline int Recv (int s,void* data,int len){
+  if(int r=::recv(s,data,len,MSG_WAITALL);r>0)return r;
+  raise("Recv",errno);
+}
+
 constexpr auto qlzFormula (int i){return i+(i>>3)+400;}
 
 template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
