@@ -397,13 +397,13 @@ int main (int pid,char** av)try{
       else if(::ioUring::Recv==cq->user_data){
         assert(!requests.empty());
         auto& req=requests.front();
+        if(writePending){
+          ring->submitWrapper();
+          writePending={};
+        }
         try{
           cmwBuf.decompress();
           if(giveBool(cmwBuf)){
-	    if(writePending){
-              ring->submitWrapper();
-              writePending={};
-	    }
             req.saveOutput();
             writePending=true;
             ring->sendto(s2ind,req.frnt);
