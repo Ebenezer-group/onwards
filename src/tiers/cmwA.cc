@@ -69,19 +69,6 @@ class ioUring{
   ::io_uring_buf_ring* const bufRing;
 
  public:
-  void submitOnly (){
-    ::io_uring_submit_and_wait(&rng,0);
-  }
-
-  auto getSqe (bool internal=false){
-    if(auto e=::uring_get_sqe(&rng);e)return e;
-    if(internal)raise("getSqe");
-    submitOnly();
-    return getSqe(true);
-  }
-
-  static constexpr int Recvmsg=0,Recv9=1,Recv=2,Send=3,Close=4,Sendto=5,Fsync=6,Write=7,WriteOutput=8;
-
   ioUring (int udpSock):
     pageSize(::sysconf(_SC_PAGESIZE))
     ,chunk1(roundUp(NumBufs*udpPacketMax,pageSize))
@@ -123,14 +110,18 @@ class ioUring{
                            regfds.data(),regfds.size());rc<0)raise("reg files",rc);
   }
 
+  void submitWrapper (int wait=0){
+    int rc;
+    while((rc=::io_uring_submit_and_wait(&rng,wait))<0){
+      if(-EINTR!=rc)raise("waitCqe",rc);
+    }
+  }
+
   auto submit (){
     static int seen;
     ::io_uring_cq_advance(&rng,seen);
     ::io_uring_buf_ring_advance(bufRing,bufsUsed);
-    int rc;
-    while((rc=::io_uring_submit_and_wait(&rng,1))<0){
-      if(-EINTR!=rc)raise("waitCqe",rc);
-    }
+    submitWrapper(1);
     if(sentBytes)cmwBuf.adjustFrame(sentBytes);
     bufsUsed=sentBytes=0;
     static ::std::array<::io_uring_cqe*,MaxBatch> cqes;
@@ -139,6 +130,15 @@ class ioUring{
   }
 
   void tallyBytes (int sent){sentBytes+=sent;}
+
+  auto getSqe (bool internal=false){
+    if(auto e=::uring_get_sqe(&rng);e)return e;
+    if(internal)raise("getSqe");
+    submitWrapper();
+    return getSqe(true);
+  }
+
+  static constexpr int Recvmsg=0,Recv9=1,Recv=2,Send=3,Close=4,Sendto=5,Fsync=6,Write=7,WriteOutput=8;
 
   void recvmsg (){
     auto e=getSqe();
@@ -287,7 +287,7 @@ struct cmwRequest{
 
 void ioUring::sendto (int& ind,::Socky const& so,auto...t){
   if(++ind>=MaxBatch/2){
-    submitOnly();
+    submitWrapper();
     ind=0;
   }
 
@@ -401,7 +401,7 @@ int main (int pid,char** av)try{
           cmwBuf.decompress();
           if(giveBool(cmwBuf)){
 	    if(writePending){
-              ring->submitOnly();
+              ring->submitWrapper();
               writePending={};
 	    }
             req.saveOutput();
