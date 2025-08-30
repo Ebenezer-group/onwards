@@ -395,15 +395,15 @@ int main (int pid,char** av)try{
       }else if(::ioUring::Send==cq->user_data)ring->tallyBytes(cq->res);
       else if(::ioUring::Recv9==cq->user_data)ring->recv(cmwBuf.gothd());
       else if(::ioUring::Recv==cq->user_data){
-	if(writePending){
-          ring->submitOnly();
-          writePending={};
-	}
         assert(!requests.empty());
         auto& req=requests.front();
         try{
           cmwBuf.decompress();
           if(giveBool(cmwBuf)){
+	    if(writePending){
+              ring->submitOnly();
+              writePending={};
+	    }
             req.saveOutput();
             writePending=true;
             ring->sendto(s2ind,req.frnt);
