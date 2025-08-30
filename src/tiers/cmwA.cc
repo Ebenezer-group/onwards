@@ -68,6 +68,20 @@ class ioUring{
   char* const bufBase;
   ::io_uring_buf_ring* const bufRing;
 
+  void submitWrapper (int wait=0){
+    int rc;
+    while((rc=::io_uring_submit_and_wait(&rng,wait))<0){
+      if(-EINTR!=rc)raise("waitCqe",rc);
+    }
+  }
+
+  auto getSqe (bool internal=false){
+    if(auto e=::uring_get_sqe(&rng);e)return e;
+    if(internal)raise("getSqe");
+    submitWrapper();
+    return getSqe(true);
+  }
+
  public:
   ioUring (int udpSock):
     pageSize(::sysconf(_SC_PAGESIZE))
@@ -110,13 +124,6 @@ class ioUring{
                            regfds.data(),regfds.size());rc<0)raise("reg files",rc);
   }
 
-  void submitWrapper (int wait=0){
-    int rc;
-    while((rc=::io_uring_submit_and_wait(&rng,wait))<0){
-      if(-EINTR!=rc)raise("waitCqe",rc);
-    }
-  }
-
   auto submit (){
     static int seen;
     ::io_uring_cq_advance(&rng,seen);
@@ -130,13 +137,6 @@ class ioUring{
   }
 
   void tallyBytes (int sent){sentBytes+=sent;}
-
-  auto getSqe (bool internal=false){
-    if(auto e=::uring_get_sqe(&rng);e)return e;
-    if(internal)raise("getSqe");
-    submitWrapper();
-    return getSqe(true);
-  }
 
   static constexpr int Recvmsg=0,Recv9=1,Recv=2,Send=3,Close=4,Sendto=5,Fsync=6,Write=7,WriteOutput=8;
 
@@ -163,7 +163,7 @@ class ioUring{
                                           o->payloadlen);
   }
 
-  void recv9 (bool stale){
+  void recv9 (bool stale=false){
     auto e=getSqe();
     ::io_uring_prep_recv(e,1,cmwBuf.getuo(),9,MSG_WAITALL);
     ::io_uring_sqe_set_data64(e,Recv9);
@@ -361,10 +361,13 @@ int main (int pid,char** av)try{
   ring->recvmsg();
 
   ::std::deque<::cmwRequest> requests;
-  for(;;){
+  for(bool writePending{};;){
     auto cqs=ring->submit();
     int s2ind=-1;
-    bool writePending{};
+    if(writePending){
+      ring->recv9();
+      writePending={};
+    }
     for(auto const* cq:cqs){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"%d Op failed %llu %d",pid,cq->user_data,cq->res);
@@ -397,10 +400,6 @@ int main (int pid,char** av)try{
       else if(::ioUring::Recv==cq->user_data){
         assert(!requests.empty());
         auto& req=requests.front();
-        if(writePending){
-          ring->submitWrapper();
-          writePending={};
-        }
         try{
           cmwBuf.decompress();
           if(giveBool(cmwBuf)){
@@ -414,7 +413,7 @@ int main (int pid,char** av)try{
           ring->sendto(s2ind,req.frnt,e.what());
           requests.pop_front();
         }
-        ring->recv9(false);
+        if(!writePending)ring->recv9();
       }else ::bail("Unknown user_data %llu",cq->user_data);
     }
   }
