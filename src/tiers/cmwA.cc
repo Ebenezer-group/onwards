@@ -361,13 +361,9 @@ int main (int pid,char** av)try{
   ring->recvmsg();
 
   ::std::deque<::cmwRequest> requests;
-  for(bool writePending{};;){
+  for(;;){
     auto cqs=ring->submit();
     int s2ind=-1;
-    if(writePending){
-      ring->recv9();
-      writePending={};
-    }
     for(auto const* cq:cqs){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"%d Op failed %llu %d",pid,cq->user_data,cq->res);
@@ -404,7 +400,6 @@ int main (int pid,char** av)try{
           cmwBuf.decompress();
           if(giveBool(cmwBuf)){
             req.saveOutput();
-            writePending=true;
             ring->sendto(s2ind,req.frnt);
           }else ring->sendto(s2ind,req.frnt,"CMW:",cmwBuf.giveStringView());
           requests.pop_front();
@@ -413,7 +408,7 @@ int main (int pid,char** av)try{
           ring->sendto(s2ind,req.frnt,e.what());
           requests.pop_front();
         }
-        if(!writePending)ring->recv9();
+        ring->recv9();
       }else ::bail("Unknown user_data %llu",cq->user_data);
     }
   }
