@@ -19,7 +19,7 @@ int genzMain (int ac,char **av)try{
   ::middle::marshal<udpPacketMax>(buf,MarshallingInt(av[1]),av[2]);
   for(int tm=8;tm<13;tm+=4){
     buf.send(res().ai_addr,res().ai_addrlen);
-    setRcvTimeout(buf.sock_,tm);
+    setRcvTimeout(buf.sock,tm);
     if(buf.getPacket()){
       if(giveBool(buf))::std::exit(EXIT_SUCCESS);
       leave("cmwA:%s\n",buf.giveStringView().data());

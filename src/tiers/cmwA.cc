@@ -169,7 +169,7 @@ class ioUring{
     ::io_uring_sqe_set_data64(e,Recv9);
     e->flags=IOSQE_FIXED_FILE;
     e->ioprio|=IORING_RECVSEND_POLL_FIRST;
-    if(stale&&(::io_uring_register_files_update(&rng,1,&cmwBuf.sock_,1)<1))
+    if(stale&&(::io_uring_register_files_update(&rng,1,&cmwBuf.sock,1)<1))
       raise("reg files update");
   }
 
@@ -322,7 +322,7 @@ void login (::Credentials const& cred,auto& sa,bool signUp=false){
     ::sleep(30);
   }
 
-  cmwBuf.sock_=sock;
+  cmwBuf.sock=sock;
   cmwBuf.flush();
   ::sctp_paddrparams pad{};
   pad.spp_address.ss_family=AF_INET;
@@ -352,7 +352,7 @@ int main (int pid,char** av)try{
   ::checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  ring=new ::ioUring{frntBuf.sock_};
+  ring=new ::ioUring{frntBuf.sock};
   ::login(cred,sa,ac==3);
   if(ac==3){
     ::printf("Signup was successful\n");
@@ -373,7 +373,7 @@ int main (int pid,char** av)try{
         for(auto& r:requests){frntBuf.send(&r.frnt.addr,r.frnt.len);}
         requests.clear();
         cmwBuf.compressedReset();
-        ring->close(cmwBuf.sock_);
+        ring->close(cmwBuf.sock);
         ::login(cred,sa);
       }else if(::ioUring::Recvmsg==cq->user_data){
         ::Socky frnt;

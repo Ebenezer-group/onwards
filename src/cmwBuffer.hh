@@ -294,7 +294,7 @@ template<class Z>class SendBuffer{
  protected:
   Z index=0;
  public:
-  sockType sock_=-1;
+  sockType sock=-1;
 
   SendBuffer (auto addr,Z sz):buf(addr),bufsize(sz){}
 
@@ -335,7 +335,7 @@ template<class Z>class SendBuffer{
   void rollback (){index=savedSize;}
 
   bool flush (){
-    int const bytes=Write(sock_,buf,index);
+    int const bytes=Write(sock,buf,index);
     if(bytes==index){
       reset();
       return true;
@@ -348,7 +348,7 @@ template<class Z>class SendBuffer{
   }
 
   template<class T=int>auto send (T* addr=nullptr,::socklen_t len=0){
-    if(int r=::sendto(sock_,buf,index,0,cast(addr),len);r>0)return r;
+    if(int r=::sendto(sock,buf,index,0,cast(addr),len);r>0)return r;
     raise("buf::send",getError());
   }
 
@@ -397,13 +397,13 @@ class BufferStack:public SendBuffer<Z>,public ReceiveBuffer<R,Z>{
   char ar[N];
  public:
   BufferStack ():SendBuffer<Z>(ar,N),ReceiveBuffer<R,Z>(ar){}
-  explicit BufferStack (int s):BufferStack(){this->sock_=s;}
+  explicit BufferStack (int s):BufferStack(){this->sock=s;}
 
   auto outDuo (){return ::std::span(ar,this->index);}
   auto getDuo (){return ::std::span(ar,N);}
 
   bool getPacket (::sockaddr* addr=nullptr,::socklen_t* len=nullptr){
-    if(int r=::recvfrom(this->sock_,ar,N,0,addr,len);r>=0)return this->update(r);
+    if(int r=::recvfrom(this->sock,ar,N,0,addr,len);r>=0)return this->update(r);
     raise("getPacket",getError());
   }
 };
@@ -468,14 +468,14 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
   }
 
   void gotPacket (){
-    Recv(this->sock_,recBuf,9);
+    Recv(this->sock,recBuf,9);
     auto sp=gothd();
-    Recv(this->sock_,sp.data(),sp.size());
+    Recv(this->sock,sp.data(),sp.size());
     decompress();
   }
 
   void flush (){
-    Write(this->sock_,compBuf,compIndex);
+    Write(this->sock,compBuf,compIndex);
     compIndex=0;
   }
 
