@@ -149,14 +149,14 @@ class ioUring{
     e->buf_group=0;
   }
 
-  auto checkMsg (auto const* cq,::Socky& s){
+  auto checkMsg (auto const& cq,::Socky& s){
     ++bufsUsed;
-    if(~cq->flags&IORING_CQE_F_MORE){
+    if(~cq.flags&IORING_CQE_F_MORE){
       ::syslog(LOG_ERR,"recvmsg was disabled");
       recvmsg();
     }
-    auto idx=cq->flags>>IORING_CQE_BUFFER_SHIFT;
-    auto* o=::io_uring_recvmsg_validate(bufBase+idx*udpPacketMax,cq->res,&mhdr);
+    auto idx=cq.flags>>IORING_CQE_BUFFER_SHIFT;
+    auto* o=::io_uring_recvmsg_validate(bufBase+idx*udpPacketMax,cq.res,&mhdr);
     if(!o)raise("recvmsg_validate");
     ::std::memcpy(&s.addr,::io_uring_recvmsg_name(o),o->namelen);
     return ::std::span(static_cast<char*>(::io_uring_recvmsg_payload(o,&mhdr)),
@@ -379,7 +379,7 @@ int main (int pid,char** av)try{
         ::Socky frnt;
         int tracy=0;
         try{
-          auto spn=ring->checkMsg(cq,frnt);
+          auto spn=ring->checkMsg(*cq,frnt);
           ++tracy;
           auto& req=requests.emplace_back(ReceiveBuffer<SameFormat,::int16_t>{spn},frnt);
           ++tracy;
