@@ -216,7 +216,8 @@ class ioUring{
   void sendto (int&,::Socky const&,auto...);
 } *ring;
 
-struct cmwRequest{
+class cmwRequest{
+ public:
   ::Socky const frnt;
  private:
   ::int32_t const bday;
