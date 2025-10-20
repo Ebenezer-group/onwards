@@ -51,18 +51,18 @@ struct Socky{
   ::socklen_t len=sizeof addr;
 };
 
-constexpr ::int32_t BufSize=1101000;
-BufferCompressed<SameFormat,::int32_t,BufSize> cmwBuf;
-
 auto roundUp (::uint64_t val,::uint64_t multiple){
   return ((val+multiple-1)/multiple)*multiple;
 }
 
+constexpr ::int32_t BufSize=1101000;
 class ioUring{
   static constexpr int SubQ=512,MaxBatch=10,NumBufs=4;
   ::io_uring rng{};
   ::iovec iov;
   ::msghdr mhdr{0,sizeof(::sockaddr_in),&iov,0,0,0,0};
+
+  BufferCompressed<SameFormat,::int32_t,BufSize>& cmwBuf;
   int sentBytes=0,bufsUsed=NumBufs;
   int const pageSize,chunk1,chunk2,chunk3;
   char* const bufBase;
@@ -83,14 +83,13 @@ class ioUring{
   }
 
  public:
-  ioUring (int udpSock):
-    pageSize(::sysconf(_SC_PAGESIZE))
+  ioUring (auto& buf,int udpSock):cmwBuf(buf)
+    ,pageSize(::sysconf(_SC_PAGESIZE))
     ,chunk1(roundUp(NumBufs*udpPacketMax,pageSize))
     ,chunk2(roundUp(NumBufs*sizeof(::io_uring_buf),pageSize))
     ,chunk3(roundUp(SubQ*(sizeof(::io_uring_sqe)+2*sizeof(::io_uring_cqe))+pageSize,pageSize))
     ,bufBase{mmapWrapper(chunk1+chunk2+chunk3)}
     ,bufRing{reinterpret_cast<::io_uring_buf_ring*>(bufBase+chunk1)}{
-    //bufRing->tail=0;
 
     ::io_uring_params ps{};
     ps.flags=IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_DEFER_TASKRUN;
@@ -313,7 +312,7 @@ void checkField (char const* fld,::std::string_view actl){
   if(actl!=fld)::bail("Expected %s",fld);
 }
 
-void login (::Credentials const& cred,auto& sa,bool signUp=false){
+void login (auto& cmwBuf,::Credentials const& cred,auto& sa,bool signUp=false){
   signUp? ::back::marshal<::messageID::signup>(cmwBuf,cred)
         : ::back::marshal<::messageID::login>(cmwBuf,cred,BufSize);
   cmwBuf.compress();
@@ -353,8 +352,9 @@ int main (int pid,char** av)try{
   ::checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  ring=new ::ioUring{frntBuf.sock};
-  ::login(cred,sa,ac==3);
+  auto& cmwBuf=*new BufferCompressed<SameFormat,::int32_t,BufSize>;
+  ring=new ::ioUring{cmwBuf,frntBuf.sock};
+  ::login(cmwBuf,cred,sa,ac==3);
   if(ac==3){
     ::printf("Signup was successful\n");
     ::std::exit(0);
@@ -375,7 +375,7 @@ int main (int pid,char** av)try{
         requests.clear();
         cmwBuf.compressedReset();
         ring->close(cmwBuf.sock);
-        ::login(cred,sa);
+        ::login(cmwBuf,cred,sa);
       }else if(::ioUring::Recvmsg==cq->user_data){
         ::Socky frnt;
         int tracy=0;
