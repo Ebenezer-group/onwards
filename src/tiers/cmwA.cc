@@ -69,8 +69,7 @@ class ioUring{
   ::io_uring_buf_ring* const bufRing;
 
   void submitWrapper (int wait=0){
-    int rc;
-    while((rc=::io_uring_submit_and_wait(&rng,wait))<0){
+    for(int rc;(rc=::io_uring_submit_and_wait(&rng,wait))<0;){
       if(-EINTR!=rc)raise("waitCqe",rc);
     }
   }
