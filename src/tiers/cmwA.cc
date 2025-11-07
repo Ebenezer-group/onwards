@@ -68,7 +68,7 @@ class ioUring{
   char* const bufBase;
   ::io_uring_buf_ring* const bufRing;
 
-  void submitWrapper (int wait=0){
+  void submitBatch (int wait=0){
     for(int rc;(rc=::io_uring_submit_and_wait(&rng,wait))<0;){
       if(-EINTR!=rc)raise("waitCqe",rc);
     }
@@ -77,7 +77,7 @@ class ioUring{
   auto getSqe (bool internal=false){
     if(auto e=::uring_get_sqe(&rng);e)return e;
     if(internal)raise("getSqe");
-    submitWrapper();
+    submitBatch();
     return getSqe(true);
   }
 
@@ -126,7 +126,7 @@ class ioUring{
     static int seen;
     ::io_uring_cq_advance(&rng,seen);
     ::io_uring_buf_ring_advance(bufRing,bufsUsed);
-    submitWrapper(1);
+    submitBatch(1);
     if(sentBytes)cmwBuf.adjustFrame(sentBytes);
     bufsUsed=sentBytes=0;
     static ::std::array<::io_uring_cqe*,MaxBatch> cqes;
@@ -286,7 +286,7 @@ class cmwRequest{
 
 void ioUring::sendto (int& ind,::Socky const& so,auto...t){
   if(++ind>=MaxBatch/2){
-    submitWrapper();
+    submitBatch();
     ind=0;
   }
 
