@@ -3,9 +3,8 @@
 #include<stdio.h>
 using namespace ::cmw;
 
-void leave (char const* fmt,auto...t)noexcept{
-  if constexpr(sizeof...(t)==0)::fputs(fmt,stderr);
-  else ::fprintf(stderr,fmt,t...);
+void leave (char const* fmt,auto...t){
+  ::fprintf(stderr,fmt,t...);
   exitFailure();
 }
 
