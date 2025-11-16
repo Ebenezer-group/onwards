@@ -3,7 +3,7 @@ project(onwards CXX)
 
 function(addExecutable name)
   add_executable("${name}" ${ARGN})
-  target_compile_features("${name}" PRIVATE cxx_std_20)
+  target_compile_features("${name}" PRIVATE cxx_std_23)
   target_include_directories("${name}" PRIVATE src)
 endfunction()
 
