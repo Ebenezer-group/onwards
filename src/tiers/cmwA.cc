@@ -203,7 +203,7 @@ class ioUring{
     auto sp=cmwBuf.giveFile();
     ::io_uring_prep_write(e,fd2,sp.data(),sp.size(),0);
     ::io_uring_sqe_set_data64(e,SaveOutput);
-    e->flags=IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_LINK;
+    e->flags=IOSQE_CQE_SKIP_SUCCESS|IOSQE_IO_HARDLINK;
     e=getSqe();
     ::io_uring_prep_fsync(e,fd2,0);
     ::io_uring_sqe_set_data64(e,Fsync);
@@ -367,7 +367,10 @@ int main (int pid,char** av)try{
     for(auto const* cq:cqs){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"%d Op failed %llu %d",pid,cq->user_data,cq->res);
-        if(cq->res<0&&-EPIPE!=cq->res)exitFailure();
+        if(cq->res<0){
+          if(::ioUring::SaveOutput==cq->user_data||::ioUring::Fsync==cq->user_data)continue;
+          if(-EPIPE!=cq->res)exitFailure();
+        }
         frntBuf.reset();
         ::front::marshal<udpPacketMax>(frntBuf,{"Back tier vanished"});
         for(auto& r:requests){frntBuf.send(&r.frnt.addr,r.frnt.len);}
