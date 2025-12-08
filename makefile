@@ -2,7 +2,7 @@ CXXFLAGS=$(CXX) -std=c++23 -Isrc -Oz -flto -Wundef -W -Wall -Wextra -Wpedantic -
 
 EXAMPLES:=example/sendExample example/receiveExample
 FRONT:=src/tiers/front/genz
-MIDDLE:=src/tiers/cmwA
+MIDDLE:=src/tiers/cmwAmb
 BINARIES:=$(EXAMPLES) $(FRONT)
 all:$(BINARIES)
 .PHONY:all clean
@@ -36,5 +36,5 @@ install:
 
 uninstall:
 	cd $(INSTALL_DIR)include && rm -f cmw_*.hh
-	cd $(INSTALL_DIR)bin && rm -f cmwA genz
+	cd $(INSTALL_DIR)bin && rm -f cmwAmb genz
 

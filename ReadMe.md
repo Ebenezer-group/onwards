@@ -15,8 +15,8 @@ The
 [library](https://github.com/Ebenezer-group/onwards/blob/master/src)
 is header-only.
 
-The [middle tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/cmwA.cc)
-of the CMW, called "cmwA", is a Linux-only program.  Non-Linux developers
+The [middle tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/cmwAmb.cc)
+of the CMW, called "cmwAmb", is a Linux-only program.  Non-Linux developers
 can use the CMW by running the middle tier on a Linux system.
 The [front tier](https://github.com/Ebenezer-group/onwards/blob/master/src/tiers/front/genz.cc)
 of the CMW, called "genz", is built on all platforms.
@@ -30,21 +30,21 @@ cmake -S .. -G "Unix Makefiles"
 make
 
 #### Configuration
-Before running the middle tier, modify your cmwA.cfg file to include your
+Before running the middle tier, modify your cmwAmb.cfg file to include your
 ambassador ID and password. The maximum length of an ambassador ID is 20.
 
-#### Running the middle tier -- cmwA (after installing)
+#### Running the middle tier -- cmwAmb (after installing)
 The middle tier is used for two purposes: registration/signup and
 normal operation.  Before the middle tier can be run normally, you need
 to run it with the -signup flag:
 
-cmwA cmwA.cfg -signup
+cmwAmb cmwAmb.cfg -signup
 
 The program exits when run this way.  If the signup succeeds, a message
 is output to the terminal indicating so.  Otherwise, an error message is
-logged.  After registering, the cmwA can be run normally:
+logged.  After registering, the cmwAmb can be run normally:
 
-nohup cmwA cmwA.cfg &
+nohup cmwAmb cmwAmb.cfg &
 
 #### Accounts
 After successfully signing up, you can request one or more accounts be 
@@ -54,7 +54,7 @@ ambassador ID that you have chosen.
 
 
 #### Running the front tier -- genz
-After starting the cmwA, run genz like this:
+After starting the cmwAmb, run genz like this:
 
 genz 11 /home/brian/onwards/example/example.mdl
 
@@ -73,7 +73,7 @@ your needs.
 
 #### Troubleshooting
 The middle tier has to be running for the front tier to work.
-If genz fails with "No reply received.  Is the cmwA running?"
+If genz fails with "No reply received.  Is the cmwAmb running?"
 make sure the middle tier is running.
 
 Another possible problem could be due to a "breaking change"
@@ -87,7 +87,7 @@ to fix the problem.
 
 If you have only moved/renamed header files listed in your
 .mdl files, you will need to touch those files (update
-timestamps) so the changes will be "noticed" by the cmwA.
+timestamps) so the changes will be "noticed" by the cmwAmb.
 
 
 Thank you for using the software.
