@@ -1,7 +1,7 @@
 from scratch
 
 workdir /app
-add cmwA .
+add cmwAmb .
 
-cmd ["./cmwA","cmwA.cfg"]
+cmd ["./cmwAmb","cmwAmb.cfg"]
 

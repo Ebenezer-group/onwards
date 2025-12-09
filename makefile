@@ -32,7 +32,7 @@ INSTALL_DIR=/usr/local/
 install:
 	cp -f src/*.hh src/quicklz.* $(INSTALL_DIR)include
 	cp -f $(FRONT) $(MIDDLE) $(INSTALL_DIR)bin
-	cp -f $(BASE)cmwA.cfg $(INSTALL_DIR)etc
+	cp -f $(BASE)cmwAmb.cfg $(INSTALL_DIR)etc
 
 uninstall:
 	cd $(INSTALL_DIR)include && rm -f cmw_*.hh
