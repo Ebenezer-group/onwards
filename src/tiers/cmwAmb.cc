@@ -45,7 +45,7 @@ class FileBuffer{
   void release (){fd=-1;}
   ~FileBuffer (){if(fd>0)::close(fd);}
   FileBuffer (FileBuffer const&)=delete;
-  void operator= (FileBuffer&)=delete;
+  void operator= (FileBuffer const&)=delete;
 };
 
 struct Socky{
@@ -284,7 +284,7 @@ class cmwRequest{
     ring->close(fd);
   }
   cmwRequest (cmwRequest const&)=delete;
-  void operator= (cmwRequest&)=delete;
+  void operator= (cmwRequest const&)=delete;
 };
 #include"cmwA.mdl.hh"
 
