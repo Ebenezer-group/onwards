@@ -195,13 +195,13 @@ class ioUring{
     e->flags=IOSQE_CQE_SKIP_SUCCESS;
   }
 
-  void saveOutput (int fd,int bday,auto nm){
+  void saveOutput (int fd,int bday,auto nam){
     auto e=getSqe();
     ::io_uring_prep_write(e,fd,&bday,sizeof bday,0);
     ::io_uring_sqe_set_data64(e,Save);
     e->flags=IOSQE_CQE_SKIP_SUCCESS;
     e=getSqe();
-    int fd2=Open(nm,O_CREAT|O_WRONLY|O_TRUNC,0644);
+    int fd2=Open(nam,O_CREAT|O_WRONLY|O_TRUNC,0644);
     auto sp=cmwBuf.giveFile();
     ::io_uring_prep_write(e,fd2,sp.data(),sp.size(),0);
     ::io_uring_sqe_set_data64(e,SaveOutput);
