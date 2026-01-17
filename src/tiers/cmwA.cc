@@ -367,8 +367,7 @@ int main (int pid,char** av)try{
   ::std::deque<::cmwRequest> requests;
   for(;;){
     auto cqs=ring->submit();
-    int s2ind=-1;
-    for(auto const* cq:cqs){
+    for(int s2ind=-1;auto const* cq:cqs){
       if(cq->res<=0){
         ::syslog(LOG_ERR,"%d Op failed %llu %d",pid,cq->user_data,cq->res);
         if(cq->res<0){
