@@ -381,41 +381,53 @@ int main (int pid,char** av)try{
         cmwBuf.compressedReset();
         ring->close(cmwBuf.sock);
         ::login(cmwBuf,cred,sa);
-      }else if(::ioUring::Recvmsg==cq->user_data){
-        ::Socky frnt;
-        int tracy=0;
-        try{
-          auto spn=ring->checkMsg(*cq,frnt);
-          ++tracy;
-          auto& req=requests.emplace_back(ReceiveBuffer<SameFormat,::int16_t>{spn},frnt);
-          ++tracy;
-          ::back::marshal<::messageID::generate,700000>(cmwBuf,req);
-          cmwBuf.compress();
-          ring->send();
-        }catch(::std::exception& e){
-          ::syslog(LOG_ERR,"%d Accept request:%s",pid,e.what());
-          if(tracy>0)ring->sendto(s2ind,frnt,e.what());
-          if(tracy>1)requests.pop_back();
+      }else switch(cq->user_data){
+        case ::ioUring::Recvmsg:
+        {
+          ::Socky frnt;
+          int tracy=0;
+          try{
+            auto spn=ring->checkMsg(*cq,frnt);
+            ++tracy;
+            auto& req=requests.emplace_back(ReceiveBuffer<SameFormat,::int16_t>{spn},frnt);
+            ++tracy;
+            ::back::marshal<::messageID::generate,700000>(cmwBuf,req);
+            cmwBuf.compress();
+            ring->send();
+          }catch(::std::exception& e){
+            ::syslog(LOG_ERR,"%d Accept request:%s",pid,e.what());
+            if(tracy>0)ring->sendto(s2ind,frnt,e.what());
+            if(tracy>1)requests.pop_back();
+          }
+          break;
         }
-      }else if(::ioUring::Send==cq->user_data)ring->tallyBytes(cq->res);
-      else if(::ioUring::Recv9==cq->user_data)ring->recv(cmwBuf.gothd());
-      else if(::ioUring::Recv==cq->user_data){
-        assert(!requests.empty());
-        auto& req=requests.front();
-        try{
-          cmwBuf.decompress();
-          if(giveBool(cmwBuf)){
-            req.saveOutput();
-            ring->sendto(s2ind,req.frnt);
-          }else ring->sendto(s2ind,req.frnt,"CMW:",cmwBuf.giveStringView());
-          requests.pop_front();
-        }catch(::std::exception& e){
-          ::syslog(LOG_ERR,"%d Reply from CMW %s",pid,e.what());
-          ring->sendto(s2ind,req.frnt,e.what());
-          requests.pop_front();
+        case ::ioUring::Send:
+          ring->tallyBytes(cq->res);
+          break;
+        case ::ioUring::Recv9:
+          ring->recv(cmwBuf.gothd());
+          break;
+        case ::ioUring::Recv:
+        {
+          assert(!requests.empty());
+          auto& req=requests.front();
+          try{
+            cmwBuf.decompress();
+            if(giveBool(cmwBuf)){
+              req.saveOutput();
+              ring->sendto(s2ind,req.frnt);
+            }else ring->sendto(s2ind,req.frnt,"CMW:",cmwBuf.giveStringView());
+            requests.pop_front();
+          }catch(::std::exception& e){
+            ::syslog(LOG_ERR,"%d Reply from CMW %s",pid,e.what());
+            ring->sendto(s2ind,req.frnt,e.what());
+            requests.pop_front();
+          }
+          ring->recv9();
+          break;
         }
-        ring->recv9();
-      }else ::bail("Unknown user_data %llu",cq->user_data);
+        default: ::bail("Unknown user_data %llu",cq->user_data);
+      }
     }
   }
 }catch(::std::exception& e){::bail("%d Oops:%s",pid,e.what());}
