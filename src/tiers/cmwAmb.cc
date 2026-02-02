@@ -76,9 +76,9 @@ class ioUring{
     }
   }
 
-  auto getSqe (bool internal=false){
+  auto getSqe (bool done=false){
     if(auto e=::uring_get_sqe(&rng);e)return e;
-    if(internal)raise("getSqe");
+    if(done)raise("getSqe");
     submitBatch();
     return getSqe(true);
   }
