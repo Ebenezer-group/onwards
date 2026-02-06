@@ -138,7 +138,7 @@ class ioUring{
 
   void tallyBytes (int sent){sentBytes+=sent;}
 
-  static constexpr int Recvmsg=0,Send=1,Recv9=2,Recv=3,Close=4,Sendto=5,Fsync=6,Save=7,SaveOutput=8;
+  static constexpr int Recvmsg=0,Send=1,Recv9=2,Recv=3,Save=4,SaveOutput=5,Fsync=6,Close=7,Sendto=8;
 
   void recvmsg (){
     auto e=getSqe();
@@ -163,6 +163,14 @@ class ioUring{
                                           o->payloadlen);
   }
 
+  void send (){
+    auto e=getSqe();
+    auto sp=cmwBuf.outDuo();
+    ::io_uring_prep_send(e,1,sp.data(),sp.size(),0);
+    ::io_uring_sqe_set_data64(e,Send);
+    e->flags=IOSQE_FIXED_FILE;
+  }
+
   void recv9 (bool stale=false){
     auto e=getSqe();
     ::io_uring_prep_recv(e,1,cmwBuf.getuo(),9,MSG_WAITALL);
@@ -177,14 +185,6 @@ class ioUring{
     auto e=getSqe();
     ::io_uring_prep_recv(e,1,sp.data(),sp.size(),MSG_WAITALL);
     ::io_uring_sqe_set_data64(e,Recv);
-    e->flags=IOSQE_FIXED_FILE;
-  }
-
-  void send (){
-    auto e=getSqe();
-    auto sp=cmwBuf.outDuo();
-    ::io_uring_prep_send(e,1,sp.data(),sp.size(),0);
-    ::io_uring_sqe_set_data64(e,Send);
     e->flags=IOSQE_FIXED_FILE;
   }
 
