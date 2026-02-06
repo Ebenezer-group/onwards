@@ -138,7 +138,7 @@ class ioUring{
 
   void tallyBytes (int sent){sentBytes+=sent;}
 
-  static constexpr int Recvmsg=0,Recv9=1,Recv=2,Send=3,Close=4,Sendto=5,Fsync=6,Save=7,SaveOutput=8;
+  static constexpr int Recvmsg=0,Send=1,Recv9=2,Recv=3,Close=4,Sendto=5,Fsync=6,Save=7,SaveOutput=8;
 
   void recvmsg (){
     auto e=getSqe();

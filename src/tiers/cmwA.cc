@@ -76,9 +76,9 @@ class ioUring{
     }
   }
 
-  auto getSqe (bool internal=false){
+  auto getSqe (bool done=false){
     if(auto e=::uring_get_sqe(&rng);e)return e;
-    if(internal)raise("getSqe");
+    if(done)raise("getSqe");
     submitBatch();
     return getSqe(true);
   }
@@ -138,7 +138,7 @@ class ioUring{
 
   void tallyBytes (int sent){sentBytes+=sent;}
 
-  static constexpr int Recvmsg=0,Recv9=1,Recv=2,Send=3,Close=4,Sendto=5,Fsync=6,Save=7,SaveOutput=8;
+  static constexpr int Recvmsg=0,Send=1,Recv9=2,Recv=3,Close=4,Sendto=5,Fsync=6,Save=7,SaveOutput=8;
 
   void recvmsg (){
     auto e=getSqe();
