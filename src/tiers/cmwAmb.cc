@@ -60,11 +60,13 @@ auto roundUp (::uint64_t val,::uint64_t multiple){
 constexpr ::int32_t BufSize=1101000;
 class ioUring{
   static constexpr int SubQ=512,MaxBatch=10,NumBufs=4;
+ public:
+  BufferCompressed<SameFormat,::int32_t,BufSize> cmwBuf;
+ private:
   ::io_uring rng{};
   ::iovec iov;
   ::msghdr mhdr{0,sizeof(::sockaddr_in),&iov,0,0,0,0};
 
-  BufferCompressed<SameFormat,::int32_t,BufSize>& cmwBuf;
   int sentBytes=0,bufsUsed=NumBufs;
   int const pageSize,chunk1,chunk2,chunk3;
   char* const bufBase;
@@ -84,8 +86,8 @@ class ioUring{
   }
 
  public:
-  ioUring (auto& buf,int udpSock):cmwBuf(buf)
-    ,pageSize(::sysconf(_SC_PAGESIZE))
+  ioUring (int udpSock):
+    pageSize(::sysconf(_SC_PAGESIZE))
     ,chunk1(roundUp(NumBufs*udpPacketMax,pageSize))
     ,chunk2(roundUp(NumBufs*sizeof(::io_uring_buf),pageSize))
     ,chunk3(roundUp(SubQ*(sizeof(::io_uring_sqe)+2*sizeof(::io_uring_cqe))+pageSize,pageSize))
@@ -355,8 +357,8 @@ int main (int pid,char** av)try{
   ::checkField("Password",cfg.getline(' '));
   cred.password=cfg.getline();
   ::signal(SIGPIPE,SIG_IGN);
-  auto& cmwBuf=*new BufferCompressed<SameFormat,::int32_t,BufSize>;
-  ring=new ::ioUring{cmwBuf,frntBuf.sock};
+  ring=new ::ioUring{frntBuf.sock};
+  auto& cmwBuf=ring->cmwBuf;
   ::login(cmwBuf,cred,sa,ac==3);
   if(ac==3){
     ::printf("Signup was successful\n");
