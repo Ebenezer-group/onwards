@@ -387,19 +387,19 @@ int main (int pid,char** av)try{
         case ::ioUring::Recvmsg:
         {
           ::Socky frnt;
-          int tracy=0;
+          int dbg=0;
           try{
             auto spn=ring->checkMsg(*cq,frnt);
-            ++tracy;
+            ++dbg;
             auto& req=requests.emplace_back(ReceiveBuffer<SameFormat,::int16_t>{spn},frnt);
-            ++tracy;
+            ++dbg;
             ::back::marshal<::messageID::generate,700000>(cmwBuf,req);
             cmwBuf.compress();
             ring->send();
           }catch(::std::exception& e){
             ::syslog(LOG_ERR,"%d Accept request:%s",pid,e.what());
-            if(tracy>0)ring->sendto(s2ind,frnt,e.what());
-            if(tracy>1)requests.pop_back();
+            if(dbg>0)ring->sendto(s2ind,frnt,e.what());
+            if(dbg>1)requests.pop_back();
           }
           break;
         }
