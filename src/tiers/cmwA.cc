@@ -173,7 +173,7 @@ class ioUring{
     e->flags=IOSQE_FIXED_FILE;
   }
 
-  void recv9 (bool stale=false){
+  void recv9 (bool stale){
     auto e=getSqe();
     ::io_uring_prep_recv(e,1,cmwBuf.getBuf(),9,MSG_WAITALL);
     ::io_uring_sqe_set_data64(e,Recv9);
@@ -425,7 +425,7 @@ int main (int pid,char** av)try{
             ring->sendto(s2ind,req.frnt,e.what());
             requests.pop_front();
           }
-          ring->recv9();
+          ring->recv9(false);
           break;
         }
         default: ::bail("Unknown user_data %llu",cq->user_data);
