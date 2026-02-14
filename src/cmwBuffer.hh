@@ -452,24 +452,24 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     return sp;
   }
 
-  auto getuo (){return recBuf;}
+  auto getBuf (){return recBuf;}
 
-  auto gothd (){
+  auto gotHdr (){
     int compPacketSize=::qlz_size_compressed(recBuf);
     if(compPacketSize>sz||::qlz_size_decompressed(recBuf)>sz)
       raise("gotIt size",compPacketSize,sz);
     compressedStart=recBuf+sz-compPacketSize;
-    ::std::memmove(compressedStart,recBuf,9);
     return ::std::span(compressedStart+9,compPacketSize-9);
   }
 
   void decompress (){
+    ::std::memmove(compressedStart,recBuf,9);
     this->update(::qlz_decompress(compressedStart,recBuf,&decomp));
   }
 
   void gotPacket (){
     Recv(this->sock,recBuf,9);
-    auto sp=gothd();
+    auto sp=gotHdr();
     Recv(this->sock,sp.data(),sp.size());
     decompress();
   }

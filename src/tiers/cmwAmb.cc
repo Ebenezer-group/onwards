@@ -175,7 +175,7 @@ class ioUring{
 
   void recv9 (bool stale=false){
     auto e=getSqe();
-    ::io_uring_prep_recv(e,1,cmwBuf.getuo(),9,MSG_WAITALL);
+    ::io_uring_prep_recv(e,1,cmwBuf.getBuf(),9,MSG_WAITALL);
     ::io_uring_sqe_set_data64(e,Recv9);
     e->flags=IOSQE_FIXED_FILE;
     e->ioprio|=IORING_RECVSEND_POLL_FIRST;
@@ -407,7 +407,7 @@ int main (int pid,char** av)try{
           ring->tallyBytes(cq->res);
           break;
         case ::ioUring::Recv9:
-          ring->recv(cmwBuf.gothd());
+          ring->recv(cmwBuf.gotHdr());
           break;
         case ::ioUring::Recv:
         {
