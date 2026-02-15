@@ -418,18 +418,17 @@ int main (int pid,char** av)try{
           assert(!requests.empty());
           auto& req=requests.front();
           try{
+            ring->recv9();
             cmwBuf.decompress();
             if(giveBool(cmwBuf)){
               req.saveOutput();
               ring->sendto(s2ind,req.frnt);
             }else ring->sendto(s2ind,req.frnt,"CMW:",cmwBuf.giveStringView());
-            requests.pop_front();
           }catch(::std::exception& e){
             ::syslog(LOG_ERR,"%d Reply from CMW %s",pid,e.what());
             ring->sendto(s2ind,req.frnt,e.what());
-            requests.pop_front();
           }
-          ring->recv9();
+          requests.pop_front();
           break;
         }
         default: ::bail("Unknown user_data %llu",cq->user_data);
