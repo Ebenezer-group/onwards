@@ -173,14 +173,18 @@ class ioUring{
     e->flags=IOSQE_FIXED_FILE;
   }
 
-  void recv9 (bool stale){
+  void recv9 (){
     auto e=getSqe();
     ::io_uring_prep_recv(e,1,cmwBuf.getBuf(),9,MSG_WAITALL);
     ::io_uring_sqe_set_data64(e,Recv9);
     e->flags=IOSQE_FIXED_FILE;
     e->ioprio|=IORING_RECVSEND_POLL_FIRST;
-    if(stale&&(::io_uring_register_files_update(&rng,1,&cmwBuf.sock,1)<1))
+  }
+
+  void filesUpdate (){
+    if(::io_uring_register_files_update(&rng,1,&cmwBuf.sock,1)<1)
       raise("reg files update");
+    recv9();
   }
 
   void recv (auto sp){
@@ -335,7 +339,7 @@ void login (auto& cmwBuf,::Credentials const& cred,auto& sa,bool signUp=false){
   pad.spp_flags=SPP_HB_ENABLE;
   if(::setsockopt(sock,IPPROTO_SCTP,SCTP_PEER_ADDR_PARAMS,&pad,sizeof pad)==-1)
     ::bail("setsockopt %d",errno);
-  ring->recv9(true);
+  ring->filesUpdate();
   sock=::socket(AF_INET,SOCK_STREAM,IPPROTO_SCTP);
   cmwBuf.gotPacket();
   if(!giveBool(cmwBuf))::bail("Login:%s",cmwBuf.giveStringView().data());
@@ -425,7 +429,7 @@ int main (int pid,char** av)try{
             ring->sendto(s2ind,req.frnt,e.what());
             requests.pop_front();
           }
-          ring->recv9(false);
+          ring->recv9();
           break;
         }
         default: ::bail("Unknown user_data %llu",cq->user_data);
