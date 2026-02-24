@@ -438,18 +438,18 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     this->reset();
   }
 
+  auto outDuo (){
+    auto sp=::std::span(compBuf+bytesSent,compIndex-bytesSent);
+    bytesSent=compIndex;
+    return sp;
+  }
+
   void adjustFrame (int bytes){
     bytesSent=0;
     compIndex-=bytes;
     if(compIndex<0)compIndex=0;
     if(compIndex==0)return;
     ::std::memmove(compBuf,compBuf+bytes,compIndex);
-  }
-
-  auto outDuo (){
-    auto sp=::std::span(compBuf+bytesSent,compIndex-bytesSent);
-    bytesSent=compIndex;
-    return sp;
   }
 
   auto getBuf (){return recBuf;}

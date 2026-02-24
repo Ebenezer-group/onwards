@@ -81,9 +81,8 @@ between the back and middle tiers.  We may have changed the
 protocol between these tiers and now your version of the
 middle tier no longer works.  The thing to do in this case
 is to check our website for an announcement/email that you
-may have missed.  Probably you will have to clone the new
-version of the repo and then rebuild and reinstall in order
-to fix the problem.
+may have missed.  Probably you will have to install a new
+version of the software in order to fix the problem.
 
 If you have only moved/renamed header files listed in your
 .mdl files, you will need to touch those files (update

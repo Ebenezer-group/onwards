@@ -187,9 +187,9 @@ class ioUring{
     recv9();
   }
 
-  void recv (auto sp){
+  void recv (auto spn){
     auto e=getSqe();
-    ::io_uring_prep_recv(e,1,sp.data(),sp.size(),MSG_WAITALL);
+    ::io_uring_prep_recv(e,1,spn.data(),spn.size(),MSG_WAITALL);
     ::io_uring_sqe_set_data64(e,Recv);
     e->flags=IOSQE_FIXED_FILE;
   }
