@@ -230,7 +230,7 @@ class cmwRequest{
   MarshallingInt const acctNbr;
   FixedString120 path;
   char* mdlFile;
-  int fd;
+  int dotfd;
   inline static ::int32_t prevTime;
 
   static bool marshalFile (char const* name,auto& buf){
@@ -255,8 +255,8 @@ class cmwRequest{
     *mdlFile='/';
     char last[60];
     ::snprintf(last,sizeof last,".%s.last",++mdlFile);
-    fd=Open(last,O_RDWR|O_CREAT,0640);
-    switch(::read(fd,&prevTime,sizeof prevTime)){
+    dotfd=Open(last,O_RDWR|O_CREAT,0640);
+    switch(::read(dotfd,&prevTime,sizeof prevTime)){
       case 0:prevTime=0;break;
       case -1:raise("read dot",errno);
     }
@@ -283,11 +283,11 @@ class cmwRequest{
   }
 
   void saveOutput (){
-    ring->saveOutput(fd,bday,path.append(".hh"));
+    ring->saveOutput(dotfd,bday,path.append(".hh"));
   }
 
   ~cmwRequest (){
-    ring->close(fd);
+    ring->close(dotfd);
   }
   cmwRequest (cmwRequest const&)=delete;
   void operator= (cmwRequest const&)=delete;
