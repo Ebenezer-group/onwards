@@ -388,8 +388,7 @@ int main (int pid,char** av)try{
         ring->close(cmwBuf.sock);
         ::login(cmwBuf,cred,sa);
       }else switch(cq->user_data){
-        case ::ioUring::Recvmsg:
-        {
+        case ::ioUring::Recvmsg:{
           ::Socky frnt;
           int dbg=0;
           try{
@@ -413,8 +412,7 @@ int main (int pid,char** av)try{
         case ::ioUring::Recv9:
           ring->recv(cmwBuf.gotHdr());
           break;
-        case ::ioUring::Recv:
-        {
+        case ::ioUring::Recv:{
           assert(!requests.empty());
           auto& req=requests.front();
           try{
