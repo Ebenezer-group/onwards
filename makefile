@@ -7,8 +7,8 @@ BINARIES:=$(EXAMPLES) $(FRONT)
 all:$(BINARIES)
 .PHONY:all clean
 
-#cmwA.mdl.hh: credentials.hh $(BASE)cmwA.mdl
-#	genz 2 $(BASE)cmwA.mdl
+#cmwAmb.mdl.hh: credentials.hh $(BASE)cmwAmb.mdl
+#	genz 2 $(BASE)cmwAmb.mdl
 
 example/sendExample:example/sendExample.cc
 	$(CXXFLAGS)
