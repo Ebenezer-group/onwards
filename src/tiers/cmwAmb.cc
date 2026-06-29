@@ -292,7 +292,7 @@ class cmwRequest{
   cmwRequest (cmwRequest const&)=delete;
   void operator= (cmwRequest const&)=delete;
 };
-#include"cmwA.mdl.hh"
+#include"cmwAmb.mdl.hh"
 
 void ioUring::sendto (int& ind,::Socky const& so,auto...t){
   if(++ind>=MaxBatch/2){
