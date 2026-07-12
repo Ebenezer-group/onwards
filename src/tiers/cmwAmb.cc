@@ -13,7 +13,7 @@
 #include"ring_setup.hh"
 
 using namespace ::cmw;
-class FileBuffer{
+class FileBuffer:NotCopyable{
   char buf[4096];
   char line[120];
   int ind=0;
@@ -22,6 +22,7 @@ class FileBuffer{
 
  public:
   FileBuffer (char const* nam,int flags):fd(Open(nam,flags)){}
+  ~FileBuffer (){if(fd>0)::close(fd);}
 
   char getc (){
     if(ind>=bytes){
@@ -43,9 +44,6 @@ class FileBuffer{
 
   auto operator() (){return fd;}
   void release (){fd=-1;}
-  ~FileBuffer (){if(fd>0)::close(fd);}
-  FileBuffer (FileBuffer const&)=delete;
-  void operator= (FileBuffer const&)=delete;
 };
 
 struct Socky{

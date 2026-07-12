@@ -285,9 +285,13 @@ void giveVec (auto& buf,auto& v){
 
 auto cast (auto* t){return reinterpret_cast<::sockaddr const*>(t);}
 
-template<class Z>class SendBuffer{
-  SendBuffer (SendBuffer const&)=delete;
-  void operator= (SendBuffer&);
+struct NotCopyable{
+  NotCopyable ()=default;
+  NotCopyable (NotCopyable const&)=delete;
+  void operator= (NotCopyable const&)=delete;
+};
+
+template<class Z>class SendBuffer:NotCopyable{
   char* const buf;
   Z const bufsize;
   Z savedSize=0;
