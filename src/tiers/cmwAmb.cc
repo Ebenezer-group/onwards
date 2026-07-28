@@ -166,7 +166,7 @@ class ioUring{
   void send (){
     auto e=getSqe();
     auto sp=cmwBuf.outDuo();
-    ::io_uring_prep_send(e,1,sp.data(),sp.size(),0);
+    ::io_uring_prep_send(e,1,sp.data(),sp.size(),MSG_WAITALL);
     ::io_uring_sqe_set_data64(e,Send);
     e->flags=IOSQE_FIXED_FILE;
   }
