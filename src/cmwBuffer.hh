@@ -452,8 +452,7 @@ template<class R,class Z,int sz>class BufferCompressed:public SendBuffer<Z>,publ
     bytesSent=0;
     compIndex-=bytes;
     if(compIndex<0)compIndex=0;
-    if(compIndex==0)return;
-    ::std::memmove(compBuf,compBuf+bytes,compIndex);
+    if(compIndex>0)::std::memmove(compBuf,compBuf+bytes,compIndex);
   }
 
   auto getBuf (){return recBuf;}
