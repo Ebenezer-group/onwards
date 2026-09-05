@@ -133,7 +133,7 @@ inline int preserveError (int s){
 
 #ifndef CMW_WINDOWS
 inline int Open (auto nm,int flags,mode_t md=0){
-  if(int d=::open(nm,flags,md);d>0)return d;
+  if(int d=::open(nm,flags,md);d>=0)return d;
   raise("Open",nm,errno);
 }
 

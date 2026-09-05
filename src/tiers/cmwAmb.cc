@@ -22,7 +22,7 @@ class FileBuffer:NotCopyable{
 
  public:
   FileBuffer (char const* nam,int flags):fd(Open(nam,flags)){}
-  ~FileBuffer (){if(fd>0)::close(fd);}
+  ~FileBuffer (){if(fd>=0)::close(fd);}
 
   char getc (){
     if(ind>=bytes){
