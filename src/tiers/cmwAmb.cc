@@ -345,8 +345,7 @@ void login (auto& cmwBuf,::Credentials const& cred,auto& sa,bool signUp=false){
 
 int main (int pid,char** av)try{
   ::openlog(av[0],LOG_PERROR|LOG_NDELAY,LOG_USER);
-  int ac=pid;
-  if(ac<2||ac>3)::bail("Usage: %s config-file [-signup]",av[0]);
+  if(pid<2||pid>3)::bail("Usage: %s config-file [-signup]",av[0]);
   pid=::getpid();
   FileBuffer cfg{av[1],O_RDONLY};
   ::checkField("CMW-IP",cfg.getline(' '));
